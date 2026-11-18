@@ -1,0 +1,685 @@
+/* Shared styles for the per-agent pages under /agents/{id}.
+   Each agent page is a hand-written static .razor file that uses these classes. */
+
+/* ----- Markdown-rendered agent output ----------------------------------- */
+/* Applied to elements whose innerHTML is set via window.zcRenderMarkdown(). */
+.agent-md {
+    color: var(--zava-text, #e8eef9);
+    font-family: inherit;
+    font-size: 0.92rem;
+    line-height: 1.55;
+    white-space: normal;
+    word-wrap: break-word;
+}
+.agent-md > :first-child { margin-top: 0; }
+.agent-md > :last-child  { margin-bottom: 0; }
+.agent-md p {
+    margin: 0 0 0.7rem 0;
+}
+.agent-md h1,
+.agent-md h2,
+.agent-md h3,
+.agent-md h4,
+.agent-md h5,
+.agent-md h6 {
+    color: var(--zava-text-strong, #fff);
+    margin: 1rem 0 0.45rem 0;
+    line-height: 1.3;
+    font-weight: 600;
+}
+.agent-md h1 { font-size: 1.15rem; }
+.agent-md h2 { font-size: 1.05rem; }
+.agent-md h3 { font-size: 0.98rem; }
+.agent-md h4,
+.agent-md h5,
+.agent-md h6 { font-size: 0.92rem; text-transform: none; letter-spacing: 0; }
+.agent-md ul,
+.agent-md ol {
+    margin: 0.25rem 0 0.75rem 0;
+    padding-left: 1.25rem;
+}
+.agent-md li {
+    margin: 0.15rem 0;
+}
+.agent-md li > p {
+    margin: 0 0 0.35rem 0;
+}
+.agent-md strong { color: var(--zava-text-strong, #fff); font-weight: 600; }
+.agent-md em { color: inherit; }
+.agent-md a {
+    color: var(--accent, #38bdf8);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+.agent-md a:hover { text-decoration: none; }
+.agent-md code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.86em;
+    background: rgba(120, 150, 200, 0.16);
+    padding: 1px 5px;
+    border-radius: 4px;
+}
+.agent-md pre {
+    margin: 0.5rem 0 0.75rem 0;
+    padding: 0.65rem 0.85rem;
+    background: rgba(15, 22, 38, 0.7);
+    border: 1px solid rgba(120, 150, 200, 0.18);
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+.agent-md pre code {
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    font-size: inherit;
+}
+.agent-md blockquote {
+    margin: 0.5rem 0 0.75rem 0;
+    padding: 0.35rem 0.85rem;
+    border-left: 3px solid color-mix(in srgb, var(--accent, #38bdf8) 60%, transparent);
+    background: rgba(120, 150, 200, 0.08);
+    color: var(--zava-muted, #97a3b6);
+    border-radius: 0 6px 6px 0;
+}
+.agent-md hr {
+    border: 0;
+    border-top: 1px solid rgba(120, 150, 200, 0.22);
+    margin: 0.85rem 0;
+}
+.agent-md table {
+    border-collapse: collapse;
+    margin: 0.5rem 0 0.85rem 0;
+    width: 100%;
+    font-size: 0.88rem;
+}
+.agent-md th,
+.agent-md td {
+    border: 1px solid rgba(120, 150, 200, 0.22);
+    padding: 0.4rem 0.6rem;
+    text-align: left;
+    vertical-align: top;
+}
+.agent-md th {
+    background: rgba(120, 150, 200, 0.12);
+    color: var(--zava-text-strong, #fff);
+    font-weight: 600;
+}
+.agent-md-fallback {
+    margin: 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.86rem;
+    white-space: pre-wrap;
+    color: inherit;
+}
+
+/* Applied to .agent-md elements while a streaming agent reply is still in
+   flight (see wwwroot/js/agent-stream.js). The element's textContent is
+   updated chunk-by-chunk before being replaced with rendered markdown on
+   the terminal `done` event, so it needs to behave like a <pre> block in
+   the meantime. A subtle blinking caret hints that more text is incoming. */
+.agent-md.agent-md-streaming {
+    white-space: pre-wrap;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.86rem;
+}
+.agent-md.agent-md-streaming::after {
+    /* Decorative blinking caret rendered without content text so screen
+       readers don't announce it; we just paint a thin rectangle next to
+       the trailing token. */
+    content: "";
+    display: inline-block;
+    width: 0.55em;
+    height: 1em;
+    margin-left: 2px;
+    vertical-align: text-bottom;
+    background: rgba(110, 193, 255, 0.85);
+    animation: zc-stream-caret 1s steps(2, end) infinite;
+}
+@keyframes zc-stream-caret {
+    0%, 49%   { opacity: 1; }
+    50%, 100% { opacity: 0; }
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-bottom: 0.85rem;
+    color: var(--zava-muted, #97a3b6);
+    text-decoration: none;
+    font-size: 0.85rem;
+    letter-spacing: 0.2px;
+}
+.back-link:hover {
+    color: var(--zava-text-strong, #fff);
+    text-decoration: none;
+}
+
+.agent-header {
+    position: relative;
+    background: rgba(20, 28, 46, 0.82);
+    border: 1px solid rgba(120, 150, 200, 0.22);
+    border-radius: 16px;
+    padding: 1.4rem 1.6rem 1.5rem 1.6rem;
+    margin-bottom: 1.25rem;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    overflow: hidden;
+}
+.agent-header::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 30%, transparent));
+}
+.agent-header::after {
+    content: "";
+    position: absolute;
+    right: -80px; top: -80px;
+    width: 260px; height: 260px;
+    border-radius: 50%;
+    background: radial-gradient(circle, color-mix(in srgb, var(--accent) 18%, transparent) 0%, transparent 65%);
+    pointer-events: none;
+}
+.agent-header-row {
+    display: flex;
+    gap: 1.1rem;
+    align-items: flex-start;
+    position: relative;
+    z-index: 1;
+}
+.agent-header-icon {
+    font-size: 1.9rem;
+    line-height: 1;
+    width: 64px;
+    height: 64px;
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--accent) 20%, rgba(20, 28, 46, 0.6));
+    border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+}
+.agent-header h1 {
+    margin: 0.1rem 0 0.2rem 0;
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.2px;
+}
+.agent-header-dept {
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--accent);
+}
+.agent-header-persona {
+    color: rgba(214, 228, 245, 0.78);
+    font-size: 0.95rem;
+}
+.agent-header .tagline {
+    margin: 0.45rem 0 0 0;
+    color: rgba(238, 242, 247, 0.85);
+    font-style: italic;
+    font-size: 0.95rem;
+}
+
+.panel {
+    background: rgba(20, 28, 46, 0.78);
+    border: 1px solid rgba(120, 150, 200, 0.18);
+    border-radius: 14px;
+    padding: 1.3rem 1.5rem;
+    margin-bottom: 1.25rem;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.35);
+}
+.panel h2 {
+    margin-top: 0;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--zava-muted, #97a3b6);
+    font-weight: 700;
+    margin-bottom: 0.85rem;
+}
+.panel h3 {
+    font-size: 0.95rem;
+    margin: 0 0 0.4rem 0;
+    color: #fff;
+    font-weight: 600;
+}
+.panel > p { color: rgba(238, 242, 247, 0.86); line-height: 1.55; }
+.panel .muted { color: var(--zava-muted, #97a3b6); font-size: 0.92rem; }
+.panel ul { margin: 0; padding-left: 1.1rem; color: rgba(238, 242, 247, 0.86); }
+.panel ul li { margin-bottom: 0.3rem; line-height: 1.5; }
+.panel ul li::marker { color: var(--accent, #ffb347); }
+.approval {
+    color: rgba(238, 242, 247, 0.86);
+    background: rgba(110, 193, 255, 0.08);
+    border: 1px solid rgba(110, 193, 255, 0.22);
+    border-radius: 8px;
+    padding: 0.55rem 0.8rem;
+    font-size: 0.92rem;
+}
+
+.two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.4rem;
+    margin-top: 0.5rem;
+}
+@media (max-width: 720px) { .two-col { grid-template-columns: 1fr; } }
+
+/* "Demo" — a single general description, no scenarios. */
+.demo {
+    position: relative;
+    border: 1px solid rgba(120, 150, 200, 0.2);
+    border-radius: 12px;
+    padding: 1rem 1.15rem 1.1rem 1.15rem;
+    background: rgba(15, 22, 38, 0.55);
+    overflow: hidden;
+}
+.demo::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--accent);
+}
+.demo p {
+    margin: 0 0 0.65rem 0;
+    color: rgba(238, 242, 247, 0.88);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+.demo p:last-child { margin-bottom: 0; }
+
+/* "Scenario" — scripted claim journey with one step per AI agent. */
+.scenario-steps {
+    list-style: none;
+    counter-reset: scenario-step;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+.scenario-step {
+    position: relative;
+    border: 1px solid rgba(120, 150, 200, 0.22);
+    border-radius: 12px;
+    padding: 0.95rem 1.1rem 1rem 1.1rem;
+    background: rgba(15, 22, 38, 0.55);
+    overflow: hidden;
+}
+.scenario-step::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--accent, #ffb347);
+}
+.scenario-step-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+    margin-bottom: 0.45rem;
+}
+.scenario-step-num {
+    flex: 0 0 auto;
+    width: 1.85rem;
+    height: 1.85rem;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--accent, #ffb347);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.85rem;
+    margin-top: 0.1rem;
+}
+.scenario-step-title { display: flex; flex-direction: column; min-width: 0; }
+.scenario-step-title h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: #fff;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+}
+.scenario-step-agent {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.2rem;
+    color: rgba(238, 242, 247, 0.78);
+    font-size: 0.85rem;
+}
+.scenario-step-agent-icon {
+    font-size: 0.95rem;
+    line-height: 1;
+}
+.scenario-step-summary {
+    margin: 0 0 0.55rem 0;
+    color: rgba(238, 242, 247, 0.88);
+    font-size: 0.92rem;
+    line-height: 1.55;
+}
+.scenario-step-actions-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255, 255, 255, 0.55);
+    font-weight: 600;
+    margin: 0.4rem 0 0.3rem 0;
+}
+.scenario-step-actions {
+    margin: 0;
+    padding-left: 1.1rem;
+    color: rgba(238, 242, 247, 0.86);
+}
+.scenario-step-actions li {
+    margin-bottom: 0.3rem;
+    line-height: 1.5;
+    font-size: 0.92rem;
+}
+.scenario-step-actions li::marker { color: var(--accent, #ffb347); }
+
+.other-agents {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+.other-agent {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(120, 150, 200, 0.22);
+    text-decoration: none;
+    color: rgba(238, 242, 247, 0.85);
+    font-size: 0.85rem;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.other-agent:hover {
+    background: rgba(255, 179, 71, 0.1);
+    border-color: rgba(255, 179, 71, 0.4);
+    color: #fff;
+    text-decoration: none;
+}
+.other-agent-icon { font-size: 1rem; }
+
+/* Tabs (used on the Claims Intake agent page only). */
+.agent-tabs {
+    display: flex;
+    gap: 0.25rem;
+    border-bottom: 1px solid rgba(120, 150, 200, 0.22);
+    margin-bottom: 1.1rem;
+}
+.agent-tab {
+    background: transparent;
+    border: none;
+    color: rgba(214, 228, 245, 0.7);
+    padding: 0.65rem 1.1rem;
+    font-size: 0.92rem;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color 0.15s ease, border-color 0.15s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+}
+.agent-tab:hover { color: #fff; }
+.agent-tab.active {
+    color: #fff;
+    border-bottom-color: var(--accent, #ffb347);
+}
+.agent-tab-panel { display: none; }
+.agent-tab-panel.active { display: block; }
+.agent-tab-panel.standalone { display: block; }
+
+/* ── Engage Agent panel sub-tabs ──────────────────────────────────────
+   Used inside the "Try It Out" panel on every agent page to flip
+   between the live demo, the agent's system prompt + tools, the
+   exact input that was sent, and the raw output (with function
+   calls). Driven by wwwroot/js/engage-tabs.js. */
+.engage-tabs-scope {
+    margin-top: 0.9rem;
+    padding-top: 0.6rem;
+    border-top: 1px dashed rgba(120, 150, 200, 0.22);
+}
+.engage-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    border-bottom: 1px solid rgba(120, 150, 200, 0.18);
+    margin: 0.4rem 0 0.9rem 0;
+}
+.engage-tab-btn {
+    background: transparent;
+    border: none;
+    color: rgba(214, 228, 245, 0.7);
+    padding: 0.5rem 0.95rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color 0.15s ease, border-color 0.15s ease;
+}
+.engage-tab-btn:hover { color: #fff; }
+.engage-tab-btn.active {
+    color: #fff;
+    border-bottom-color: var(--accent, #ffb347);
+}
+.engage-tab-panel { display: none; }
+.engage-tab-panel.active { display: block; }
+
+/* Cap the streamed Agent Narrative body so it never grows past 200px;
+   overflow scrolls within the panel. Applies to all agent pages. */
+.engage-narrative-body {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.engage-info-block {
+    background: rgba(10, 16, 28, 0.7);
+    border: 1px solid rgba(120, 150, 200, 0.18);
+    border-radius: 8px;
+    padding: 0.85rem 1rem;
+    margin-bottom: 0.8rem;
+}
+.engage-info-block h4 {
+    margin: 0 0 0.4rem 0;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--zava-muted, #97a3b6);
+    font-weight: 700;
+}
+.engage-info-block p { margin: 0.2rem 0; color: rgba(238, 242, 247, 0.9); font-size: 0.9rem; }
+.engage-info-block ul { margin: 0.3rem 0 0 1.1rem; padding: 0; }
+.engage-info-block ul li {
+    color: rgba(238, 242, 247, 0.9);
+    font-size: 0.88rem;
+    margin-bottom: 0.2rem;
+}
+.engage-info-meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.45rem 1rem;
+    font-size: 0.85rem;
+    color: rgba(238, 242, 247, 0.86);
+}
+.engage-info-meta .k {
+    display: block;
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--zava-muted, #97a3b6);
+    font-weight: 700;
+    margin-bottom: 0.15rem;
+}
+
+.engage-pre {
+    background: rgba(8, 12, 22, 0.85);
+    border: 1px solid rgba(120, 150, 200, 0.18);
+    border-radius: 8px;
+    padding: 0.85rem 1rem;
+    color: rgba(238, 242, 247, 0.92);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.82rem;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    overflow-x: auto;
+    max-height: 70vh;
+    margin: 0;
+}
+
+.engage-prompt-body {
+    height: 150px;
+    max-height: 150px;
+    overflow-y: auto;
+}
+.engage-empty {
+    color: var(--zava-muted, #97a3b6);
+    font-style: italic;
+    font-size: 0.88rem;
+    padding: 0.5rem 0;
+}
+
+/* Reference tab — citations list rendered by engage-tabs.js. */
+.engage-references-body {
+    display: block;
+}
+.engage-refs-list {
+    list-style: none;
+    counter-reset: engage-ref;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+.engage-ref-card {
+    counter-increment: engage-ref;
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    padding: 0.6rem 0.85rem;
+    background: rgba(8, 12, 22, 0.55);
+    border: 1px solid rgba(120, 150, 200, 0.18);
+    border-radius: 8px;
+}
+.engage-ref-card::before {
+    content: "[" counter(engage-ref) "]";
+    color: var(--zava-muted, #97a3b6);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.82rem;
+    flex: 0 0 auto;
+    padding-top: 0.1rem;
+}
+.engage-ref-kind {
+    flex: 0 0 auto;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.15rem 0.45rem;
+    border-radius: 999px;
+    border: 1px solid transparent;
+}
+.engage-ref-kind-web {
+    color: #93c5fd;
+    background: rgba(59, 130, 246, 0.12);
+    border-color: rgba(59, 130, 246, 0.35);
+}
+.engage-ref-kind-doc {
+    color: #86efac;
+    background: rgba(34, 197, 94, 0.12);
+    border-color: rgba(34, 197, 94, 0.35);
+}
+.engage-ref-body {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.engage-ref-title {
+    font-size: 0.92rem;
+    line-height: 1.4;
+    word-break: break-word;
+}
+.engage-ref-title a {
+    color: #cfe3ff;
+    text-decoration: none;
+}
+.engage-ref-title a:hover { text-decoration: underline; }
+.engage-ref-url {
+    margin-top: 0.2rem;
+    color: var(--zava-muted, #97a3b6);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.78rem;
+    word-break: break-all;
+}
+
+/* JSON viewer (collapsible). */
+.json-viewer {
+    background: rgba(8, 12, 22, 0.85);
+    border: 1px solid rgba(120, 150, 200, 0.18);
+    border-radius: 8px;
+    padding: 0.85rem 1rem;
+    color: rgba(238, 242, 247, 0.92);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    overflow-x: auto;
+    max-height: 70vh;
+}
+.json-viewer .jv-toggle {
+    cursor: pointer;
+    user-select: none;
+    color: rgba(214, 228, 245, 0.6);
+    width: 1em;
+    display: inline-block;
+    text-align: center;
+    margin-right: 0.1rem;
+}
+.json-viewer .jv-toggle:hover { color: #fff; }
+.json-viewer .jv-key { color: #93c5fd; }
+.json-viewer .jv-string { color: #86efac; word-break: break-word; }
+.json-viewer .jv-number { color: #fcd34d; }
+.json-viewer .jv-boolean { color: #f0abfc; }
+.json-viewer .jv-null { color: #fca5a5; font-style: italic; }
+.json-viewer .jv-bracket { color: rgba(238, 242, 247, 0.7); }
+.json-viewer .jv-comma { color: rgba(238, 242, 247, 0.5); }
+.json-viewer .jv-summary { color: var(--zava-muted, #97a3b6); font-style: italic; margin-left: 0.25rem; }
+.json-viewer .jv-block { display: block; }
+.json-viewer .jv-block.collapsed > .jv-children { display: none; }
+.json-viewer .jv-block.collapsed > .jv-summary { display: inline; }
+.json-viewer .jv-block:not(.collapsed) > .jv-summary { display: none; }
+.json-viewer .jv-line { display: block; padding-left: 1.25rem; }
+.json-viewer .jv-controls {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.78rem;
+}
+.json-viewer .jv-controls button {
+    background: rgba(20, 28, 46, 0.7);
+    border: 1px solid rgba(120, 150, 200, 0.32);
+    color: rgba(238, 242, 247, 0.86);
+    border-radius: 6px;
+    padding: 0.25rem 0.6rem;
+    cursor: pointer;
+    font-size: 0.78rem;
+}
+.json-viewer .jv-controls button:hover { background: rgba(255, 255, 255, 0.06); color: #fff; }
