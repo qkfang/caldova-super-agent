@@ -1,0 +1,847 @@
+@page "/agents/investment-analyst"
+@using CaldovaSuper.App.Api
+@using CaldovaSuper.App.Mcp
+@using Microsoft.AspNetCore.Hosting
+@inject IWebHostEnvironment Env
+
+<PageTitle>Investment Analyst Agent — Wealth Team in a Day</PageTitle>
+
+<div class="agent-header" style="--accent: #f59e0b">
+    <a class="back-link" href="/"><span aria-hidden="true">←</span> Back to operations office</a>
+    <div class="agent-header-row">
+        <div class="agent-header-icon">📈</div>
+        <div>
+            <div class="agent-header-dept">Investment Solutions</div>
+            <h1>Investment Analyst Agent</h1>
+            <div class="agent-header-persona">Ivy — Investment Analyst</div>
+            <p class="tagline">Keeps portfolios on plan — and shows the fees in dollars.</p>
+        </div>
+    </div>
+</div>
+
+<div class="agent-tab-scope" style="--accent: #f59e0b">
+    <nav class="agent-tabs" role="tablist" aria-label="Investment Analyst agent details">
+        <button type="button" class="agent-tab active" data-tab="overview" role="tab" aria-selected="true" tabindex="0">Overview</button>
+        <button type="button" class="agent-tab" data-tab="try" role="tab" aria-selected="false" tabindex="-1">Try it out</button>
+    </nav>
+
+    <div class="agent-tab-panel active" data-panel="overview" role="tabpanel">
+    <section class="panel" style="--accent: #f59e0b">
+        <h2>What this agent does</h2>
+        <p>
+            Checks that each client's model portfolio still fits their risk profile and Statement of Advice,
+            compares Caldova Managed Portfolios on fees in dollars, risk and illustrative returns, designs
+            pension income and redemption plans, and builds an Excel workbook the adviser can share. It
+            supplies the facts — the adviser recommends and the client decides.
+        </p>
+        <div class="two-col">
+            <div>
+                <h3>Responsibilities</h3>
+                <ul>
+                    <li>Check the selected model against the risk profile in the client's SoA.</li>
+                    <li>Compare models on total annual Caldova fees in dollars, not just percentages.</li>
+                    <li>Design cash-bucket income strategies for new account-based pensions.</li>
+                    <li>Plan redemptions for withdrawals and death benefits — cash first, then units.</li>
+                    <li>Flag menu-governance concerns (illiquid or high-risk options, concentration).</li>
+                </ul>
+                <h3>Human approval</h3>
+                <p class="approval">
+                    Required for any mismatch between a model and the SoA risk profile, pension strategies that may
+                    not sustain the requested income, and any investment instruction on a case under review. Ivy's
+                    agent never changes an investment or gives personal financial advice.
+                </p>
+            </div>
+            <div>
+                <h3>Tools available</h3>
+                <ul>
+                    <li><strong>analyzeFactSheet</strong> — fetch and parse a model fact sheet (MCP)</li>
+                    <li><strong>compareModels</strong> — fees in dollars, comparison table + Mermaid chart (MCP)</li>
+                    <li><strong>generateClientWorkbook</strong> — write the case .xlsx workbook (MCP)</li>
+                    <li>Azure AI Search — Caldova Managed Portfolios menu and fee schedule <span class="muted">(cited by title)</span></li>
+                    <li>Bing grounding — current public context</li>
+                </ul>
+                <h3>Model fact sheets</h3>
+                <p class="muted inv-fs-help">Hover a fact sheet to preview it; ↗ opens the raw JSON the agent reads.</p>
+                <div class="inv-fs-thumbs">
+                    @foreach (var fs in _sheets)
+                    {
+                        <div class="inv-fs-thumb" tabindex="0">
+                            <span class="inv-fs-icon" aria-hidden="true">📊</span>
+                            <span class="inv-fs-name">@fs.ShortName</span>
+                            <span class="inv-fs-meta">@IcrText(fs) ICR</span>
+                            <a class="inv-fs-ext" href="@fs.Source" target="_blank" rel="noopener" title="Open raw JSON" aria-label="Open the @fs.ShortName fact sheet">↗</a>
+                            <div class="inv-fs-popover" role="tooltip">
+                                <div class="inv-fs-popover-head">
+                                    <strong>@fs.Name</strong>
+                                    <span>@fs.Code · @fs.GrowthDefensive growth/defensive</span>
+                                </div>
+                                <pre class="inv-fs-popover-pre">@InvestmentsApi.BuildFactSheetPreview(fs)</pre>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="panel" style="--accent: #f59e0b">
+        <h2>Caldova Managed Portfolios menu</h2>
+        <p class="muted">
+            Six model portfolios used inside Caldova Super, Caldova Pension and Caldova Wrap. Every model has a
+            0.10% buy/sell spread. The Caldova admin fee is charged on the whole account: 0.30% on the first
+            $250,000, 0.15% on $250,000–$1,000,000, 0.05% on $1,000,000–$2,000,000, nil above, plus $180 p.a.
+        </p>
+        <div class="inv-table-wrap">
+            <table class="inv-table">
+                <thead>
+                    <tr>
+                        <th>Model</th>
+                        <th>Growth / defensive</th>
+                        <th class="num">Investment fee (ICR)</th>
+                        <th>Standard risk measure</th>
+                        <th class="num">Min. timeframe</th>
+                        <th class="num">5-year return p.a.*</th>
+                        <th>Style</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var fs in _sheets)
+                    {
+                        <tr>
+                            <td><strong>@fs.ShortName</strong> <span class="muted">@fs.Code</span></td>
+                            <td>@fs.GrowthDefensive</td>
+                            <td class="num">@IcrText(fs)</td>
+                            <td>@fs.RiskBand — @fs.RiskLabel</td>
+                            <td class="num">@fs.MinimumTimeframeYears years</td>
+                            <td class="num">@ReturnText(fs)</td>
+                            <td>@fs.Style</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <p class="muted inv-footnote">
+            * Illustrative returns to 31 Oct 2026, net of investment fees. Past performance is not a reliable
+            indicator of future performance.
+        </p>
+    </section>
+
+    <section class="panel" style="--accent: #f59e0b">
+        <h2>How Ivy's agent helps on each case</h2>
+        <div class="inv-table-wrap">
+            <table class="inv-table">
+                <thead>
+                    <tr><th>Case</th><th>What the Investment Analyst Agent does</th><th>Human approval</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Priya Natarajan</strong><br /><span class="muted">New account &amp; consolidation</span></td>
+                        <td>Confirms Growth fits the SoA risk profile, then compares Growth, Balanced and Index Balanced on $138,200 — about <strong>$1,175</strong>, <strong>$1,120</strong> and <strong>$843</strong> a year — and sends the workbook to the adviser.</td>
+                        <td>None — no change is made</td>
+                    </tr>
+                    <tr>
+                        <td><strong>George Papadopoulos</strong><br /><span class="muted">Pension commencement</span></td>
+                        <td>Builds the income strategy: a two-year cash bucket of <strong>$156,000</strong> plus <strong>$1,094,000</strong> in Balanced, compared with two other structures on $1,250,000.</td>
+                        <td>Team Leader — commencement of $1,000,000 or more</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tom Bradley</strong><br /><span class="muted">Financial hardship</span></td>
+                        <td>Plans the $10,000 redemption — cash first, then Balanced units — so the balance falls from $84,300 to about <strong>$74,300</strong>.</td>
+                        <td>Team Leader — partial hardship release</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Robert Chen</strong> (for Mei Chen)<br /><span class="muted">Death benefit</span></td>
+                        <td>Redeems Mei's pension portfolio (about <strong>$486,200</strong>) to cash and notes that market movements until the sale change the final amounts.</td>
+                        <td>Team Leader — every death benefit</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Grace Williams</strong><br /><span class="muted">Rollover blocked</span></td>
+                        <td>No investment action — the account is frozen while Financial Crime reviews it; the <strong>$612,400</strong> stays invested and a holdings snapshot is recorded.</td>
+                        <td>Financial Crime and Team Leader sign-off for any instruction</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+    </div>
+
+    <div class="agent-tab-panel" data-panel="try" role="tabpanel">
+    <section class="panel inv-panel" style="--accent: #f59e0b">
+        <h2>Try it out — Investment Analyst demo</h2>
+        <p class="muted inv-help">
+            Pick a Member Case, review the investment details Ivy works from, then engage her agent. It reads
+            the model fact sheets, compares the options with fees in dollars, builds a Mermaid chart and an Excel
+            workbook, and answers follow-up questions. Every step runs live against the
+            <code>/investments/*</code> endpoints in this app.
+        </p>
+
+        <!-- Step 1 — pick a case -->
+        <div class="inv-step" data-step="1">
+            <div class="inv-step-head">
+                <span class="inv-step-num">1</span>
+                <h3>Pick a case</h3>
+            </div>
+            <p class="muted">
+                The five scenario cases are pre-loaded; cases opened in the
+                <a href="/agents/onboarding">Onboarding</a> demo appear here too.
+            </p>
+            <div class="inv-case-row">
+                <select id="inv-case-select" aria-label="Member Case">
+                    <option value="">— Loading cases —</option>
+                </select>
+                <button type="button" id="inv-refresh-btn" class="inv-secondary" title="Reload the list of cases">↻ Refresh</button>
+            </div>
+            <p class="muted inv-empty" id="inv-empty" hidden>
+                No cases yet. Open one in the <a href="/agents/onboarding">Onboarding</a> demo, then come back here.
+            </p>
+        </div>
+
+        <!-- Step 2 — review -->
+        <div class="inv-step" data-step="2" id="inv-review-step" hidden>
+            <div class="inv-step-head">
+                <span class="inv-step-num">2</span>
+                <h3>Review the investment details</h3>
+            </div>
+            <p class="muted">What Ivy works from: the balance, the current or selected model, the risk profile and SoA, and the request.</p>
+            <div class="inv-case-card">
+                <div class="inv-case-num" id="inv-case-num"></div>
+                <div class="inv-case-grid">
+                    <div><span class="k">Client</span><span id="inv-case-client"></span></div>
+                    <div><span class="k">Member no.</span><span id="inv-case-member"></span></div>
+                    <div><span class="k">Product</span><span id="inv-case-product"></span></div>
+                    <div><span class="k">Request type</span><span id="inv-case-type"></span></div>
+                    <div><span class="k">Adviser</span><span id="inv-case-adviser"></span></div>
+                    <div><span class="k">Received</span><span id="inv-case-received"></span></div>
+                    <div class="span-2"><span class="k">Balance</span><span><strong id="inv-case-balance"></strong> <span class="muted" id="inv-case-balance-note"></span></span></div>
+                    <div class="span-2"><span class="k">Current / selected model</span><span id="inv-case-model"></span></div>
+                    <div><span class="k">Risk profile</span><span id="inv-case-risk"></span></div>
+                    <div><span class="k">Statement of Advice</span><span id="inv-case-soa"></span></div>
+                    <div class="span-2"><span class="k">Analysis</span><span><strong id="inv-case-analysis-title"></strong> — <span id="inv-case-analysis-summary"></span></span></div>
+                </div>
+            </div>
+            <div class="inv-subblock" id="inv-review-holdings" hidden>
+                <h4 class="inv-subhead">Holdings</h4>
+                <div class="inv-table-wrap"><table class="inv-table" id="inv-review-holdings-table"></table></div>
+            </div>
+            <div class="inv-subblock" id="inv-review-factsheets" hidden>
+                <h4 class="inv-subhead">Fact sheets the agent will analyse</h4>
+                <p class="muted">The agent calls <code>analyzeFactSheet</code> on each of these before comparing the options.</p>
+                <div class="inv-fs-thumbs" id="inv-review-factsheet-list"></div>
+            </div>
+        </div>
+
+        <!-- Step 3 — engage -->
+        <div class="inv-step" data-step="3" id="inv-process-step" hidden>
+            <div class="inv-step-head">
+                <span class="inv-step-num">3</span>
+                <h3>Engage the Investment Analyst Agent</h3>
+            </div>
+            <p class="muted">
+                The agent reads the fact sheets, compares the options with total annual fees in dollars
+                (<code>compareModels</code>), draws the Mermaid chart and writes the client workbook
+                (<code>generateClientWorkbook</code>). Without a Foundry connection the same calculations run
+                in-process, so the results below still appear.
+            </p>
+            <button id="inv-process-btn" type="button" disabled>Engage Investment Analyst Agent</button>
+            <div id="inv-process-status" class="inv-status" hidden></div>
+
+            <div class="engage-tabs-scope" data-engage-role="investment-analyst">
+                <div class="engage-tabs" role="tablist">
+                    <button type="button" class="engage-tab-btn active" data-engage-tab="narrative">Agent Narrative</button>
+                    <button type="button" class="engage-tab-btn" data-engage-tab="reference">Reference</button>
+                    <button type="button" class="engage-tab-btn" data-engage-tab="prompt">Agent Prompt &amp; Tools</button>
+                    <button type="button" class="engage-tab-btn" data-engage-tab="input">Agent Input</button>
+                    <button type="button" class="engage-tab-btn" data-engage-tab="output">Raw Output</button>
+                </div>
+
+                <div class="engage-tab-panel active" data-engage-tab="narrative">
+                    <div class="engage-info-block">
+                        <h4>Agent narrative (streamed)</h4>
+                        <div class="agent-md engage-narrative-body"><div class="engage-empty">Engage the agent to see the streamed narrative.</div></div>
+                    </div>
+                </div>
+
+                <div class="engage-tab-panel" data-engage-tab="reference">
+                    <div class="engage-info-block">
+                        <h4>Reference documents cited by the agent</h4>
+                        <div class="engage-references-body"><div class="engage-empty">Engage the agent to see the reference documents cited in its response.</div></div>
+                    </div>
+                </div>
+
+                <div class="engage-tab-panel" data-engage-tab="prompt">
+                    <div class="engage-info-block">
+                        <h4>Agent metadata</h4>
+                        <div class="engage-info-meta engage-meta"></div>
+                    </div>
+                    <div class="engage-info-block">
+                        <h4>System prompt</h4>
+                        <pre class="engage-pre engage-prompt-body">Loading…</pre>
+                    </div>
+                    <div class="engage-info-block">
+                        <h4>Tools available</h4>
+                        <ul class="engage-tools-list"><li class="engage-empty">Loading…</li></ul>
+                    </div>
+                </div>
+
+                <div class="engage-tab-panel" data-engage-tab="input">
+                    <div class="engage-info-block">
+                        <h4>Prompt sent to the agent</h4>
+                        <pre class="engage-pre engage-input-body engage-empty">Engage the agent to capture the input that was sent.</pre>
+                    </div>
+                </div>
+
+                <div class="engage-tab-panel" data-engage-tab="output">
+                    <div class="engage-info-block">
+                        <h4>Raw agent output (text, citations, every output item including tool / function calls)</h4>
+                        <div class="json-viewer engage-output-body"><div class="engage-empty">Engage the agent to see the full raw response.</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analysis results (always rendered from the deterministic analysis) -->
+            <div class="inv-results" id="inv-results" hidden>
+                <div class="inv-results-head">
+                    <div>
+                        <div class="inv-results-kicker">Analysis</div>
+                        <div class="inv-results-title" id="inv-results-title"></div>
+                        <div class="inv-results-summary" id="inv-results-summary"></div>
+                    </div>
+                    <span class="inv-mode-pill" id="inv-results-mode"></span>
+                </div>
+
+                <div class="inv-action-note" id="inv-action-note" hidden></div>
+                <div class="inv-fit" id="inv-fit"></div>
+
+                <div class="inv-subblock" id="inv-comparison" hidden>
+                    <h4 class="inv-subhead">Model comparison — total Caldova fees per year</h4>
+                    <div class="inv-table-wrap"><table class="inv-table" id="inv-comparison-table"></table></div>
+                    <p class="muted inv-footnote" id="inv-comparison-note"></p>
+                </div>
+
+                <div class="inv-subblock" id="inv-holdings" hidden>
+                    <h4 class="inv-subhead">Holdings</h4>
+                    <div class="inv-table-wrap"><table class="inv-table" id="inv-holdings-table"></table></div>
+                </div>
+
+                <div class="inv-subblock" id="inv-chart" hidden>
+                    <h4 class="inv-subhead" id="inv-chart-title"></h4>
+                    <div class="inv-chart-mermaid" id="inv-chart-mermaid" hidden></div>
+                    <div class="inv-bars" id="inv-chart-bars"></div>
+                    <details class="inv-chart-source">
+                        <summary>Mermaid chart source</summary>
+                        <pre id="inv-chart-source"></pre>
+                    </details>
+                </div>
+
+                <div class="inv-subblock" id="inv-plan" hidden>
+                    <h4 class="inv-subhead" id="inv-plan-title"></h4>
+                    <div class="inv-table-wrap"><table class="inv-table" id="inv-plan-table"></table></div>
+                    <p class="muted inv-footnote" id="inv-plan-note"></p>
+                </div>
+
+                <div class="inv-two-col">
+                    <div class="inv-subblock">
+                        <h4 class="inv-subhead">Observations &amp; risks</h4>
+                        <ul class="inv-list" id="inv-observations"></ul>
+                    </div>
+                    <div class="inv-subblock">
+                        <h4 class="inv-subhead">Next steps</h4>
+                        <ul class="inv-list" id="inv-next-steps"></ul>
+                    </div>
+                </div>
+
+                <div class="inv-workbook" id="inv-workbook" hidden>
+                    <span class="inv-workbook-icon" aria-hidden="true">📗</span>
+                    <div class="inv-workbook-meta">
+                        <div class="inv-workbook-label">Client workbook (.xlsx)</div>
+                        <div class="inv-workbook-name" id="inv-workbook-name"></div>
+                        <div class="inv-workbook-sheets" id="inv-workbook-sheets"></div>
+                    </div>
+                    <a id="inv-workbook-link" class="inv-workbook-btn" href="#" download>Download workbook</a>
+                </div>
+                <div class="inv-status error" id="inv-workbook-error" hidden></div>
+
+                <div class="inv-approval" id="inv-approval">
+                    <span class="inv-approval-pill" id="inv-approval-pill"></span>
+                    <span id="inv-approval-reason"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 4 — chat -->
+        <div class="inv-step" data-step="4" id="inv-chat-step" hidden>
+            <div class="inv-step-head">
+                <span class="inv-step-num">4</span>
+                <h3>Chat with the Investment Analyst Agent</h3>
+            </div>
+            <p class="muted">
+                Ask follow-up questions about the fees, the fact sheets, the plan or what needs approval. The
+                conversation continues from the analysis, so the agent keeps the full context.
+            </p>
+
+            <div class="inv-chat-layout">
+                <div class="inv-chat-col">
+                    <div class="inv-chips" id="inv-chat-suggestions">
+                        <button type="button" class="inv-chip" data-question="Show me the fees in dollars for each option.">Fees in dollars</button>
+                        <button type="button" class="inv-chip" data-question="What returns do the fact sheets show?">Fact sheet returns</button>
+                        <button type="button" class="inv-chip" data-question="Does the model fit the risk profile in the SoA?">Fit with the SoA</button>
+                        <button type="button" class="inv-chip" data-question="Walk me through the income or redemption plan.">The plan</button>
+                        <button type="button" class="inv-chip" data-question="Should the client switch models?">Should they switch?</button>
+                    </div>
+                    <div class="inv-chat-messages" id="inv-chat-messages" role="log" aria-live="polite">
+                        <div class="inv-chat-empty">No follow-up messages yet. Ask a question below.</div>
+                    </div>
+                    <form class="inv-chat-form" id="inv-chat-form" autocomplete="off">
+                        <input type="text" id="inv-chat-input"
+                               placeholder="Ask a follow-up question (e.g. 'Why is Index Balanced cheaper?')"
+                               aria-label="Follow-up question to the Investment Analyst Agent" />
+                        <button type="submit" id="inv-chat-send" disabled>Send</button>
+                    </form>
+                    <div id="inv-chat-status" class="inv-status" hidden></div>
+                </div>
+
+                <aside class="inv-refs-col" aria-label="Web and document references">
+                    <div class="inv-refs-head">
+                        <h4>References</h4>
+                        <span class="inv-refs-count" id="inv-refs-count">0</span>
+                    </div>
+                    <p class="inv-refs-help">
+                        Web results and document citations the agent used to ground its answers. Updated after every reply.
+                    </p>
+                    <div class="inv-refs-list" id="inv-refs-list">
+                        <div class="inv-refs-empty">References from the agent will appear here.</div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </section>
+    </div>
+</div>
+
+<style>
+    .inv-panel { --inv-accent: #f59e0b; }
+    .inv-help { margin-bottom: 0.9rem; }
+    .inv-help code, .inv-step code {
+        background: rgba(245, 158, 11, 0.12); padding: 1px 6px; border-radius: 4px; font-size: 0.84rem;
+    }
+    .inv-fs-help { margin: 0.1rem 0 0.4rem 0; font-size: 0.84rem; }
+
+    .inv-step {
+        border: 1px solid rgba(16, 38, 72, 0.112);
+        background: #f9fafb;
+        border-radius: 12px;
+        padding: 0.95rem 1.1rem 1rem 1.1rem;
+        margin-top: 0.9rem;
+    }
+    .inv-step-head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.3rem; }
+    .inv-step-head h3 { margin: 0; color: #0b1f3a; font-size: 1rem; }
+    .inv-step-num {
+        display: inline-grid; place-items: center;
+        width: 1.55rem; height: 1.55rem;
+        border-radius: 50%;
+        background: color-mix(in srgb, #f59e0b 22%, #f6f7f9);
+        border: 1px solid color-mix(in srgb, #f59e0b 55%, transparent);
+        color: #845910;
+        font-size: 0.78rem; font-weight: 700;
+    }
+    .inv-step .muted { color: var(--cw-muted, #5d6b7e); font-size: 0.9rem; margin: 0.35rem 0 0.7rem 0; }
+    .inv-step .muted a, .inv-empty a { color: #845910; }
+
+    .inv-case-row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+    .inv-case-row select {
+        background: #ffffff;
+        border: 1px solid rgba(16, 38, 72, 0.198);
+        border-radius: 6px;
+        color: #0b1f3a;
+        padding: 0.5rem 0.7rem;
+        font-size: 0.9rem;
+        min-width: 320px;
+        max-width: 100%;
+    }
+    .inv-case-row select:focus {
+        outline: none;
+        border-color: #f59e0b;
+        box-shadow: 0 0 0 3px color-mix(in srgb, #f59e0b 25%, transparent);
+    }
+    .inv-secondary {
+        background: transparent;
+        color: #344054;
+        border: 1px solid rgba(16, 38, 72, 0.198);
+        border-radius: 6px;
+        padding: 0.45rem 0.85rem;
+        font-size: 0.85rem;
+        cursor: pointer;
+    }
+    .inv-secondary:hover { background: rgba(16, 38, 72, 0.035); color: #0b1f3a; }
+    .inv-empty { margin-top: 0.6rem; }
+
+    .inv-case-card {
+        margin-top: 0.4rem;
+        background: #f6f7f9;
+        border: 1px solid rgba(16, 38, 72, 0.112);
+        border-radius: 8px;
+        padding: 0.8rem 0.95rem;
+    }
+    .inv-case-num {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        color: #845910; font-weight: 700; font-size: 0.95rem; margin-bottom: 0.45rem;
+    }
+    .inv-case-grid {
+        display: grid; grid-template-columns: 1fr 1fr; gap: 0.45rem 0.9rem;
+        font-size: 0.86rem; color: #344054;
+    }
+    .inv-case-grid .span-2 { grid-column: span 2; }
+    @@media (max-width: 820px) {
+        .inv-case-grid { grid-template-columns: 1fr; }
+        .inv-case-grid .span-2 { grid-column: span 1; }
+    }
+    .inv-case-grid .k {
+        display: block;
+        color: var(--cw-muted, #5d6b7e);
+        font-weight: 600; text-transform: uppercase; font-size: 0.64rem; letter-spacing: 0.08em;
+        margin-bottom: 0.1rem;
+    }
+    .inv-case-grid .muted { font-size: 0.8rem; }
+
+    .inv-subblock { margin-top: 0.9rem; }
+    .inv-subhead { margin: 0 0 0.35rem 0; font-size: 0.88rem; color: #1d2939; }
+
+    /* Fact sheet thumbs + hover popovers */
+    .inv-fs-thumbs { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 0.35rem; }
+    .inv-fs-thumb {
+        position: relative;
+        display: flex; flex-direction: column; align-items: center;
+        width: 96px;
+        background: #f6f7f9;
+        border: 1px solid rgba(16, 38, 72, 0.136);
+        border-radius: 8px;
+        padding: 0.5rem 0.4rem 0.4rem;
+        gap: 0.2rem;
+        transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .inv-fs-thumb:hover, .inv-fs-thumb:focus-within {
+        border-color: #f59e0b;
+        box-shadow: 0 0 0 1px color-mix(in srgb, #f59e0b 35%, transparent);
+        z-index: 10;
+    }
+    .inv-fs-icon { font-size: 1.5rem; line-height: 1; }
+    .inv-fs-name { font-size: 0.66rem; color: #1d2939; text-align: center; line-height: 1.25; }
+    .inv-fs-meta { font-size: 0.66rem; font-weight: 700; color: #845910; }
+    .inv-fs-ext { font-size: 0.72rem; color: var(--cw-muted, #5d6b7e); text-decoration: none; line-height: 1; }
+    .inv-fs-ext:hover { color: #845910; }
+    .inv-fs-popover {
+        display: none;
+        position: absolute;
+        bottom: calc(100% + 6px);
+        left: 50%;
+        transform: translateX(-50%);
+        min-width: 280px; max-width: 340px;
+        background: #f2f4f7;
+        border: 1px solid rgba(16, 38, 72, 0.186);
+        border-radius: 8px;
+        padding: 0.55rem 0.65rem;
+        box-shadow: 0 8px 32px rgba(16, 24, 40, 0.12);
+        z-index: 200;
+        pointer-events: none;
+    }
+    .inv-fs-thumb:hover .inv-fs-popover, .inv-fs-thumb:focus-within .inv-fs-popover { display: block; }
+    .inv-fs-popover-head {
+        display: flex; flex-direction: column; gap: 0.1rem;
+        margin-bottom: 0.4rem; padding-bottom: 0.35rem;
+        border-bottom: 1px solid rgba(16, 38, 72, 0.112);
+        font-size: 0.78rem;
+    }
+    .inv-fs-popover-head strong { color: #0b1f3a; }
+    .inv-fs-popover-head span { color: #845910; font-size: 0.72rem; }
+    .inv-fs-popover-pre {
+        margin: 0;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 0.7rem; line-height: 1.45;
+        color: #344054;
+        white-space: pre-wrap;
+        max-height: 260px; overflow-y: auto;
+    }
+
+    /* Tables — `contain: inline-size` stops a wide table from stretching the
+       page layout; it scrolls inside its wrapper instead. */
+    .inv-table-wrap { overflow-x: auto; contain: inline-size; }
+    .inv-table { width: 100%; border-collapse: collapse; font-size: 0.84rem; color: #1d2939; }
+    .inv-table th, .inv-table td {
+        padding: 0.42rem 0.55rem;
+        border-bottom: 1px solid rgba(16, 38, 72, 0.099);
+        text-align: left; vertical-align: top;
+    }
+    .inv-table th {
+        color: var(--cw-muted, #5d6b7e);
+        font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.07em; font-weight: 700;
+    }
+    .inv-table th.num { text-align: right; }
+    .inv-table td.num { text-align: right; white-space: nowrap; }
+    #inv-comparison-table td:first-child { min-width: 200px; }
+    .inv-table tr.selected td { background: rgba(245, 158, 11, 0.08); }
+    .inv-table tr.total td { font-weight: 700; color: #0b1f3a; }
+    .inv-table .muted { color: var(--cw-muted, #5d6b7e); font-size: 0.76rem; }
+    .inv-tag {
+        display: inline-block; margin-left: 0.35rem;
+        font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+        color: #1a1100; background: #f59e0b; border-radius: 999px; padding: 0 0.45rem;
+    }
+    .inv-footnote { font-size: 0.78rem !important; margin: 0.35rem 0 0 0 !important; }
+
+    #inv-process-btn {
+        background: var(--cw-primary); color: #fff;
+        border: none; border-radius: 999px;
+        padding: 0.55rem 1.1rem;
+        font-size: 0.9rem; font-weight: 700;
+        cursor: pointer; margin-top: 0.35rem;
+    }
+    #inv-process-btn:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-1px); }
+    #inv-process-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .inv-status { margin-top: 0.6rem; font-size: 0.88rem; color: #344054; }
+    .inv-status.error { color: #c11818; }
+    .inv-status .spinner {
+        display: inline-block; width: 12px; height: 12px;
+        border: 2px solid rgba(16, 38, 72, 0.25); border-top-color: #0b1f3a;
+        border-radius: 50%; margin-right: 6px; vertical-align: middle;
+        animation: inv-spin 0.7s linear infinite;
+    }
+    @@keyframes inv-spin { to { transform: rotate(360deg); } }
+
+    /* Results */
+    .inv-results {
+        margin-top: 1rem;
+        border: 1px solid color-mix(in srgb, #f59e0b 35%, transparent);
+        background: color-mix(in srgb, #f59e0b 5%, #f6f7f9);
+        border-radius: 10px;
+        padding: 0.85rem 1rem 1rem;
+    }
+    .inv-results-head { display: flex; justify-content: space-between; gap: 0.8rem; align-items: flex-start; }
+    .inv-results-kicker {
+        font-size: 0.64rem; text-transform: uppercase; letter-spacing: 0.12em;
+        color: var(--cw-muted, #5d6b7e); font-weight: 700;
+    }
+    .inv-results-title { color: #0b1f3a; font-weight: 700; font-size: 1rem; margin-top: 0.1rem; }
+    .inv-results-summary { color: #344054; font-size: 0.86rem; margin-top: 0.2rem; }
+    .inv-mode-pill {
+        flex-shrink: 0;
+        font-size: 0.66rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+        border-radius: 999px; padding: 0.15rem 0.6rem;
+        border: 1px solid rgba(16, 38, 72, 0.24); color: #344054;
+    }
+    .inv-mode-pill.live { border-color: rgba(16, 185, 129, 0.5); color: #126f4a; background: rgba(16, 185, 129, 0.12); }
+    .inv-fit { margin-top: 0.6rem; font-size: 0.88rem; color: #1d2939; }
+    .inv-action-note {
+        margin-top: 0.7rem;
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.4);
+        color: #c11818;
+        border-radius: 8px;
+        padding: 0.55rem 0.8rem;
+        font-size: 0.88rem;
+    }
+
+    .inv-bars { display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.3rem; }
+    .inv-bar-row { display: grid; grid-template-columns: minmax(130px, 220px) 1fr auto; gap: 0.6rem; align-items: center; font-size: 0.82rem; }
+    .inv-bar-label { color: #344054; }
+    .inv-bar-track { height: 14px; background: rgba(120, 150, 200, 0.12); border-radius: 4px; overflow: hidden; }
+    .inv-bar-fill { height: 100%; background: color-mix(in srgb, #f59e0b 60%, #f2f4f7); border-radius: 4px; }
+    .inv-bar-fill.highlight { background: #f59e0b; }
+    .inv-bar-value { color: #0b1f3a; font-weight: 600; white-space: nowrap; }
+    .inv-chart-mermaid { background: #f6f7f9; border-radius: 8px; padding: 0.5rem; overflow-x: auto; }
+    .inv-chart-mermaid svg { max-width: 100%; height: auto; }
+    .inv-chart-source { margin-top: 0.45rem; font-size: 0.78rem; color: var(--cw-muted, #5d6b7e); }
+    .inv-chart-source summary { cursor: pointer; }
+    .inv-chart-source pre {
+        margin: 0.35rem 0 0 0;
+        background: #f6f7f9; border-radius: 6px; padding: 0.5rem 0.65rem;
+        font-size: 0.74rem; color: #344054; white-space: pre-wrap;
+    }
+    .agent-md .inv-mermaid-rendered { background: #f6f7f9; border-radius: 8px; padding: 0.5rem; margin: 0.5rem 0; overflow-x: auto; }
+    .agent-md .inv-mermaid-rendered svg { max-width: 100%; height: auto; }
+    .inv-panel .engage-narrative-body { contain: inline-size; overflow-x: auto; }
+
+    .inv-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
+    @@media (max-width: 900px) { .inv-two-col { grid-template-columns: 1fr; } }
+    .inv-list { margin: 0; padding-left: 1.1rem; font-size: 0.85rem; color: #344054; }
+    .inv-list li { margin-bottom: 0.3rem; }
+
+    .inv-workbook {
+        margin-top: 0.9rem;
+        display: flex; align-items: center; gap: 0.75rem;
+        background: rgba(16, 185, 129, 0.08);
+        border: 1px solid rgba(16, 185, 129, 0.35);
+        border-radius: 8px;
+        padding: 0.65rem 0.85rem;
+    }
+    .inv-workbook-icon { font-size: 1.6rem; }
+    .inv-workbook-meta { flex: 1; min-width: 0; contain: inline-size; }
+    .inv-workbook-label {
+        font-size: 0.64rem; text-transform: uppercase; letter-spacing: 0.12em;
+        color: var(--cw-muted, #5d6b7e); font-weight: 700;
+    }
+    .inv-workbook-name { color: #0b1f3a; font-weight: 600; font-size: 0.9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .inv-workbook-sheets { color: var(--cw-muted, #5d6b7e); font-size: 0.76rem; margin-top: 0.1rem; }
+    .inv-workbook-btn {
+        background: #fff; color: var(--cw-primary);
+        border-radius: 999px; padding: 0.42rem 0.85rem;
+        font-size: 0.82rem; font-weight: 700;
+        text-decoration: none; white-space: nowrap; border: 1px solid color-mix(in srgb, var(--cw-primary) 40%, transparent); }
+    .inv-workbook-btn:hover { filter: brightness(1.1); }
+
+    .inv-approval {
+        margin-top: 0.8rem;
+        border-radius: 8px;
+        padding: 0.55rem 0.8rem;
+        font-size: 0.86rem;
+        background: rgba(16, 185, 129, 0.08);
+        border: 1px solid rgba(16, 185, 129, 0.35);
+        color: #0f7043;
+    }
+    .inv-approval.required { background: rgba(245, 158, 11, 0.10); border-color: rgba(245, 158, 11, 0.4); color: #954f12; }
+    .inv-approval-pill {
+        display: inline-block;
+        border: 1px solid currentColor;
+        padding: 0.05rem 0.55rem;
+        border-radius: 999px;
+        font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+        margin-right: 0.5rem;
+    }
+
+    /* Chat */
+    .inv-chat-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 0.9rem; margin-top: 0.6rem; }
+    @@media (max-width: 980px) { .inv-chat-layout { grid-template-columns: 1fr; } }
+    .inv-chat-col { display: flex; flex-direction: column; min-width: 0; }
+    .inv-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.5rem; }
+    .inv-chip {
+        background: rgba(245, 158, 11, 0.1);
+        border: 1px solid rgba(245, 158, 11, 0.35);
+        color: #954f12;
+        border-radius: 999px;
+        padding: 0.2rem 0.7rem;
+        font-size: 0.78rem;
+        cursor: pointer;
+    }
+    .inv-chip:hover:not(:disabled) { background: rgba(245, 158, 11, 0.2); }
+    .inv-chip:disabled { opacity: 0.5; cursor: not-allowed; }
+    .inv-chat-messages {
+        background: #f6f7f9;
+        border: 1px solid rgba(16, 38, 72, 0.112);
+        border-radius: 10px;
+        padding: 0.7rem 0.85rem;
+        max-height: 440px; overflow-y: auto;
+        display: flex; flex-direction: column; gap: 0.55rem;
+    }
+    .inv-chat-empty { color: var(--cw-muted, #5d6b7e); font-size: 0.85rem; text-align: center; padding: 1.2rem 0.5rem; }
+    .inv-chat-msg { display: flex; flex-direction: column; max-width: 88%; }
+    .inv-chat-msg-user { align-self: flex-end; align-items: flex-end; }
+    .inv-chat-msg-assistant { align-self: flex-start; align-items: flex-start; }
+    .inv-chat-bubble { padding: 0.55rem 0.8rem; border-radius: 12px; font-size: 0.9rem; line-height: 1.45; word-wrap: break-word; }
+    .inv-chat-msg-user .inv-chat-bubble {
+        background: color-mix(in srgb, #f59e0b 26%, #f2f4f7);
+        color: #0b1f3a;
+        border: 1px solid color-mix(in srgb, #f59e0b 50%, transparent);
+        border-bottom-right-radius: 4px;
+        white-space: pre-wrap;
+    }
+    .inv-chat-msg-assistant .inv-chat-bubble {
+        background: #f2f4f7;
+        color: var(--cw-text, #0b1f3a);
+        border: 1px solid rgba(16, 38, 72, 0.136);
+        border-bottom-left-radius: 4px;
+    }
+    .inv-chat-meta { font-size: 0.7rem; color: var(--cw-muted, #5d6b7e); margin-top: 0.2rem; }
+    .inv-chat-form { display: flex; gap: 0.4rem; margin-top: 0.55rem; }
+    .inv-chat-form input[type="text"] {
+        flex: 1;
+        background: #ffffff;
+        border: 1px solid rgba(16, 38, 72, 0.198);
+        border-radius: 8px;
+        color: #0b1f3a;
+        padding: 0.55rem 0.75rem;
+        font-size: 0.9rem;
+    }
+    .inv-chat-form input[type="text"]:focus {
+        outline: none; border-color: #f59e0b;
+        box-shadow: 0 0 0 3px color-mix(in srgb, #f59e0b 25%, transparent);
+    }
+    #inv-chat-send {
+        background: var(--cw-primary); color: #fff;
+        border: none; border-radius: 999px;
+        padding: 0.55rem 1.05rem;
+        font-size: 0.88rem; font-weight: 700;
+        cursor: pointer;
+    }
+    #inv-chat-send:hover:not(:disabled) { filter: brightness(1.08); }
+    #inv-chat-send:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .inv-refs-col {
+        background: #f6f7f9;
+        border: 1px solid rgba(16, 38, 72, 0.112);
+        border-radius: 10px;
+        padding: 0.75rem 0.85rem;
+        align-self: start;
+        max-height: 480px; overflow-y: auto;
+    }
+    .inv-refs-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem; }
+    .inv-refs-head h4 { margin: 0; font-size: 0.92rem; color: #0b1f3a; }
+    .inv-refs-count {
+        font-size: 0.72rem; font-weight: 700;
+        background: color-mix(in srgb, #f59e0b 22%, #f2f4f7);
+        color: #845910;
+        border: 1px solid color-mix(in srgb, #f59e0b 45%, transparent);
+        padding: 1px 8px; border-radius: 999px;
+    }
+    .inv-refs-help { font-size: 0.78rem; color: var(--cw-muted, #5d6b7e); margin: 0 0 0.55rem 0; line-height: 1.4; }
+    .inv-refs-list { display: flex; flex-direction: column; gap: 0.45rem; }
+    .inv-refs-empty { color: var(--cw-muted, #5d6b7e); font-size: 0.8rem; text-align: center; padding: 0.8rem 0.4rem; }
+    .inv-ref-card {
+        background: #f2f4f7;
+        border: 1px solid rgba(16, 38, 72, 0.112);
+        border-left: 3px solid #f59e0b;
+        border-radius: 6px;
+        padding: 0.45rem 0.6rem;
+        font-size: 0.82rem; line-height: 1.4;
+    }
+    .inv-ref-kind {
+        display: inline-block;
+        font-size: 0.66rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+        padding: 1px 6px; border-radius: 4px; margin-bottom: 0.2rem;
+    }
+    .inv-ref-kind-web { color: #195cc8; background: rgba(138, 180, 248, 0.12); border: 1px solid rgba(138, 180, 248, 0.3); }
+    .inv-ref-kind-doc { color: #845910; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.35); }
+    .inv-ref-card a { color: #845910; text-decoration: none; font-weight: 600; word-break: break-word; }
+    .inv-ref-card a:hover { text-decoration: underline; }
+    .inv-ref-url { display: block; font-size: 0.7rem; color: var(--cw-muted, #5d6b7e); margin-top: 0.15rem; word-break: break-all; }
+</style>
+
+@code {
+    private IReadOnlyList<FactSheet> _sheets = Array.Empty<FactSheet>();
+
+    protected override void OnInitialized()
+    {
+        // The Overview renders straight from the sample fact sheets the agent reads.
+        var dir = Path.Combine(Env.WebRootPath ?? "wwwroot", "investments", "samples");
+        var list = new List<FactSheet>();
+        foreach (var file in InvestmentsApi.FactSheetFiles)
+        {
+            var path = Path.Combine(dir, file);
+            if (!File.Exists(path)) continue;
+            try
+            {
+                list.Add(InvestmentsMcpTools.ParseFactSheet(InvestmentsMcpTools.SamplesUrlPrefix + file, File.ReadAllText(path)));
+            }
+            catch (IOException)
+            {
+                // Skip a sample that can't be read; the rest of the menu still renders.
+            }
+        }
+        _sheets = list;
+    }
+
+    private static string IcrText(FactSheet fs) =>
+        fs.InvestmentFeePercent is decimal icr ? InvestmentsMcpTools.FormatPercent(icr) : "n/a";
+
+    private static string ReturnText(FactSheet fs) =>
+        fs.Returns?.FiveYearPercentPa is decimal r ? r.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture) + "%" : "n/a";
+}
