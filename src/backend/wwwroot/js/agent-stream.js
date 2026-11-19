@@ -12,7 +12,7 @@
  *
  * Usage from a page script:
  *   await window.zcAgentStream({
- *     url: '/intake/process',
+ *     url: '/onboarding/process',
  *     body: { sampleId },
  *     onDelta: (chunk, fullText) => { ... append chunk to UI ... },
  *     onError: (msg) => { ... },

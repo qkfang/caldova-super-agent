@@ -187,6 +187,7 @@ public static class FinancialCrimeApi
             var profile = docStore.ProfileFor(record);
             var assessment = Assess(record, profile, documents);
             var prompt = BuildAgentPrompt(record, profile, documents);
+            string? agentCreateError = null;
 
             object BuildEnvelope(AgentTraceResult? trace, string? agentError) => new
             {
@@ -210,7 +211,7 @@ public static class FinancialCrimeApi
                 agentRiskScore = ParseAgentScore(trace?.Text),
                 agentNotes = trace?.Text,
                 agentConfigured = factory.IsConfigured,
-                agentError,
+                agentError = agentError ?? agentCreateError,
                 agentInput = trace?.Input,
                 agentRawOutput = trace is null ? null : new
                 {
@@ -224,7 +225,21 @@ public static class FinancialCrimeApi
 
             if (AgentSseStreaming.WantsEventStream(httpContext))
             {
-                var streamingAgent = factory.IsConfigured ? factory.Create("fincrime") : null;
+                // Creating the agent registers it with Foundry, so it can fail too;
+                // the stream then still ends with the deterministic assessment.
+                CaldovaAgent? streamingAgent = null;
+                if (factory.IsConfigured)
+                {
+                    try
+                    {
+                        streamingAgent = factory.Create("fincrime");
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogWarning(ex, "Financial Crime Agent could not be created; streaming the deterministic assessment only");
+                        agentCreateError = ex.Message;
+                    }
+                }
                 await AgentSseStreaming.StreamAsync(httpContext, streamingAgent, prompt, BuildEnvelope, logger, "Financial Crime Agent");
                 return Results.Empty;
             }
@@ -458,10 +473,6 @@ public static class FinancialCrimeApi
                 $"The request pays an account named '{string.Join("', '", mismatched)}' — not {member}{fund}.",
                 "Request", 6, "medium"));
         }
-        else if (p.RequestedPayees.Count > 0)
-        {
-            clear.Add($"Payment account{(p.RequestedPayees.Count > 1 ? "s" : "")} in the right name: {string.Join(" and ", p.RequestedPayees)}.");
-        }
 
         // Pressure / channel-steering language in the request email.
         var email = RequestSampleCatalog.FindById(c.SampleId);
@@ -555,7 +566,7 @@ public static class FinancialCrimeApi
             else if (s.Status == "pass")
                 clear.Add($"{s.Check}: {s.Result}.");
         }
-        foreach (var e in p.Timeline.Where(e => e.Flag == "ok" && e.Type is "check" or "document"))
+        foreach (var e in p.Timeline.Where(e => e.Flag == "ok" && e.Type == "check"))
         {
             var line = $"{e.Summary}.";
             if (!clear.Contains(line)) clear.Add(line);

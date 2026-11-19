@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>FcHarness</RootNamespace>
+    <NoWarn>$(NoWarn);OPENAI001;SCME0001</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\src\agent\cs-agent.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Azure.AI.ContentUnderstanding" Version="1.1.0" />
+    <PackageReference Include="Azure.Identity" Version="1.21.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\src\backend\Services\CaseStore.cs" Link="Linked\CaseStore.cs" />
+    <Compile Include="..\src\backend\Models\RequestSamples.cs" Link="Linked\RequestSamples.cs" />
+    <Compile Include="..\src\backend\Services\CaldovaAgentFactory.cs" Link="Linked\CaldovaAgentFactory.cs" />
+    <Compile Include="..\src\backend\Services\CaldovaAgentOptions.cs" Link="Linked\CaldovaAgentOptions.cs" />
+    <Compile Include="..\src\backend\Api\AgentSseStreaming.cs" Link="Linked\AgentSseStreaming.cs" />
+    <Compile Include="..\src\backend\Services\FinCrimeCaseDocumentStore.cs" Link="Linked\FinCrimeCaseDocumentStore.cs" />
+    <Compile Include="..\src\backend\Services\FinCrimeDocumentVerifier.cs" Link="Linked\FinCrimeDocumentVerifier.cs" />
+    <Compile Include="..\src\backend\Api\FinancialCrimeApi.cs" Link="Linked\FinancialCrimeApi.cs" />
+  </ItemGroup>
+</Project>

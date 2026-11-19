@@ -1,22 +1,22 @@
-@page "/agents/settlement"
+@page "/agents/payments"
 
-<PageTitle>Settlement Agent — Claims Team in a Day</PageTitle>
+<PageTitle>Payments Agent — Wealth Team in a Day</PageTitle>
 
 <div class="agent-header" style="--accent: #a855f7">
-    <a class="back-link" href="/"><span aria-hidden="true">←</span> Back to claims office</a>
+    <a class="back-link" href="/"><span aria-hidden="true">←</span> Back to the operations office</a>
     <div class="agent-header-row">
         <div class="agent-header-icon">💳</div>
         <div>
-            <div class="agent-header-dept">Settlement</div>
-            <h1>Settlement Agent</h1>
-            <div class="agent-header-persona">Seth — Settlement Officer</div>
-            <p class="tagline">Does the maths transparently and prepares the payment.</p>
+            <div class="agent-header-dept">Payments</div>
+            <h1>Payments Agent</h1>
+            <div class="agent-header-persona">Penny — Payments Officer</div>
+            <p class="tagline">Gets the tax right, then waits for the human approval.</p>
         </div>
     </div>
 </div>
 
 <div class="agent-tab-scope" style="--accent: #a855f7">
-    <nav class="agent-tabs" role="tablist" aria-label="Settlement agent details">
+    <nav class="agent-tabs" role="tablist" aria-label="Payments agent details">
         <button type="button" class="agent-tab active" data-tab="overview" role="tab" aria-selected="true" tabindex="0">Overview</button>
         <button type="button" class="agent-tab" data-tab="try" role="tab" aria-selected="false" tabindex="-1">Try it out</button>
     </nav>
@@ -25,171 +25,247 @@
     <section class="panel" style="--accent: #a855f7">
         <h2>What this agent does</h2>
         <p>
-            Calculates the payable amount using approved scope, policy limits, excess,
-            depreciation, and prior payments, then prepares the payment and settlement letter
-            for human approval.
+            Releases money correctly — financial hardship lump sums, pension commencements and regular
+            pension payments, death benefits and outbound rollovers — and invests incoming money on
+            arrival. Penny's agent validates the payee, confirms the eligibility decision on the Member
+            Case, splits the tax-free and taxable components, calculates PAYG withholding and the net
+            payment, checks authority limits and raises a Microsoft Teams approval. Nothing is paid until
+            a human approves.
         </p>
         <div class="two-col">
             <div>
                 <h3>Responsibilities</h3>
                 <ul>
-                    <li>Pull approved scope, supplier invoice, and policy limits.</li>
-                    <li>Apply excess, depreciation, sub-limits, and prior payments.</li>
-                    <li>Show the calculation step by step.</li>
-                    <li>Validate payee details and authority limits.</li>
-                    <li>Draft the settlement letter and payment instruction.</li>
+                    <li>Validate the payee and bank details against the member or the nominated beneficiaries on file.</li>
+                    <li>Confirm the eligibility decision and approved amount from Benefits &amp; Eligibility.</li>
+                    <li>Split tax-free and taxable components; calculate PAYG withholding and the net payment.</li>
+                    <li>Check authority limits and raise a Microsoft Teams approval card.</li>
+                    <li>Release only after approval — and confirm no funds leave a blocked account.</li>
+                    <li>Invest incoming rollovers on arrival, keeping 1% in the Caldova Cash Account.</li>
+                    <li>Draft the payment confirmation for Client Communications to send.</li>
                 </ul>
             </div>
             <div>
                 <h3>Tools available</h3>
-                <ul>
-                    <li>Settlement calculator</li>
-                    <li>Authority limit checker</li>
-                    <li>Invoice matcher</li>
-                    <li>Settlement letter generator</li>
-                    <li>Payment API <span class="muted">(MCP automation)</span></li>
-                    <li>Microsoft Teams approval card <span class="muted">(Adaptive Card)</span></li>
+                <ul class="payments-tool-list">
+                    <li><code>payments_validatePayee</code> — payee and bank details match the member or beneficiary</li>
+                    <li><code>payments_checkCaseApproval</code> — eligibility decision and approved amount</li>
+                    <li><code>payments_calculateBenefit</code> — components, PAYG withholding and net payment</li>
+                    <li><code>payments_checkAuthorityLimit</code> — when the Team Leader must approve</li>
+                    <li><code>payments_requestApproval</code> — raises the approval and posts the Teams card</li>
+                    <li><code>payments_getApprovalStatus</code> — pending, approved, rejected, released or blocked</li>
+                    <li><code>payments_releasePayment</code> — gated release; refuses unless approved</li>
+                    <li><code>teams_sendApprovalCard</code> — Microsoft Teams Adaptive Card <span class="muted">(called by payments_requestApproval)</span></li>
+                    <li>Azure AI Search — tax, hardship, pension and death benefit rules <span class="muted">(cited by title)</span></li>
                 </ul>
-                <h3>Human approval</h3>
-                <p class="approval">
-                    Required for payment release, payee mismatch, high-value settlement, ex-gratia,
-                    manual override, or customer dispute. The agent cross-checks every input, then
-                    posts an approval request to Microsoft Teams and pauses — payment is only
-                    released after the human approver clicks <strong>Approve</strong>.
-                </p>
             </div>
         </div>
-    </section>
-
-    <section class="panel" style="--accent: #a855f7">
-        <h2>Automated payment flow with human approval in Teams</h2>
-        <div class="demo">
-            <p>
-                The Settlement Agent is wired up with a dedicated MCP tool surface that
-                automates the payment workflow end-to-end. Each step is a discrete tool the
-                agent can call: <code>settlement_validatePayee</code>,
-                <code>settlement_matchInvoice</code>,
-                <code>settlement_calculateSettlement</code>,
-                <code>settlement_checkAuthorityLimit</code>,
-                <code>settlement_requestPaymentApproval</code> and
-                <code>settlement_releasePayment</code>. Every tool call requires explicit
-                operator consent before it runs, so nothing happens silently.
-            </p>
-            <p>
-                When the cross-checks complete, the agent calls
-                <code>settlement_requestPaymentApproval</code> which mints an approval
-                id and then invokes the dedicated
-                <code>teams_sendApprovalCard</code> MCP tool to deliver an Adaptive Card
-                to the configured Microsoft Teams channel. The card shows the customer,
-                policy, payable amount and payee, and links back to this page for review.
-                The approver clicks Approve in Teams (or here in the demo) before the
-                agent will call <code>settlement_releasePayment</code> — that tool
-                refuses to run while the approval is still pending or has been rejected.
-            </p>
+        <h3 class="payments-overview-h3">Human approval</h3>
+        <div class="approval">
+            <p>The Team Leader (Theo) must approve before money moves when there is:</p>
+            <ul class="payments-rule-list">
+                <li>any single payment of <strong>$250,000 or more</strong>;</li>
+                <li><strong>any death benefit</strong>;</li>
+                <li><strong>any financial hardship release</strong> (a vulnerable member);</li>
+                <li>a <strong>pension commencement of $1,000,000 or more</strong>;</li>
+                <li>any <strong>blocked case</strong> or a <strong>payee that doesn't match</strong> the member or a nominated beneficiary.</li>
+            </ul>
+            <p>Every other release still needs Penny's sign-off — the agent never releases money on its own.</p>
         </div>
     </section>
 
     <section class="panel" style="--accent: #a855f7">
-        <h2>How this agent helps with the claim</h2>
+        <h2>Automated payment flow with human approval in Microsoft Teams</h2>
         <div class="demo">
             <p>
-                When the supplier invoice arrives, Seth's settlement agent matches it line-for-line
-                against the approved scope, then applies the policy terms — excess, depreciation,
-                sub-limits, and any prior payments. Every step of the calculation is shown
-                transparently so the customer (and any auditor) can see exactly how the figure
-                was reached.
+                The Payments Agent is wired to a dedicated MCP tool surface served by this app
+                (<code>caldova-ops-mcp</code>), so each step of the payment workflow is a discrete,
+                auditable tool call: <code>payments_validatePayee</code>,
+                <code>payments_checkCaseApproval</code>, <code>payments_calculateBenefit</code>,
+                <code>payments_checkAuthorityLimit</code>, <code>payments_requestApproval</code>,
+                <code>payments_getApprovalStatus</code> and <code>payments_releasePayment</code>.
+                Every call — with its inputs and results — appears in the agent's raw output, so the
+                audit trail shows exactly what was checked and why.
             </p>
             <p>
-                The agent validates the payee, checks the amount against authority limits, and
-                drafts both the payment instruction and the settlement letter. Nothing is paid
-                automatically: a human reviewer releases the payment, with the agent's working
-                attached for the audit trail.
+                When the cross-checks are complete, the agent calls <code>payments_requestApproval</code>,
+                which mints an approval id and invokes <code>teams_sendApprovalCard</code> to post the
+                <strong>"Caldova Wealth — Payment approval"</strong> Adaptive Card to the approvals channel.
+                The card shows the case number, member, payment type, gross amount, tax withheld, net
+                payment, the payee with masked bank details and why approval is needed, with
+                <strong>Approve</strong> and <strong>Reject</strong> actions. The agent then stops and waits.
             </p>
+            <p>
+                Once the approver says yes — in Teams, or on this page in the demo — the same agent
+                conversation resumes and calls <code>payments_releasePayment</code>. That tool refuses to run
+                while the approval is pending, rejected or blocked, so money can't leave without a human
+                decision.
+            </p>
+            <ol class="payments-flow">
+                <li><span>1</span>Validate payee</li>
+                <li><span>2</span>Confirm case approval</li>
+                <li><span>3</span>Components &amp; PAYG withholding</li>
+                <li><span>4</span>Authority check</li>
+                <li><span>5</span>Teams approval card</li>
+                <li><span>6</span>Release after approval</li>
+                <li><span>7</span>Payment confirmation</li>
+            </ol>
         </div>
     </section>
 
+    <section class="panel" style="--accent: #a855f7">
+        <h2>How Penny's agent helps on each case</h2>
+        <div class="payments-cases-table-wrap">
+            <table class="payments-cases-table">
+                <thead>
+                    <tr><th>Case</th><th>What the Payments Agent does</th><th>Human approval</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Tom Bradley</strong><br /><span class="muted">Financial hardship</span></td>
+                        <td>$10,000 gross (partial — $15,000 was requested): $600 tax-free, $9,400 taxable, $2,068 withheld at 22% — <strong>$7,932</strong> paid on Fri 13/11/2026, $2,068 remitted to the ATO.</td>
+                        <td>Team Leader — hardship release</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Robert &amp; Lily Chen</strong><br /><span class="muted">Death benefit</span></td>
+                        <td>$243,100 each under Mei's binding nomination: $92,378 tax-free, $150,722 taxable, $25,622.74 withheld at 17% — <strong>$217,477.26</strong> paid to each.</td>
+                        <td>Team Leader — every death benefit</td>
+                    </tr>
+                    <tr>
+                        <td><strong>George Papadopoulos</strong><br /><span class="muted">Retirement pension</span></td>
+                        <td>$1,250,000 into pension CP-3077881 on 16/11/2026; <strong>$6,500 a month</strong> from 15/12/2026 to the joint account, no tax withheld (age 66).</td>
+                        <td>Team Leader — commencement of $1,000,000 or more</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Grace Williams</strong><br /><span class="muted">Rollover blocked</span></td>
+                        <td>No payment released: the payee "G Williams Holdings Pty Ltd" doesn't match and Financial Crime has blocked the case — <strong>$612,400 stays invested</strong>.</td>
+                        <td>Block approved by the Team Leader; release disabled</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Priya Natarajan</strong><br /><span class="muted">New account</span></td>
+                        <td>Invest on arrival: the Harbourline rollover (about $41,800) goes into the Growth model, keeping 1% in cash; $275 a month adviser fee under her signed consent.</td>
+                        <td>None — no money leaves Caldova</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
     </div>
 
     <div class="agent-tab-panel" data-panel="try" role="tabpanel">
-    <section class="panel settlement-panel" style="--accent: #a855f7">
-        <h2>Try It Out — Settlement Demo</h2>
-        <p class="muted settlement-help">
-            Walk through how Seth's settlement agent picks up a claim case opened
-            by the Claims Intake demo, applies policy terms transparently, and
-            prepares the payment package for human approval. All steps run live
-            against the <code>/settlement/*</code> endpoints in this app.
+    <section class="panel payments-panel" style="--accent: #a855f7">
+        <h2>Try it out — Payments demo</h2>
+        <p class="muted payments-help">
+            Walk through how Penny's Payments Agent picks up a Member Case, confirms the payment inputs,
+            works out the tax-free and taxable components, PAYG withholding and the net payment,
+            cross-checks the payee, the eligibility decision and authority limits, and raises a
+            Microsoft Teams approval — money is released only after a human approves. Every step runs
+            live against the <code>/payments/*</code> endpoints in this app.
         </p>
 
-        <!-- Step 1 — pick a claim from the dropdown -->
-        <div class="settlement-step" data-step="1">
-            <div class="settlement-step-head">
-                <span class="settlement-step-num">1</span>
-                <h3>Pick a claim</h3>
+        <div id="payments-deeplink" class="payments-deeplink" hidden></div>
+
+        <!-- Step 1 — pick a case -->
+        <div class="payments-step" data-step="1">
+            <div class="payments-step-head">
+                <span class="payments-step-num">1</span>
+                <h3>Pick a case</h3>
             </div>
             <p class="muted">
-                Choose one of the claims previously lodged via the
-                <a href="/agents/claims-intake">Claims Intake</a> demo. The list
-                is read from the in-memory claim store.
+                Choose a Member Case. The five scenario cases are pre-loaded; cases opened in the
+                <a href="/agents/onboarding">Onboarding</a> demo appear here too.
             </p>
-            <div class="settlement-claim-picker">
-                <select id="settlement-claim-select" class="settlement-select">
-                    <option value="">— Select a Claim ID —</option>
+            <div class="payments-case-picker">
+                <select id="payments-case-select" class="payments-select" aria-label="Member Case">
+                    <option value="">— Loading cases —</option>
                 </select>
-                <button id="settlement-refresh-btn" type="button" class="settlement-refresh" title="Reload claims">↻</button>
+                <button id="payments-refresh-btn" type="button" class="payments-refresh" title="Reload cases">↻</button>
             </div>
-            <div id="settlement-claim-empty" class="settlement-status" hidden>
-                No claims in memory yet. Run the
-                <a href="/agents/claims-intake">Claims Intake</a> demo first to mint
-                a claim number.
+            <div id="payments-case-empty" class="payments-status" hidden>
+                No cases in memory yet. Run the <a href="/agents/onboarding">Onboarding</a> demo first to open a case.
             </div>
-            <div id="settlement-claim-summary" class="settlement-summary" hidden>
-                <div class="settlement-summary-grid">
-                    <div><span class="k">Claim</span><span id="settlement-claim-num"></span></div>
-                    <div><span class="k">Customer</span><span id="settlement-claim-customer"></span></div>
-                    <div><span class="k">Policy</span><span id="settlement-claim-policy"></span></div>
-                    <div><span class="k">Type</span><span id="settlement-claim-type"></span></div>
-                    <div class="span-2"><span class="k">Incident</span><span id="settlement-claim-incident"></span></div>
+            <div id="payments-case-summary" class="payments-summary" hidden>
+                <div class="payments-summary-grid">
+                    <div><span class="k">Case</span><span id="payments-case-num"></span></div>
+                    <div><span class="k">Member</span><span id="payments-case-member"></span></div>
+                    <div><span class="k">Product</span><span id="payments-case-product"></span></div>
+                    <div><span class="k">Request</span><span id="payments-case-type"></span></div>
+                    <div><span class="k">Received</span><span id="payments-case-received"></span></div>
+                    <div><span class="k">Adviser</span><span id="payments-case-adviser"></span></div>
+                    <div><span class="k">Amount</span><span id="payments-case-amount"></span></div>
+                    <div><span class="k">Priority</span><span id="payments-case-priority"></span></div>
+                    <div class="span-2"><span class="k">Summary</span><span id="payments-case-summary-text"></span></div>
                 </div>
             </div>
         </div>
 
-        <!-- Step 2 — settlement inputs -->
-        <div class="settlement-step" data-step="2" id="settlement-inputs-step" hidden>
-            <div class="settlement-step-head">
-                <span class="settlement-step-num">2</span>
-                <h3>Confirm settlement inputs</h3>
+        <!-- Step 2 — payment inputs -->
+        <div class="payments-step" data-step="2" id="payments-inputs-step" hidden>
+            <div class="payments-step-head">
+                <span class="payments-step-num">2</span>
+                <h3>Confirm payment inputs</h3>
             </div>
             <p class="muted">
-                The agent will use these values when applying the policy terms.
-                Defaults are pre-filled from the claim record and product
-                defaults; edit any of them before engaging the agent.
+                Defaults come from the case and the Benefits &amp; Eligibility decision. Edit any value —
+                the calculation, cross-checks and approval follow your inputs. Bank details stay masked.
             </p>
-            <form id="settlement-inputs-form" class="settlement-form" autocomplete="off">
-                <div class="settlement-grid">
-                    <label>Approved amount<input type="number" name="approvedAmount" min="0" step="0.01" required /></label>
-                    <label>Policy limit<input type="number" name="policyLimit" min="0" step="0.01" required /></label>
-                    <label>Excess / deductible<input type="number" name="excess" min="0" step="0.01" /></label>
-                    <label>Depreciation<input type="number" name="depreciation" min="0" step="0.01" /></label>
-                    <label>Prior payments<input type="number" name="priorPayments" min="0" step="0.01" /></label>
+            <div id="payments-inputs-hint" class="payments-hint" hidden></div>
+            <form id="payments-inputs-form" class="payments-form" autocomplete="off">
+                <fieldset>
+                    <legend>Payment</legend>
+                    <div class="payments-grid">
+                        <label>Payment type<select name="paymentType"></select></label>
+                        <label>Gross amount (AUD)<input type="number" name="grossAmount" min="0" step="0.01" /></label>
+                        <label data-field="requested">Amount requested (AUD)<input type="number" name="requestedAmount" min="0" step="0.01" /></label>
+                        <label data-field="commencement">Pension commencement amount (AUD)<input type="number" name="commencementAmount" min="0" step="0.01" /></label>
+                        <label class="span-2">Payment date<input type="text" name="paymentDate" /></label>
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <legend>Tax</legend>
+                    <div class="payments-grid">
+                        <label data-field="tax">Tax-free component (%)<input type="number" name="taxFreePercent" min="0" max="100" step="0.01" /></label>
+                        <label>Member age<input type="number" name="memberAge" min="0" max="120" step="1" /></label>
+                        <label class="span-2">Tax status<select name="taxStatus"></select></label>
+                    </div>
+                </fieldset>
+                <fieldset id="payments-payees-fieldset">
+                    <legend>Payee(s) — bank details masked</legend>
+                    <div class="payments-payee-head" aria-hidden="true">
+                        <span>Name on the account</span><span>BSB</span><span>Account</span><span>Share %</span>
+                    </div>
+                    <div id="payments-payee-rows"></div>
+                    <div id="payments-payees-onfile" class="payments-onfile"></div>
+                </fieldset>
+                <div id="payments-no-payee" class="payments-no-payee" hidden>
+                    No outbound payee — the money is coming into the member's own Caldova account.
                 </div>
+                <fieldset>
+                    <legend>Case approval — from Benefits &amp; Eligibility</legend>
+                    <div class="payments-grid">
+                        <label>Decision<select name="caseApprovalStatus"></select></label>
+                        <label>Approved amount (AUD)<input type="number" name="approvedAmount" min="0" step="0.01" /></label>
+                    </div>
+                    <div id="payments-case-decision" class="payments-decision"></div>
+                </fieldset>
             </form>
         </div>
 
-        <!-- Step 3 — engage agent -->
-        <div class="settlement-step" data-step="3" id="settlement-process-step" hidden>
-            <div class="settlement-step-head">
-                <span class="settlement-step-num">3</span>
-                <h3>Engage Settlement Agent</h3>
+        <!-- Step 3 — engage the agent -->
+        <div class="payments-step" data-step="3" id="payments-process-step" hidden>
+            <div class="payments-step-head">
+                <span class="payments-step-num">3</span>
+                <h3>Engage the Payments Agent</h3>
             </div>
             <p class="muted">
-                The agent loads the claim from memory, applies the inputs above,
-                and returns the itemised calculation, settlement letter draft,
-                and payment approval request.
+                Penny's agent runs the payments_* MCP tools — validate the payee, check the case approval,
+                calculate the benefit, check the authority limit and request approval — streams its
+                narrative and posts the Microsoft Teams approval card. Release unlocks only after approval.
             </p>
-            <button id="settlement-process-btn" type="button">Process with Settlement Agent</button>
-            <div id="settlement-process-status" class="settlement-status" hidden></div>
+            <button id="payments-process-btn" type="button">Process with Payments Agent</button>
+            <div id="payments-process-status" class="payments-status" hidden></div>
 
-            <div class="engage-tabs-scope" data-engage-role="settlement">
+            <div class="engage-tabs-scope" data-engage-role="payments">
                 <div class="engage-tabs" role="tablist">
                     <button type="button" class="engage-tab-btn active" data-engage-tab="narrative">Agent Narrative</button>
                     <button type="button" class="engage-tab-btn" data-engage-tab="reference">Reference</button>
@@ -236,96 +312,139 @@
 
                 <div class="engage-tab-panel" data-engage-tab="output">
                     <div class="engage-info-block">
-                        <h4>Raw agent output (text, citations, every output item including tool / function calls)</h4>
+                        <h4>Raw agent output (text, citations and every output item, including the payments_* MCP tool calls)</h4>
                         <div class="json-viewer engage-output-body"><div class="engage-empty">Engage the agent to see the full raw response.</div></div>
                     </div>
                 </div>
             </div>
 
-            <div id="settlement-result" class="settlement-result" hidden>
-                <div class="settlement-calc">
-                    <div class="settlement-calc-label">Settlement calculation</div>
-                    <table class="settlement-calc-table">
-                        <tbody id="settlement-calc-body"></tbody>
-                    </table>
-                    <div class="settlement-payable">
-                        <span class="k">Payable amount</span>
-                        <span id="settlement-payable-amount"></span>
+            <div id="payments-result" class="payments-result" hidden>
+                <div class="payments-card payments-calc">
+                    <div class="payments-card-label" id="payments-calc-title">Payment calculation</div>
+                    <div class="payments-calc-scroll">
+                        <table class="payments-calc-table">
+                            <thead id="payments-calc-head"></thead>
+                            <tbody id="payments-calc-body"></tbody>
+                        </table>
                     </div>
+                    <div class="payments-net" id="payments-net">
+                        <span class="k" id="payments-net-label">Net payment</span>
+                        <span id="payments-net-amount"></span>
+                    </div>
+                    <dl class="payments-context" id="payments-context"></dl>
+                    <div class="payments-rule" id="payments-calc-rule"></div>
                 </div>
 
-                <div class="settlement-approval" id="settlement-approval">
-                    <div class="settlement-approval-head">
-                        <span class="settlement-step-num small">!</span>
-                        <span class="settlement-approval-title">Human approval</span>
-                        <span class="settlement-approval-pill" id="settlement-approval-pill"></span>
-                    </div>
-                    <p id="settlement-approval-reason"></p>
+                <div class="payments-card">
+                    <div class="payments-card-label">Cross-checks</div>
+                    <ul id="payments-checks-list" class="payments-checks-list"></ul>
                 </div>
 
-                <div class="settlement-approval settlement-teams-card" id="settlement-teams-card" hidden>
-                    <div class="settlement-approval-head">
-                        <span class="settlement-step-num small">T</span>
-                        <span class="settlement-approval-title">Microsoft Teams approval</span>
-                        <span class="settlement-approval-pill" id="settlement-teams-pill"></span>
+                <div class="payments-callout payments-approval" id="payments-approval">
+                    <div class="payments-callout-head">
+                        <span class="payments-step-num small">!</span>
+                        <span class="payments-callout-title">Human approval</span>
+                        <span class="payments-pill" id="payments-approval-pill"></span>
                     </div>
-                    <p class="settlement-teams-msg" id="settlement-teams-msg"></p>
-                    <div class="settlement-teams-meta">
-                        <div><span class="k">Approval id</span> <code id="settlement-teams-approvalid"></code></div>
-                        <div><span class="k">Approval link</span> <a id="settlement-teams-link" href="#" target="_blank" rel="noopener">open</a></div>
-                    </div>
-                    <div class="settlement-teams-actions">
-                        <button type="button" id="settlement-teams-approve-btn" class="settlement-teams-approve">Approve in Teams</button>
-                        <button type="button" id="settlement-teams-reject-btn" class="settlement-teams-reject">Reject</button>
-                        <button type="button" id="settlement-teams-release-btn" class="settlement-teams-release" hidden>Release payment</button>
-                    </div>
-                    <div class="settlement-teams-status" id="settlement-teams-status" hidden></div>
+                    <ul id="payments-approval-reasons" class="payments-reasons"></ul>
+                    <p class="payments-approver" id="payments-approval-approver"></p>
                 </div>
 
-                <div class="settlement-notes">
-                    <div class="settlement-notes-label">Settlement letter draft</div>
-                    <div id="settlement-letter" class="agent-md"></div>
+                <!-- Outbound payment: Microsoft Teams approval, then release -->
+                <div class="payments-callout payments-teams" id="payments-teams" hidden>
+                    <div class="payments-callout-head">
+                        <span class="payments-step-num small teams">T</span>
+                        <span class="payments-callout-title">Microsoft Teams approval</span>
+                        <span class="payments-pill" id="payments-teams-pill"></span>
+                    </div>
+                    <p class="payments-teams-msg" id="payments-teams-msg"></p>
+                    <div class="payments-teams-preview" id="payments-teams-preview"></div>
+                    <div class="payments-teams-meta">
+                        <div><span class="k">Approval id</span> <code id="payments-teams-approvalid"></code></div>
+                        <div><span class="k">Approval link</span> <a id="payments-teams-link" href="#" target="_blank" rel="noopener">open</a></div>
+                    </div>
+                    <div class="payments-actions">
+                        <button type="button" id="payments-popup-btn" class="payments-popup">Open approval popup</button>
+                        <button type="button" id="payments-release-btn" class="payments-release" disabled>Release payment</button>
+                    </div>
+                    <div class="payments-release-hint" id="payments-release-hint">Release unlocks once the approval is recorded.</div>
+                    <div class="payments-teams-status" id="payments-teams-status" hidden></div>
+                </div>
+
+                <!-- Blocked case: nothing can be released -->
+                <div class="payments-callout payments-blocked" id="payments-blocked" hidden>
+                    <div class="payments-callout-head">
+                        <span class="payments-step-num small blocked">✕</span>
+                        <span class="payments-callout-title">Release blocked — no funds leave the account</span>
+                        <span class="payments-pill status-blocked">Blocked</span>
+                    </div>
+                    <p id="payments-blocked-text"></p>
+                    <p class="payments-blocked-record" id="payments-blocked-record"></p>
+                    <div class="payments-actions">
+                        <button type="button" id="payments-blocked-release" class="payments-release" disabled>Release payment</button>
+                    </div>
+                    <div class="payments-release-hint" id="payments-blocked-hint"></div>
+                </div>
+
+                <!-- Inbound money: invest on arrival, nothing to release -->
+                <div class="payments-callout payments-inbound" id="payments-inbound" hidden>
+                    <div class="payments-callout-head">
+                        <span class="payments-step-num small inbound">↓</span>
+                        <span class="payments-callout-title">No outbound payment — invest on arrival</span>
+                        <span class="payments-pill optional">No approval needed</span>
+                    </div>
+                    <p id="payments-inbound-text"></p>
+                </div>
+
+                <div class="payments-card payments-notes">
+                    <div class="payments-card-label" id="payments-confirmation-title">Payment confirmation draft</div>
+                    <div id="payments-confirmation" class="agent-md"></div>
                 </div>
             </div>
         </div>
 
-        <!-- Real popup: human approval for the payment MCP action.
-             Opens automatically when `humanApprovalRequired` is true after
-             the Settlement Agent has produced its plan, and chains the
-             approve/reject decision back to the same agent in the same
-             conversation so it can call settlement_releasePayment. -->
-        <div id="settlement-approval-modal" class="settlement-modal" hidden role="dialog" aria-modal="true" aria-labelledby="settlement-modal-title">
-            <div class="settlement-modal-backdrop" data-modal-dismiss></div>
-            <div class="settlement-modal-card" role="document">
-                <button type="button" class="settlement-modal-close" data-modal-dismiss aria-label="Close">×</button>
-                <div class="settlement-modal-header">
-                    <span class="settlement-modal-badge">!</span>
-                    <h3 id="settlement-modal-title">Human approval required</h3>
+        <!-- Approval popup: the in-page stand-in for the Approve / Reject
+             actions on the Microsoft Teams card. Approving resumes the same
+             Payments Agent conversation so it can call payments_releasePayment. -->
+        <div id="payments-approval-modal" class="payments-modal" hidden role="dialog" aria-modal="true" aria-labelledby="payments-modal-title">
+            <div class="payments-modal-backdrop" data-modal-dismiss></div>
+            <div class="payments-modal-card" role="document">
+                <button type="button" class="payments-modal-close" data-modal-dismiss aria-label="Close">×</button>
+                <div class="payments-modal-header">
+                    <span class="payments-modal-badge">!</span>
+                    <div>
+                        <h3 id="payments-modal-title">Payment approval required</h3>
+                        <div class="payments-modal-sub">Caldova Wealth — Payment approval · Microsoft Teams</div>
+                    </div>
                 </div>
-                <p class="settlement-modal-reason" id="settlement-modal-reason"></p>
-                <div class="settlement-modal-meta">
-                    <div><span class="k">Claim</span><span id="settlement-modal-claim"></span></div>
-                    <div><span class="k">Customer</span><span id="settlement-modal-customer"></span></div>
-                    <div><span class="k">Policy</span><span id="settlement-modal-policy"></span></div>
-                    <div><span class="k">Approval id</span><code id="settlement-modal-approval-id"></code></div>
-                    <div class="span-2 amount-row"><span class="k">Payable</span><strong id="settlement-modal-amount"></strong></div>
+                <div class="payments-modal-deeplink" id="payments-modal-deeplink" hidden></div>
+                <div class="payments-modal-why">Why approval is needed</div>
+                <ul class="payments-modal-reasons" id="payments-modal-reasons"></ul>
+                <div class="payments-modal-meta">
+                    <div><span class="k">Case</span><span id="payments-modal-case"></span></div>
+                    <div><span class="k">Approval id</span><code id="payments-modal-approval-id"></code></div>
+                    <div class="span-2"><span class="k">Member</span><span id="payments-modal-member"></span></div>
+                    <div class="span-2"><span class="k">Payment type</span><span id="payments-modal-type"></span></div>
+                    <div class="span-2"><span class="k">Payee</span><span id="payments-modal-payee"></span></div>
+                    <div><span class="k">Gross</span><span id="payments-modal-gross"></span></div>
+                    <div><span class="k">Tax withheld</span><span id="payments-modal-tax"></span></div>
+                    <div class="span-2 amount-row"><span class="k">Net payment</span><strong id="payments-modal-net"></strong></div>
                 </div>
-                <p class="settlement-modal-explainer">
-                    Approving here will resume the same Settlement Agent conversation
-                    and let it call the <code>settlement_releasePayment</code> MCP tool
-                    to actually release the payment. This is the human-in-the-loop step
-                    for the payment MCP action.
+                <p class="payments-modal-explainer">
+                    Approving here stands in for the approver pressing <strong>Approve</strong> on the Teams card.
+                    It resumes the same Payments Agent conversation so Penny can call
+                    <code>payments_releasePayment</code> — the tool refuses to run until the approval is recorded.
                 </p>
-                <div class="settlement-modal-status" id="settlement-modal-status" hidden></div>
-                <div class="settlement-modal-agent" id="settlement-modal-agent" hidden>
-                    <div class="settlement-modal-agent-label">Agent reply after approval</div>
-                    <div class="agent-md" id="settlement-modal-agent-body"></div>
+                <div class="payments-modal-status" id="payments-modal-status" hidden></div>
+                <div class="payments-modal-agent" id="payments-modal-agent" hidden>
+                    <div class="payments-modal-agent-label">Agent reply after approval</div>
+                    <div class="agent-md" id="payments-modal-agent-body"></div>
                 </div>
-                <div class="settlement-modal-actions">
-                    <button type="button" id="settlement-modal-reject-btn" class="settlement-modal-reject">Reject</button>
-                    <button type="button" id="settlement-modal-cancel-btn" class="settlement-modal-cancel" data-modal-dismiss>Cancel</button>
-                    <button type="button" id="settlement-modal-approve-btn" class="settlement-modal-approve">Approve</button>
-                    <button type="button" id="settlement-modal-release-btn" class="settlement-modal-release" disabled>Release payment</button>
+                <div class="payments-modal-actions">
+                    <button type="button" id="payments-modal-reject-btn" class="payments-modal-reject">Reject</button>
+                    <button type="button" id="payments-modal-cancel-btn" class="payments-modal-cancel" data-modal-dismiss>Close</button>
+                    <button type="button" id="payments-modal-approve-btn" class="payments-modal-approve">Approve</button>
+                    <button type="button" id="payments-modal-release-btn" class="payments-modal-release" disabled>Release payment</button>
                 </div>
             </div>
         </div>
@@ -334,910 +453,388 @@
 </div>
 
 <style>
-    .settlement-panel { --settlement-accent: #a855f7; }
-    .settlement-help { margin-bottom: 0.9rem; }
-    .settlement-help code { background: rgba(168, 85, 247, 0.14); padding: 1px 6px; border-radius: 4px; font-size: 0.85rem; }
+    .payments-panel { --pay-accent: #a855f7; --pay-teams: #5b5fc7; }
+    .payments-panel [hidden] { display: none !important; }
+    .payments-help { margin-bottom: 0.9rem; }
+    .payments-help code, .payments-panel .muted code { background: rgba(168, 85, 247, 0.14); padding: 1px 6px; border-radius: 4px; font-size: 0.85rem; }
 
-    .settlement-step {
+    /* ── Overview ─────────────────────────────────────────────── */
+    .payments-tool-list code, .payments-flow code { font-size: 0.82rem; background: rgba(168, 85, 247, 0.14); padding: 1px 5px; border-radius: 4px; }
+    .payments-overview-h3 { margin-top: 1.1rem !important; }
+    .approval p { margin: 0.2rem 0; }
+    .payments-rule-list { margin: 0.35rem 0 0.45rem 0 !important; }
+    .payments-flow {
+        list-style: none; margin: 0.9rem 0 0 0; padding: 0;
+        display: flex; flex-wrap: wrap; gap: 0.45rem;
+    }
+    .payments-flow li {
+        display: inline-flex; align-items: center; gap: 0.45rem;
+        background: rgba(10, 16, 28, 0.7);
+        border: 1px solid color-mix(in srgb, #a855f7 35%, rgba(120, 150, 200, 0.2));
+        border-radius: 999px;
+        padding: 0.3rem 0.75rem 0.3rem 0.35rem;
+        font-size: 0.82rem; color: rgba(238, 242, 247, 0.9);
+    }
+    .payments-flow li span {
+        display: inline-grid; place-items: center;
+        width: 1.35rem; height: 1.35rem; border-radius: 50%;
+        background: color-mix(in srgb, #a855f7 25%, rgba(20, 28, 46, 0.8));
+        color: #e9d5ff; font-size: 0.7rem; font-weight: 700;
+    }
+    .payments-cases-table-wrap { overflow-x: auto; }
+    .payments-cases-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; color: rgba(238, 242, 247, 0.88); }
+    .payments-cases-table th {
+        text-align: left; font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.1em;
+        color: var(--cw-muted, #97a3b6); padding: 0.4rem 0.6rem; border-bottom: 1px solid rgba(120, 150, 200, 0.22);
+    }
+    .payments-cases-table td { padding: 0.6rem; border-bottom: 1px dashed rgba(120, 150, 200, 0.16); vertical-align: top; line-height: 1.45; }
+    .payments-cases-table td:first-child { min-width: 9.5rem; }
+    .payments-cases-table td:last-child { min-width: 11rem; color: #e9d5ff; }
+
+    /* ── Steps ────────────────────────────────────────────────── */
+    .payments-step {
         border: 1px solid rgba(120, 150, 200, 0.18);
         background: rgba(15, 22, 38, 0.4);
         border-radius: 12px;
         padding: 0.95rem 1.1rem 1rem 1.1rem;
         margin-top: 0.9rem;
     }
-    .settlement-step-head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.3rem; }
-    .settlement-step-head h3 { margin: 0; color: #fff; font-size: 1rem; }
-    .settlement-step-num {
-        display: inline-grid; place-items: center;
-        width: 1.55rem; height: 1.55rem;
-        border-radius: 50%;
-        background: color-mix(in srgb, var(--settlement-accent) 22%, rgba(20, 28, 46, 0.7));
-        border: 1px solid color-mix(in srgb, var(--settlement-accent) 55%, transparent);
-        color: var(--settlement-accent);
-        font-size: 0.78rem; font-weight: 700;
+    .payments-step-head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.3rem; }
+    .payments-step-head h3 { margin: 0; color: #fff; font-size: 1rem; }
+    .payments-step-num {
+        display: inline-grid; place-items: center; flex: 0 0 auto;
+        width: 1.55rem; height: 1.55rem; border-radius: 50%;
+        background: color-mix(in srgb, var(--pay-accent) 22%, rgba(20, 28, 46, 0.7));
+        border: 1px solid color-mix(in srgb, var(--pay-accent) 55%, transparent);
+        color: var(--pay-accent); font-size: 0.78rem; font-weight: 700;
     }
-    .settlement-step-num.small { width: 1.35rem; height: 1.35rem; font-size: 0.7rem; }
-    .settlement-step .muted { color: var(--cw-muted, #97a3b6); font-size: 0.9rem; margin: 0.35rem 0 0.7rem 0; }
+    .payments-step-num.small { width: 1.4rem; height: 1.4rem; font-size: 0.7rem; }
+    .payments-step-num.teams { background: rgba(91, 95, 199, 0.3); border-color: rgba(129, 133, 230, 0.7); color: #c7d2fe; }
+    .payments-step-num.blocked { background: rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.6); color: #fca5a5; }
+    .payments-step-num.inbound { background: rgba(14, 165, 233, 0.2); border-color: rgba(14, 165, 233, 0.6); color: #7dd3fc; }
+    .payments-step .muted { color: var(--cw-muted, #97a3b6); font-size: 0.9rem; margin: 0.35rem 0 0.7rem 0; }
 
-    .settlement-claim-picker { display: flex; gap: 0.5rem; align-items: center; }
-    .settlement-select {
-        flex: 1; min-width: 0;
+    .payments-deeplink {
+        margin: 0.3rem 0 0.4rem 0; padding: 0.6rem 0.85rem; border-radius: 10px; font-size: 0.88rem;
+        background: rgba(91, 95, 199, 0.16); border: 1px solid rgba(129, 133, 230, 0.45); color: #e0e7ff;
+    }
+    .payments-deeplink.error { background: rgba(239, 68, 68, 0.12); border-color: rgba(239, 68, 68, 0.4); color: #fecaca; }
+
+    .payments-case-picker { display: flex; gap: 0.5rem; align-items: center; }
+    .payments-select, .payments-form select, .payments-form input, .payments-payee-row input {
         background: rgba(10, 16, 28, 0.7);
         border: 1px solid rgba(120, 150, 200, 0.22);
-        border-radius: 6px;
-        color: #fff;
-        font-size: 0.9rem;
-        padding: 0.55rem 0.7rem;
+        border-radius: 6px; color: #fff; font-size: 0.9rem;
+        padding: 0.5rem 0.65rem; font-family: inherit;
     }
-    .settlement-select:focus {
-        outline: none;
-        border-color: var(--settlement-accent);
-        box-shadow: 0 0 0 3px color-mix(in srgb, var(--settlement-accent) 25%, transparent);
+    .payments-select { flex: 1; min-width: 0; }
+    .payments-select:focus, .payments-form select:focus, .payments-form input:focus, .payments-payee-row input:focus {
+        outline: none; border-color: var(--pay-accent);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--pay-accent) 25%, transparent);
     }
-    .settlement-refresh {
-        background: transparent;
-        color: rgba(238, 242, 247, 0.86);
-        border: 1px solid rgba(120, 150, 200, 0.32);
-        border-radius: 6px;
-        padding: 0.45rem 0.7rem;
-        font-size: 0.95rem;
-        cursor: pointer;
+    .payments-refresh {
+        background: transparent; color: rgba(238, 242, 247, 0.86);
+        border: 1px solid rgba(120, 150, 200, 0.32); border-radius: 6px;
+        padding: 0.45rem 0.7rem; font-size: 0.95rem; cursor: pointer;
     }
-    .settlement-refresh:hover { background: rgba(255, 255, 255, 0.05); color: #fff; }
+    .payments-refresh:hover { background: rgba(255, 255, 255, 0.05); color: #fff; }
 
-    .settlement-summary {
-        margin-top: 0.7rem;
-        background: rgba(10, 16, 28, 0.7);
-        border: 1px solid rgba(120, 150, 200, 0.18);
-        border-radius: 8px;
-        padding: 0.7rem 0.85rem;
+    .payments-summary {
+        margin-top: 0.7rem; background: rgba(10, 16, 28, 0.7);
+        border: 1px solid rgba(120, 150, 200, 0.18); border-radius: 8px; padding: 0.7rem 0.85rem;
     }
-    .settlement-summary-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 0.35rem 0.85rem;
-        font-size: 0.85rem;
-        color: rgba(238, 242, 247, 0.88);
+    .payments-summary-grid {
+        display: grid; grid-template-columns: 1fr 1fr; gap: 0.35rem 0.85rem;
+        font-size: 0.85rem; color: rgba(238, 242, 247, 0.88);
     }
-    @@media (max-width: 820px) { .settlement-summary-grid { grid-template-columns: 1fr; } }
-    .settlement-summary-grid .span-2 { grid-column: span 2; }
-    @@media (max-width: 820px) { .settlement-summary-grid .span-2 { grid-column: span 1; } }
-    .settlement-summary-grid .k {
-        display: inline-block; min-width: 80px;
-        color: var(--cw-muted, #97a3b6); font-weight: 600;
-        text-transform: uppercase; font-size: 0.66rem; letter-spacing: 0.08em;
-        margin-right: 0.5rem;
+    .payments-summary-grid .span-2 { grid-column: span 2; }
+    .payments-summary-grid .k {
+        display: inline-block; min-width: 76px; color: var(--cw-muted, #97a3b6); font-weight: 600;
+        text-transform: uppercase; font-size: 0.66rem; letter-spacing: 0.08em; margin-right: 0.5rem;
     }
 
-    .settlement-form .settlement-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 0.7rem 0.85rem;
+    /* ── Inputs ───────────────────────────────────────────────── */
+    .payments-hint {
+        margin: 0 0 0.7rem 0; padding: 0.55rem 0.8rem; border-radius: 8px; font-size: 0.86rem; line-height: 1.45;
+        background: color-mix(in srgb, var(--pay-accent) 10%, rgba(15, 22, 38, 0.7));
+        border: 1px solid color-mix(in srgb, var(--pay-accent) 30%, transparent); color: rgba(238, 242, 247, 0.9);
     }
-    @@media (max-width: 820px) { .settlement-form .settlement-grid { grid-template-columns: 1fr; } }
-    .settlement-form label {
-        display: block;
-        font-size: 0.7rem;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        color: var(--cw-muted, #97a3b6);
-        font-weight: 700;
+    .payments-form fieldset {
+        border: 1px solid rgba(120, 150, 200, 0.16); border-radius: 10px;
+        padding: 0.55rem 0.85rem 0.8rem 0.85rem; margin: 0 0 0.7rem 0;
     }
-    .settlement-form input {
-        display: block; width: 100%;
-        margin-top: 0.3rem;
-        background: rgba(10, 16, 28, 0.7);
-        border: 1px solid rgba(120, 150, 200, 0.22);
-        border-radius: 6px;
-        color: #fff;
-        font-size: 0.9rem;
-        padding: 0.55rem 0.7rem;
-        font-family: inherit;
-        text-transform: none;
-        letter-spacing: normal;
+    .payments-form legend {
+        float: none; width: auto; margin: 0; padding: 0 0.35rem;
+        font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; color: #d8b4fe;
     }
-    .settlement-form input:focus {
-        outline: none;
-        border-color: var(--settlement-accent);
-        box-shadow: 0 0 0 3px color-mix(in srgb, var(--settlement-accent) 25%, transparent);
+    .payments-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem 0.85rem; }
+    .payments-grid .span-2 { grid-column: span 2; }
+    .payments-form label {
+        display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em;
+        color: var(--cw-muted, #97a3b6); font-weight: 700;
     }
+    .payments-form label input, .payments-form label select {
+        display: block; width: 100%; margin-top: 0.3rem; text-transform: none; letter-spacing: normal; font-weight: 400;
+    }
+    .payments-payee-head, .payments-payee-row {
+        display: grid; grid-template-columns: 2.2fr 1fr 1.2fr 0.8fr; gap: 0.5rem; align-items: center;
+    }
+    .payments-payee-head {
+        font-size: 0.64rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700;
+        color: var(--cw-muted, #97a3b6); margin: 0.2rem 0 0.3rem 0;
+    }
+    .payments-payee-row { margin-bottom: 0.4rem; }
+    .payments-payee-row input { width: 100%; min-width: 0; }
+    .payments-onfile { margin-top: 0.35rem; font-size: 0.8rem; color: var(--cw-muted, #97a3b6); line-height: 1.7; }
+    .payments-onfile-chip {
+        display: inline-block; margin: 0 0.3rem 0.2rem 0; padding: 0.1rem 0.55rem; border-radius: 999px;
+        background: rgba(10, 16, 28, 0.75); border: 1px solid rgba(120, 150, 200, 0.22); color: rgba(238, 242, 247, 0.88);
+    }
+    .payments-onfile-chip em { font-style: normal; color: var(--cw-muted, #97a3b6); margin-left: 0.35rem; }
+    .payments-no-payee {
+        margin: 0 0 0.7rem 0; padding: 0.55rem 0.8rem; border-radius: 8px; font-size: 0.86rem;
+        background: rgba(14, 165, 233, 0.08); border: 1px solid rgba(14, 165, 233, 0.3); color: #bae6fd;
+    }
+    .payments-decision { margin-top: 0.55rem; font-size: 0.84rem; line-height: 1.5; color: rgba(238, 242, 247, 0.86); }
+    .payments-decision .muted { display: block; font-size: 0.78rem; margin-top: 0.2rem; }
 
-    #settlement-process-btn {
-        background: var(--settlement-accent);
-        color: #1a0633;
-        border: none;
-        border-radius: 8px;
-        padding: 0.55rem 1.1rem;
-        font-size: 0.9rem;
-        font-weight: 700;
-        cursor: pointer;
-        margin-top: 0.35rem;
+    /* ── Engage ───────────────────────────────────────────────── */
+    #payments-process-btn {
+        background: var(--pay-accent); color: #1a0633; border: none; border-radius: 8px;
+        padding: 0.55rem 1.1rem; font-size: 0.9rem; font-weight: 700; cursor: pointer; margin-top: 0.35rem;
     }
-    #settlement-process-btn:disabled { opacity: 0.55; cursor: not-allowed; }
-    #settlement-process-btn:hover:not(:disabled) { filter: brightness(1.08); }
-
-    .settlement-status {
-        margin-top: 0.6rem; font-size: 0.88rem;
-        color: rgba(238, 242, 247, 0.88);
-    }
-    .settlement-status.error { color: #fca5a5; }
-    .settlement-status .spinner {
+    #payments-process-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+    #payments-process-btn:hover:not(:disabled) { filter: brightness(1.08); }
+    .payments-status { margin-top: 0.6rem; font-size: 0.88rem; color: rgba(238, 242, 247, 0.88); }
+    .payments-status.error { color: #fca5a5; }
+    .payments-status.warn { color: #fcd34d; }
+    .payments-panel .spinner {
         display: inline-block; width: 12px; height: 12px;
-        border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff;
+        border: 2px solid rgba(255, 255, 255, 0.3); border-top-color: #fff;
         border-radius: 50%; margin-right: 6px; vertical-align: middle;
-        animation: settlement-spin 0.7s linear infinite;
+        animation: payments-spin 0.7s linear infinite;
     }
-    @@keyframes settlement-spin { to { transform: rotate(360deg); } }
+    @@keyframes payments-spin { to { transform: rotate(360deg); } }
 
-    .settlement-result { margin-top: 0.85rem; display: grid; gap: 0.85rem; }
-
-    .settlement-calc {
-        background: rgba(10, 16, 28, 0.7);
-        border: 1px solid rgba(120, 150, 200, 0.18);
-        border-radius: 10px;
-        padding: 0.85rem 1rem;
+    /* ── Results ──────────────────────────────────────────────── */
+    .payments-result { margin-top: 0.85rem; display: grid; gap: 0.85rem; }
+    .payments-card {
+        background: rgba(10, 16, 28, 0.7); border: 1px solid rgba(120, 150, 200, 0.18);
+        border-radius: 10px; padding: 0.85rem 1rem;
     }
-    .settlement-calc-label {
+    .payments-card-label {
         font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.12em;
         color: var(--cw-muted, #97a3b6); font-weight: 700; margin-bottom: 0.5rem;
     }
-    .settlement-calc-table {
-        width: 100%; border-collapse: collapse;
-        font-size: 0.88rem;
-        color: rgba(238, 242, 247, 0.9);
+    .payments-calc-scroll { overflow-x: auto; }
+    .payments-calc-table {
+        width: 100%; border-collapse: collapse; font-size: 0.88rem; color: rgba(238, 242, 247, 0.9);
         font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     }
-    .settlement-calc-table td { padding: 0.3rem 0.2rem; border-bottom: 1px dashed rgba(120, 150, 200, 0.18); }
-    .settlement-calc-table td.amount { text-align: right; }
-    .settlement-calc-table td.amount.neg { color: #fca5a5; }
-    .settlement-calc-table td.amount.pos { color: #86efac; }
-    .settlement-calc-table tr.total td { border-bottom: none; padding-top: 0.6rem; font-weight: 700; }
+    .payments-calc-table th {
+        text-align: left; font-family: inherit; font-size: 0.7rem; color: #d8b4fe; font-weight: 700;
+        padding: 0.25rem 0.2rem 0.4rem 0.2rem; border-bottom: 1px solid rgba(120, 150, 200, 0.22);
+    }
+    .payments-calc-table th.amount, .payments-calc-table td.amount { text-align: right; white-space: nowrap; padding-left: 1rem; }
+    .payments-calc-table td { padding: 0.32rem 0.2rem; border-bottom: 1px dashed rgba(120, 150, 200, 0.18); }
+    .payments-calc-table td.neg { color: #fca5a5; }
+    .payments-calc-table td.pos { color: #86efac; }
+    .payments-calc-table tr.kind-component td:first-child { padding-left: 1rem; color: rgba(238, 242, 247, 0.78); }
+    .payments-calc-table tr.kind-total td { border-bottom: none; padding-top: 0.55rem; font-weight: 700; }
 
-    .settlement-payable {
-        margin-top: 0.6rem;
-        display: flex; align-items: center; justify-content: space-between;
-        padding: 0.55rem 0.85rem;
-        background: color-mix(in srgb, var(--settlement-accent) 14%, rgba(20, 28, 46, 0.7));
-        border: 1px solid color-mix(in srgb, var(--settlement-accent) 45%, transparent);
-        border-radius: 8px;
+    .payments-net {
+        margin-top: 0.6rem; display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; flex-wrap: wrap;
+        padding: 0.55rem 0.85rem; border-radius: 8px;
+        background: color-mix(in srgb, var(--pay-accent) 14%, rgba(20, 28, 46, 0.7));
+        border: 1px solid color-mix(in srgb, var(--pay-accent) 45%, transparent);
     }
-    .settlement-payable .k {
-        color: rgba(238, 242, 247, 0.86);
-        font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700;
-    }
-    .settlement-payable #settlement-payable-amount {
+    .payments-net.mode-protected { background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.4); }
+    .payments-net.mode-inbound { background: rgba(14, 165, 233, 0.1); border-color: rgba(14, 165, 233, 0.4); }
+    .payments-net .k { color: rgba(238, 242, 247, 0.86); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; }
+    #payments-net-amount {
         font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-        font-size: 1.1rem; font-weight: 700; color: #fff;
+        font-size: 1.1rem; font-weight: 700; color: #fff; text-align: right;
     }
+    .payments-context { margin: 0.7rem 0 0 0; display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem 1rem; }
+    .payments-context div { min-width: 0; }
+    .payments-context dt { font-size: 0.64rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--cw-muted, #97a3b6); font-weight: 700; }
+    .payments-context dd { margin: 0.1rem 0 0 0; font-size: 0.85rem; color: rgba(238, 242, 247, 0.9); line-height: 1.4; }
+    .payments-rule { margin-top: 0.6rem; font-size: 0.78rem; color: var(--cw-muted, #97a3b6); }
 
-    .settlement-approval {
-        background: color-mix(in srgb, var(--settlement-accent) 8%, rgba(15, 22, 38, 0.7));
-        border: 1px solid color-mix(in srgb, var(--settlement-accent) 30%, transparent);
-        border-radius: 10px;
-        padding: 0.7rem 0.9rem;
+    .payments-checks-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
+    .payments-check { display: flex; gap: 0.6rem; align-items: flex-start; }
+    .payments-check-icon {
+        flex: 0 0 auto; display: inline-grid; place-items: center; width: 1.45rem; height: 1.45rem; border-radius: 50%;
+        font-size: 0.75rem; font-weight: 800; margin-top: 0.05rem;
     }
-    .settlement-approval-head { display: flex; align-items: center; gap: 0.55rem; margin-bottom: 0.25rem; }
-    .settlement-approval-title { color: #fff; font-weight: 700; font-size: 0.92rem; }
-    .settlement-approval-pill {
-        margin-left: auto;
-        padding: 0.15rem 0.7rem;
-        border-radius: 999px;
-        font-size: 0.72rem; font-weight: 700;
-        text-transform: uppercase; letter-spacing: 0.1em;
-    }
-    .settlement-approval-pill.required { background: rgba(239, 68, 68, 0.18); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }
-    .settlement-approval-pill.optional { background: rgba(34, 197, 94, 0.16); color: #86efac; border: 1px solid rgba(34, 197, 94, 0.4); }
-    .settlement-approval p { margin: 0; color: rgba(238, 242, 247, 0.88); font-size: 0.88rem; line-height: 1.45; }
+    .payments-check.status-pass .payments-check-icon { background: rgba(34, 197, 94, 0.18); color: #86efac; border: 1px solid rgba(34, 197, 94, 0.45); }
+    .payments-check.status-fail .payments-check-icon { background: rgba(239, 68, 68, 0.18); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.45); }
+    .payments-check.status-warn .payments-check-icon { background: rgba(245, 158, 11, 0.18); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.45); }
+    .payments-check.status-na .payments-check-icon { background: rgba(148, 163, 184, 0.16); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.4); }
+    .payments-check-body { min-width: 0; flex: 1; }
+    .payments-check-head { display: flex; flex-wrap: wrap; gap: 0.35rem 0.7rem; align-items: baseline; color: #fff; font-size: 0.9rem; }
+    .payments-check-value { font-size: 0.78rem; font-weight: 700; color: #e9d5ff; }
+    .payments-check.status-fail .payments-check-value { color: #fca5a5; }
+    .payments-check.status-pass .payments-check-value { color: #86efac; }
+    .payments-check.status-warn .payments-check-value { color: #fcd34d; }
+    .payments-check-detail { font-size: 0.84rem; color: rgba(238, 242, 247, 0.84); line-height: 1.45; margin-top: 0.15rem; }
+    .payments-check-source { font-size: 0.74rem; color: var(--cw-muted, #97a3b6); margin-top: 0.15rem; }
 
-    .settlement-notes {
-        background: rgba(10, 16, 28, 0.7);
-        border: 1px solid rgba(120, 150, 200, 0.18);
-        border-radius: 8px;
-        padding: 0.7rem 0.85rem;
+    .payments-callout {
+        border-radius: 10px; padding: 0.75rem 0.95rem;
+        background: color-mix(in srgb, var(--pay-accent) 8%, rgba(15, 22, 38, 0.7));
+        border: 1px solid color-mix(in srgb, var(--pay-accent) 30%, transparent);
     }
-    .settlement-notes-label {
-        font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.12em;
-        color: var(--cw-muted, #97a3b6); font-weight: 700; margin-bottom: 0.35rem;
+    .payments-callout p { margin: 0.25rem 0 0 0; color: rgba(238, 242, 247, 0.88); font-size: 0.88rem; line-height: 1.45; }
+    .payments-callout-head { display: flex; align-items: center; gap: 0.55rem; margin-bottom: 0.3rem; flex-wrap: wrap; }
+    .payments-callout-title { color: #fff; font-weight: 700; font-size: 0.92rem; }
+    .payments-reasons { margin: 0.2rem 0 0 0; padding-left: 1.2rem; color: rgba(238, 242, 247, 0.88); font-size: 0.87rem; line-height: 1.5; }
+    .payments-approver { font-size: 0.82rem !important; color: #d8b4fe !important; }
+    .payments-pill {
+        margin-left: auto; padding: 0.15rem 0.7rem; border-radius: 999px;
+        font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+        background: rgba(148, 163, 184, 0.18); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.4);
     }
-    .settlement-notes pre {
-        color: rgba(238, 242, 247, 0.86);
-        font-size: 0.82rem;
-        line-height: 1.5;
-        white-space: pre-wrap;
-        margin: 0;
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    }
+    .payments-pill.required { background: rgba(239, 68, 68, 0.18); color: #fca5a5; border-color: rgba(239, 68, 68, 0.4); }
+    .payments-pill.standard { background: rgba(168, 85, 247, 0.18); color: #e9d5ff; border-color: rgba(168, 85, 247, 0.45); }
+    .payments-pill.optional { background: rgba(34, 197, 94, 0.16); color: #86efac; border-color: rgba(34, 197, 94, 0.4); }
+    .payments-pill.status-pending { background: rgba(91, 95, 199, 0.22); color: #c7d2fe; border-color: rgba(129, 133, 230, 0.5); }
+    .payments-pill.status-approved { background: rgba(34, 197, 94, 0.18); color: #86efac; border-color: rgba(34, 197, 94, 0.4); }
+    .payments-pill.status-rejected, .payments-pill.status-blocked { background: rgba(239, 68, 68, 0.18); color: #fca5a5; border-color: rgba(239, 68, 68, 0.4); }
+    .payments-pill.status-released { background: rgba(168, 85, 247, 0.2); color: #e9d5ff; border-color: rgba(168, 85, 247, 0.5); }
+    .payments-pill.status-cancelled { background: rgba(148, 163, 184, 0.16); color: #cbd5e1; }
 
-    .settlement-teams-card { border-color: color-mix(in srgb, #4f6bed 38%, transparent); background: color-mix(in srgb, #4f6bed 10%, rgba(15, 22, 38, 0.7)); }
-    .settlement-teams-card .settlement-approval-pill.sent { background: rgba(99, 102, 241, 0.18); color: #c7d2fe; border: 1px solid rgba(99, 102, 241, 0.45); }
-    .settlement-teams-card .settlement-approval-pill.skipped { background: rgba(148, 163, 184, 0.18); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.4); }
-    .settlement-teams-card .settlement-approval-pill.approved { background: rgba(34, 197, 94, 0.18); color: #86efac; border: 1px solid rgba(34, 197, 94, 0.4); }
-    .settlement-teams-card .settlement-approval-pill.rejected { background: rgba(239, 68, 68, 0.18); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }
-    .settlement-teams-card .settlement-approval-pill.released { background: rgba(168, 85, 247, 0.18); color: #d8b4fe; border: 1px solid rgba(168, 85, 247, 0.45); }
-    .settlement-teams-msg { margin: 0.2rem 0 0.45rem 0; color: rgba(238, 242, 247, 0.88); font-size: 0.88rem; }
-    .settlement-teams-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 0.3rem 0.85rem; font-size: 0.82rem; color: rgba(238, 242, 247, 0.86); margin-bottom: 0.55rem; }
-    @@media (max-width: 820px) { .settlement-teams-meta { grid-template-columns: 1fr; } }
-    .settlement-teams-meta .k { color: var(--cw-muted, #97a3b6); font-weight: 600; text-transform: uppercase; font-size: 0.66rem; letter-spacing: 0.08em; margin-right: 0.4rem; }
-    .settlement-teams-meta code { background: rgba(10, 16, 28, 0.6); padding: 1px 6px; border-radius: 4px; }
-    .settlement-teams-meta a { color: #c7d2fe; }
-    .settlement-teams-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.4rem; }
-    .settlement-teams-actions button {
+    .payments-teams { background: color-mix(in srgb, #5b5fc7 10%, rgba(15, 22, 38, 0.75)); border-color: rgba(129, 133, 230, 0.4); }
+    .payments-blocked { background: rgba(239, 68, 68, 0.07); border-color: rgba(239, 68, 68, 0.35); }
+    .payments-inbound { background: rgba(14, 165, 233, 0.07); border-color: rgba(14, 165, 233, 0.35); }
+    .payments-blocked-record { font-size: 0.8rem !important; color: var(--cw-muted, #97a3b6) !important; }
+    .payments-teams-msg code { background: rgba(91, 95, 199, 0.25); padding: 1px 5px; border-radius: 4px; font-size: 0.8rem; }
+    .payments-teams-meta {
+        display: grid; grid-template-columns: 1fr 1fr; gap: 0.3rem 0.85rem; margin: 0.6rem 0 0.2rem 0;
+        font-size: 0.82rem; color: rgba(238, 242, 247, 0.86);
+    }
+    .payments-teams-meta .k { color: var(--cw-muted, #97a3b6); font-weight: 600; text-transform: uppercase; font-size: 0.64rem; letter-spacing: 0.08em; margin-right: 0.35rem; }
+    .payments-teams-meta code { background: rgba(10, 16, 28, 0.6); padding: 1px 6px; border-radius: 4px; }
+    .payments-teams-meta a { color: #c7d2fe; word-break: break-all; }
+    .payments-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.6rem; }
+    .payments-actions button {
         border: none; border-radius: 8px; padding: 0.45rem 0.95rem; font-size: 0.85rem; font-weight: 700; cursor: pointer;
     }
-    .settlement-teams-actions button:disabled { opacity: 0.55; cursor: not-allowed; }
-    .settlement-teams-approve { background: #22c55e; color: #052e16; }
-    .settlement-teams-reject { background: rgba(239, 68, 68, 0.85); color: #1a0707; }
-    .settlement-teams-release { background: var(--settlement-accent); color: #1a0633; }
-    .settlement-teams-status { margin-top: 0.5rem; font-size: 0.85rem; color: rgba(238, 242, 247, 0.86); }
-    .settlement-teams-status.error { color: #fca5a5; }
+    .payments-actions button:disabled { opacity: 0.45; cursor: not-allowed; }
+    .payments-popup { background: rgba(129, 133, 230, 0.25); color: #e0e7ff; border: 1px solid rgba(129, 133, 230, 0.5) !important; }
+    .payments-release { background: #34d399; color: #052e1f; }
+    .payments-release-hint { margin-top: 0.35rem; font-size: 0.8rem; color: var(--cw-muted, #97a3b6); }
+    .payments-teams-status { margin-top: 0.45rem; font-size: 0.85rem; color: rgba(238, 242, 247, 0.88); }
+    .payments-teams-status.error { color: #fca5a5; }
 
-    /* ── Real popup modal for human approval ─────────────────────── */
-    .settlement-modal[hidden] { display: none !important; }
-    .settlement-modal {
-        position: fixed; inset: 0;
-        z-index: 1000;
-        display: flex; align-items: center; justify-content: center;
-        padding: 1.2rem;
+    /* Microsoft Teams channel post + Adaptive Card preview */
+    .payments-teams-preview { margin-top: 0.6rem; border-radius: 10px; overflow: hidden; border: 1px solid rgba(129, 133, 230, 0.35); background: #1f1f2b; }
+    .tp-channel-head {
+        display: flex; align-items: center; gap: 0.5rem; padding: 0.45rem 0.75rem; font-size: 0.78rem;
+        background: #2b2b40; color: #d6d8ff; border-bottom: 1px solid rgba(129, 133, 230, 0.25);
     }
-    .settlement-modal-backdrop {
-        position: absolute; inset: 0;
-        background: rgba(4, 8, 18, 0.72);
-        backdrop-filter: blur(3px);
+    .tp-logo { display: inline-grid; place-items: center; width: 1.2rem; height: 1.2rem; border-radius: 4px; background: #5b5fc7; color: #fff; font-weight: 800; font-size: 0.7rem; }
+    .tp-time { margin-left: auto; color: #a5a8d6; }
+    .tp-post { display: flex; gap: 0.65rem; padding: 0.75rem; }
+    .tp-avatar {
+        flex: 0 0 auto; width: 2rem; height: 2rem; border-radius: 50%; display: grid; place-items: center;
+        background: linear-gradient(135deg, #a855f7, #6d28d9); color: #fff; font-weight: 800; font-size: 0.85rem;
     }
-    .settlement-modal-card {
-        position: relative;
-        z-index: 1;
-        width: min(560px, 100%);
+    .tp-post-body { min-width: 0; flex: 1; }
+    .tp-author { font-size: 0.82rem; font-weight: 700; color: #f1f1ff; margin-bottom: 0.35rem; }
+    .tp-app { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: #3b3b58; color: #c7c9f5; border-radius: 4px; padding: 0.05rem 0.35rem; margin-left: 0.3rem; }
+    .tp-card { background: #292938; border: 1px solid #3d3d55; border-radius: 8px; padding: 0.75rem 0.85rem; color: #ececf7; }
+    .tp-card-title { font-size: 1rem; font-weight: 800; color: #fff; }
+    .tp-card-sub { font-size: 0.76rem; color: #a5a8d6; margin-bottom: 0.55rem; }
+    .tp-facts { display: grid; grid-template-columns: max-content 1fr; gap: 0.25rem 0.9rem; margin: 0 0 0.6rem 0; font-size: 0.84rem; }
+    .tp-facts dt { font-weight: 700; color: #f1f1ff; }
+    .tp-facts dd { margin: 0; color: #dcdcf0; min-width: 0; overflow-wrap: anywhere; }
+    .tp-why-title { font-weight: 800; font-size: 0.84rem; color: #fff; }
+    .tp-why { margin: 0.2rem 0 0.45rem 0; padding-left: 1.1rem; font-size: 0.84rem; color: #dcdcf0; }
+    .tp-note { font-size: 0.74rem; color: #a5a8d6; margin-bottom: 0.6rem; }
+    .tp-actions { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+    .tp-btn {
+        border: 1px solid #5b5fc7; background: transparent; color: #c7d2fe; border-radius: 6px;
+        padding: 0.35rem 0.85rem; font-size: 0.82rem; font-weight: 700; cursor: pointer; text-decoration: none;
+    }
+    .tp-btn:hover { background: rgba(91, 95, 199, 0.2); color: #fff; }
+    .tp-btn.tp-approve { background: #5b5fc7; color: #fff; }
+    .tp-btn.tp-approve:hover { filter: brightness(1.1); }
+    .tp-btn.tp-reject { border-color: rgba(239, 68, 68, 0.7); color: #fecaca; }
+    .tp-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .tp-decided { font-size: 0.84rem; font-weight: 700; padding: 0.35rem 0.6rem; border-radius: 6px; background: rgba(148, 163, 184, 0.14); color: #e2e8f0; }
+    .tp-decided.tp-approved, .tp-decided.tp-released { background: rgba(34, 197, 94, 0.14); color: #bbf7d0; }
+    .tp-decided.tp-rejected { background: rgba(239, 68, 68, 0.14); color: #fecaca; }
+
+    .payments-notes .agent-md { font-size: 0.9rem; }
+
+    /* ── Approval popup ───────────────────────────────────────── */
+    .payments-modal { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 1.2rem; }
+    .payments-modal-backdrop { position: absolute; inset: 0; background: rgba(4, 8, 18, 0.72); backdrop-filter: blur(3px); }
+    .payments-modal-card {
+        position: relative; z-index: 1; width: min(600px, 100%);
         background: linear-gradient(180deg, rgba(28, 36, 58, 0.98), rgba(15, 22, 38, 0.98));
-        border: 1px solid color-mix(in srgb, var(--settlement-accent) 45%, rgba(120, 150, 200, 0.25));
-        border-radius: 14px;
-        box-shadow: 0 22px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(168, 85, 247, 0.15);
-        padding: 1.2rem 1.3rem 1.1rem 1.3rem;
-        color: #fff;
-        max-height: calc(100vh - 2.4rem);
-        overflow-y: auto;
+        border: 1px solid color-mix(in srgb, var(--pay-accent) 45%, rgba(120, 150, 200, 0.25));
+        border-radius: 14px; box-shadow: 0 22px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(168, 85, 247, 0.15);
+        padding: 1.2rem 1.3rem 1.1rem 1.3rem; color: #fff;
+        max-height: calc(100vh - 2.4rem); overflow-y: auto;
     }
-    .settlement-modal-close {
-        position: absolute; top: 0.5rem; right: 0.6rem;
-        background: transparent; color: rgba(238, 242, 247, 0.7);
-        border: none; font-size: 1.4rem; line-height: 1;
-        cursor: pointer; padding: 0.25rem 0.5rem;
-        border-radius: 6px;
+    .payments-modal-close {
+        position: absolute; top: 0.5rem; right: 0.6rem; background: transparent; color: rgba(238, 242, 247, 0.7);
+        border: none; font-size: 1.4rem; line-height: 1; cursor: pointer; padding: 0.25rem 0.5rem; border-radius: 6px;
     }
-    .settlement-modal-close:hover { background: rgba(255, 255, 255, 0.06); color: #fff; }
-    .settlement-modal-header { display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.4rem; }
-    .settlement-modal-header h3 { margin: 0; font-size: 1.05rem; color: #fff; }
-    .settlement-modal-badge {
-        display: inline-grid; place-items: center;
-        width: 1.7rem; height: 1.7rem; border-radius: 50%;
-        background: rgba(239, 68, 68, 0.2);
-        border: 1px solid rgba(239, 68, 68, 0.55);
-        color: #fca5a5; font-weight: 800; font-size: 0.95rem;
+    .payments-modal-close:hover { background: rgba(255, 255, 255, 0.06); color: #fff; }
+    .payments-modal-header { display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.5rem; }
+    .payments-modal-header h3 { margin: 0; font-size: 1.05rem; color: #fff; }
+    .payments-modal-sub { font-size: 0.76rem; color: #c7d2fe; }
+    .payments-modal-badge {
+        display: inline-grid; place-items: center; flex: 0 0 auto; width: 1.8rem; height: 1.8rem; border-radius: 50%;
+        background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.55); color: #fca5a5; font-weight: 800;
     }
-    .settlement-modal-reason {
-        margin: 0.1rem 0 0.85rem 0;
-        font-size: 0.92rem;
-        color: rgba(238, 242, 247, 0.92);
-        line-height: 1.5;
+    .payments-modal-deeplink {
+        margin-bottom: 0.6rem; padding: 0.45rem 0.7rem; border-radius: 8px; font-size: 0.84rem;
+        background: rgba(91, 95, 199, 0.18); border: 1px solid rgba(129, 133, 230, 0.45); color: #e0e7ff;
     }
-    .settlement-modal-meta {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 0.4rem 1rem;
-        font-size: 0.85rem;
-        background: rgba(10, 16, 28, 0.7);
-        border: 1px solid rgba(120, 150, 200, 0.18);
-        border-radius: 8px;
-        padding: 0.65rem 0.85rem;
-        margin-bottom: 0.7rem;
+    .payments-modal-why { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; color: var(--cw-muted, #97a3b6); }
+    .payments-modal-reasons { margin: 0.25rem 0 0.75rem 0; padding-left: 1.2rem; font-size: 0.9rem; line-height: 1.5; color: rgba(238, 242, 247, 0.92); }
+    .payments-modal-meta {
+        display: grid; grid-template-columns: 1fr 1fr; gap: 0.45rem 1rem; font-size: 0.85rem;
+        background: rgba(10, 16, 28, 0.7); border: 1px solid rgba(120, 150, 200, 0.18); border-radius: 8px;
+        padding: 0.65rem 0.85rem; margin-bottom: 0.7rem;
     }
-    @@media (max-width: 600px) { .settlement-modal-meta { grid-template-columns: 1fr; } }
-    .settlement-modal-meta .span-2 { grid-column: span 2; }
-    @@media (max-width: 600px) { .settlement-modal-meta .span-2 { grid-column: span 1; } }
-    .settlement-modal-meta .k {
-        display: block;
-        color: var(--cw-muted, #97a3b6); font-weight: 700;
-        text-transform: uppercase; font-size: 0.62rem; letter-spacing: 0.1em;
-        margin-bottom: 0.15rem;
+    .payments-modal-meta .span-2 { grid-column: span 2; }
+    .payments-modal-meta .k {
+        display: block; color: var(--cw-muted, #97a3b6); font-weight: 700; text-transform: uppercase;
+        font-size: 0.62rem; letter-spacing: 0.1em; margin-bottom: 0.15rem;
     }
-    .settlement-modal-meta code { background: rgba(10, 16, 28, 0.6); padding: 1px 6px; border-radius: 4px; font-size: 0.78rem; }
-    .settlement-modal-meta .amount-row strong {
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-        font-size: 1.15rem; color: #fff;
+    .payments-modal-meta code { background: rgba(10, 16, 28, 0.6); padding: 1px 6px; border-radius: 4px; font-size: 0.78rem; }
+    .payments-modal-meta .amount-row strong { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 1.15rem; color: #fff; }
+    .payments-modal-explainer { margin: 0 0 0.7rem 0; font-size: 0.82rem; color: rgba(203, 213, 225, 0.85); line-height: 1.45; }
+    .payments-modal-explainer code { background: rgba(168, 85, 247, 0.16); padding: 1px 6px; border-radius: 4px; font-size: 0.78rem; }
+    .payments-modal-status { margin-bottom: 0.6rem; font-size: 0.88rem; color: rgba(238, 242, 247, 0.88); }
+    .payments-modal-status.error { color: #fca5a5; }
+    .payments-modal-agent {
+        background: rgba(10, 16, 28, 0.7); border: 1px solid rgba(120, 150, 200, 0.18); border-radius: 8px;
+        padding: 0.65rem 0.85rem; margin-bottom: 0.7rem; max-height: 240px; overflow-y: auto;
     }
-    .settlement-modal-explainer {
-        margin: 0 0 0.7rem 0;
-        font-size: 0.82rem;
-        color: rgba(203, 213, 225, 0.85);
-        line-height: 1.45;
+    .payments-modal-agent-label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--cw-muted, #97a3b6); font-weight: 700; margin-bottom: 0.4rem; }
+    .payments-modal-actions { display: flex; flex-wrap: wrap; gap: 0.55rem; justify-content: flex-end; margin-top: 0.3rem; }
+    .payments-modal-actions button { border: none; border-radius: 8px; padding: 0.55rem 1.1rem; font-size: 0.88rem; font-weight: 700; cursor: pointer; }
+    .payments-modal-actions button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .payments-modal-cancel { background: rgba(120, 150, 200, 0.14); color: #cbd5e1; }
+    .payments-modal-reject { background: rgba(239, 68, 68, 0.85); color: #1a0707; }
+    .payments-modal-approve { background: var(--pay-accent); color: #1a0633; }
+    .payments-modal-release { background: #34d399; color: #052e1f; }
+    .payments-modal-actions button:hover:not(:disabled) { filter: brightness(1.08); }
+
+    @@media (max-width: 820px) {
+        .payments-summary-grid, .payments-grid, .payments-context, .payments-teams-meta { grid-template-columns: 1fr; }
+        .payments-summary-grid .span-2, .payments-grid .span-2 { grid-column: span 1; }
+        .payments-payee-head { display: none; }
+        .payments-payee-row { grid-template-columns: 1fr 1fr; }
     }
-    .settlement-modal-explainer code { background: rgba(168, 85, 247, 0.16); padding: 1px 6px; border-radius: 4px; font-size: 0.78rem; }
-    .settlement-modal-status {
-        margin-bottom: 0.6rem; font-size: 0.88rem;
-        color: rgba(238, 242, 247, 0.88);
+    @@media (max-width: 600px) {
+        .payments-modal-meta { grid-template-columns: 1fr; }
+        .payments-modal-meta .span-2 { grid-column: span 1; }
     }
-    .settlement-modal-status.error { color: #fca5a5; }
-    .settlement-modal-status .spinner {
-        display: inline-block; width: 12px; height: 12px;
-        border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff;
-        border-radius: 50%; margin-right: 6px; vertical-align: middle;
-        animation: settlement-spin 0.7s linear infinite;
-    }
-    .settlement-modal-agent {
-        background: rgba(10, 16, 28, 0.7);
-        border: 1px solid rgba(120, 150, 200, 0.18);
-        border-radius: 8px;
-        padding: 0.65rem 0.85rem;
-        margin-bottom: 0.7rem;
-        max-height: 220px;
-        overflow-y: auto;
-    }
-    .settlement-modal-agent-label {
-        font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.12em;
-        color: var(--cw-muted, #97a3b6); font-weight: 700; margin-bottom: 0.4rem;
-    }
-    .settlement-modal-actions {
-        display: flex; flex-wrap: wrap; gap: 0.55rem; justify-content: flex-end;
-        margin-top: 0.3rem;
-    }
-    .settlement-modal-actions button {
-        border: none; border-radius: 8px;
-        padding: 0.55rem 1.1rem;
-        font-size: 0.88rem; font-weight: 700; cursor: pointer;
-    }
-    .settlement-modal-actions button:disabled { opacity: 0.55; cursor: not-allowed; }
-    .settlement-modal-cancel { background: rgba(120, 150, 200, 0.14); color: #cbd5e1; }
-    .settlement-modal-cancel:hover:not(:disabled) { background: rgba(120, 150, 200, 0.22); }
-    .settlement-modal-reject { background: rgba(239, 68, 68, 0.85); color: #1a0707; }
-    .settlement-modal-reject:hover:not(:disabled) { filter: brightness(1.08); }
-    .settlement-modal-approve { background: var(--settlement-accent); color: #1a0633; }
-    .settlement-modal-approve:hover:not(:disabled) { filter: brightness(1.08); }
-    .settlement-modal-release { background: #34d399; color: #052e1f; }
-    .settlement-modal-release:hover:not(:disabled) { filter: brightness(1.08); }
 </style>
-
-<script>
-    (function () {
-        function init() {
-        const root = document.querySelector('.settlement-panel');
-        if (!root || root.dataset.wired === '1') return;
-        root.dataset.wired = '1';
-
-        const $ = sel => root.querySelector(sel);
-        const select = $('#settlement-claim-select');
-        const refreshBtn = $('#settlement-refresh-btn');
-        const emptyEl = $('#settlement-claim-empty');
-        const summaryEl = $('#settlement-claim-summary');
-        const inputsStep = $('#settlement-inputs-step');
-        const inputsForm = $('#settlement-inputs-form');
-        const processStep = $('#settlement-process-step');
-        const processBtn = $('#settlement-process-btn');
-        const processStatus = $('#settlement-process-status');
-        const resultEl = $('#settlement-result');
-        const calcBody = $('#settlement-calc-body');
-        const payableEl = $('#settlement-payable-amount');
-        const approvalPill = $('#settlement-approval-pill');
-        const approvalReason = $('#settlement-approval-reason');
-        const letterEl = $('#settlement-letter');
-        const engageScope = $('.engage-tabs-scope');
-        const teamsCard = $('#settlement-teams-card');
-        const teamsPill = $('#settlement-teams-pill');
-        const teamsMsg = $('#settlement-teams-msg');
-        const teamsApprovalIdEl = $('#settlement-teams-approvalid');
-        const teamsLinkEl = $('#settlement-teams-link');
-        const teamsApproveBtn = $('#settlement-teams-approve-btn');
-        const teamsRejectBtn = $('#settlement-teams-reject-btn');
-        const teamsReleaseBtn = $('#settlement-teams-release-btn');
-        const teamsStatus = $('#settlement-teams-status');
-        let currentApprovalId = null;
-
-        // Real popup modal for payment approval. Element refs + state.
-        const modalEl = $('#settlement-approval-modal');
-        const modalReason = $('#settlement-modal-reason');
-        const modalClaim = $('#settlement-modal-claim');
-        const modalCustomer = $('#settlement-modal-customer');
-        const modalPolicy = $('#settlement-modal-policy');
-        const modalApprovalIdEl = $('#settlement-modal-approval-id');
-        const modalAmount = $('#settlement-modal-amount');
-        const modalStatus = $('#settlement-modal-status');
-        const modalAgentBlock = $('#settlement-modal-agent');
-        const modalAgentBody = $('#settlement-modal-agent-body');
-        const modalApproveBtn = $('#settlement-modal-approve-btn');
-        const modalRejectBtn = $('#settlement-modal-reject-btn');
-        const modalCancelBtn = $('#settlement-modal-cancel-btn');
-        const modalReleaseBtn = $('#settlement-modal-release-btn');
-        const modalCloseBtn = root.querySelector('.settlement-modal-close');
-        let modalApprovalContext = null;
-
-        let claims = [];
-        let selected = null;
-
-        function escapeHtml(s) {
-            return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
-        }
-
-        function fmtMoney(n) {
-            const num = Number(n) || 0;
-            return num.toLocaleString('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 });
-        }
-
-        function parseMoney(value) {
-            if (value === null || value === undefined) return 0;
-            const cleaned = String(value).replace(/[^0-9.\-]/g, '');
-            const n = parseFloat(cleaned);
-            return Number.isFinite(n) ? n : 0;
-        }
-
-        function defaultPolicyLimit(claimType, approved) {
-            const t = (claimType || '').toLowerCase();
-            if (t.includes('home')) return 750000;
-            if (t.includes('motor') || t.includes('car')) return 60000;
-            if (t.includes('travel')) return 15000;
-            if (t.includes('business')) return 250000;
-            if (t.includes('life')) return 500000;
-            return Math.max(approved * 5, 50000);
-        }
-
-        function defaultExcess(claimType) {
-            const t = (claimType || '').toLowerCase();
-            if (t.includes('home')) return 500;
-            if (t.includes('motor') || t.includes('car')) return 800;
-            if (t.includes('travel')) return 250;
-            if (t.includes('business')) return 1000;
-            return 500;
-        }
-
-        async function loadClaims() {
-            try {
-                const res = await fetch('/settlement/claims');
-                if (!res.ok) throw new Error('HTTP ' + res.status);
-                claims = await res.json();
-                const previous = select.value;
-                select.innerHTML = '<option value="">— Select a Claim ID —</option>' +
-                    claims.map(c => `<option value="${escapeHtml(c.claimNumber)}">${escapeHtml(c.claimNumber)} — ${escapeHtml(c.customerName)} (${escapeHtml(c.claimType)})</option>`).join('');
-                if (previous && claims.some(c => c.claimNumber === previous)) {
-                    select.value = previous;
-                }
-                emptyEl.hidden = claims.length > 0;
-            } catch (err) {
-                emptyEl.hidden = false;
-                emptyEl.textContent = 'Failed to load claims: ' + err.message;
-            }
-        }
-
-        async function selectClaim(claimNumber) {
-            resultEl.hidden = true;
-            processStatus.hidden = true;
-            teamsCard.hidden = true;
-            currentApprovalId = null;
-            if (!claimNumber) {
-                selected = null;
-                summaryEl.hidden = true;
-                inputsStep.hidden = true;
-                processStep.hidden = true;
-                return;
-            }
-            try {
-                const res = await fetch(`/settlement/claims/${encodeURIComponent(claimNumber)}`);
-                if (!res.ok) throw new Error('HTTP ' + res.status);
-                selected = await res.json();
-            } catch (err) {
-                selected = null;
-                summaryEl.hidden = true;
-                inputsStep.hidden = true;
-                processStep.hidden = true;
-                emptyEl.hidden = false;
-                emptyEl.textContent = 'Failed to load claim: ' + err.message;
-                return;
-            }
-
-            $('#settlement-claim-num').textContent = selected.claimNumber;
-            $('#settlement-claim-customer').textContent = selected.customerName;
-            $('#settlement-claim-policy').textContent = selected.policyNumber;
-            $('#settlement-claim-type').textContent = selected.claimType;
-            $('#settlement-claim-incident').textContent =
-                `${selected.incidentDate || '—'} · ${selected.incidentLocation || '—'} — ${selected.incidentDescription || ''}`;
-            summaryEl.hidden = false;
-
-            const approved = parseMoney(selected.estimatedLoss);
-            inputsForm.approvedAmount.value = approved.toFixed(2);
-            inputsForm.policyLimit.value = defaultPolicyLimit(selected.claimType, approved).toFixed(2);
-            inputsForm.excess.value = defaultExcess(selected.claimType).toFixed(2);
-            inputsForm.depreciation.value = '0';
-            inputsForm.priorPayments.value = '0';
-
-            inputsStep.hidden = false;
-            processStep.hidden = false;
-        }
-
-        async function processSettlement() {
-            if (!selected) return;
-            processBtn.disabled = true;
-            processStatus.hidden = false;
-            processStatus.className = 'settlement-status';
-            processStatus.innerHTML = '<span class="spinner"></span>Engaging Settlement Agent…';
-            resultEl.hidden = true;
-
-            const payload = {
-                claimNumber: selected.claimNumber,
-                approvedAmount: parseFloat(inputsForm.approvedAmount.value) || 0,
-                policyLimit: parseFloat(inputsForm.policyLimit.value) || 0,
-                excess: parseFloat(inputsForm.excess.value) || 0,
-                depreciation: parseFloat(inputsForm.depreciation.value) || 0,
-                priorPayments: parseFloat(inputsForm.priorPayments.value) || 0
-            };
-
-            try {
-                const data = await window.zcAgentStream({
-                    url: '/settlement/process',
-                    body: payload,
-                    onDelta: (_chunk, fullText) => {
-                        if (window.engageTabsStreamNarrative) {
-                            window.engageTabsStreamNarrative(engageScope, fullText);
-                        }
-                    },
-                    onError: (msg) => {
-                        processStatus.className = 'settlement-status error';
-                        processStatus.textContent = 'Agent error: ' + msg;
-                    }
-                });
-                if (!data) throw new Error('No response from agent');
-
-                processStatus.textContent = data.agentConfigured
-                    ? 'Settlement Agent processed the claim.'
-                    : 'Processed (Foundry agent not configured — using deterministic demo calculation).';
-
-                calcBody.innerHTML = (data.calculation || []).map((row, idx, arr) => {
-                    const isTotal = idx === arr.length - 1;
-                    const cls = isTotal ? 'pos' : (row.amount < 0 ? 'neg' : (row.amount > 0 ? 'pos' : ''));
-                    const sign = row.amount < 0 ? '−' : (row.amount > 0 && !isTotal && idx > 0 ? '+' : '');
-                    const display = sign + fmtMoney(Math.abs(row.amount));
-                    return `<tr${isTotal ? ' class="total"' : ''}>
-                        <td>${escapeHtml(row.label)}</td>
-                        <td class="amount ${cls}">${escapeHtml(display)}</td>
-                    </tr>`;
-                }).join('');
-
-                payableEl.textContent = data.payableAmountFormatted || fmtMoney(data.payableAmount);
-
-                approvalPill.textContent = data.humanApprovalRequired ? 'Required' : 'Optional';
-                approvalPill.className = 'settlement-approval-pill ' + (data.humanApprovalRequired ? 'required' : 'optional');
-                approvalReason.textContent = data.humanApprovalReason || '';
-
-                window.zcRenderMarkdown(letterEl, data.settlementLetter || '');
-
-                renderTeamsCard(data.paymentApproval);
-
-                resultEl.hidden = false;
-                resultEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-
-                // Surface input + raw output in the Engage Agent sub-tabs.
-                if (window.engageTabsRender) {
-                    window.engageTabsRender(engageScope, data);
-                }
-
-                // If the agent flagged human approval as required (e.g. the
-                // payable amount is at or above the authority threshold),
-                // open the real popup so the operator can approve/reject
-                // the payment MCP action — the decision flows back to the
-                // same Foundry agent in the same conversation.
-                if (data.humanApprovalRequired && data.paymentApproval && data.paymentApproval.approvalId) {
-                    openApprovalModal(data);
-                }
-            } catch (err) {
-                processStatus.className = 'settlement-status error';
-                processStatus.textContent = 'Failed to process: ' + err.message;
-            } finally {
-                processBtn.disabled = false;
-            }
-        }
-
-        function renderTeamsCard(approval) {
-            if (!approval || !approval.approvalId) {
-                teamsCard.hidden = true;
-                currentApprovalId = null;
-                return;
-            }
-            currentApprovalId = approval.approvalId;
-            teamsCard.hidden = false;
-            teamsApprovalIdEl.textContent = approval.approvalId;
-            if (approval.approvalUrl) {
-                teamsLinkEl.href = approval.approvalUrl;
-                teamsLinkEl.textContent = approval.approvalUrl;
-            } else {
-                teamsLinkEl.removeAttribute('href');
-                teamsLinkEl.textContent = '(none)';
-            }
-            const sentText = approval.teamsSent
-                ? `Adaptive Card posted to ${escapeHtml(approval.teamsChannel || 'Teams')} via teams_sendApprovalCard.`
-                : `Teams send failed: ${escapeHtml(approval.teamsMessage || 'unknown error')}.`;
-            teamsMsg.innerHTML = sentText + ' Approve below to simulate the Teams approver clicking <strong>Approve</strong>.';
-            updateTeamsPill(approval.status || 'pending', approval.teamsSent);
-            teamsStatus.hidden = true;
-            teamsStatus.className = 'settlement-teams-status';
-            teamsStatus.textContent = '';
-            teamsReleaseBtn.hidden = true;
-            teamsApproveBtn.disabled = false;
-            teamsRejectBtn.disabled = false;
-        }
-
-        function updateTeamsPill(status, sent) {
-            const s = (status || 'pending').toLowerCase();
-            teamsPill.className = 'settlement-approval-pill ' + s;
-            if (s === 'pending') {
-                teamsPill.textContent = sent ? 'Sent · Pending' : 'Logged · Pending';
-                if (!sent) teamsPill.classList.add('skipped');
-                else teamsPill.classList.add('sent');
-            } else {
-                teamsPill.textContent = s.charAt(0).toUpperCase() + s.slice(1);
-            }
-        }
-
-        async function decideApproval(action) {
-            if (!currentApprovalId) return;
-            teamsApproveBtn.disabled = true;
-            teamsRejectBtn.disabled = true;
-            teamsStatus.hidden = false;
-            teamsStatus.className = 'settlement-teams-status';
-            teamsStatus.innerHTML = '<span class="spinner"></span>Sending decision…';
-            try {
-                const res = await fetch(`/settlement/payment/${encodeURIComponent(currentApprovalId)}/${action}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ decidedBy: 'Demo approver (Teams)' })
-                });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
-                updateTeamsPill(data.status, true);
-                teamsStatus.textContent = `Decision recorded: ${data.status}` +
-                    (data.decidedBy ? ` by ${data.decidedBy}` : '') + '.';
-                if (data.status === 'approved') {
-                    teamsReleaseBtn.hidden = false;
-                    teamsReleaseBtn.disabled = false;
-                }
-            } catch (err) {
-                teamsStatus.className = 'settlement-teams-status error';
-                teamsStatus.textContent = 'Failed: ' + err.message;
-                teamsApproveBtn.disabled = false;
-                teamsRejectBtn.disabled = false;
-            }
-        }
-
-        async function releasePayment() {
-            if (!currentApprovalId) return;
-            teamsReleaseBtn.disabled = true;
-            teamsStatus.hidden = false;
-            teamsStatus.className = 'settlement-teams-status';
-            teamsStatus.innerHTML = '<span class="spinner"></span>Releasing payment…';
-            try {
-                const res = await fetch(`/settlement/payment/${encodeURIComponent(currentApprovalId)}/release`, {
-                    method: 'POST'
-                });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
-                updateTeamsPill(data.status, true);
-                teamsStatus.textContent = `Payment released. Reference: ${data.paymentReference}.`;
-            } catch (err) {
-                teamsStatus.className = 'settlement-teams-status error';
-                teamsStatus.textContent = 'Failed: ' + err.message;
-                teamsReleaseBtn.disabled = false;
-            }
-        }
-
-        // ── Real popup modal for human approval ──────────────────────
-        function openApprovalModal(data) {
-            const approval = data && data.paymentApproval;
-            if (!approval || !approval.approvalId) return;
-            modalApprovalContext = approval;
-            modalReason.textContent = data.humanApprovalReason || approval.reason || 'Human approval required.';
-            modalClaim.textContent = data.claimNumber || '';
-            modalCustomer.textContent = data.customerName || '';
-            modalPolicy.textContent = data.policyNumber || '';
-            modalApprovalIdEl.textContent = approval.approvalId;
-            modalAmount.textContent = data.payableAmountFormatted || fmtMoney(data.payableAmount);
-            modalStatus.hidden = true;
-            modalStatus.className = 'settlement-modal-status';
-            modalStatus.textContent = '';
-            modalAgentBlock.hidden = true;
-            modalAgentBody.innerHTML = '';
-            modalApproveBtn.disabled = false;
-            modalRejectBtn.disabled = false;
-            modalApproveBtn.textContent = 'Approve';
-            // Release button is gated on a successful approve. Reset it
-            // every time the modal opens so a previous run doesn't leak
-            // an enabled state across approvals.
-            if (modalReleaseBtn) {
-                modalReleaseBtn.hidden = false;
-                modalReleaseBtn.disabled = true;
-                modalReleaseBtn.textContent = 'Release payment';
-            }
-            modalEl.hidden = false;
-            modalApproveBtn.focus();
-        }
-
-        function closeApprovalModal() {
-            modalEl.hidden = true;
-            modalApprovalContext = null;
-        }
-
-        async function approveViaModal() {
-            if (!modalApprovalContext) return;
-            const approvalId = modalApprovalContext.approvalId;
-            modalApproveBtn.disabled = true;
-            modalRejectBtn.disabled = true;
-            if (modalReleaseBtn) modalReleaseBtn.disabled = true;
-            modalStatus.hidden = false;
-            modalStatus.className = 'settlement-modal-status';
-            modalStatus.innerHTML = '<span class="spinner"></span>Approving and resuming agent conversation…';
-            try {
-                const res = await fetch(`/settlement/payment/${encodeURIComponent(approvalId)}/agent-approve`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ decidedBy: 'Demo approver (popup)' })
-                });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
-
-                const approval = data.approval || {};
-                if (data.agentNarrative) {
-                    modalAgentBlock.hidden = false;
-                    if (window.zcRenderMarkdown) {
-                        window.zcRenderMarkdown(modalAgentBody, data.agentNarrative);
-                    } else {
-                        modalAgentBody.textContent = data.agentNarrative;
-                    }
-                }
-                let msg = `Approval recorded — status: ${approval.status || 'approved'}`;
-                if (approval.paymentReference) msg += `, payment reference: ${approval.paymentReference}`;
-                if (data.agentError) msg += `. (Agent resume failed: ${data.agentError})`;
-                modalStatus.textContent = msg + '.';
-
-                // Update the modal Release button based on the new status.
-                // If the agent already released the payment in the same
-                // turn (status=released), keep it disabled and show "Released".
-                // Otherwise enable it so the operator can manually release.
-                const finalStatus = (approval.status || '').toLowerCase();
-                if (modalReleaseBtn) {
-                    if (finalStatus === 'released') {
-                        modalReleaseBtn.hidden = false;
-                        modalReleaseBtn.disabled = true;
-                        modalReleaseBtn.textContent = 'Released';
-                    } else if (finalStatus === 'approved') {
-                        modalReleaseBtn.hidden = false;
-                        modalReleaseBtn.disabled = false;
-                        modalReleaseBtn.textContent = 'Release payment';
-                        modalReleaseBtn.focus();
-                    } else {
-                        modalReleaseBtn.hidden = true;
-                        modalReleaseBtn.disabled = true;
-                    }
-                }
-
-                // Mirror the inline Teams card so the UI stays consistent.
-                if (currentApprovalId === approvalId) {
-                    updateTeamsPill(approval.status || 'approved', true);
-                    if ((approval.status || '').toLowerCase() === 'released') {
-                        teamsStatus.hidden = false;
-                        teamsStatus.className = 'settlement-teams-status';
-                        teamsStatus.textContent = `Payment released by agent. Reference: ${approval.paymentReference}.`;
-                        teamsReleaseBtn.hidden = true;
-                    } else {
-                        teamsReleaseBtn.hidden = false;
-                        teamsReleaseBtn.disabled = false;
-                    }
-                    teamsApproveBtn.disabled = true;
-                    teamsRejectBtn.disabled = true;
-                }
-            } catch (err) {
-                modalStatus.className = 'settlement-modal-status error';
-                modalStatus.textContent = 'Failed: ' + err.message;
-                modalApproveBtn.disabled = false;
-                modalRejectBtn.disabled = false;
-            }
-        }
-
-        async function releaseViaModal() {
-            if (!modalApprovalContext) return;
-            const approvalId = modalApprovalContext.approvalId;
-            if (!modalReleaseBtn) return;
-            modalReleaseBtn.disabled = true;
-            modalStatus.hidden = false;
-            modalStatus.className = 'settlement-modal-status';
-            modalStatus.innerHTML = '<span class="spinner"></span>Releasing payment…';
-            try {
-                const res = await fetch(`/settlement/payment/${encodeURIComponent(approvalId)}/release`, {
-                    method: 'POST'
-                });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
-                modalStatus.textContent = `Payment released — status: ${data.status}` +
-                    (data.paymentReference ? `, reference: ${data.paymentReference}` : '') + '.';
-                modalReleaseBtn.textContent = 'Released';
-                modalReleaseBtn.disabled = true;
-
-                // Mirror the inline Teams card.
-                if (currentApprovalId === approvalId) {
-                    updateTeamsPill(data.status, true);
-                    teamsStatus.hidden = false;
-                    teamsStatus.className = 'settlement-teams-status';
-                    teamsStatus.textContent = `Payment released. Reference: ${data.paymentReference}.`;
-                    teamsReleaseBtn.hidden = true;
-                    teamsApproveBtn.disabled = true;
-                    teamsRejectBtn.disabled = true;
-                }
-            } catch (err) {
-                modalStatus.className = 'settlement-modal-status error';
-                modalStatus.textContent = 'Failed: ' + err.message;
-                modalReleaseBtn.disabled = false;
-            }
-        }
-
-        async function rejectViaModal() {
-            if (!modalApprovalContext) return;
-            const approvalId = modalApprovalContext.approvalId;
-            modalApproveBtn.disabled = true;
-            modalRejectBtn.disabled = true;
-            modalStatus.hidden = false;
-            modalStatus.className = 'settlement-modal-status';
-            modalStatus.innerHTML = '<span class="spinner"></span>Recording rejection…';
-            try {
-                const res = await fetch(`/settlement/payment/${encodeURIComponent(approvalId)}/reject`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ decidedBy: 'Demo approver (popup)' })
-                });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
-                modalStatus.textContent = `Rejection recorded — status: ${data.status}.`;
-
-                if (currentApprovalId === approvalId) {
-                    updateTeamsPill(data.status, true);
-                    teamsApproveBtn.disabled = true;
-                    teamsRejectBtn.disabled = true;
-                }
-            } catch (err) {
-                modalStatus.className = 'settlement-modal-status error';
-                modalStatus.textContent = 'Failed: ' + err.message;
-                modalApproveBtn.disabled = false;
-                modalRejectBtn.disabled = false;
-            }
-        }
-
-        select.addEventListener('change', () => selectClaim(select.value));
-        refreshBtn.addEventListener('click', loadClaims);
-        processBtn.addEventListener('click', processSettlement);
-        teamsApproveBtn.addEventListener('click', () => decideApproval('approve'));
-        teamsRejectBtn.addEventListener('click', () => decideApproval('reject'));
-        teamsReleaseBtn.addEventListener('click', releasePayment);
-
-        // Real popup modal event wiring.
-        modalApproveBtn.addEventListener('click', approveViaModal);
-        modalRejectBtn.addEventListener('click', rejectViaModal);
-        if (modalReleaseBtn) modalReleaseBtn.addEventListener('click', releaseViaModal);
-        modalCancelBtn.addEventListener('click', closeApprovalModal);
-        if (modalCloseBtn) modalCloseBtn.addEventListener('click', closeApprovalModal);
-        modalEl.addEventListener('click', (ev) => {
-            if (ev.target && ev.target.matches && ev.target.matches('[data-modal-dismiss]')) {
-                closeApprovalModal();
-            }
-        });
-        document.addEventListener('keydown', (ev) => {
-            if (ev.key === 'Escape' && !modalEl.hidden) closeApprovalModal();
-        });
-
-        loadClaims();
-        }
-
-        init();
-
-        if (!window.__settlementDemoEnhancedHook) {
-            window.__settlementDemoEnhancedHook = true;
-            const hook = () => init();
-            if (typeof Blazor !== 'undefined' && typeof Blazor.addEventListener === 'function') {
-                Blazor.addEventListener('enhancedload', hook);
-            } else {
-                document.addEventListener('enhancedload', hook);
-            }
-        }
-    })();
-</script>

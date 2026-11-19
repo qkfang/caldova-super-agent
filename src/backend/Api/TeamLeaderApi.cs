@@ -53,7 +53,8 @@ public static class TeamLeaderApi
         VulnerableMember? Vulnerable,
         string Summary,
         string Decision,
-        string Recommendation);
+        string Recommendation,
+        string? Today = null);
 
     private const string Received = "Received";
     private const string InAssessment = "In assessment";
@@ -207,10 +208,12 @@ public static class TeamLeaderApi
             .OrderBy(c => StateRank(c.State))
             .ToList();
 
+        // Escalations: most severe first, then in approval-queue order.
         var escalations = profiles
             .Where(p => p.Profile.Escalation is not null)
+            .OrderBy(p => SeverityRank(p.Profile.Escalation!.Severity))
+            .ThenBy(p => p.Profile.Approval?.Priority ?? int.MaxValue)
             .Select(p => p.Profile.Escalation!)
-            .OrderBy(e => SeverityRank(e.Severity))
             .ToList();
 
         var approvals = profiles
@@ -244,26 +247,21 @@ public static class TeamLeaderApi
             coaching.Add("Retirement (George): a one-table payment schedule answers most new-retiree questions before they're asked — reuse Cara's format.");
         coaching.Add("QA sampling: 100% of blocks, declines, partial approvals and bereavement letters; 1 in 5 routine completions.");
 
-        var priorities = approvals
-            .Select(a => a.CaseNumber + " — " + PriorityLine(a))
+        // Today's priorities: the approval queue in order, then other
+        // follow-ups, then triage of anything newly received.
+        var priorities = profiles
+            .Where(p => p.Profile.Today is not null)
+            .OrderBy(p => p.Profile.Approval?.Priority ?? int.MaxValue)
+            .Select(p => $"{p.Case.CaseNumber} — {p.Profile.Today}")
             .ToList();
-        var priya = profiles.FirstOrDefault(p => IsSeeded(p.Case) && Sample(p.Case) == "onboarding-priya");
-        if (priya.Case is not null)
-            priorities.Add($"{priya.Case.CaseNumber} — ask Rory to chase Hannah for Priya's written insurance decision so the ~$96,400 Southern Cross rollover isn't left waiting.");
         var received = profiles.Count(p => p.Profile.Stage == Received);
         if (received > 0)
-            priorities.Add($"Triage the {received} newly received case{(received == 1 ? "" : "s")} with Olivia and route to the right specialist.");
+            priorities.Add($"Triage the {received} newly received case{(received == 1 ? "" : "s")} with Olivia and route each to the right specialist.");
 
         var asAt = $"{cases.Count} open Member Case{(cases.Count == 1 ? "" : "s")} · scenario cases shown at their decision points";
 
         return new FloorView(asAt, stageCounts, floorCases, clocks, escalations, approvals, vulnerable, coaching, priorities);
     }
-
-    private static string PriorityLine(ApprovalItem a) => a.Priority switch
-    {
-        1 => $"{a.ClientName}: {a.Recommendation} (due {a.Due}).",
-        _ => $"{a.ClientName}: {a.Item} — {a.Recommendation} (due {a.Due})."
-    };
 
     private static CaseFocus BuildFocus(CaseRecord c)
     {
@@ -314,7 +312,8 @@ public static class TeamLeaderApi
                     Vulnerable: null,
                     Summary: "New advised Caldova Super (Select) account CS-2049817 open in the Growth model; consolidating ~$138,200 from two external funds.",
                     Decision: "No approval needed — account opening is within delegated authority.",
-                    Recommendation: "Have Rory chase Hannah for the written insurance decision so $96,400 isn't left waiting; Cara's welcome email and adviser update are ready to go.");
+                    Recommendation: "Have Rory chase Hannah for the written insurance decision so $96,400 isn't left waiting; Cara's welcome email and adviser update are ready to go.",
+                    Today: "Ask Rory to chase Hannah for Priya's written insurance decision so the ~$96,400 Southern Cross rollover isn't left waiting.");
 
             case "rollover-grace":
                 return new CaseProfile(
@@ -343,7 +342,8 @@ public static class TeamLeaderApi
                         "Contact only on pre-change verified details; human-approved reassurance letter; IDCARE referral; never mention the SMR"),
                     Summary: "Full-balance rollover ($612,400) to a newly registered SMSF after a phone change of details — financial-crime risk HIGH.",
                     Decision: "Approve the block and the SMR referral.",
-                    Recommendation: "Approve now — the 3-business-day SMR clock is the tightest on the floor, and no money has moved.");
+                    Recommendation: "Approve now — the 3-business-day SMR clock is the tightest on the floor, and no money has moved.",
+                    Today: "Approve Grace's block and the SMR referral first — the SMR clock (due Wed 11 Nov 2026) is the tightest on the floor.");
 
             case "pension-george":
                 return new CaseProfile(
@@ -370,7 +370,8 @@ public static class TeamLeaderApi
                     Vulnerable: null,
                     Summary: "Account-based pension of $1,250,000 paying $6,500 a month from 15 Dec 2026; Helen as reversionary beneficiary.",
                     Decision: "Approve the commencement (authority limit: $1,000,000 or more).",
-                    Recommendation: "Approve in Teams — every rule check passed and Cara's welcome-to-retirement letter is ready.");
+                    Recommendation: "Approve in Teams — every rule check passed and Cara's welcome-to-retirement letter is ready.",
+                    Today: "Approve George's $1,250,000 pension commencement in Teams ahead of the Mon 16 Nov 2026 start.");
 
             case "hardship-tom":
                 return new CaseProfile(
@@ -399,7 +400,8 @@ public static class TeamLeaderApi
                         "Human review; kind plain-English letter; National Debt Helpline 1800 007 007 and Moneysmart; offer a call"),
                     Summary: "Severe financial hardship — every criterion met, capped at $10,000 by law.",
                     Decision: "Approve the partial release ($10,000 of $15,000).",
-                    Recommendation: "Approve today so $7,932 reaches Tom on Friday, and read Cara's letter for tone before it goes.");
+                    Recommendation: "Approve today so $7,932 reaches Tom on Friday, and read Cara's letter for tone before it goes.",
+                    Today: "Review Tom's vulnerable-member brief and approve the $10,000 partial release so Penny can pay $7,932 on Fri 13 Nov 2026.");
 
             case "death-benefit-robert":
                 return new CaseProfile(
@@ -428,7 +430,8 @@ public static class TeamLeaderApi
                         "Theo owns the case; Cara is the single contact; human-approved condolence letters; Marcus updated only with consent"),
                     Summary: "Death benefit under a valid binding nomination — 50/50 to Mei Chen's two children.",
                     Decision: "Approve both death benefit payments.",
-                    Recommendation: "Approve as soon as the sale completes; Cara calls Robert before the letters go.");
+                    Recommendation: "Approve as soon as the sale completes; Cara calls Robert before the letters go.",
+                    Today: "Approve the Chen death benefit payments ($217,477.26 net each) once the portfolio sale completes, and keep Cara as the family's single contact.");
 
             default:
                 return ReceivedProfile(c);

@@ -535,7 +535,10 @@
                 });
                 if (!data) throw new Error('No response from the agent');
 
-                if (!data.agentError) {
+                if (data.agentError) {
+                    processStatus.className = 'fc-status error';
+                    processStatus.textContent = 'Agent error: ' + data.agentError + ' — showing the deterministic assessment.';
+                } else {
                     processStatus.className = 'fc-status';
                     processStatus.textContent = data.agentConfigured
                         ? 'Financial Crime Agent completed the review.'

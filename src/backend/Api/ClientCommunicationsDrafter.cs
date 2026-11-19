@@ -4,14 +4,16 @@ namespace CaldovaSuper.App.Api;
 
 /// <summary>
 /// Deterministic draft generator for the Client Communications "Try it out"
-/// demo (Cara). For each Member Case it switches on
-/// <see cref="CaseRecord.SampleId"/> and produces Cara's case summary
-/// (sentiment, what happened, what's next) plus ready-to-review drafts for
-/// both audiences of an adviser-led platform — the member (letter or email),
-/// the adviser (only when the account has one) and an SMS. Every draft
-/// carries tone notes and a compliance check: no personal advice, next steps,
-/// timeframes, contact details and complaint rights (Caldova's internal
-/// dispute resolution first, then AFCA), plus the hardship, fraud-victim and
+/// demo (Cara). The five seeded scenario cases (switching on
+/// <see cref="CaseRecord.SampleId"/>) are shown at the point Cara writes the
+/// outcome, with her case summary (sentiment, what happened, what's next)
+/// and ready-to-review drafts for both audiences of an adviser-led platform —
+/// the member (letter or email), the adviser (only when the account has one)
+/// and an SMS. Cases opened live by the Onboarding demo get a type-aware
+/// "request received" acknowledgement instead. Every draft carries tone
+/// notes and a compliance check: no personal advice, next steps, timeframes,
+/// contact details and complaint rights (Caldova's internal dispute
+/// resolution first, then AFCA), plus the hardship, fraud-victim and
 /// bereavement specifics. The demo therefore always has realistic output,
 /// even when the live Foundry agent is not configured; when it is, the
 /// agent's streamed narrative is shown alongside these drafts.
@@ -66,15 +68,17 @@ internal static class ClientCommunicationsDrafter
     private const string SpotCheckReason =
         "Spot-check — routine communication with no decline, partial approval or vulnerability.";
 
-    internal static DraftBundle Build(CaseRecord r) => (r.SampleId ?? string.Empty).ToLowerInvariant() switch
-    {
-        "onboarding-priya" => Priya(r),
-        "rollover-grace" => Grace(r),
-        "pension-george" => George(r),
-        "hardship-tom" => Tom(r),
-        "death-benefit-robert" => Robert(r),
-        _ => Generic(r)
-    };
+    internal static DraftBundle Build(CaseRecord r) => !IsScenarioCase(r)
+        ? Generic(r)
+        : (r.SampleId ?? string.Empty).ToLowerInvariant() switch
+        {
+            "onboarding-priya" => Priya(r),
+            "rollover-grace" => Grace(r),
+            "pension-george" => George(r),
+            "hardship-tom" => Tom(r),
+            "death-benefit-robert" => Robert(r),
+            _ => Generic(r)
+        };
 
     // ── 1. Priya — welcome + adviser update (BDBN witness, insurance) ──────────
     private static DraftBundle Priya(CaseRecord r)
@@ -671,7 +675,7 @@ internal static class ClientCommunicationsDrafter
                 **Who to contact**
                 I'll be your contact for anything you need. Please call me on {CaldovaPhone} ({ServiceHours}) and ask for Cara, or simply reply to this email.
 
-                {DeathBenefitComplaints()}
+                {DeathBenefitComplaints("your mother's account")}
 
                 With our deepest sympathy,
                 {Signature}
@@ -767,49 +771,122 @@ internal static class ClientCommunicationsDrafter
             AdviserNote: null);
     }
 
-    // ── Generic acknowledgement for any other case (e.g. minted live) ─────────
+    // ── Request received — cases opened live by the Onboarding demo ──────────
+    // (The seeded scenario cases above are shown at the stage where Cara
+    // writes the outcome; a freshly opened case gets a type-aware
+    // acknowledgement instead.)
     private static DraftBundle Generic(CaseRecord r)
     {
         var first = FirstName(r.ClientName);
         var type = string.IsNullOrWhiteSpace(r.RequestType) ? "request" : r.RequestType;
-        var typeLower = type.ToLowerInvariant();
-        var isHardship = typeLower.Contains("hardship");
-        var isDeath = typeLower.Contains("death");
-        var isSmsf = typeLower.Contains("smsf");
+        var typeLower = type.ToLowerInvariant().Replace("smsf", "SMSF");
+        var kind = KindOf(type);
         var hasAdviser = HasAdviser(r);
+        var adviserFirst = FirstName(r.AdviserName);
         var nextTeam = NextTeam(type);
 
         var flags = new List<string>();
-        if (isHardship)
-            flags.Add("Financial hardship — vulnerable member; human review and free financial counselling details (National Debt Helpline 1800 007 007, Moneysmart).");
-        if (isDeath)
+        if (kind == "hardship")
+            flags.Add("Financial hardship — vulnerable member; kind tone, human review and free financial counselling (National Debt Helpline 1800 007 007, Moneysmart).");
+        if (kind == "death")
             flags.Add("Bereavement — condolences first; one named contact; human-approved letters only.");
-        if (isSmsf)
-            flags.Add("Rollover to an SMSF — contact the member only on verified details held before any recent change.");
+        if (kind == "rollover")
+            flags.Add("Rollover out — write only to the verified contact details on file, invite the member to call if they didn't make the request, and never discuss any suspicion with the requester.");
         if (string.Equals(r.Priority, "Urgent", StringComparison.OrdinalIgnoreCase))
             flags.Add($"Urgent case — {r.PriorityReason}");
 
         var approvalRequired = flags.Count > 0;
 
-        var opener = isDeath
-            ? $"Dear {first},\n\nWe're so sorry for your loss. Thank you for letting us know — we'll take care of this with you, step by step."
-            : isHardship
-                ? $"Dear {first},\n\nThank you for getting in touch. We know it isn't easy to ask for help, and we'll look at your application carefully and quickly."
-                : $"Hi {first},\n\nThanks for your request — it's with us and we're on it.";
+        var opener = kind switch
+        {
+            "death" => $"Dear {first},\n\nWe're so sorry for your loss. Thank you for letting us know — we'll take care of this with you, one step at a time.",
+            "hardship" => $"Dear {first},\n\nThank you for your application. We know it isn't easy to ask for help, and we'll look at it carefully and as quickly as we can.",
+            "rollover" => $"Dear {first},\n\nWe've received a request to roll over your super out of Caldova. Before any money moves to another fund — especially a self-managed super fund — we verify the request with the ATO and with you.",
+            "pension" => $"Hi {first},\n\nThanks for your pension application — it's a big milestone, and we'll make sure it's set up properly.",
+            "account" => $"Hi {first},\n\nThanks for choosing Caldova — your application is with us and we're setting things up.",
+            _ => $"Hi {first},\n\nThanks for your request — it's with us and we're on it."
+        };
+
+        string[] steps = kind switch
+        {
+            "death" =>
+            [
+                "We'll check the documents we have — a certified death certificate and identification for each person receiving a benefit — and let you know straight away if we need anything else.",
+                "We'll confirm any death benefit nomination and who can receive the benefit under super law and the trust deed.",
+                "We'll explain the amounts and any tax in plain English before anything is paid.",
+            ],
+            "hardship" =>
+            [
+                "Our Benefits & Eligibility team will check your application against the severe financial hardship rules — including 26 weeks in a row of Centrelink income support, and a limit of $1,000 to $10,000 (before tax) once in any 12 months.",
+                "If we need anything else, we'll ask you once, clearly.",
+                "We'll write to you with the decision, the amount and any tax, in plain English.",
+            ],
+            "rollover" =>
+            [
+                "We'll verify the request, including checking the receiving fund's details with the ATO's SMSF verification service where an SMSF is involved.",
+                "We may call you on the number we already hold to confirm it's really you.",
+                "Once the request is verified and we have everything we need, rollovers are completed within 3 business days.",
+            ],
+            "pension" =>
+            [
+                "Our Benefits & Eligibility team will confirm your condition of release, your transfer balance cap and this year's minimum payment.",
+                "Once everything checks out — and any approval is in place — we'll start your pension and confirm your payment schedule in writing.",
+                hasAdviser ? $"We'll keep {r.AdviserName} updated at each step." : "If anything is missing, we'll ask you once, clearly.",
+            ],
+            "account" =>
+            [
+                "We'll confirm your member number and our fund details to give your employer.",
+                hasAdviser
+                    ? $"If anything is missing from your application, we'll let you and {r.AdviserName} know straight away."
+                    : "If anything is missing from your application, we'll let you know straight away.",
+                "If you've asked us to bring super across from other funds, we'll request it for you — and we'll check first whether you'd lose any insurance cover.",
+            ],
+            _ =>
+            [
+                $"Our {nextTeam} team will review your request against your product's rules and the law.",
+                "If we need anything else, we'll ask you once, clearly, and explain why.",
+                "We'll let you know the outcome and what it means for you, in plain English.",
+            ]
+        };
+        var stepsText = string.Join("\n", steps.Select((s, i) => $"{i + 1}. {s}"));
+
+        var extra = kind switch
+        {
+            "hardship" =>
+                "\n\n**Free, confidential help**\n" +
+                "- National Debt Helpline — free financial counselling: 1800 007 007 (www.ndh.org.au)\n" +
+                "- Moneysmart — free tools and guidance from ASIC: www.moneysmart.gov.au",
+            "rollover" =>
+                "\n\n**Didn't make this request?**\n" +
+                $"Call us straight away on {CaldovaPhone}. We will never ask for your password or a one-time code by phone, email or SMS.",
+            _ => string.Empty
+        };
 
         var summary = new CaseSummary(
-            SentimentLabel: isDeath ? "Grieving" : isHardship ? "Possibly distressed" : "Neutral",
-            Sentiment: isDeath
-                ? "A bereaved family member — be gentle, keep it simple and give one contact."
-                : isHardship
-                    ? "A member under financial pressure — be kind, clear and practical."
-                    : "First contact on this request — keep it clear and set expectations.",
-            WhatHappened: $"{r.ClientName}'s {typeLower} ({r.CaseNumber}) was received on {r.ReceivedDate}. {r.RequestSummary}",
+            SentimentLabel: kind switch
+            {
+                "death" => "Grieving",
+                "hardship" => "Possibly distressed",
+                "rollover" => "Unknown — verify first",
+                "pension" or "account" => "Positive",
+                _ => "Neutral"
+            },
+            Sentiment: kind switch
+            {
+                "death" => "A bereaved family member — be gentle, keep it simple and give one contact.",
+                "hardship" => "A member under financial pressure — be kind, clear and practical, and point to free help.",
+                "rollover" => "We can't yet be sure the member made this request — write only to verified details and keep it factual and protective.",
+                "pension" => "A member reaching a milestone — warm, and clear about what happens next.",
+                "account" => "A new member — welcoming, practical and quick to read.",
+                _ => "First contact on this request — keep it clear and set expectations."
+            },
+            WhatHappened: $"{r.ClientName}'s {typeLower} ({r.CaseNumber}) was received on {r.ReceivedDate} and opened by Olivia. {r.RequestSummary}",
             WhatsNext:
             [
                 $"{nextTeam} reviews the request against the PDS, trust deed and super law.",
-                $"We'll keep {first} informed at each step by their preferred channel ({(string.IsNullOrWhiteSpace(r.PreferredContact) ? "email" : r.PreferredContact)}).",
-                "If anything is missing, we'll ask once — clearly and with a reason.",
+                $"Cara acknowledges the request today by {(string.IsNullOrWhiteSpace(r.PreferredContact) ? "email" : r.PreferredContact)}" +
+                    (hasAdviser ? $" and updates {r.AdviserName}." : "."),
+                "If anything is missing, we ask once — clearly and with a reason.",
             ]);
 
         var drafts = new List<Draft>
@@ -817,9 +894,11 @@ internal static class ClientCommunicationsDrafter
             new(
                 Id: "member-acknowledgement",
                 Audience: "member",
-                AudienceLabel: "Member email — acknowledgement",
+                AudienceLabel: "Member email — request received",
                 Channel: "Email",
-                Recipient: $"{r.ClientName} <{r.ClientEmail}>",
+                Recipient: kind == "rollover"
+                    ? $"{r.ClientName} <{r.ClientEmail}> — verified details on file"
+                    : $"{r.ClientName} <{r.ClientEmail}>",
                 Subject: $"We've received your request — {r.CaseNumber}",
                 Body: $"""
                     {opener}
@@ -830,29 +909,24 @@ internal static class ClientCommunicationsDrafter
                     - Account: {r.MemberNumber}
 
                     **What happens next**
-                    1. Our {nextTeam} team will review your request against your product's rules and the law.
-                    2. If we need anything else, we'll ask you once, clearly, and explain why.
-                    3. We'll let you know the outcome and what it means for you, in plain English.
+                    {stepsText}{extra}
 
                     **Questions?**
                     Reply to this email or call us on {CaldovaPhone} ({ServiceHours}).
 
-                    {(isDeath ? DeathBenefitComplaints() : SuperComplaints("reply to this email"))}
+                    {(kind == "death" ? DeathBenefitComplaints("your loved one's account") : SuperComplaints("reply to this email"))}
 
                     Kind regards,
                     {Signature}
                     """,
-                Tone: isDeath
-                    ? "Gentle and simple, with condolences first."
-                    : isHardship ? "Kind and practical; no judgement." : "Clear and friendly; sets expectations.",
-                Compliance:
-                [
-                    Pass("No personal advice", "Explains the process only."),
-                    Pass("Next steps", "What happens next, in order."),
-                    Warn("Timeframes", "No firm date yet — confirm once the eligibility check is complete."),
-                    Pass("Contact details", CaldovaPhone),
-                    Pass("Complaint rights", isDeath ? "Caldova IDR (up to 90 days for death benefits) then AFCA." : "Caldova IDR (45 days) then AFCA."),
-                ],
+                Tone: kind switch
+                {
+                    "death" => "Gentle and simple, with condolences first and one named contact.",
+                    "hardship" => "Kind and practical; no judgement; free help up front.",
+                    "rollover" => "Calm, factual and protective — no detail the requester could misuse.",
+                    _ => "Clear and friendly; sets expectations."
+                },
+                Compliance: GenericCompliance(kind),
                 ApprovalRequired: approvalRequired,
                 ApprovalReason: approvalRequired
                     ? "Sensitive case — a human reviews the message before it is sent."
@@ -869,7 +943,7 @@ internal static class ClientCommunicationsDrafter
                 Recipient: $"{r.AdviserName}{(string.IsNullOrWhiteSpace(r.AdviserPractice) ? string.Empty : " · " + r.AdviserPractice)}",
                 Subject: $"{r.ClientName} — {type} received ({r.CaseNumber})",
                 Body: $"""
-                    Hi {FirstName(r.AdviserName)},
+                    Hi {adviserFirst},
 
                     We've received {r.ClientName}'s {typeLower} (case {r.CaseNumber}, received {r.ReceivedDate}).
 
@@ -888,10 +962,18 @@ internal static class ClientCommunicationsDrafter
                 [
                     Pass("No personal advice", "Status only."),
                     Pass("Authority to share", "Adviser of record on the account."),
+                    Pass("Next steps", "Who has the case and when the adviser will hear back."),
                 ],
                 ApprovalRequired: false,
                 ApprovalReason: SpotCheckReason));
         }
+
+        var smsBody = kind switch
+        {
+            "death" => $"Caldova: {first}, we're so sorry for your loss. We've received your message ({r.CaseNumber}) and emailed you what happens next. {CaldovaPhone}",
+            "rollover" => $"Caldova: We've received a request to roll over your super ({r.CaseNumber}). If this wasn't you, call us now on {CaldovaPhone}.",
+            _ => $"Caldova: Hi {first}, we've received your request ({r.CaseNumber}) and we're on it. Details are in your email. Questions? {CaldovaPhone}"
+        };
 
         drafts.Add(new Draft(
             Id: "sms",
@@ -900,8 +982,8 @@ internal static class ClientCommunicationsDrafter
             Channel: "SMS",
             Recipient: $"{r.ClientName} · {r.ClientPhone}",
             Subject: null,
-            Body: $"Caldova: Hi {first}, we've received your request ({r.CaseNumber}) and we're on it. We've emailed you the details. Questions? {CaldovaPhone}",
-            Tone: "Short acknowledgement.",
+            Body: smsBody,
+            Tone: kind == "rollover" ? "Short and protective — invites a call if the member didn't make the request." : "Short acknowledgement.",
             Compliance:
             [
                 Pass("Non-sensitive", "Reference number only."),
@@ -923,16 +1005,46 @@ internal static class ClientCommunicationsDrafter
             AdviserNote: hasAdviser ? null : "No adviser on this account — no adviser update is needed.");
     }
 
+    private static IReadOnlyList<ComplianceCheck> GenericCompliance(string kind)
+    {
+        var checks = new List<ComplianceCheck>
+        {
+            Pass("No personal advice", "Explains the process only."),
+            Pass("Next steps", "What happens next, in order."),
+            kind == "rollover"
+                ? Pass("Timeframes", "States the 3-business-day rollover standard once the request is verified.")
+                : Warn("Timeframes", "No firm date yet — confirm once the assessment is complete."),
+            Pass("Contact details", CaldovaPhone),
+            Pass("Complaint rights", kind == "death"
+                ? "Caldova IDR (up to 90 days for death benefits) then AFCA."
+                : "Caldova IDR (45 days) then AFCA."),
+        };
+        if (kind == "hardship")
+            checks.Add(Pass("Free help", "National Debt Helpline 1800 007 007 and Moneysmart."));
+        if (kind == "rollover")
+            checks.Add(Pass("Verified channel only", "Sent to the details on file; invites the member to call if they didn't make the request."));
+        return checks;
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// True for the five seeded scenario cases (<c>REQ-yyyyMMdd-DEMOnn</c>),
+    /// which are shown at the point Cara writes the outcome. Cases opened
+    /// live by the Onboarding demo are freshly received.
+    /// </summary>
+    internal static bool IsScenarioCase(CaseRecord r) =>
+        r.CaseNumber.Contains("-DEMO", StringComparison.OrdinalIgnoreCase);
+
     private static string SuperComplaints(string howToTellUs) =>
         "**If you're unhappy**\n" +
         $"Please tell us first — {howToTellUs} and our Complaints team will look into it and give you a written response within 45 days. " +
         "If you're not satisfied with our response, or we haven't responded in time, you can contact the Australian Financial Complaints Authority (AFCA), " +
         $"a free and independent service: {AfcaContact}.";
 
-    private static string DeathBenefitComplaints() =>
+    private static string DeathBenefitComplaints(string whoseAccount) =>
         "**If you're unhappy**\n" +
-        "If you're unhappy with anything about how we've handled your mother's account, please tell us first and we'll do our best to put it right. " +
+        $"If you're unhappy with anything about how we've handled {whoseAccount}, please tell us first and we'll do our best to put it right. " +
         "We'll respond in writing within the time that applies — up to 90 days for a complaint about how a death benefit is paid. " +
         $"If you're still not satisfied, you can contact the Australian Financial Complaints Authority (AFCA), a free and independent service: {AfcaContact}.";
 
@@ -943,16 +1055,26 @@ internal static class ClientCommunicationsDrafter
         !string.IsNullOrWhiteSpace(r.AdviserName) &&
         !r.AdviserName.TrimStart().StartsWith("None", StringComparison.OrdinalIgnoreCase);
 
-    private static string NextTeam(string requestType)
+    private static string KindOf(string requestType)
     {
         var t = (requestType ?? string.Empty).ToLowerInvariant();
-        if (t.Contains("death")) return "Benefits & Eligibility";
-        if (t.Contains("hardship")) return "Benefits & Eligibility";
-        if (t.Contains("pension")) return "Benefits & Eligibility";
-        if (t.Contains("smsf") || t.Contains("rollover")) return "Transfers & Rollovers";
-        if (t.Contains("account")) return "Onboarding & Requests";
-        return "Client Operations";
+        if (t.Contains("death")) return "death";
+        if (t.Contains("hardship")) return "hardship";
+        if (t.Contains("smsf") || t.Contains("rollover")) return "rollover";
+        if (t.Contains("pension")) return "pension";
+        if (t.Contains("account")) return "account";
+        return "general";
     }
+
+    private static string NextTeam(string requestType) => KindOf(requestType) switch
+    {
+        "death" => "Benefits & Eligibility",
+        "hardship" => "Benefits & Eligibility",
+        "pension" => "Benefits & Eligibility",
+        "rollover" => "Transfers & Rollovers",
+        "account" => "Onboarding & Requests",
+        _ => "Client Operations"
+    };
 
     internal static string FirstName(string? fullName)
     {

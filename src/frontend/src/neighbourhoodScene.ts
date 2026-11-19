@@ -1490,7 +1490,8 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
   attach(path);
 
   // Office label
-  makeLabel(-10, 8, "Caldova Wealth — Client Operations", "#2a3a5c", 9.4);
+  // Stands just behind the office, raised so it clears the gable roof.
+  makeLabel(-10, 13.5, "Caldova Wealth — Client Operations", "#2a3a5c", 7.6);
 
   // ----- Captures: scenery referenced by the life-event animations -----
   // These are populated as each zone is built below, then handed to the
@@ -1735,7 +1736,9 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
     // Briefcase marker (💼)
     makeIncidentMarker(zx + 1.2, 3.4, zz + 4.8, "briefcase");
 
-    makeLabel(zx + 4, zz + 8, "Docklands — New Job (Priya)", "#3a8fd6", 7.4);
+    // Stands behind the HQ, raised above its roof, so it never blocks the
+    // entrance or the building sign.
+    makeLabel(zx + 4, zz + 11, "Docklands — New Job (Priya)", "#3a8fd6", 7.4);
   }
 
   // ----- Zone 3: Lygon St — Café Closed (Tom) -----

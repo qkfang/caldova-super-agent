@@ -45,8 +45,8 @@ internal static class AgentSseStreaming
     /// <summary>
     /// Stream the agent's reply over SSE, then emit a final <c>done</c> event
     /// carrying <paramref name="buildEnvelope"/>'s projection of the agent
-    /// trace into the page-specific envelope shape (fields, urgency, calculation,
-    /// supplier match, etc).
+    /// trace into the page-specific envelope shape (fields, NIGO checklist,
+    /// eligibility checklist, payment calculation, transfer plan, etc).
     ///
     /// Pass <paramref name="agent"/> as <c>null</c> to send only the
     /// deterministic-fallback envelope (zero deltas, single <c>done</c> event).

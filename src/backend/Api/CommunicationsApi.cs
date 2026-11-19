@@ -234,7 +234,9 @@ public static class CommunicationsApi
     // ── Prompts ───────────────────────────────────────────────────────────────
     private static string BuildDraftingPrompt(CaseRecord r, ClientCommunicationsDrafter.DraftBundle bundle)
     {
-        var sample = (r.SampleId ?? string.Empty).ToLowerInvariant();
+        var isScenario = ClientCommunicationsDrafter.IsScenarioCase(r);
+        var sample = isScenario ? (r.SampleId ?? string.Empty).ToLowerInvariant() : string.Empty;
+        var type = (r.RequestType ?? string.Empty).ToLowerInvariant();
         var hasAdviser = ClientCommunicationsDrafter.HasAdviser(r);
         var sb = new StringBuilder();
 
@@ -303,6 +305,18 @@ public static class CommunicationsApi
                 sb.AppendLine("Celebrate the retirement; give the payment schedule ($6,500 monthly from 15/12/2026), the $38,870 minimum " +
                               "for 2026-27 and, for the adviser, the $850,000 remaining transfer balance cap space.");
                 break;
+            default:
+                // A case opened live: acknowledge receipt, set expectations and
+                // match the tone to the request type — no decision exists yet.
+                sb.AppendLine("This case has just been received — acknowledge it, explain what happens next and don't pre-empt any decision.");
+                if (type.Contains("hardship"))
+                    sb.AppendLine("Hardship: be kind and non-judgemental and include the National Debt Helpline (1800 007 007) and Moneysmart.");
+                else if (type.Contains("death"))
+                    sb.AppendLine("Bereavement: condolences first, plain English and one named contact.");
+                else if (type.Contains("smsf") || type.Contains("rollover"))
+                    sb.AppendLine("Rollover out: write only to the verified contact details on file, invite the member to call if they didn't " +
+                                  "make the request, and never discuss any suspicion with the requester.");
+                break;
         }
         sb.AppendLine("Use only the facts above — never invent amounts or dates. Mask TFNs and bank account numbers.");
         return sb.ToString();
@@ -337,14 +351,24 @@ public static class CommunicationsApi
     private static string FallbackVoiceReply(string message, CaseRecord? record)
     {
         var intent = DetectIntent(message);
-        if (record is not null)
+        if (record is null) return GenericReply(intent);
+
+        if (ClientCommunicationsDrafter.IsScenarioCase(record))
         {
             var caseReply = CaseReply(record, intent);
             if (caseReply is not null) return caseReply;
-            var first = ClientCommunicationsDrafter.FirstName(record.ClientName);
-            return $"Thanks for calling, {first}. " + GenericReply(intent);
         }
-        return GenericReply(intent);
+
+        var first = ClientCommunicationsDrafter.FirstName(record.ClientName);
+        if (intent is "status" or "general" or "greeting")
+        {
+            var condolence = (record.RequestType ?? string.Empty).Contains("death", StringComparison.OrdinalIgnoreCase)
+                ? "I'm so sorry for your loss. "
+                : string.Empty;
+            return $"Hi {first}, it's Cara from Caldova. {condolence}Your request, {record.CaseNumber}, is with our team now, and we'll be in " +
+                   "touch as soon as there's an update — there's nothing you need to do right now. Is there anything I can help with in the meantime?";
+        }
+        return $"Hi {first}. " + GenericReply(intent);
     }
 
     private static string DetectIntent(string message)
