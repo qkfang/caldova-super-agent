@@ -1,13 +1,13 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72D-47B6-A68D-7590B98EB39B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "agent", "src\agent\agent.csproj", "{0654E4C6-F3E5-8BD9-9C4D-51DCDAF8E70C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cs-agent", "src\agent\cs-agent.csproj", "{0654E4C6-F3E5-8BD9-9C4D-51DCDAF8E70C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "app", "src\app\app.csproj", "{03D632EC-110B-466E-906B-1768ED6DC0F1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cs-backend", "src\backend\cs-backend.csproj", "{03D632EC-110B-466E-906B-1768ED6DC0F1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

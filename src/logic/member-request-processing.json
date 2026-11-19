@@ -49,7 +49,7 @@
             "Create_Conversation": {
                 "type": "Http",
                 "inputs": {
-                    "uri": "https://zava-foundry.services.ai.azure.com/api/projects/zava-claims-project/openai/conversations?api-version=2025-05-15-preview",
+                    "uri": "https://aif-cs.services.ai.azure.com/api/projects/aif-cs-project/openai/conversations?api-version=2025-05-15-preview",
                     "method": "POST",
                     "headers": {
                         "Content-Type": "application/json"
@@ -65,7 +65,7 @@
                     },
                     "authentication": {
                         "type": "ManagedServiceIdentity",
-                        "identity": "/subscriptions/873a4995-e21b-47e2-953e-f2e88e2fa4f9/resourcegroups/rg-zava-claims/providers/Microsoft.ManagedIdentity/userAssignedIdentities/zava-claims-logic-uid",
+                        "identity": "/subscriptions/873a4995-e21b-47e2-953e-f2e88e2fa4f9/resourcegroups/rg-caldova-super/providers/Microsoft.ManagedIdentity/userAssignedIdentities/caldova-ops-logic-uid",
                         "audience": "https://ai.azure.com"
                     }
                 },
@@ -78,7 +78,7 @@
             "Generate_Agent_Response": {
                 "type": "Http",
                 "inputs": {
-                    "uri": "https://zava-foundry.services.ai.azure.com/api/projects/zava-claims-project/openai/responses?api-version=2025-05-15-preview",
+                    "uri": "https://aif-cs.services.ai.azure.com/api/projects/aif-cs-project/openai/responses?api-version=2025-05-15-preview",
                     "method": "POST",
                     "headers": {
                         "Content-Type": "application/json"
@@ -86,13 +86,13 @@
                     "body": {
                         "conversation": "@{body('Create_Conversation')?['id']}",
                         "agent": {
-                            "name": "claims-email-agent",
+                            "name": "member-request-agent",
                             "type": "agent_reference"
                         }
                     },
                     "authentication": {
                         "type": "ManagedServiceIdentity",
-                        "identity": "/subscriptions/873a4995-e21b-47e2-953e-f2e88e2fa4f9/resourcegroups/rg-zava-claims/providers/Microsoft.ManagedIdentity/userAssignedIdentities/zava-claims-logic-uid",
+                        "identity": "/subscriptions/873a4995-e21b-47e2-953e-f2e88e2fa4f9/resourcegroups/rg-caldova-super/providers/Microsoft.ManagedIdentity/userAssignedIdentities/caldova-ops-logic-uid",
                         "audience": "https://ai.azure.com"
                     }
                 },
@@ -122,7 +122,7 @@
                         "messages": [
                             {
                                 "role": "system",
-                                "content": "check if the response from process indicates a successful run.\nif successful, nothing to be done.\nif unsuccessful, engage a human team member via teams\n\nprocess result is below:\n@{body('Filter_Message_Output')[0]['content'][0]['text']}"
+                                "content": "check if the response from the member-request-agent (Onboarding & Requests Officer) indicates a successful run (processed_status = true).\nif successful, nothing to be done.\nif unsuccessful, engage the Client Operations Team Leader via teams\n\nprocess result is below:\n@{body('Filter_Message_Output')[0]['content'][0]['text']}"
                             }
                         ],
                         "agentModelType": "AzureOpenAI",
@@ -162,11 +162,11 @@
                                                 "Click to Complete Manual Review"
                                             ],
                                             "recipient": {
-                                                "to": "claims-team-leader@zava-insurance.com",
-                                                "summary": "Claim Email Process Issue"
+                                                "to": "client-ops-team-leader@caldova.example",
+                                                "summary": "Member Request Process Issue"
                                             },
-                                            "messageBody": "[manual review required]\n\ncustomer_email: @{variables('fabricLog')['customer_email']}\n\ncustomer_email_title: @{variables('fabricLog')['customer_email_title']}\n\ncustomer_email_body: @{variables('fabricLog')['customer_email_body']}\n\nfabric_filename: @{variables('fabricFileName')}\n\nprocessing_note: @{variables('agentResponse')['processing_note']}",
-                                            "messageTitle": "Claim Email Process Issue"
+                                            "messageBody": "[manual review required]\n\nsender_email: @{variables('fabricLog')['sender_email']}\n\nsender_email_title: @{variables('fabricLog')['sender_email_title']}\n\nsender_email_body: @{variables('fabricLog')['sender_email_body']}\n\ncase_number: @{variables('agentResponse')?['case_number']}\n\nfabric_filename: @{variables('fabricFileName')}\n\nprocessing_note: @{variables('agentResponse')['processing_note']}",
+                                            "messageTitle": "Member Request Process Issue"
                                         }
                                     },
                                     "path": "/flowbot/actions/messagewithoptions/recipienttypes/user/$subscriptions"
@@ -234,7 +234,7 @@
                                 }
                             }
                         },
-                        "description": "raise an issue of processing to human member "
+                        "description": "raise a request the agent could not complete to the Client Operations Team Leader in Teams for manual review"
                     }
                 },
                 "runAfter": {
@@ -315,7 +315,7 @@
                         {
                             "name": "runPrefix",
                             "type": "string",
-                            "value": "@{concat('claim_email_', formatDateTime(utcNow(), 'yyyyMMdd-HHmmss'))}"
+                            "value": "@{concat('member_request_', formatDateTime(utcNow(), 'yyyyMMdd-HHmmss'))}"
                         },
                         {
                             "name": "attachmentFileList",
@@ -330,12 +330,12 @@
                 "inputs": {
                     "name": "fabricLog",
                     "value": {
-                        "customer_email": "@{triggerBody()?['from']}",
-                        "customer_email_title": "@{triggerBody()?['subject']}",
-                        "customer_email_body": "@{body('Html_to_text')}",
-                        "customer_email_attachment": "@{if(equals(length(triggerBody()?['attachments']), 0), '', triggerBody()?['attachments'][0]['name'])}",
-                        "customer_email_datetime": "@{utcNow()}",
-                        "workflow_type": "claims_intake"
+                        "sender_email": "@{triggerBody()?['from']}",
+                        "sender_email_title": "@{triggerBody()?['subject']}",
+                        "sender_email_body": "@{body('Html_to_text')}",
+                        "sender_email_attachment": "@{if(equals(length(triggerBody()?['attachments']), 0), '', triggerBody()?['attachments'][0]['name'])}",
+                        "sender_email_datetime": "@{utcNow()}",
+                        "workflow_type": "member_request"
                     }
                 },
                 "runAfter": {
@@ -358,7 +358,7 @@
             },
             "Compose_fabricLog_Step2": {
                 "type": "Compose",
-                "inputs": "@addProperty(addProperty(mergeObjects(variables('fabricLog'), variables('agentResponse')), 'processed_by', 'claims-email-agent'), 'processed_datetime', utcNow())",
+                "inputs": "@addProperty(addProperty(mergeObjects(variables('fabricLog'), variables('agentResponse')), 'processed_by', 'member-request-agent'), 'processed_datetime', utcNow())",
                 "runAfter": {
                     "Set_agentResponse": [
                         "SUCCEEDED"

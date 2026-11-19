@@ -1,0 +1,58 @@
+{
+  "documentType": "Caldova Managed Portfolio fact sheet",
+  "issuer": "Caldova Investments Limited — responsible entity of Caldova Managed Portfolios",
+  "name": "Caldova Managed Portfolio — Index Balanced",
+  "shortName": "Index Balanced",
+  "code": "CMP-IXB",
+  "asAt": "2026-10-31",
+  "style": "Passive (index)",
+  "objective": "To track a composite 60% growth / 40% defensive index benchmark before fees, aiming for CPI + 3.0% p.a. over rolling 5-year periods.",
+  "growthAllocation": 60,
+  "defensiveAllocation": 40,
+  "investmentFeePercent": 0.18,
+  "buySellSpreadPercent": 0.10,
+  "adminFeeNote": "Caldova Super & Pension admin fee is charged separately on the whole account balance: 0.30% on the first $250,000, 0.15% on $250,000–$1,000,000, 0.05% on $1,000,000–$2,000,000, nil above $2,000,000, plus a $180 p.a. account-keeping fee.",
+  "standardRiskMeasure": {
+    "band": 5,
+    "label": "Medium to high",
+    "negativeYearsIn20": "3 to less than 4"
+  },
+  "minimumSuggestedTimeframeYears": 5,
+  "assetAllocation": [
+    { "assetClass": "Australian shares (ASX 300 index)", "type": "growth", "targetPercent": 25, "rangePercent": "20–30" },
+    { "assetClass": "International shares (developed markets index)", "type": "growth", "targetPercent": 29, "rangePercent": "24–34" },
+    { "assetClass": "Listed property & infrastructure (index)", "type": "growth", "targetPercent": 6, "rangePercent": "3–9" },
+    { "assetClass": "Australian fixed interest (index)", "type": "defensive", "targetPercent": 18, "rangePercent": "13–23" },
+    { "assetClass": "International fixed interest (hedged index)", "type": "defensive", "targetPercent": 14, "rangePercent": "9–19" },
+    { "assetClass": "Cash & term deposits", "type": "defensive", "targetPercent": 8, "rangePercent": "3–13" }
+  ],
+  "returns": {
+    "periodEnding": "2026-10-31",
+    "oneYearPercent": 9.2,
+    "threeYearPercentPa": 7.9,
+    "fiveYearPercentPa": 6.3,
+    "basis": "Illustrative model returns, net of investment fees and costs, before admin fees and taxes.",
+    "warning": "Past performance is not a reliable indicator of future performance."
+  },
+  "topHoldings": [
+    { "holding": "Global equities — developed markets (index ETF, unhedged)", "weightPercent": 29.0 },
+    { "holding": "Australian equities — ASX 300 (index ETF)", "weightPercent": 25.0 },
+    { "holding": "Australian fixed interest — composite bond index (ETF)", "weightPercent": 18.0 },
+    { "holding": "Global aggregate bonds — AUD hedged (index ETF)", "weightPercent": 14.0 },
+    { "holding": "Global listed property & infrastructure (index ETF)", "weightPercent": 6.0 }
+  ],
+  "sectorNotes": [
+    "Fully passive — each sleeve tracks a market-capitalisation-weighted index; rebalanced quarterly back to target.",
+    "Same 60/40 growth/defensive split as Balanced, but no active managers or liquid alternatives — this is why the fee is lower.",
+    "All holdings are daily-priced and liquid exchange-traded funds."
+  ],
+  "suitableFor": "Cost-conscious investors who want a diversified 60/40 mix without active management and have a timeframe of at least 5 years.",
+  "availableOn": [
+    "Caldova Super — Essential",
+    "Caldova Super — Select",
+    "Caldova Super — Private",
+    "Caldova Pension",
+    "Caldova Wrap"
+  ],
+  "disclaimer": "General information only — not personal financial advice. Caldova Managed Portfolios are fictional products used in the Wealth Team in a Day demo."
+}

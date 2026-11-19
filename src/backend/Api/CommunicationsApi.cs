@@ -1,119 +1,105 @@
-using ZavaClaims.Agents;
-using ZavaClaims.App.Services;
+using System.Text;
+using System.Text.RegularExpressions;
+using CaldovaSuper.Agents;
+using CaldovaSuper.App.Services;
 
-namespace ZavaClaims.App.Api;
+namespace CaldovaSuper.App.Api;
 
-record CommunicationsProcessRequest(string ClaimNumber);
+record CommunicationsProcessRequest(string CaseNumber);
 
-record CommunicationsVoiceRequest(string Message, string? ClaimNumber, string? ConversationId);
+record CommunicationsVoiceRequest(string Message, string? CaseNumber, string? PreviousResponseId);
 
 /// <summary>
-/// HTTP endpoints that back the "Try It Out" tab on the Customer
-/// Communications agent page (<c>/agents/customer-communications</c>).
+/// HTTP endpoints behind the "Try it out" and "Voice chat" tabs on the Client
+/// Communications agent page (<c>/agents/client-communications</c>).
 ///
-/// The flow mirrors the Claims Intake demo:
+/// The flow:
 ///
-/// 1. List the claims minted by the Claims Intake demo (held in
-///    <see cref="IntakeClaimStore"/>) so the user can pick one from a
-///    dropdown.
-/// 2. Run the selected claim through the Customer Communications Agent
-///    (Cara) which drafts empathetic plain-English updates across
-///    email / SMS / portal, summarises current status &amp; next steps,
-///    and surfaces vulnerability flags for human review.
+/// 1. List the Member Cases held in <see cref="CaseStore"/> (the five seeded
+///    scenario cases plus any opened live by the Onboarding demo) so the user
+///    can pick one.
+/// 2. Engage the Client Communications Agent (Cara) on the selected case. The
+///    page always receives Cara's deterministic case summary and drafts from
+///    <see cref="ClientCommunicationsDrafter"/> — member letter/email, adviser
+///    update (when the account has an adviser) and SMS, each with tone and
+///    compliance notes — and, when Foundry is configured, the live agent's
+///    streamed narrative as well.
+/// 3. A typed "talk to Cara" endpoint used by the Voice chat tab whenever the
+///    real-time Voice Live connection isn't available: the live voice agent
+///    answers when Foundry is configured, otherwise a deterministic,
+///    case-aware spoken-style reply is returned.
 /// </summary>
 public static class CommunicationsApi
 {
     public static void MapCommunicationsEndpoints(
         this WebApplication app,
-        IntakeClaimStore claimStore,
-        ClaimsAgentFactory agentFactory,
+        CaseStore store,
+        CaldovaAgentFactory factory,
         ILogger logger)
     {
-        // Lightweight list used to populate the Claim ID dropdown on the
-        // Try It Out tab. Returns claims most-recent first.
-        app.MapGet("/communications/claims", () =>
+        // Lightweight list for the case pickers (Try it out + Voice chat),
+        // most recent first.
+        app.MapGet("/communications/cases", () =>
         {
-            var claims = claimStore.All().Select(c => new
+            var cases = store.All().Select(c => new
             {
-                claimNumber = c.ClaimNumber,
-                customerName = c.CustomerName,
-                claimType = c.ClaimType,
-                urgency = c.Urgency,
-                policyNumber = c.PolicyNumber,
+                caseNumber = c.CaseNumber,
+                clientName = c.ClientName,
+                requestType = c.RequestType,
+                memberNumber = c.MemberNumber,
+                adviserName = c.AdviserName,
+                priority = c.Priority,
                 createdAt = c.CreatedAt
             });
-            return Results.Ok(claims);
+            return Results.Ok(cases);
         });
 
-        // Full record for a single claim — mirrors /intake/claims/{n}.
-        app.MapGet("/communications/claims/{claimNumber}", (string claimNumber) =>
+        // Full Member Case record for a single case.
+        app.MapGet("/communications/cases/{caseNumber}", (string caseNumber) =>
         {
-            var record = claimStore.Get(claimNumber);
+            var record = store.Get(caseNumber);
             return record is null
-                ? Results.NotFound(new { error = $"claim '{claimNumber}' not found" })
+                ? Results.NotFound(new { error = $"case '{caseNumber}' not found" })
                 : Results.Ok(record);
         });
 
-        // Engage the Customer Communications Agent on the selected claim.
-        // Deterministic drafts are generated server-side so the demo always
-        // produces output; when Foundry is configured the live agent is
-        // also invoked and its narrative is surfaced in `agentNotes`.
-        //
-        // Clients can request a live SSE stream of the agent reply by sending
-        // `Accept: text/event-stream`; otherwise the response is a single JSON
-        // envelope as before.
+        // Engage Cara on the selected case. Deterministic drafts are always
+        // produced server-side so the demo completes end-to-end; when Foundry
+        // is configured the live agent is invoked too and its narrative is
+        // returned in `agentNotes` (streamed as SSE `delta` events when the
+        // client sends `Accept: text/event-stream`).
         app.MapPost("/communications/process", async (HttpContext httpContext, CommunicationsProcessRequest request) =>
         {
-            if (string.IsNullOrWhiteSpace(request.ClaimNumber))
-                return Results.BadRequest(new { error = "claimNumber is required" });
+            if (string.IsNullOrWhiteSpace(request.CaseNumber))
+                return Results.BadRequest(new { error = "caseNumber is required" });
 
-            var record = claimStore.Get(request.ClaimNumber);
+            var record = store.Get(request.CaseNumber);
             if (record is null)
-                return Results.NotFound(new { error = $"claim '{request.ClaimNumber}' not found" });
+                return Results.NotFound(new { error = $"case '{request.CaseNumber}' not found" });
 
-            logger.LogInformation("Communications process: claimNumber={ClaimNumber}",
-                Sanitize(record.ClaimNumber));
+            logger.LogInformation("Communications process: caseNumber={CaseNumber}", Sanitize(record.CaseNumber));
 
-            var drafts = CustomerCommunicationsDrafter.Draft(record);
-
-            var prompt =
-                "CLAIM CASE FOR CUSTOMER COMMUNICATIONS\n" +
-                "======================================\n" +
-                $"Claim number   : {record.ClaimNumber}\n" +
-                $"Customer       : {record.CustomerName}\n" +
-                $"Email          : {record.CustomerEmail}\n" +
-                $"Phone          : {record.CustomerPhone}\n" +
-                $"Preferred      : {record.PreferredContact}\n" +
-                $"Policy         : {record.PolicyNumber}\n" +
-                $"Claim type     : {record.ClaimType}\n" +
-                $"Incident date  : {record.IncidentDate}\n" +
-                $"Incident place : {record.IncidentLocation}\n" +
-                $"Description    : {record.IncidentDescription}\n" +
-                $"Estimated loss : {record.EstimatedLoss}\n" +
-                $"Urgency        : {record.Urgency} — {record.UrgencyReason}\n" +
-                $"Stage          : Lodged, awaiting Claims Assessment\n\n" +
-                "Please draft empathetic, plain-English customer updates for this claim across " +
-                "the most appropriate channels (email, SMS, portal). Include a short summary of " +
-                "current status and next steps, and surface any vulnerability flags that need a " +
-                "human reviewer before sending.";
+            var bundle = ClientCommunicationsDrafter.Build(record);
+            var prompt = BuildDraftingPrompt(record, bundle);
 
             object BuildEnvelope(AgentTraceResult? trace, string? agentError) => new
             {
-                claimNumber = record.ClaimNumber,
-                customerName = record.CustomerName,
-                claimType = record.ClaimType,
-                urgency = record.Urgency,
-                stage = "Lodged — awaiting Claims Assessment",
-                drafts.Email,
-                drafts.Sms,
-                drafts.Portal,
-                drafts.Summary,
-                drafts.NextSteps,
-                drafts.VulnerabilityFlags,
-                drafts.HumanApprovalRequired,
-                drafts.HumanApprovalReason,
+                caseNumber = record.CaseNumber,
+                clientName = record.ClientName,
+                requestType = record.RequestType,
+                memberNumber = record.MemberNumber,
+                priority = record.Priority,
+                adviserName = record.AdviserName,
+                stage = bundle.Stage,
+                outcome = bundle.Outcome,
+                summary = bundle.Summary,
+                vulnerabilityFlags = bundle.VulnerabilityFlags,
+                humanApprovalRequired = bundle.HumanApprovalRequired,
+                humanApprovalReason = bundle.HumanApprovalReason,
+                drafts = bundle.Drafts,
+                adviserNote = bundle.AdviserNote,
                 agentNotes = trace?.Text,
-                agentConfigured = agentFactory.IsConfigured,
+                agentConfigured = factory.IsConfigured,
                 agentError,
                 agentInput = trace?.Input,
                 agentRawOutput = trace is null ? null : new
@@ -128,23 +114,42 @@ public static class CommunicationsApi
 
             if (AgentSseStreaming.WantsEventStream(httpContext))
             {
-                var streamingAgent = agentFactory.IsConfigured ? agentFactory.Create("communications") : null;
-                await AgentSseStreaming.StreamAsync(httpContext, streamingAgent, prompt, BuildEnvelope, logger, "Customer Communications Agent");
+                CaldovaAgent? streamingAgent = null;
+                string? createError = null;
+                if (factory.IsConfigured)
+                {
+                    try
+                    {
+                        streamingAgent = factory.Create("communications");
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogWarning(ex, "Client Communications Agent could not be created; using deterministic drafts");
+                        createError = ex.Message;
+                    }
+                }
+                await AgentSseStreaming.StreamAsync(
+                    httpContext,
+                    streamingAgent,
+                    prompt,
+                    (trace, error) => BuildEnvelope(trace, error ?? createError),
+                    logger,
+                    "Client Communications Agent");
                 return Results.Empty;
             }
 
             AgentTraceResult? traceResult = null;
             string? agentInvocationError = null;
-            if (agentFactory.IsConfigured)
+            if (factory.IsConfigured)
             {
                 try
                 {
-                    var agent = agentFactory.Create("communications");
+                    var agent = factory.Create("communications");
                     traceResult = await agent.RunWithTraceAsync(prompt);
                 }
                 catch (Exception ex)
                 {
-                    logger.LogWarning(ex, "Customer Communications Agent invocation failed; falling back to deterministic drafts");
+                    logger.LogWarning(ex, "Client Communications Agent invocation failed; falling back to deterministic drafts");
                     agentInvocationError = ex.Message;
                 }
             }
@@ -152,73 +157,62 @@ public static class CommunicationsApi
             return Results.Ok(BuildEnvelope(traceResult, agentInvocationError));
         });
 
-        // Voice chat endpoint — backs the "Voice chat" tab on the
-        // Customer Communications agent page. Accepts a transcribed user
-        // message (the browser does the speech-to-text) along with an
-        // optional claim context and conversation id, and returns a short
-        // plain-English reply that the browser then speaks aloud via the
-        // Web Speech API. When the Foundry agent is configured the live
-        // Customer Communications Agent generates the reply; otherwise a
-        // deterministic, empathetic fallback is returned so the demo
-        // always works end-to-end.
+        // Typed "talk to Cara" endpoint behind the Voice chat tab. Used when
+        // the real-time Voice Live call isn't connected (or isn't configured):
+        // the browser sends the caller's words, gets a short spoken-style
+        // reply, and can read it aloud with the Web Speech API. With Foundry
+        // configured the conversational voice agent answers (chaining turns
+        // via previousResponseId); otherwise a deterministic, case-aware reply
+        // keeps the demo working end-to-end.
         app.MapPost("/communications/voice", async (CommunicationsVoiceRequest request) =>
         {
             if (string.IsNullOrWhiteSpace(request.Message))
                 return Results.BadRequest(new { error = "message is required" });
 
-            // Pull optional claim context to ground the reply.
-            IntakeClaimRecord? record = null;
-            if (!string.IsNullOrWhiteSpace(request.ClaimNumber))
-                record = claimStore.Get(request.ClaimNumber);
+            CaseRecord? record = string.IsNullOrWhiteSpace(request.CaseNumber)
+                ? null
+                : store.Get(request.CaseNumber);
 
             logger.LogInformation(
-                "Communications voice: claimNumber={ClaimNumber}, conversationId={ConversationId}",
-                Sanitize(request.ClaimNumber ?? "(none)"),
-                Sanitize(request.ConversationId ?? "(new)"));
+                "Communications voice: caseNumber={CaseNumber}, chained={Chained}",
+                Sanitize(request.CaseNumber ?? "(none)"),
+                !string.IsNullOrWhiteSpace(request.PreviousResponseId));
 
             string reply;
-            string? conversationId = request.ConversationId;
-            bool agentUsed = false;
+            string? responseId = null;
+            var agentUsed = false;
 
-            if (agentFactory.IsConfigured)
+            if (factory.IsConfigured)
             {
                 try
                 {
-                    var prompt =
-                        "You are Cara, the Customer Communications Specialist at Zava Insurance. " +
-                        "You are speaking with the customer over a voice call, so reply in short, " +
-                        "warm, plain-English sentences (no markdown, no bullet points, no headings). " +
-                        "Keep replies to 2-4 sentences. Never invent claim facts; if you don't know, " +
-                        "say you'll check and follow up. If the situation sounds sensitive, be empathetic " +
-                        "and offer to escalate to a human teammate.\n\n";
-
-                    if (record is not null)
+                    var agent = factory.Create("communications-voice");
+                    AgentTraceResult result;
+                    if (!string.IsNullOrWhiteSpace(request.PreviousResponseId))
                     {
-                        prompt +=
-                            "CURRENT CLAIM CONTEXT\n" +
-                            $"Claim number   : {record.ClaimNumber}\n" +
-                            $"Customer       : {record.CustomerName}\n" +
-                            $"Policy         : {record.PolicyNumber}\n" +
-                            $"Claim type     : {record.ClaimType}\n" +
-                            $"Incident       : {record.IncidentDate} · {record.IncidentLocation}\n" +
-                            $"Description    : {record.IncidentDescription}\n" +
-                            $"Urgency        : {record.Urgency}\n" +
-                            $"Stage          : Lodged, awaiting Claims Assessment\n\n";
+                        try
+                        {
+                            result = await agent.ChatWithTraceAsync(request.PreviousResponseId!, request.Message);
+                        }
+                        catch (Exception ex)
+                        {
+                            logger.LogInformation(ex, "Voice chat chaining failed; starting a fresh turn");
+                            result = await agent.RunWithTraceAsync(BuildVoicePrompt(record, request.Message));
+                        }
+                    }
+                    else
+                    {
+                        result = await agent.RunWithTraceAsync(BuildVoicePrompt(record, request.Message));
                     }
 
-                    prompt += "CUSTOMER SAID (over voice):\n" + request.Message;
-
-                    var agent = agentFactory.Create("communications");
-                    var result = await agent.RunWithTraceAsync(prompt, conversationId);
                     reply = StripMarkdown(result.Text);
-                    // NOTE: each turn currently runs stateless; we keep
-                    // whatever conversationId the caller supplied so the
-                    // browser can still group messages on its side.
-                    agentUsed = true;
+                    responseId = result.ResponseId;
+                    agentUsed = !string.IsNullOrWhiteSpace(reply);
+                    if (!agentUsed) reply = FallbackVoiceReply(request.Message, record);
                 }
                 catch (Exception ex)
                 {
-                    logger.LogWarning(ex, "Customer Communications voice agent invocation failed; using fallback reply");
+                    logger.LogWarning(ex, "Client Communications voice agent invocation failed; using the scripted reply");
                     reply = FallbackVoiceReply(request.Message, record);
                 }
             }
@@ -230,16 +224,223 @@ public static class CommunicationsApi
             return Results.Ok(new
             {
                 reply,
-                conversationId,
-                agentConfigured = agentFactory.IsConfigured,
+                responseId,
+                agentConfigured = factory.IsConfigured,
                 agentUsed
             });
         });
     }
 
-    // Strip very basic markdown so the reply sounds natural when read aloud
-    // by the browser's speech synthesiser. Removes leading list markers,
-    // headings, emphasis characters and code fences.
+    // ── Prompts ───────────────────────────────────────────────────────────────
+    private static string BuildDraftingPrompt(CaseRecord r, ClientCommunicationsDrafter.DraftBundle bundle)
+    {
+        var sample = (r.SampleId ?? string.Empty).ToLowerInvariant();
+        var hasAdviser = ClientCommunicationsDrafter.HasAdviser(r);
+        var sb = new StringBuilder();
+
+        sb.AppendLine("MEMBER CASE FOR CLIENT COMMUNICATIONS");
+        sb.AppendLine("=====================================");
+        sb.AppendLine($"Case number    : {r.CaseNumber}");
+        sb.AppendLine($"Client         : {r.ClientName}");
+        sb.AppendLine($"Email / phone  : {r.ClientEmail} / {r.ClientPhone}");
+        sb.AppendLine($"Preferred      : {r.PreferredContact}");
+        sb.AppendLine($"Member number  : {r.MemberNumber}");
+        sb.AppendLine($"Product        : {r.Product}");
+        sb.AppendLine($"Request type   : {r.RequestType}");
+        sb.AppendLine($"Received       : {r.ReceivedDate}");
+        sb.AppendLine($"Adviser        : {(hasAdviser ? $"{r.AdviserName} ({r.AdviserPractice})" : "None (direct member)")}");
+        sb.AppendLine($"Amount         : {r.Amount}");
+        sb.AppendLine($"Priority       : {r.Priority} — {r.PriorityReason}");
+        sb.AppendLine($"Request summary: {r.RequestSummary}");
+        sb.AppendLine();
+        sb.AppendLine("CASE FILE NOTES (what has happened so far — use only these facts)");
+        sb.AppendLine("-----------------------------------------------------------------");
+        sb.AppendLine($"Stage          : {bundle.Stage}");
+        sb.AppendLine($"Outcome        : {bundle.Outcome}");
+        sb.AppendLine($"What happened  : {bundle.Summary.WhatHappened}");
+        sb.AppendLine("What's next    :");
+        foreach (var step in bundle.Summary.WhatsNext) sb.AppendLine($"- {step}");
+        if (bundle.VulnerabilityFlags.Count > 0)
+        {
+            sb.AppendLine("Vulnerability  :");
+            foreach (var flag in bundle.VulnerabilityFlags) sb.AppendLine($"- {flag}");
+        }
+        sb.AppendLine();
+        sb.AppendLine("TASK");
+        sb.AppendLine("----");
+        sb.AppendLine("Write the communications for this case as Cara:");
+        sb.AppendLine("1. Case summary — the member's likely sentiment, what happened and what happens next (3–5 lines).");
+        sb.AppendLine(sample == "death-benefit-robert"
+            ? "2. Member letters — a separate condolence letter to each beneficiary (Robert and Lily)."
+            : "2. Member letter or email.");
+        sb.AppendLine(hasAdviser
+            ? $"3. Adviser update for {r.AdviserName} ({r.AdviserPractice}) in adviser language."
+            : "3. No adviser on this account — say so and skip the adviser update.");
+        sb.AppendLine("4. An SMS (aim for under 160 characters, no sensitive details).");
+        sb.AppendLine("For each draft give Channel & Audience, Draft Message, Tone & Compliance Check and Human Approval Required.");
+        sb.AppendLine("Compliance must cover: no personal financial advice; next steps; timeframes; contact details " +
+                      "(Caldova Client Services 1300 975 707); complaint rights — Caldova's internal dispute resolution first, then AFCA " +
+                      "(1800 931 678, www.afca.org.au).");
+        switch (sample)
+        {
+            case "hardship-tom":
+                sb.AppendLine("Hardship: be kind and non-judgemental; explain why $10,000 is the legal maximum; include the National Debt Helpline " +
+                              "(1800 007 007) and Moneysmart (www.moneysmart.gov.au).");
+                break;
+            case "rollover-grace":
+                sb.AppendLine("Fraud victim: lead with reassurance that her money is safe; contact only via the pre-change verified details " +
+                              "(grace.williams@example.com, 0403 118 220); include IDCARE (1800 595 160); NEVER mention an SMR, AUSTRAC or any report.");
+                break;
+            case "death-benefit-robert":
+                sb.AppendLine("Bereavement: condolences first, plain-English explanation of the 17% withholding, one named contact, " +
+                              "and the adviser update only with the family's consent.");
+                break;
+            case "onboarding-priya":
+                sb.AppendLine("Include the insurance-loss warning (Southern Cross $520,000 Death & TPD cover ends on rollover) and the " +
+                              "nomination re-sign request; give the employer details (USI CDV0101AU).");
+                break;
+            case "pension-george":
+                sb.AppendLine("Celebrate the retirement; give the payment schedule ($6,500 monthly from 15/12/2026), the $38,870 minimum " +
+                              "for 2026-27 and, for the adviser, the $850,000 remaining transfer balance cap space.");
+                break;
+        }
+        sb.AppendLine("Use only the facts above — never invent amounts or dates. Mask TFNs and bank account numbers.");
+        return sb.ToString();
+    }
+
+    private static string BuildVoicePrompt(CaseRecord? record, string message)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("You are Cara from Caldova Wealth, speaking with a caller on a voice call. Reply in two to four short, warm, " +
+                      "plain-English sentences — no markdown, lists or headings. Never invent case facts; if you don't know, say " +
+                      "you'll check and follow up. Never give personal financial advice.");
+        sb.AppendLine();
+        if (record is not null)
+        {
+            var bundle = ClientCommunicationsDrafter.Build(record);
+            sb.AppendLine("CALLER & CASE CONTEXT (the caller's identity has already been verified — do not read this aloud):");
+            sb.AppendLine($"Case number   : {record.CaseNumber}");
+            sb.AppendLine($"Caller        : {record.ClientName}");
+            sb.AppendLine($"Member number : {record.MemberNumber}");
+            sb.AppendLine($"Request type  : {record.RequestType}");
+            sb.AppendLine($"Stage         : {bundle.Stage}");
+            sb.AppendLine($"What happened : {bundle.Summary.WhatHappened}");
+            sb.AppendLine("What's next   : " + string.Join(" ", bundle.Summary.WhatsNext));
+            sb.AppendLine();
+        }
+        sb.AppendLine("CALLER SAID:");
+        sb.AppendLine(message);
+        return sb.ToString();
+    }
+
+    // ── Deterministic voice replies ───────────────────────────────────────────
+    private static string FallbackVoiceReply(string message, CaseRecord? record)
+    {
+        var intent = DetectIntent(message);
+        if (record is not null)
+        {
+            var caseReply = CaseReply(record, intent);
+            if (caseReply is not null) return caseReply;
+            var first = ClientCommunicationsDrafter.FirstName(record.ClientName);
+            return $"Thanks for calling, {first}. " + GenericReply(intent);
+        }
+        return GenericReply(intent);
+    }
+
+    private static string DetectIntent(string message)
+    {
+        var t = (message ?? string.Empty).ToLowerInvariant().Replace('’', '\'');
+        bool Any(params string[] words) => words.Any(w => t.Contains(w));
+
+        if (Any("changed my", "change my details", "someone changed", "hacked", "scam", "fraud", "didn't ask",
+                "did not ask", "not me", "suspicious", "stolen", "identity"))
+            return "security";
+        if (Any("passed away", "passed", "died", "death", "funeral", "deceased", "estate"))
+            return "bereavement";
+        if (Any("hardship", "bills", "struggling", "mortgage", "can't afford", "cannot afford", "behind on",
+                "centrelink", "jobseeker", "early access", "access my super", "withdraw"))
+            return "hardship";
+        if (Any("pension", "retire", "income stream"))
+            return "pension";
+        if (Any("consolidate", "combine", "scattered", "old jobs", "old super", "super accounts", "other fund", "one account",
+                "roll over", "rollover", "move my super"))
+            return "consolidate";
+        if (Any("mum", "mother", "dad", "father", "parent"))
+            return "family";
+        if (Any("status", "update", "what's happening", "whats happening", "where is", "where's", "how long", "when will"))
+            return "status";
+        if (Any("hello", "hi ", "hey", "good morning", "good afternoon", "g'day"))
+            return "greeting";
+        return "general";
+    }
+
+    // Case-aware replies once the caller has been verified against a case.
+    // Returns null when the caller's question doesn't fit the case, so the
+    // generic answer for that topic is used instead.
+    private static string? CaseReply(CaseRecord record, string intent)
+    {
+        var generalOrStatus = intent is "status" or "general" or "greeting";
+        switch ((record.SampleId ?? string.Empty).ToLowerInvariant())
+        {
+            case "onboarding-priya" when generalOrStatus || intent == "consolidate":
+                return "Hi Priya, it's Cara from Caldova. Your new Caldova Super account, CS-2049817, is open and invested in the Growth portfolio from Hannah's advice. " +
+                       "We've asked Harbourline to send your super across, which should arrive within about three business days, and we're holding your Southern Cross account " +
+                       "until you and Hannah confirm you're happy for its $520,000 of insurance cover to end. The only other thing is your nomination for Arjun — it needs a " +
+                       "second witness, so Hannah has a fresh form for you.";
+            case "rollover-grace" when generalOrStatus || intent is "security" or "family":
+                return "Grace, I'm so glad you called, and I'm sorry you've had this worry while you're away. Your super is safe — the request to move your $612,400 " +
+                       "was stopped, and no money has left your account. We've put your previous contact details back and locked your online access, and a specialist " +
+                       "will call you on 0403 118 220 to set you up again — that's the only number we'll use. IDCARE can also help you, free, on 1800 595 160.";
+            case "pension-george" when generalOrStatus || intent == "pension":
+                return "Hi George, congratulations again on your retirement. Your Caldova Pension started on the 16th of November, and you'll receive $6,500 a month " +
+                       "from the 15th of December — tax-free, so nothing is taken out. This year's minimum is $38,870, and your payments are comfortably above it. " +
+                       "Would you like me to explain anything about the payments?";
+            case "hardship-tom" when generalOrStatus || intent == "hardship":
+                return "Hi Tom, thanks for calling — I know this hasn't been easy. We've approved $10,000 before tax, which is the most the law allows for a hardship " +
+                       "release in any twelve months, and $7,932 will reach your account on Friday the 13th of November after tax. If it would help, the National Debt " +
+                       "Helpline on 1800 007 007 offers free financial counselling. Is there anything I can explain for you?";
+            case "death-benefit-robert" when generalOrStatus || intent is "bereavement" or "family":
+                return "Robert, I'm so sorry about your mum. Her binding nomination is valid, so her pension has been paid exactly as she wished — half to you and half " +
+                       "to Lily, $217,477.26 each after tax — and we've written to you both with the details. I'll be your contact the whole way through, so please " +
+                       "call me on 1300 975 707 whenever you need.";
+            default:
+                return null;
+        }
+    }
+
+    private static string GenericReply(string intent) => intent switch
+    {
+        "security" =>
+            "That must be really worrying — thank you for calling us straight away. For your protection we never change details or move money on a call like this, " +
+            "so I'm flagging your account to our member protection team now, and a specialist will call you back on the number we had on file before the change. " +
+            "Please don't share any codes you've been sent, and IDCARE can help for free on 1800 595 160.",
+        "bereavement" =>
+            "I'm so sorry for your loss. I'll help you through this one step at a time — could you tell me your loved one's full name and, if you have it, their " +
+            "member number? We'll need a certified copy of the death certificate and some identification for you, and I'll stay your contact the whole way through.",
+        "family" =>
+            "Of course, I'd be glad to help. I can only talk about your mum's account with her permission, or if you hold her power of attorney — and if she has " +
+            "passed away, I'm so sorry, and I'll gently guide you through what we need. Could you tell me a little more about what's happened?",
+        "hardship" =>
+            "I'm sorry things are tough at the moment — asking is the right step. You may be able to access some of your super on severe financial hardship grounds " +
+            "if you've received Centrelink income support, like JobSeeker, for 26 weeks in a row; it's a single payment of between $1,000 and $10,000 before tax, " +
+            "once in any twelve months. The National Debt Helpline on 1800 007 007 also offers free financial counselling — would you like me to send you the form?",
+        "pension" =>
+            "I'd be glad to help you start a pension. Generally you can start an account-based pension once you've met a condition of release — like turning 65, " +
+            "or retiring after 60 — and your adviser can help you decide how much income to take. I'll just need to confirm your full name, date of birth and " +
+            "member number, and then I can send you the application pack.",
+        "consolidate" =>
+            "Happy to help bring your super together. We can request the rollovers from your other funds for you — I'll just need each fund's name and your member " +
+            "number with them. One important thing: if any of those accounts includes insurance, that cover usually ends when the account is closed, so it's worth " +
+            "checking with your adviser first.",
+        "status" =>
+            "I can check that for you. Could you give me your member number, or the case reference starting with R-E-Q, so I can pull up the details?",
+        _ =>
+            "Hi, you're speaking with Cara from Caldova Wealth. I can help with your account, a request you've made, or questions about how super and pensions " +
+            "work. What can I help you with today?"
+    };
+
+    // Strip basic markdown so the reply sounds natural when read aloud by the
+    // browser's speech synthesiser.
     private static string StripMarkdown(string? text)
     {
         if (string.IsNullOrWhiteSpace(text)) return string.Empty;
@@ -249,31 +450,13 @@ public static class CommunicationsApi
         {
             var line = raw.TrimStart();
             if (line.StartsWith("```")) continue;
-            // Strip heading markers (# foo) and list markers (- foo, * foo, 1. foo)
-            while (line.StartsWith("#")) line = line[1..];
+            while (line.StartsWith('#')) line = line[1..];
             if (line.StartsWith("- ") || line.StartsWith("* ")) line = line[2..];
-            line = System.Text.RegularExpressions.Regex.Replace(line, @"^\d+\.\s+", "");
-            // Drop emphasis chars
+            line = Regex.Replace(line, @"^\d+\.\s+", "");
             line = line.Replace("**", "").Replace("__", "").Replace("`", "");
             cleaned.Add(line.Trim());
         }
         return string.Join(" ", cleaned.Where(l => l.Length > 0)).Trim();
-    }
-
-    private static string FallbackVoiceReply(string message, IntakeClaimRecord? record)
-    {
-        var who = record?.CustomerName?.Split(' ').FirstOrDefault();
-        var greet = string.IsNullOrEmpty(who) ? "Hi there" : $"Hi {who}";
-        if (record is null)
-        {
-            return $"{greet}, this is Cara from Zava Insurance Customer Communications. " +
-                   "I heard you, and I'd be glad to help. Could you share the claim number you're calling about so I can pull up the details?";
-        }
-
-        var stage = "lodged and awaiting our Claims Assessment team";
-        return $"{greet}, this is Cara from Zava Insurance. " +
-               $"Your claim {record.ClaimNumber} for the {record.ClaimType.ToLowerInvariant()} incident is {stage}. " +
-               "I've noted what you just told me, and I'll make sure the team has it before they reach out next. Is there anything else I can help with right now?";
     }
 
     private static string Sanitize(string value) =>

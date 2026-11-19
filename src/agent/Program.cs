@@ -2,23 +2,24 @@ using Azure.AI.Projects;
 using Azure.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using ZavaClaims.Agents;
+using CaldovaSuper.Agents;
 
-// Claims Team in a Day — Zava Insurance — .NET 10 Foundry agents
+// Wealth Team in a Day — Caldova Wealth — .NET 10 Foundry agents
 //
-// Each staff character in the Zava Insurance claims office is implemented as a
-// specialised Azure AI Foundry declarative agent. This console host lets you
-// drive any individual agent from the command line for demo / testing purposes.
+// Each staff character in the Caldova Wealth client operations office is
+// implemented as a specialised Azure AI Foundry declarative agent. This
+// console host lets you drive any individual agent from the command line
+// for demo / testing purposes.
 //
 // Usage:
-//   dotnet run -- --intake          "My kitchen flooded after a pipe burst"
-//   dotnet run -- --assessment      "Review claim CL-1001 against policy POL-42"
-//   dotnet run -- --loss-adjuster   "Inspect water-damage photos for CL-1001"
-//   dotnet run -- --fraud           "Check CL-1001 for fraud indicators"
-//   dotnet run -- --supplier        "Assign a builder for CL-1001 in 3000"
-//   dotnet run -- --settlement      "Calculate settlement for CL-1001"
-//   dotnet run -- --communications  "Draft an approval message for CL-1001"
-//   dotnet run -- --team-leader     "Summarise today's escalations"
+//   dotnet run -- --onboarding      "Adviser email: new Caldova Super account for Priya Natarajan, consolidate 2 funds"
+//   dotnet run -- --benefits        "Is Tom Bradley (47, JobSeeker 31 weeks) eligible for a $15,000 hardship release?"
+//   dotnet run -- --investments     "Compare Growth vs Balanced vs Index Balanced on a $138,200 balance"
+//   dotnet run -- --fincrime        "Full-balance rollover to a 9-day-old SMSF two days after a mobile change"
+//   dotnet run -- --transfers       "Consolidate Southern Cross Industry Super and Harbourline Retail Super"
+//   dotnet run -- --payments        "Calculate a $10,000 hardship payment, 6% tax-free, member aged 47"
+//   dotnet run -- --communications  "Draft a condolence letter to Robert Chen about his mother's death benefit"
+//   dotnet run -- --team-leader     "Summarise today's approvals and IDR clocks"
 
 var config = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json", optional: false)
@@ -58,24 +59,24 @@ var bingConnectionId = config["AZURE_BING_CONNECTION_ID"];
 string? flag = args.Length > 0 ? args[0] : null;
 string request = args.Length > 1
     ? string.Join(" ", args.Skip(1))
-    : "Walk me through how you would handle this claim.";
+    : "Walk me through how you would handle this request.";
 
-ClaimsAgent? agent = flag switch
+CaldovaAgent? agent = flag switch
 {
-    "--intake"
-        => new ClaimsIntakeAgent(aiProjectClient, deploymentName, searchConnectionId, searchIndexName, bingConnectionId, loggerFactory.CreateLogger<ClaimsIntakeAgent>()),
-    "--assessment"
-        => new ClaimsAssessmentAgent(aiProjectClient, deploymentName, searchConnectionId, searchIndexName, bingConnectionId, loggerFactory.CreateLogger<ClaimsAssessmentAgent>()),
-    "--loss-adjuster"
-        => new LossAdjusterAgent(aiProjectClient, deploymentName, searchConnectionId, searchIndexName, bingConnectionId, loggerFactory.CreateLogger<LossAdjusterAgent>()),
-    "--fraud"
-        => new FraudInvestigationAgent(aiProjectClient, deploymentName, searchConnectionId, searchIndexName, bingConnectionId, loggerFactory.CreateLogger<FraudInvestigationAgent>()),
-    "--supplier"
-        => new SupplierCoordinatorAgent(aiProjectClient, deploymentName, searchConnectionId, searchIndexName, bingConnectionId, mcpServerUri: null, logger: loggerFactory.CreateLogger<SupplierCoordinatorAgent>()),
-    "--settlement"
-        => new SettlementAgent(aiProjectClient, deploymentName, searchConnectionId, searchIndexName, bingConnectionId, loggerFactory.CreateLogger<SettlementAgent>()),
+    "--onboarding"
+        => new OnboardingAgent(aiProjectClient, deploymentName, searchConnectionId, searchIndexName, bingConnectionId, loggerFactory.CreateLogger<OnboardingAgent>()),
+    "--benefits"
+        => new BenefitsEligibilityAgent(aiProjectClient, deploymentName, searchConnectionId, searchIndexName, bingConnectionId, loggerFactory.CreateLogger<BenefitsEligibilityAgent>()),
+    "--investments"
+        => new InvestmentAnalystAgent(aiProjectClient, deploymentName, searchConnectionId, searchIndexName, bingConnectionId, loggerFactory.CreateLogger<InvestmentAnalystAgent>()),
+    "--fincrime"
+        => new FinancialCrimeAgent(aiProjectClient, deploymentName, searchConnectionId, searchIndexName, bingConnectionId, loggerFactory.CreateLogger<FinancialCrimeAgent>()),
+    "--transfers"
+        => new TransfersRolloversAgent(aiProjectClient, deploymentName, searchConnectionId, searchIndexName, bingConnectionId, mcpServerUri: null, logger: loggerFactory.CreateLogger<TransfersRolloversAgent>()),
+    "--payments"
+        => new PaymentsAgent(aiProjectClient, deploymentName, searchConnectionId, searchIndexName, bingConnectionId, loggerFactory.CreateLogger<PaymentsAgent>()),
     "--communications"
-        => new CustomerCommunicationsAgent(aiProjectClient, deploymentName, searchConnectionId, searchIndexName, bingConnectionId, loggerFactory.CreateLogger<CustomerCommunicationsAgent>()),
+        => new ClientCommunicationsAgent(aiProjectClient, deploymentName, searchConnectionId, searchIndexName, bingConnectionId, loggerFactory.CreateLogger<ClientCommunicationsAgent>()),
     "--team-leader"
         => new TeamLeaderAgent(aiProjectClient, deploymentName, searchConnectionId, searchIndexName, bingConnectionId, loggerFactory.CreateLogger<TeamLeaderAgent>()),
     _ => null
@@ -99,15 +100,15 @@ Console.WriteLine();
 
 static void PrintUsage()
 {
-    Console.WriteLine("Claims Team in a Day — Zava Insurance — Foundry agents");
+    Console.WriteLine("Wealth Team in a Day — Caldova Wealth — Foundry agents");
     Console.WriteLine();
     Console.WriteLine("Usage:");
-    Console.WriteLine("  dotnet run -- --intake          \"<message>\"");
-    Console.WriteLine("  dotnet run -- --assessment      \"<message>\"");
-    Console.WriteLine("  dotnet run -- --loss-adjuster   \"<message>\"");
-    Console.WriteLine("  dotnet run -- --fraud           \"<message>\"");
-    Console.WriteLine("  dotnet run -- --supplier        \"<message>\"");
-    Console.WriteLine("  dotnet run -- --settlement      \"<message>\"");
-    Console.WriteLine("  dotnet run -- --communications  \"<message>\"");
-    Console.WriteLine("  dotnet run -- --team-leader     \"<message>\"");
+    Console.WriteLine("  dotnet run -- --onboarding      \"<message>\"   Olivia — Onboarding & Requests");
+    Console.WriteLine("  dotnet run -- --benefits        \"<message>\"   Ben    — Benefits & Eligibility");
+    Console.WriteLine("  dotnet run -- --investments     \"<message>\"   Ivy    — Investment Solutions");
+    Console.WriteLine("  dotnet run -- --fincrime        \"<message>\"   Felix  — Financial Crime");
+    Console.WriteLine("  dotnet run -- --transfers       \"<message>\"   Rory   — Transfers & Rollovers");
+    Console.WriteLine("  dotnet run -- --payments        \"<message>\"   Penny  — Payments");
+    Console.WriteLine("  dotnet run -- --communications  \"<message>\"   Cara   — Client Communications");
+    Console.WriteLine("  dotnet run -- --team-leader     \"<message>\"   Theo   — Team Leader Office");
 }

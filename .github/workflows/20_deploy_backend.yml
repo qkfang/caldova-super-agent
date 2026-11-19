@@ -27,11 +27,11 @@ jobs:
 
       - name: Restore
         working-directory: src/backend
-        run: dotnet restore zc-backend.csproj
+        run: dotnet restore cs-backend.csproj
 
       - name: Publish
         working-directory: src/backend
-        run: dotnet publish zc-backend.csproj -c Release -o ${{ github.workspace }}/publish --no-restore
+        run: dotnet publish cs-backend.csproj -c Release -o ${{ github.workspace }}/publish --no-restore
 
       - name: Azure CLI Login
         uses: azure/login@v1
@@ -41,5 +41,5 @@ jobs:
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-          app-name: app-zc-backend
+          app-name: app-cs-backend
           package: ${{ github.workspace }}/publish

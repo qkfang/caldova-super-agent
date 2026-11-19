@@ -1,11 +1,11 @@
 using System.Globalization;
 using System.Text.Json;
 using OpenAI.Responses;
-using ZavaClaims.Agents;
-using ZavaClaims.App.Mcp;
-using ZavaClaims.App.Services;
+using CaldovaSuper.Agents;
+using CaldovaSuper.App.Mcp;
+using CaldovaSuper.App.Services;
 
-namespace ZavaClaims.App.Api;
+namespace CaldovaSuper.App.Api;
 
 record SettlementProcessRequest(
     string ClaimNumber,

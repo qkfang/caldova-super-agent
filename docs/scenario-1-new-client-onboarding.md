@@ -13,6 +13,7 @@ An adviser-led new account. A busy professional's adviser sends Caldova an appli
 | Case number | `REQ-20261103-DEMO01` |
 | Request type | New account & consolidation |
 | Received | Tue 3 Nov 2026, by email from the adviser |
+| Priority | Standard |
 | Member | Priya Natarajan (DOB 14/02/1992, age 34). New member no. `CS-2049817` |
 | Product | Caldova Super (Select) |
 | Adviser | Hannah Lewis CFP® (ADV-10442), Yarra Private Wealth, Collins St, Melbourne |
@@ -34,7 +35,7 @@ An adviser-led new account. A busy professional's adviser sends Caldova an appli
 - Contact: priya.natarajan@example.com · 0412 555 018.
 - She is busy and organised, and wants everything done digitally.
 
-> "I've got three super accounts from old jobs — I just want one, set up properly."
+> "I've got super scattered across old jobs — I just want one account, set up properly."
 
 ## Life Event
 
@@ -74,6 +75,7 @@ On 3 Nov 2026 Hannah emails Caldova an application pack with:
 | Death benefit nomination | ⚠ Only **one** witness signature. Sent to Benefits & Eligibility |
 | Existing cover in funds being rolled over | ⚠ Southern Cross account holds Death & TPD cover. Sent to Transfers & Rollovers |
 
+- It sets the priority to **Standard**: a new account and consolidation with nothing time-critical.
 - It opens case `REQ-20261103-DEMO01`, prepares new member number `CS-2049817`, and routes the case to Financial Crime for screening and to Benefits & Eligibility.
 
 > Olivia checks the extraction against the form, confirms the two flagged items and releases the case.
@@ -98,7 +100,7 @@ The **Benefits & Eligibility Agent** checks the request against the PDS, the tru
 | Rule | Finding | Result | Cited source |
 |---|---|---|---|
 | Adviser fee consent (SIS s99FA) | Personal advice. Written consent held by the trustee: signed and dated by Priya, amount $3,300 p.a. incl. GST, services described, 12-month term, can be withdrawn | ✓ Pass | Adviser fee consent (s99FA) & ongoing fee arrangements |
-| Product fit (target market determination) | An advised member in Caldova Super (Select) is within the target market | ✓ Pass | Caldova Super & Pension PDS extract |
+| Product fit (target market determination) | Priya's objectives and her managed portfolio selection fit the Caldova Super (Select) target market | ✓ Pass | Caldova Super & Pension PDS extract |
 | BDBN formalities (SIS reg 6.17A) | Needs two adult witnesses who are not named in the nomination. Only one witness signed | ✗ Fail. Not valid as binding | Trust-deed rules on death benefits & nominations |
 | Nominated person is a SIS dependant | Arjun is Priya's de facto partner | ✓ Pass | Trust-deed rules on death benefits & nominations |
 

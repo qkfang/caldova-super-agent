@@ -1,0 +1,31 @@
+{
+  "id": "matrix-authority-approvals-and-escalation",
+  "title": "Authority & escalation matrix — human approvals, payment limits, service levels and IDR clocks (Client Operations)",
+  "category": "Operations Guide",
+  "requestType": "All",
+  "caseNumber": "",
+  "memberNumber": "",
+  "content": "Matrix used by the Client Operations Team Leader and every specialist team (and their AI agents) to decide what the team can action and what needs human approval. AI agents draft, check, summarise, calculate and recommend; people approve everything listed below.\n\nHuman approval ALWAYS required — approver: Client Operations Team Leader, through a Microsoft Teams approval card unless stated:\n1 Declines and partial approvals of any request.\n2 Blocking or holding a request on financial-crime grounds, and locking online access.\n3 Suspicious matter reports — decided with the AML/CTF Compliance Officer; lodged with AUSTRAC within 3 business days of forming the suspicion (24 hours for terrorism financing).\n4 Payments above the Payments Officer's authority: any single payment of $250,000 or more, and ANY death benefit regardless of amount.\n5 Pension commencements of $1,000,000 or more.\n6 Severe financial hardship releases (vulnerable member review).\n7 Complaint responses (internal dispute resolution).\n8 Any communication to a fraud victim or a bereaved family.\n\nPayments authority: the Payments Officer may release payments under $250,000 (other than death benefits) after maker-checker validation — payee name matches, bank account in the member's name or the linked receiving fund, components and PAYG calculated, no open financial-crime flag. Nobody can release a payment while a financial-crime flag is open. Payments are released only after the approval is recorded on the case.\n\nEscalate to Financial Crime: money out within 30 days of a change to contact, bank or login details; any SMSF rollover that fails SVS; altered or suspicious documents; elder-abuse or scam indicators; a PEP or sanctions match.\n\nEscalate to the Team Leader immediately: vulnerable members (hardship, bereavement, scam victims, age-related or cognitive concerns); any complaint or mention of AFCA, the ombudsman or legal action; any service-level or IDR deadline due within 5 business days; media or regulator enquiries.\n\nService levels: SuperStream rollovers — completed within 3 business days of receiving all required information (SIS reg 6.34A); contributions under Payday Super — allocated to the member's account, or returned, within 3 business days of receipt; applications not in good order (NIGO) — adviser or member told what is missing within 1 business day, and money received is held for up to 30 days and then returned if still incomplete; benefit payments and pension commencements — within 5 business days of approval (Caldova standard).\n\nComplaints (ASIC RG 271): acknowledge within 24 hours (or one business day). IDR response due within 30 calendar days for standard complaints (e.g. Caldova Wrap); 45 calendar days for complaints to the super trustee (Caldova Super & Pension); 90 calendar days for complaints about death benefit distributions, counted from the end of the 28-day objection period. Every IDR response must tell the complainant they can take the complaint to the Australian Financial Complaints Authority (AFCA) if they are not satisfied, or if no response is given in time.\n\nQuality: the Team Leader samples 10% of completed cases each week, plus every death benefit, hardship release and financial-crime block, against the rule documents.",
+  "severity": "medium",
+  "department": "Team Leader Office",
+  "tags": [
+    "authority-matrix",
+    "approvals",
+    "escalation",
+    "team-leader",
+    "teams-approval",
+    "payment-limits",
+    "250000",
+    "death-benefit-approval",
+    "pension-1m-approval",
+    "hardship-approval",
+    "sla",
+    "idr",
+    "rg-271",
+    "30-45-90-days",
+    "afca",
+    "vulnerable-member",
+    "quality-assurance"
+  ],
+  "lastUpdated": "2026-10-15T00:00:00Z"
+}

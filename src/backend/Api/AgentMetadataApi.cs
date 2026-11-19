@@ -1,7 +1,7 @@
-using ZavaClaims.Agents;
-using ZavaClaims.App.Services;
+using CaldovaSuper.Agents;
+using CaldovaSuper.App.Services;
 
-namespace ZavaClaims.App.Api;
+namespace CaldovaSuper.App.Api;
 
 /// <summary>
 /// Lightweight read-only endpoint that powers the "Agent Prompt &amp; Tools"
@@ -23,14 +23,14 @@ public static class AgentMetadataApi
         string[] DefaultTools,
         string[] McpTools);
 
-    // Shared base tools every claims agent gets. Surfaced both in the
+    // Shared base tools every Caldova agent gets. Surfaced both in the
     // static "demo" view (defaultTools) and the runtime view
     // (configuredTools) when the corresponding Foundry connection ids
     // are present in configuration.
     private const string SearchToolDescription =
-        "Azure AI Search — Zava claims knowledge base (policy wordings, scenarios, supplier directory)";
+        "Azure AI Search — Caldova wealth knowledge base (PDS, trust deed, super rules, member case files)";
     private const string BingToolDescription =
-        "Bing Grounding — open-web grounding for current-events context";
+        "Bing Grounding — open-web grounding for current public context (e.g. ATO rates)";
 
     private static readonly string[] DefaultTools =
     [
@@ -42,82 +42,75 @@ public static class AgentMetadataApi
     // shown in the "Tools available" list in the Agent Prompt & Tools tab.
     // These mirror the [McpServerTool] methods in src/backend/Mcp/*.cs and
     // are appended to the runtime configuredTools list whenever
-    // APP_MCP_URL is set so the operator sees exactly which MCP tools the
-    // Foundry agent is wired up with.
-    private static readonly string[] LossAdjusterMcpTools =
+    // APP_MCP_URL is set.
+    private static readonly string[] InvestmentsMcpTools =
     [
-        "MCP · analyzeQuote — fetch and parse a contractor quote document (line items + total)",
-        "MCP · compareQuotes — markdown comparison table + Mermaid totals chart + flagged anomalies",
-        "MCP · generateClaimExcel — write the claim .xlsx workbook (summary + comparison + recommendations) and return its download URL"
+        "MCP · analyzeFactSheet — fetch and parse a Caldova Managed Portfolio fact sheet (fees, allocation, returns)",
+        "MCP · compareModels — markdown comparison table + Mermaid chart of annual cost in dollars + observations",
+        "MCP · generateClientWorkbook — write the case .xlsx workbook (summary + comparison + recommendations) and return its download URL"
     ];
 
-    private static readonly string[] SupplierMcpToolsList =
+    private static readonly string[] TransfersMcpTools =
     [
-        "MCP · lookupSuppliers — Zava approved-network supplier directory with indicative pricing (best-price match)",
-        "MCP · generateQuoteRequestPdf — generate a Zava quote-request PDF for the chosen supplier and return the download URL"
+        "MCP · lookupFunds — Caldova directory of external super funds and counterparties (USI, SuperStream contact, turnaround)",
+        "MCP · verifySmsf — SMSF verification check before any rollover out (registered SMSF, member linked, bank details and ESA match)",
+        "MCP · generateTransferRequestPdf — generate the Caldova transfer / rollover request PDF and return the download URL"
     ];
 
-    private static readonly string[] SettlementMcpToolsList =
+    private static readonly string[] PaymentsMcpTools =
     [
-        "MCP · settlement_validatePayee — confirm payee matches the customer on the claim",
-        "MCP · settlement_matchInvoice — match supplier invoice against approved scope",
-        "MCP · settlement_checkAuthorityLimit — flag amounts at/above the authority threshold",
-        "MCP · settlement_calculateSettlement — transparent payable-amount calculation",
-        "MCP · settlement_requestPaymentApproval — raise approval and post Adaptive Card to Microsoft Teams (uses teams_sendApprovalCard)",
-        "MCP · settlement_getApprovalStatus — poll the approval state",
-        "MCP · settlement_releasePayment — release the payment (gated, requires prior approval)"
+        "MCP · payments_validatePayee — confirm the payee name and bank details match the member or beneficiary",
+        "MCP · payments_checkCaseApproval — confirm the eligibility decision and approved amount on the case",
+        "MCP · payments_calculateBenefit — tax-free / taxable components, PAYG withholding and net payment",
+        "MCP · payments_checkAuthorityLimit — flag payments that need Team Leader approval",
+        "MCP · payments_requestApproval — raise an approval and post an Adaptive Card to Microsoft Teams (uses teams_sendApprovalCard)",
+        "MCP · payments_getApprovalStatus — poll the approval state",
+        "MCP · payments_releasePayment — release the payment (gated, requires prior approval)"
     ];
 
     private static readonly string[] NoMcpTools = Array.Empty<string>();
 
-    private static readonly string[] LossAdjusterDefaultTools =
-        DefaultTools.Concat(LossAdjusterMcpTools).ToArray();
-    private static readonly string[] SupplierDefaultTools =
-        DefaultTools.Concat(SupplierMcpToolsList).ToArray();
-    private static readonly string[] SettlementDefaultTools =
-        DefaultTools.Concat(SettlementMcpToolsList).ToArray();
-
     private static readonly Dictionary<string, RoleMetadata> _catalog = new(StringComparer.OrdinalIgnoreCase)
     {
-        ["claims-intake"] = new(
-            "claims-intake", "Iris", "Claims Intake Officer", "Claims Intake",
-            "claims-intake-agent", ClaimsIntakeAgent.Instructions, DefaultTools, NoMcpTools),
-        ["claims-assessment"] = new(
-            "claims-assessment", "Adam", "Claims Assessor", "Claims Assessment",
-            "claims-assessment-agent", ClaimsAssessmentAgent.Instructions, DefaultTools, NoMcpTools),
-        ["loss-adjuster"] = new(
-            "loss-adjuster", "Lara", "Loss Adjuster", "Loss Adjusting",
-            "loss-adjuster-agent", LossAdjusterAgent.Instructions, LossAdjusterDefaultTools, LossAdjusterMcpTools),
-        ["fraud"] = new(
-            "fraud", "Felix", "Fraud Investigator", "Fraud Investigation",
-            "fraud-investigation-agent", FraudInvestigationAgent.Instructions, DefaultTools, NoMcpTools),
-        ["supplier"] = new(
-            "supplier", "Sam", "Supplier Coordinator", "Supplier Coordination",
-            "supplier-coordination-agent", SupplierCoordinatorAgent.Instructions, SupplierDefaultTools, SupplierMcpToolsList),
-        ["settlement"] = new(
-            "settlement", "Seth", "Settlement Officer", "Settlement",
-            "settlement-agent", SettlementAgent.Instructions, SettlementDefaultTools, SettlementMcpToolsList),
-        ["communications"] = new(
-            "communications", "Cara", "Customer Communications Specialist", "Customer Communications",
-            "customer-communications-agent", CustomerCommunicationsAgent.Instructions, DefaultTools, NoMcpTools),
+        ["onboarding"] = new(
+            "onboarding", "Olivia", "Onboarding & Requests Officer", "Onboarding & Requests",
+            "onboarding-agent", OnboardingAgent.Instructions, DefaultTools, NoMcpTools),
+        ["benefits-eligibility"] = new(
+            "benefits-eligibility", "Ben", "Benefits & Eligibility Assessor", "Benefits & Eligibility",
+            "benefits-eligibility-agent", BenefitsEligibilityAgent.Instructions, DefaultTools, NoMcpTools),
+        ["investment-analyst"] = new(
+            "investment-analyst", "Ivy", "Investment Analyst", "Investment Solutions",
+            "investment-analyst-agent", InvestmentAnalystAgent.Instructions, DefaultTools.Concat(InvestmentsMcpTools).ToArray(), InvestmentsMcpTools),
+        ["financial-crime"] = new(
+            "financial-crime", "Felix", "Financial Crime Investigator", "Financial Crime",
+            "financial-crime-agent", FinancialCrimeAgent.Instructions, DefaultTools, NoMcpTools),
+        ["transfers-rollovers"] = new(
+            "transfers-rollovers", "Rory", "Transfers & Rollovers Coordinator", "Transfers & Rollovers",
+            "transfers-rollovers-agent", TransfersRolloversAgent.Instructions, DefaultTools.Concat(TransfersMcpTools).ToArray(), TransfersMcpTools),
+        ["payments"] = new(
+            "payments", "Penny", "Payments Officer", "Payments",
+            "payments-agent", PaymentsAgent.Instructions, DefaultTools.Concat(PaymentsMcpTools).ToArray(), PaymentsMcpTools),
+        ["client-communications"] = new(
+            "client-communications", "Cara", "Client Communications Specialist", "Client Communications",
+            "client-communications-agent", ClientCommunicationsAgent.Instructions, DefaultTools, NoMcpTools),
+        ["client-communications-voice"] = new(
+            "client-communications-voice", "Cara", "Client Communications Specialist (Voice)", "Client Communications",
+            "client-communications-voice-agent", ClientCommunicationsVoiceAgent.Instructions, DefaultTools, NoMcpTools),
         ["team-leader"] = new(
-            "team-leader", "Theo", "Claims Team Leader", "Team Leader Office",
+            "team-leader", "Theo", "Client Operations Team Leader", "Team Leader Office",
             "team-leader-agent", TeamLeaderAgent.Instructions, DefaultTools, NoMcpTools),
     };
 
-    public static void MapAgentMetadataEndpoints(this WebApplication app, ClaimsAgentOptions options)
+    public static void MapAgentMetadataEndpoints(this WebApplication app, CaldovaAgentOptions options)
     {
         app.MapGet("/agents/{role}/metadata", (string role) =>
         {
             if (!_catalog.TryGetValue(role, out var m))
                 return Results.NotFound(new { error = $"Unknown agent role '{role}'." });
 
-            // Build the live runtime view of which tools the agent has
-            // wired up given the current configuration. This drives the
-            // "Tools available" list shown in the Agent Prompt & Tools
-            // sub-tab. When APP_MCP_URL is set, the role's MCP tool
-            // surface is also appended so the operator can see every
-            // [McpServerTool] the Foundry agent can call.
+            // Live runtime view of which tools the agent has wired up given
+            // the current configuration. When APP_MCP_URL is set, the role's
+            // MCP tool surface is also appended.
             var configuredTools = new List<string>();
             if (!string.IsNullOrWhiteSpace(options.SearchConnectionId) && !string.IsNullOrWhiteSpace(options.SearchIndexName))
                 configuredTools.Add($"Azure AI Search — index '{options.SearchIndexName}'");

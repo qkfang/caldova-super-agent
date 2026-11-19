@@ -1,8 +1,8 @@
 using System.Text.Json;
-using ZavaClaims.Agents;
-using ZavaClaims.App.Services;
+using CaldovaSuper.Agents;
+using CaldovaSuper.App.Services;
 
-namespace ZavaClaims.App.Api;
+namespace CaldovaSuper.App.Api;
 
 record SupplierProcessRequest(string ClaimNumber);
 
@@ -12,7 +12,7 @@ record SupplierProcessRequest(string ClaimNumber);
 ///
 /// 1. List the claims minted earlier by the Claims Intake demo, so the user
 ///    can pick one from a dropdown.
-/// 2. Engage the <see cref="ZavaClaims.Agents.SupplierCoordinatorAgent"/>
+/// 2. Engage the <see cref="CaldovaSuper.Agents.SupplierCoordinatorAgent"/>
 ///    against the selected claim — recommending a supplier, suggesting
 ///    appointment slots, and drafting a customer update — and surface its
 ///    narrative back to the page alongside a deterministic supplier match

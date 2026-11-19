@@ -1,6 +1,6 @@
 using 'main.bicep'
 
-param baseName = 'zc'
+param baseName = 'caldovacs'
 param location = 'eastus2'
 param principals = [
   {

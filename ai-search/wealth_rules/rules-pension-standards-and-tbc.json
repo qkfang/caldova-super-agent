@@ -1,0 +1,34 @@
+{
+  "id": "rules-pension-standards-and-tbc",
+  "title": "Super law rule summary — Pension standards, minimum drawdowns & transfer balance cap (FY2026-27)",
+  "product": "Caldova Super & Pension",
+  "version": "Rule summary 2026-27 v1.0 — effective 1 July 2026",
+  "summary": "Rules for starting and running a Caldova Pension (account-based pension): who can start one, the minimum annual payment by age, pro-rating in the first year, rounding, the general transfer balance cap of $2.1 million for 2026-27, transfer balance credits and debits, reversionary pensions and how pension payments are taxed. Used by Benefits & Eligibility, Investment Solutions and Payments when commencing or reviewing a pension.",
+  "rules": "Commencement: an account-based pension can start once a condition of release with no cashing restriction is met (e.g. retirement after preservation age, or age 65); a transition-to-retirement (TTR) income stream can start from preservation age (60) while still working. The amount is fixed at commencement — later contributions or rollovers need a new pension.\nMinimum annual payment (percentage of the balance at commencement, or at 1 July in later years, by age on that date): under 65 — 4%; 65–74 — 5%; 75–79 — 6%; 80–84 — 7%; 85–89 — 9%; 90–94 — 11%; 95 and over — 14%.\nFirst year: the minimum is pro-rated by the days from the commencement day to 30 June (inclusive) divided by the days in the financial year. No minimum applies if the pension starts on or after 1 June.\nRounding: the minimum is rounded to the nearest $10.\nMaximum: none for account-based pensions; TTR income streams are limited to 10% of the balance each year.\nThe minimum must be paid in full each financial year, otherwise the income stream is treated as having stopped for tax purposes.\nTransfer balance cap (TBC): the general cap is $2.1 million for 2026-27 (it was $2.0 million in 2025-26). A member's personal cap is set when they first have a transfer balance account. A credit arises when a retirement-phase pension starts (its value at commencement). Regular pension payments do not reduce the account; commutations (lump sums taken out of the pension) create debits. Amounts above the cap must be commuted and attract excess transfer balance tax. The unused percentage of a member's cap drives proportional indexation of their personal cap. When a pension reverts to a spouse, the spouse's transfer balance credit arises 12 months after the death. Caldova reports transfer balance credits and debits to the ATO.\nTax: pension payments and lump sums to members aged 60 or over from a taxed fund are tax-free with no PAYG withheld. Earnings on assets supporting a retirement-phase pension are tax-exempt; TTR earnings are taxed at up to 15%. Division 296 may apply separately to members with total super balances above $3 million.",
+  "limits": "A pension cannot be started with preserved money unless a relevant condition of release has been met (TTR excepted). Amounts above the member's available cap space must stay in accumulation, where earnings are taxed at up to 15%. A reversionary beneficiary must be nominated when the pension starts — Caldova accepts a spouse or de facto partner, or a child eligible for a death benefit pension (under 18; under 25 and financially dependent; or with a disability). Minimum payments cannot be deferred to a later year.",
+  "evidenceRequired": [
+    "Signed Caldova Pension application (amount, income amount and frequency, nominated bank account)",
+    "Evidence of a condition of release (age 65+ needs proof of age only; ages 60–64 need a retirement declaration)",
+    "Reversionary nomination and relationship details (if any)",
+    "Investment instruction, including a cash reserve for pension payments",
+    "Transfer balance account history — any earlier retirement-phase income streams",
+    "TFN held"
+  ],
+  "owner": "Benefits & Eligibility",
+  "tags": [
+    "pension",
+    "account-based-pension",
+    "minimum-drawdown",
+    "pro-rata",
+    "rounding-nearest-10",
+    "transfer-balance-cap",
+    "tbc-2.1m",
+    "transfer-balance-credit",
+    "reversionary",
+    "ttr",
+    "tax-free-60",
+    "retirement-phase",
+    "division-296"
+  ],
+  "lastUpdated": "2026-07-01T00:00:00Z"
+}

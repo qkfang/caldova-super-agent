@@ -1,0 +1,34 @@
+{
+  "id": "menu-caldova-managed-portfolios",
+  "title": "Caldova Managed Portfolios — Investment menu & model summary (illustrative)",
+  "product": "Caldova Managed Portfolios",
+  "version": "Menu as at 31 October 2026 — illustrative performance",
+  "summary": "The six Caldova Managed Portfolios available in Caldova Super, Caldova Pension and Caldova Wrap (all tiers). Each is a diversified model portfolio run by Caldova's Investment Solutions team through the Caldova managed account service; the underlying investments are held in the member's own account. For each model: growth/defensive split, strategic asset allocation, indicative investment fee (ICR), buy/sell spread, standard risk measure (SRM) risk band, suggested minimum timeframe, objective and 1-, 3- and 5-year returns. ALL PERFORMANCE FIGURES ARE ILLUSTRATIVE for this demo — returns to 31 Oct 2026, after investment fees and costs, before administration fees and tax. Past performance is not a reliable indicator of future performance.",
+  "rules": "Conservative — 30% growth / 70% defensive (Australian shares 12%, international shares 13%, property & infrastructure 5%, fixed interest 50%, cash 20%). ICR 0.32%; buy/sell spread 0.10%. Risk band 3 — low to medium (1 to fewer than 2 negative annual returns expected in 20 years). Minimum timeframe 3 years. Objective CPI + 1.0% p.a. Returns: 1 yr 6.1%; 3 yrs 5.4% p.a.; 5 yrs 3.9% p.a.\nBalanced — 60/40 (Australian shares 24%, international shares 28%, property & infrastructure 8%, fixed interest 30%, cash 10%). ICR 0.38%; spread 0.10%. Risk band 5 — medium to high (3 to fewer than 4). Minimum timeframe 5 years. Objective CPI + 2.5% p.a. Returns: 8.9%; 8.1% p.a.; 6.4% p.a.\nGrowth — 80/20 (Australian shares 32%, international shares 37%, property & infrastructure 11%, fixed interest 14%, cash 6%). ICR 0.42%; spread 0.10%. Risk band 6 — high (4 to fewer than 6). Minimum timeframe 7 years. Objective CPI + 3.5% p.a. Returns: 10.8%; 9.9% p.a.; 7.9% p.a.\nHigh Growth — 95/5 (Australian shares 38%, international shares 44%, property & infrastructure 13%, cash 5%). ICR 0.45%; spread 0.10%. Risk band 6 — high (4 to fewer than 6). Minimum timeframe 8 years. Objective CPI + 4.0% p.a. Returns: 12.3%; 11.2% p.a.; 8.9% p.a.\nIndex Balanced — 60/40, passive index funds and ETFs, lowest fee (Australian shares 25%, international shares 30%, listed property 5%, fixed interest 32%, cash 8%). ICR 0.18%; spread 0.10%. Risk band 5 — medium to high. Minimum timeframe 5 years. Objective CPI + 2.5% p.a. Returns: 9.2%; 8.4% p.a.; 6.6% p.a.\nSustainable Growth — 80/20 with ESG screens: excludes thermal coal, tobacco and controversial weapons and targets lower carbon intensity than its benchmark (Australian shares 31%, international shares 39%, property & infrastructure 10%, fixed interest 15%, cash 5%). ICR 0.49%; spread 0.10%. Risk band 6 — high. Minimum timeframe 7 years. Objective CPI + 3.5% p.a. Returns: 10.1%; 9.2% p.a.; 7.4% p.a.\nRisk-profile fit (target market): Conservative — low to medium risk tolerance; Balanced and Index Balanced — 'Balanced' profile, also commonly used for pension income portfolios alongside a cash reserve; Growth and Sustainable Growth — 'Growth' profile, 7+ years; High Growth — 'High Growth' profile, comfortable with large short-term falls.\nRebalancing: quarterly, or sooner if an asset class drifts more than 5% from target. Model changes are approved by Caldova's Investment Committee.",
+  "limits": "Performance figures are illustrative, not actual returns. Asset allocations are strategic targets; actual holdings move within ranges. Members cannot change the holdings inside a model. A model's fit must be checked against the member's risk profile, Statement of Advice (advised members) and the target market determination. Caldova does not give personal advice — model selection for advised members is the adviser's recommendation.",
+  "evidenceRequired": [
+    "Member's risk profile and Statement of Advice (advised members) to confirm model fit",
+    "Target market determination (TMD) check for the model and the product",
+    "Investment instruction naming the model(s) and percentage allocations (total 100%, with 1% minimum cash)"
+  ],
+  "owner": "Investment Solutions",
+  "tags": [
+    "managed-portfolios",
+    "model-portfolios",
+    "investment-menu",
+    "conservative",
+    "balanced",
+    "growth",
+    "high-growth",
+    "index-balanced",
+    "sustainable-growth",
+    "icr",
+    "buy-sell-spread",
+    "risk-band",
+    "standard-risk-measure",
+    "performance",
+    "illustrative",
+    "tmd"
+  ],
+  "lastUpdated": "2026-11-02T00:00:00Z"
+}

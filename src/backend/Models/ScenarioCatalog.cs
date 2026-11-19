@@ -1,9 +1,9 @@
-namespace ZavaClaims.App.Models;
+namespace CaldovaSuper.App.Models;
 
 /// <summary>
-/// One step in a scripted claim-journey scenario. Each step is owned by a
-/// specific AI agent in the office and lists the actions that agent carries
-/// out at that stage of the journey.
+/// One step in a scripted member-case scenario. Each step is owned by a
+/// specific AI agent in the operations office and lists the actions that
+/// agent carries out at that stage of the journey.
 /// </summary>
 public record ScenarioStep(
     int Number,
@@ -14,11 +14,9 @@ public record ScenarioStep(
     IReadOnlyList<string> Actions);
 
 /// <summary>
-/// Lightweight metadata for one of the five scripted Zava Insurance demo
-/// scenarios. The detailed page content is hand-written in
-/// <c>Components/Pages/Scenarios/&lt;Scenario&gt;.razor</c>; this catalog
-/// powers navigation (NavMenu) and any landing surfaces that need to list
-/// the scenarios.
+/// Metadata and walkthrough for one of the five scripted Caldova Wealth demo
+/// scenarios. Rendered by <c>Components/Pages/Scenarios/Scenario.razor</c>
+/// and listed in the NavMenu and on the home page.
 /// </summary>
 public record ScenarioDefinition(
     string Id,
@@ -29,7 +27,9 @@ public record ScenarioDefinition(
     string Persona,
     string Tagline,
     string Flavor,
-    string Incident,
+    string LifeEvent,
+    string CaseNumber,
+    string Outcome,
     IReadOnlyList<string> AgentsFeatured,
     string DemoHighlight,
     IReadOnlyList<ScenarioStep> Steps,
@@ -37,658 +37,403 @@ public record ScenarioDefinition(
     string Accent);
 
 /// <summary>
-/// Static catalog of the five Zava Insurance demo scenarios. Mirrors the
-/// scripts in <c>docs/scenario-1..5</c>. Per-scenario demo pages are static
-/// — see <c>Components/Pages/Scenarios/</c>.
+/// Static catalog of the five Caldova Wealth demo scenarios. Mirrors the
+/// scripts in <c>docs/scenario-1..5</c>, the seeded cases in
+/// <c>CaseStore.SeedDefaults</c> and the 3D frontend scenario files.
 /// </summary>
 public static class ScenarioCatalog
 {
+    private const string Onboarding = "Onboarding Agent";
+    private const string Benefits = "Benefits & Eligibility Agent";
+    private const string Investments = "Investment Analyst Agent";
+    private const string FinCrime = "Financial Crime Agent";
+    private const string Transfers = "Transfers & Rollovers Agent";
+    private const string Payments = "Payments Agent";
+    private const string Comms = "Client Communications Agent";
+    private const string Leader = "Team Leader Agent";
+
     public static IReadOnlyList<ScenarioDefinition> All { get; } = new[]
     {
+        // ── 1. Priya — new client onboarding & consolidation ────────────────
         new ScenarioDefinition(
-            Id: "motor-collision",
+            Id: "new-client-onboarding",
             Number: "1",
-            Title: "Motor Collision — Rear-End Accident",
-            ShortTitle: "Motor collision",
-            Customer: "Aisha Khan",
-            Persona: "Aisha Khan — Motor Insurance Customer",
-            Tagline: "A fast, supplier-driven motor claim from photo triage to repair and rental.",
-            Flavor: "Motor insurance claim where the customer's car has been hit and needs repair. Showcases photo-based damage assessment, supplier (garage) coordination, rental car arrangement, and supplier payment.",
-            Incident: "Aisha was stopped at a red light when another driver rear-ended her sedan. The other driver admitted fault at the scene. Her rear bumper is crushed, the boot does not close, and a rear tail light is broken. The car is drivable but unsafe at night.",
-            AgentsFeatured: new[]
-            {
-                "Claims Intake AI Agent",
-                "Claims Assessment AI Agent",
-                "Loss Adjusting AI Agent (photo triage)",
-                "Supplier Coordination AI Agent (garage + rental)",
-                "Settlement AI Agent",
-                "Customer Communications AI Agent",
-            },
-            DemoHighlight: "Shows how AI agents collaborate on a fast, supplier-driven motor claim, with photo analysis, repairer assignment, rental coordination, and recovery of excess all visible in a single timeline.",
+            Title: "New Client Onboarding & Super Consolidation",
+            ShortTitle: "New client onboarding",
+            Customer: "Priya Natarajan",
+            Persona: "Priya Natarajan — new advised client (via Yarra Private Wealth)",
+            Tagline: "An adviser's application pack becomes a clean, compliant account in one pass.",
+            Flavor: "Adviser-led onboarding onto Caldova Super with two external funds to consolidate. Showcases document extraction, the NIGO checklist, KYC screening, rule checks with citations, an insurance-loss warning before a rollover, a fee comparison in dollars and coordinated member + adviser communications.",
+            LifeEvent: "Priya, 34, has just started a new job at a Docklands fintech. Her adviser, Hannah Lewis of Yarra Private Wealth, sends Caldova an application pack: a new Caldova Super (Select) account invested in the Growth model, consolidation of Southern Cross Industry Super (~$96,400, holding $520,000 of Death & TPD cover) and Harbourline Retail Super (~$41,800), a binding nomination for her partner Arjun, and a $3,300 p.a. ongoing advice fee from super.",
+            CaseNumber: "REQ-20261103-DEMO01",
+            Outcome: "Account opened ✅",
+            AgentsFeatured: new[] { Onboarding, FinCrime, Benefits, Transfers, Investments, Payments, Comms },
+            DemoHighlight: "Shows agents catching the two NIGO issues that usually cost days of back-and-forth — a one-witness nomination and an un-ticked insurance acknowledgement — and protecting Priya from losing $520,000 of insurance cover by accident.",
             Steps: new[]
             {
-                new ScenarioStep(
-                    Number: 1,
-                    Title: "First Notice of Loss",
-                    AgentName: "Claims Intake AI Agent",
-                    AgentIcon: "📥",
-                    Summary: "Aisha lodges through the customer portal on her phone, still standing near the roadside.",
-                    Actions: new[]
+                new ScenarioStep(1, "Application received", Onboarding, "📥",
+                    "Hannah Lewis emails Priya's application pack to Caldova New Business.",
+                    new[]
                     {
-                        "Capture policy number, incident date, time, and location.",
-                        "Guide a dynamic questionnaire on the other driver, registration, insurer, and police attendance.",
-                        "Request photos of the damage, the other vehicle, and the scene.",
-                        "Detect that Aisha relies on the car for work and flag the claim as urgent for rental priority.",
-                        "Generate a document checklist (licence, other-party details, photos, police event number).",
-                        "Open claim CLM-2026-00184 and route it to assessment.",
+                        "Read the adviser email plus the application, nomination and fee-consent forms.",
+                        "Extract Priya's details, Select tier, Growth model, two external funds and the $3,300 p.a. adviser fee.",
+                        "Confirm ID was verified via DVS and the TFN is supplied (masked *** *** 418).",
+                        "Flag two NIGO items: the binding nomination has only one witness, and the Southern Cross insurance-loss acknowledgement isn't ticked.",
+                        "Open member CS-2049817 and case REQ-20261103-DEMO01; route to Financial Crime and Benefits & Eligibility.",
                     }),
-                new ScenarioStep(
-                    Number: 2,
-                    Title: "Coverage Check",
-                    AgentName: "Claims Assessment AI Agent",
-                    AgentIcon: "📋",
-                    Summary: "Confirm the policy responds and recommend the call to the human assessor.",
-                    Actions: new[]
+                new ScenarioStep(2, "KYC & AML screening", FinCrime, "🛡️",
+                    "Screen the new member before any money moves.",
+                    new[]
                     {
-                        "Confirm Comprehensive Motor cover with a $750 excess.",
-                        "Check exclusions (unlicensed driver, undisclosed modifications) — none found.",
-                        "Match the photos to the described rear-end impact.",
-                        "Recommend third-party recovery from the at-fault driver's insurer.",
-                        "Produce a structured assessment note: cover confirmed, damage consistent, approve repair, pursue recovery.",
+                        "Run PEP and sanctions screening — no matches.",
+                        "Confirm the identity verification method (DVS) meets Caldova's KYC standard.",
+                        "Record a Low risk rating, with reasons, on the case.",
                     }),
-                new ScenarioStep(
-                    Number: 3,
-                    Title: "Photo Damage Triage",
-                    AgentName: "Loss Adjusting AI Agent",
-                    AgentIcon: "🔍",
-                    Summary: "Read the uploaded photos and draft a repair scope.",
-                    Actions: new[]
+                new ScenarioStep(3, "Rules check", Benefits, "📋",
+                    "Check the application against the PDS, trust deed and super law.",
+                    new[]
                     {
-                        "Tag visible damage: rear bumper (replace), boot panel (repair/replace), right tail light (replace), rear chassis alignment (inspect).",
-                        "Produce a draft damage scope and an estimated repair band of $3,800–$5,200.",
-                        "Flag that a physical inspection at the repairer is needed to confirm chassis alignment.",
-                        "Forward the draft scope to the chosen repairer via Lara.",
+                        "Adviser fee consent meets SIS s99FA — written, signed, amount, services and a 12-month term.",
+                        "Binding nomination fails SIS reg 6.17A — it needs two adult witnesses who are not beneficiaries; treat it as non-binding until re-signed.",
+                        "Growth model is consistent with the SoA risk profile and the product's target market.",
+                        "Recommend: open the account and request a re-signed nomination.",
                     }),
-                new ScenarioStep(
-                    Number: 4,
-                    Title: "Garage Assignment",
-                    AgentName: "Supplier Coordination AI Agent",
-                    AgentIcon: "🛠️",
-                    Summary: "Assign the right repairer and book a rental car.",
-                    Actions: new[]
+                new ScenarioStep(4, "Consolidation", Transfers, "🔁",
+                    "Bring Priya's old super across — without losing cover by accident.",
+                    new[]
                     {
-                        "Search the preferred repairer network in Aisha's postcode.",
-                        "Rank suppliers by availability, cycle time, and quality score.",
-                        "Assign Northside Smash Repairs — available next morning, 6-day average cycle.",
-                        "Book a rental car through the partnered hire provider for the duration of the repair.",
-                        "Send Aisha the repairer address, drop-off time, and rental pickup details by SMS and email.",
-                        "Set SLA reminders: quote due in 48 hours, repair completion within 7 days.",
+                        "Look up Southern Cross Industry Super (SCI0001AU) and Harbourline Retail Super (HRB0007AU) in the fund directory.",
+                        "Request the Harbourline rollover (~$41,800) via SuperStream now — due within 3 business days.",
+                        "Hold the Southern Cross rollover (~$96,400): it would end $520,000 of Death & TPD cover, so the adviser must confirm or arrange replacement cover first.",
+                        "Generate the transfer request PDF for the file.",
                     }),
-                new ScenarioStep(
-                    Number: 5,
-                    Title: "Repair Quote and Approval",
-                    AgentName: "Supplier Coordination + Claims Assessment AI Agents",
-                    AgentIcon: "🧾",
-                    Summary: "Validate the quote against benchmarks and the approved scope.",
-                    Actions: new[]
+                new ScenarioStep(5, "Portfolio fit & fees", Investments, "📈",
+                    "Confirm the Growth model and show the fees in dollars.",
+                    new[]
                     {
-                        "Receive the repairer's $4,800 quote.",
-                        "Run a cost reasonableness check against benchmarks for the same vehicle and damage pattern.",
-                        "Confirm the quote matches the approved scope and authorise the work.",
+                        "Confirm Growth (80/20) matches the SoA's Growth risk profile.",
+                        "Compare total annual cost on $138,200: Growth ≈ $1,175, Balanced ≈ $1,120, Index Balanced ≈ $843 (admin + investment fees).",
+                        "Generate the client workbook with the comparison table and chart for Hannah.",
                     }),
-                new ScenarioStep(
-                    Number: 6,
-                    Title: "Settlement and Payment",
-                    AgentName: "Settlement AI Agent",
-                    AgentIcon: "💳",
-                    Summary: "Pay the repairer transparently against scope and authority.",
-                    Actions: new[]
+                new ScenarioStep(6, "Invest on arrival", Payments, "💳",
+                    "Invest incoming money as it lands.",
+                    new[]
                     {
-                        "Match the final invoice to the approved scope and quote.",
-                        "Calculate Approved $4,800 − $750 excess = $4,050 payable to the repairer.",
-                        "Confirm the payment is within Adam's authority and validate the repairer's bank details.",
-                        "Release payment and record a complete audit trail of the calculation.",
+                        "Match each rollover receipt to the case.",
+                        "Invest into the Growth model, keeping 1% in the Caldova Cash Account for fees.",
+                        "Set up the $275 monthly adviser-fee deduction under the signed consent.",
                     }),
-                new ScenarioStep(
-                    Number: 7,
-                    Title: "Excess Recovery",
-                    AgentName: "Claims Assessment + Settlement AI Agents",
-                    AgentIcon: "↩️",
-                    Summary: "Pursue the at-fault insurer and refund Aisha's excess once recovered.",
-                    Actions: new[]
+                new ScenarioStep(7, "Welcome & adviser update", Comms, "✉️",
+                    "Tell Priya and Hannah exactly where things stand.",
+                    new[]
                     {
-                        "Open a third-party recovery sub-task against the at-fault driver's insurer.",
-                        "Refund Aisha's $750 excess automatically once recovery completes.",
-                    }),
-                new ScenarioStep(
-                    Number: 8,
-                    Title: "Customer Communications",
-                    AgentName: "Customer Communications AI Agent",
-                    AgentIcon: "✉️",
-                    Summary: "Keep Aisha informed in plain English at every step.",
-                    Actions: new[]
-                    {
-                        "Send a confirmation SMS at lodgement with the claim number.",
-                        "Send a daily status update during repair.",
-                        "Draft a plain-English explanation when third-party recovery begins.",
-                        "Send a final closure email with the repairer invoice, settlement summary, and feedback link.",
+                        "Send Priya a welcome email with her member number and what happens next.",
+                        "Send Hannah an update: Harbourline requested; Southern Cross on hold pending insurance confirmation; nomination needs a second witness.",
+                        "Plain English, no advice, contact details and complaint rights included.",
                     }),
             },
-            Icon: "🚗",
+            Icon: "💼",
             Accent: "#0ea5e9"),
 
+        // ── 2. Grace — identity takeover & fake SMSF rollover blocked ───────
         new ScenarioDefinition(
-            Id: "fraud-staged-theft",
+            Id: "account-takeover-blocked",
             Number: "2",
-            Title: "Suspected Fraud — Staged Theft with Fabricated Receipts",
-            ShortTitle: "Suspected fraud",
-            Customer: "Jordan Pierce",
-            Persona: "Jordan Pierce — Contents Insurance Customer (under investigation)",
-            Tagline: "An evidence-driven fraud workflow that detects anomalies and produces a defensible decision.",
-            Flavor: "A claim that initially looks routine but reveals fabricated documents and inconsistent statements. Showcases the Fraud Investigation AI Agent, anomaly detection, timeline reconstruction, and the careful, evidence-driven path to declining a claim while staying compliant.",
-            Incident: "Jordan reports that his apartment was burgled while he was away for the weekend. He says the front door was forced and that a laptop, professional camera, and luxury watch — totalling $11,400 — were taken. He provides receipts and a police event number.",
-            AgentsFeatured: new[]
-            {
-                "Claims Intake AI Agent (duplicate detection, fraud tag)",
-                "Claims Assessment AI Agent (escalation, partial-cover analysis)",
-                "Fraud Investigation AI Agent (anomaly detection, timeline, risk score, plan)",
-                "Claims Team Leader AI Agent (escalation review, approval support)",
-                "Customer Communications AI Agent (compliant decline letter)",
-            },
-            DemoHighlight: "Shows how AI agents support a careful, evidence-driven fraud workflow — detecting anomalies early, reconstructing the timeline, recommending investigation steps, and producing a defensible decision without replacing human judgement.",
+            Title: "Identity Takeover & Fake SMSF Rollover — Blocked",
+            ShortTitle: "Account takeover blocked",
+            Customer: "Grace Williams",
+            Persona: "Grace Williams — member travelling overseas",
+            Tagline: "A full-balance rollover to a nine-day-old SMSF is stopped before a cent leaves.",
+            Flavor: "Financial-crime scenario where the member is the victim. Showcases timeline reconstruction, ID-document authenticity checks, ATO SMSF verification (SVS), an explainable risk score, human approval of the block and a call-back on the verified number.",
+            LifeEvent: "Grace, 63, a retired school principal from Williamstown, is travelling through Italy. While she's away, a caller impersonating her changes her mobile and email by phone (2 November), sets up online access from a new device in Sydney (3 November), then requests a rollover of her entire $612,400 balance to 'GW Family Superannuation Fund' — an SMSF registered nine days earlier, paying an account in another name.",
+            CaseNumber: "REQ-20261106-DEMO02",
+            Outcome: "Request blocked 🛡️",
+            AgentsFeatured: new[] { Onboarding, Benefits, FinCrime, Transfers, Leader, Payments, Comms },
+            DemoHighlight: "Shows agents joining the dots in minutes — a phone change, a new device, a brand-new SMSF and a doctored licence — while humans make the call and Grace's $612,400 stays exactly where it is.",
             Steps: new[]
             {
-                new ScenarioStep(
-                    Number: 1,
-                    Title: "First Notice of Loss",
-                    AgentName: "Claims Intake AI Agent",
-                    AgentIcon: "📥",
-                    Summary: "Capture the report and surface early fraud indicators.",
-                    Actions: new[]
+                new ScenarioStep(1, "Rollover request received", Onboarding, "📥",
+                    "An 'urgent' email asks to roll Grace's whole balance to an SMSF.",
+                    new[]
                     {
-                        "Capture incident details, police event number, and the list of stolen items.",
-                        "Request proof of ownership: receipts, photographs, and serial numbers.",
-                        "Run duplicate detection and note a similar prior contents claim at another insurer.",
-                        "Flag the claim as 'review for fraud indicators' based on policy age (6 weeks) and high claim value.",
-                        "Open claim CLM-2026-00219 and route to assessment with a fraud-review tag.",
+                        "Read the email and rollover form — full balance (~$612,400) to 'GW Family Superannuation Fund'.",
+                        "Notice it came from an email address changed on 02/11/2026, and asks not to use the 'old' number.",
+                        "Flag NIGO: SVS not run, payee name mismatch, signature differs from the specimen, pressure to act urgently.",
+                        "Set priority Urgent and route to Benefits & Eligibility and Financial Crime — no processing.",
                     }),
-                new ScenarioStep(
-                    Number: 2,
-                    Title: "Coverage Check",
-                    AgentName: "Claims Assessment AI Agent",
-                    AgentIcon: "📋",
-                    Summary: "Confirm cover is technically in place but escalate inconsistencies.",
-                    Actions: new[]
+                new ScenarioStep(2, "Rollover rules", Benefits, "📋",
+                    "Check the rules for a rollover to an SMSF.",
+                    new[]
                     {
-                        "Confirm contents cover, theft included, and a sufficient limit.",
-                        "Note that the watch ($6,200) exceeds the unspecified valuables sub-limit and was not itemised.",
-                        "Note that one receipt has a date after the reported incident date.",
-                        "Recommend at most partial cover for the watch and escalate to fraud review.",
+                        "A rollover to an SMSF must pass the ATO SMSF verification service (SVS) first.",
+                        "SVS result: the ABN is a registered SMSF, but Grace's TFN is not linked to it and the bank details and ESA don't match.",
+                        "Recommendation: do not process — refer to Financial Crime.",
                     }),
-                new ScenarioStep(
-                    Number: 3,
-                    Title: "Anomaly Detection",
-                    AgentName: "Fraud Investigation AI Agent",
-                    AgentIcon: "🛡️",
-                    Summary: "Run a structured, explainable fraud review.",
-                    Actions: new[]
+                new ScenarioStep(3, "Account-takeover investigation", FinCrime, "🛡️",
+                    "Join up the timeline and the documents.",
+                    new[]
                     {
-                        "Flag policy timing — high-value items endorsed days before the alleged loss.",
-                        "Flag document forensics — receipt PDF created 3 days after the burglary.",
-                        "Flag image reuse — camera 'proof of ownership' photo matches a public product listing.",
-                        "Flag receipt mismatch — watch retailer does not stock that model.",
-                        "Flag claim history — two prior contents claims at another insurer in 18 months.",
-                        "Flag statement drift between police report and customer's later account.",
-                        "Assign a risk score of High, with explainable reasons (no black box).",
+                        "Timeline: phone call changes mobile and email (02/11, 10:42) → new device in Sydney (03/11, 21:14) → full-balance rollover request (06/11).",
+                        "Compare with the travel notice on file: Grace is in Italy.",
+                        "Licence image: altered date-of-birth font and missing hologram — verdict fake.",
+                        "Risk HIGH (92/100), every indicator explained without accusing anyone.",
+                        "Recommend: hold, lock online access, call back on the pre-change verified number, IDCARE referral; consider an SMR to AUSTRAC within 3 business days.",
                     }),
-                new ScenarioStep(
-                    Number: 4,
-                    Title: "Timeline Reconstruction",
-                    AgentName: "Fraud Investigation AI Agent",
-                    AgentIcon: "🕒",
-                    Summary: "Build a single timeline of the loss, the documents, and the policy.",
-                    Actions: new[]
+                new ScenarioStep(4, "Hold the rollover", Transfers, "🔁",
+                    "Stop the money leaving while the request is verified.",
+                    new[]
                     {
-                        "Assemble a timeline from online lodgement, phone notes, police log, receipt PDF metadata, and policy history.",
-                        "Show visually that the receipt was created after the incident.",
-                        "Show that valuables were endorsed onto the policy days before the alleged loss.",
+                        "Place the outbound SuperStream rollover on hold — the 3-business-day clock only runs once all required information is received and verified.",
+                        "Record the SVS failure and the hold reason on the case; nothing is sent to the receiving fund.",
                     }),
-                new ScenarioStep(
-                    Number: 5,
-                    Title: "Investigation Plan",
-                    AgentName: "Fraud Investigation AI Agent",
-                    AgentIcon: "🧪",
-                    Summary: "Recommend the next investigation steps for Felix to approve.",
-                    Actions: new[]
+                new ScenarioStep(5, "Approve the block", Leader, "🧭",
+                    "A human decides.",
+                    new[]
                     {
-                        "Request original receipts and bank or card statements showing purchase.",
-                        "Request the watch's serial number and warranty card.",
-                        "Contact the named retailer to verify receipt authenticity.",
-                        "Arrange a recorded interview with the customer to clarify door vs. window discrepancy.",
-                        "Pause settlement until verification completes.",
+                        "Review Felix's evidence pack and approve the block.",
+                        "Approve SMR lodgement by the AML/CTF compliance officer (kept confidential).",
+                        "Restore Grace's pre-change contact details and assign Cara to reach her.",
                     }),
-                new ScenarioStep(
-                    Number: 6,
-                    Title: "Evidence Outcome",
-                    AgentName: "Fraud Investigation AI Agent",
-                    AgentIcon: "📑",
-                    Summary: "Reconcile the verification results with the claim.",
-                    Actions: new[]
+                new ScenarioStep(6, "Funds protected", Payments, "💳",
+                    "Make sure no money moves.",
+                    new[]
                     {
-                        "Record retailer confirmation that the receipt is not genuine.",
-                        "Record that the customer cannot produce supporting bank statements.",
-                        "Record the third change to the customer's account of entry during the recorded interview.",
+                        "Confirm no funds left the account — $612,400 remains invested.",
+                        "Cancel the pending payment instruction to 'G Williams Holdings Pty Ltd'.",
+                        "Add a payment block until Grace re-verifies her identity.",
                     }),
-                new ScenarioStep(
-                    Number: 7,
-                    Title: "Decision and Customer Communications",
-                    AgentName: "Claims Assessment + Team Leader + Customer Communications AI Agents",
-                    AgentIcon: "✉️",
-                    Summary: "Produce a defensible decline with compliant, neutral wording.",
-                    Actions: new[]
+                new ScenarioStep(7, "Contact Grace", Comms, "✉️",
+                    "Reach the real Grace on details we already trust.",
+                    new[]
                     {
-                        "Prepare a decline recommendation citing fraudulent documents and misrepresentation against the policy fraud clause.",
-                        "Approve the decision with full audit trail (Theo, team leader).",
-                        "Draft a compliant, neutral decline letter citing specific clauses and verifiable evidence.",
-                        "Avoid accusatory language and include the customer's right to complain or seek external review.",
-                        "Refer the case to special investigations and log it in the industry fraud register.",
+                        "Email and call Grace on her pre-change verified details — never the new ones.",
+                        "Grace confirms from Florence that she never asked to move her super.",
+                        "Explain calmly: account secured, details restored, credentials reset, IDCARE support offered.",
+                        "No mention of any SMR — it stays confidential.",
                     }),
             },
             Icon: "🛡️",
             Accent: "#ef4444"),
 
+        // ── 3. George — retirement: account-based pension ───────────────────
         new ScenarioDefinition(
-            Id: "home-burst-pipe",
+            Id: "retirement-pension",
             Number: "3",
-            Title: "Home Burst Pipe — Urgent Make-Safe and Kitchen Repair",
-            ShortTitle: "Home burst pipe",
-            Customer: "Michael Harris",
-            Persona: "Michael Harris — Home Insurance Customer",
-            Tagline: "An urgent home claim with emergency make-safe and proactive customer care.",
-            Flavor: "A home insurance claim that needs urgent triage, emergency make-safe, and supplier coordination across a plumber and a builder. Showcases vulnerability awareness, temporary accommodation logic, and proactive customer communication during a stressful event.",
-            Incident: "A flexible hose under Michael's kitchen sink burst overnight. By morning the kitchen floor, kickboards, and lower cabinetry are saturated. Water has tracked into the laundry, and the kitchen is unusable. The family cannot prepare meals at home.",
-            AgentsFeatured: new[]
-            {
-                "Claims Intake AI Agent (urgency triage, vulnerability)",
-                "Supplier Coordination AI Agent (emergency plumber, drying, builder)",
-                "Claims Assessment AI Agent (cover analysis, allowance)",
-                "Loss Adjusting AI Agent (inspection brief, scope drafting)",
-                "Customer Communications AI Agent (proactive empathetic updates)",
-                "Settlement AI Agent (multi-party payments)",
-            },
-            DemoHighlight: "Shows how AI agents support an urgent home claim end-to-end — dispatching emergency suppliers within minutes, coordinating builders, keeping a stressed family informed, and handling multi-payee settlement cleanly.",
+            Title: "Retirement — Starting an Account-Based Pension",
+            ShortTitle: "Retirement pension",
+            Customer: "George Papadopoulos",
+            Persona: "George Papadopoulos — retiring member (via Bayside Financial Partners)",
+            Tagline: "From forty years on the tools to a steady, tax-free income.",
+            Flavor: "Retirement scenario showcasing the rules engine: condition of release, the 2026-27 transfer balance cap, pro-rated minimum drawdowns, reversionary nominations, a cash-bucket income strategy and a Teams approval before a $1.25 million pension starts.",
+            LifeEvent: "George, 66, has retired from his electrical contracting business in Oakleigh. His adviser, Marcus Tan, asks Caldova to move $1,250,000 into an account-based pension paying $78,000 a year monthly, with his wife Helen as reversionary beneficiary, leaving about $34,600 in accumulation.",
+            CaseNumber: "REQ-20261109-DEMO03",
+            Outcome: "Pension started ✅",
+            AgentsFeatured: new[] { Onboarding, Benefits, Investments, Transfers, Payments, Leader, Comms },
+            DemoHighlight: "Shows the calculations people usually do by hand — condition of release, $850,000 of cap space left under the $2.1m cap, a $38,870 pro-rated minimum, a two-year cash bucket — all cited, checked and approved in one sitting.",
             Steps: new[]
             {
-                new ScenarioStep(
-                    Number: 1,
-                    Title: "First Notice of Loss",
-                    AgentName: "Claims Intake AI Agent",
-                    AgentIcon: "📥",
-                    Summary: "Triage urgency in real time during the hotline call.",
-                    Actions: new[]
+                new ScenarioStep(1, "Pension application received", Onboarding, "📥",
+                    "Marcus Tan emails George's signed pension application.",
+                    new[]
                     {
-                        "Capture incident time, cause (burst flexi hose), affected rooms, and confirm the water has been shut off at the mains.",
-                        "Detect keywords like 'two children' and 'water still pooling' — flag urgent and potentially vulnerable household.",
-                        "Generate a tailored checklist: photos, plumber's report on the failed hose, list of damaged items.",
-                        "Open claim CLM-2026-00307 and create an emergency make-safe task.",
+                        "Extract: $1,250,000 to pension from CS-1077881, $78,000 p.a. paid monthly, Helen as reversionary beneficiary, start 16/11/2026.",
+                        "Confirm no existing retirement-phase income streams are declared.",
+                        "Open case REQ-20261109-DEMO03 and flag that Team Leader approval is needed (≥ $1,000,000).",
                     }),
-                new ScenarioStep(
-                    Number: 2,
-                    Title: "Emergency Make-Safe",
-                    AgentName: "Supplier Coordination AI Agent",
-                    AgentIcon: "🛠️",
-                    Summary: "Dispatch emergency suppliers within minutes of lodgement.",
-                    Actions: new[]
+                new ScenarioStep(2, "Eligibility & caps", Benefits, "📋",
+                    "Apply the pension rules — and cite them.",
+                    new[]
                     {
-                        "Assign an after-hours emergency plumber within 30 minutes of lodgement.",
-                        "Book a water extraction and drying company for the same day.",
-                        "Notify Michael by SMS with plumber name, ETA, and job reference.",
-                        "Pre-authorise the make-safe scope up to the policy's emergency limit.",
+                        "Condition of release: George is 66 — age 65 met; his benefits are unrestricted non-preserved.",
+                        "Transfer balance cap: a $1,250,000 credit is within the $2.1 million general cap for 2026-27 — $850,000 of cap space remains.",
+                        "Minimum drawdown: 5% at age 66 = $62,500 a year; pro-rated for 227 days from 16 November = $38,870 for 2026-27. $78,000 a year is well above it.",
+                        "Reversionary beneficiary: Helen is his spouse — eligible.",
+                        "Tax: pension payments are tax-free from age 60, and retirement-phase earnings are tax-free.",
                     }),
-                new ScenarioStep(
-                    Number: 3,
-                    Title: "Coverage Check",
-                    AgentName: "Claims Assessment AI Agent",
-                    AgentIcon: "📋",
-                    Summary: "Confirm the policy responds and the right allowances apply.",
-                    Actions: new[]
+                new ScenarioStep(3, "Income strategy", Investments, "📈",
+                    "Make the income dependable.",
+                    new[]
                     {
-                        "Confirm 'sudden and accidental escape of liquid' is covered (gradual leakage is not).",
-                        "Read the plumber's report — flexi hose ruptured at the crimp, failure was sudden — supports cover.",
-                        "Authorise meal allowance and laundromat costs for up to 14 days instead of temporary accommodation.",
-                        "Produce a structured assessment with recommended reserves of $18,000.",
+                        "Hold two years of payments ($156,000) in cash and term deposits.",
+                        "Invest the remaining $1,094,000 in the Balanced model.",
+                        "Compare three income structures and explain sequencing risk in plain English.",
+                        "Generate the workbook for Marcus.",
                     }),
-                new ScenarioStep(
-                    Number: 4,
-                    Title: "Damage Scope",
-                    AgentName: "Loss Adjusting AI Agent",
-                    AgentIcon: "🔍",
-                    Summary: "Prepare Lara for the inspection and draft the scope.",
-                    Actions: new[]
+                new ScenarioStep(4, "Pension transfer", Transfers, "🔁",
+                    "Move the money into the pension phase.",
+                    new[]
                     {
-                        "Prepare an inspection brief covering background, age of cabinetry, pre-existing rot, and moisture readings.",
-                        "Draft a damage scope: lower cabinetry, kickboards, vinyl flooring, repaint, and subfloor check.",
-                        "Estimate cost band $14,000–$19,000 based on the photos and notes.",
+                        "Transfer $1,250,000 from accumulation CS-1077881 to pension CP-3077881 on 16/11/2026.",
+                        "Leave $34,600 in accumulation.",
+                        "Report the transfer balance credit to the ATO.",
                     }),
-                new ScenarioStep(
-                    Number: 5,
-                    Title: "Builder Quote and Approval",
-                    AgentName: "Supplier Coordination + Claims Assessment AI Agents",
-                    AgentIcon: "🧾",
-                    Summary: "Validate the builder quote against scope and benchmarks.",
-                    Actions: new[]
+                new ScenarioStep(5, "Approve, commence & pay", Payments, "💳",
+                    "Start the pension — after a human says yes.",
+                    new[]
                     {
-                        "Assign an approved builder.",
-                        "Receive a $17,200 quote and run a cost reasonableness check against benchmarks.",
-                        "Confirm the quote matches scope and authorise the work for an 8 working day schedule.",
+                        "Validate the payee — a joint account in George's name.",
+                        "Raise a Microsoft Teams approval (commencement ≥ $1,000,000); Theo approves.",
+                        "Commence the pension on 16/11/2026; first payment of $6,500 on 15/12/2026, no tax withheld.",
                     }),
-                new ScenarioStep(
-                    Number: 6,
-                    Title: "Customer Communications",
-                    AgentName: "Customer Communications AI Agent",
-                    AgentIcon: "✉️",
-                    Summary: "Drive proactive, empathetic updates because Michael is stressed.",
-                    Actions: new[]
+                new ScenarioStep(6, "Welcome to retirement", Comms, "✉️",
+                    "Celebrate the milestone, clearly.",
+                    new[]
                     {
-                        "Send a Day 0 confirmation, plumber dispatched, and meal allowance approved.",
-                        "Send Day 1 drying installation, Day 3 builder appointed, Day 5 repair start date confirmed.",
-                        "Send daily progress notes from the builder and a Day 14 final inspection booking.",
-                        "Adjust tone to be warm and reassuring and avoid jargon.",
-                        "Detect a 2-day silence during quoting and prompt a status update before Michael chases.",
-                    }),
-                new ScenarioStep(
-                    Number: 7,
-                    Title: "Settlement",
-                    AgentName: "Settlement AI Agent",
-                    AgentIcon: "💳",
-                    Summary: "Settle multiple payees cleanly with one excess applied.",
-                    Actions: new[]
-                    {
-                        "Pay the builder directly: $17,200 − $500 excess = $16,700.",
-                        "Pay plumber and drying suppliers directly: $1,650.",
-                        "Pay meal allowance to Michael: $420.",
-                        "Validate payee details, confirm approval authority, and release payments.",
+                        "Send George a warm 'welcome to retirement' letter with his payment schedule.",
+                        "Send Marcus a confirmation with the minimum drawdown and remaining cap space.",
+                        "Explain that the minimum is recalculated every 1 July.",
                     }),
             },
-            Icon: "🏠",
-            Accent: "#10b981"),
-
-        new ScenarioDefinition(
-            Id: "business-fire",
-            Number: "4",
-            Title: "Small Business Fire — Property Damage and Business Interruption",
-            ShortTitle: "Small business fire",
-            Customer: "Tom Bradley",
-            Persona: "Tom Bradley — Small Business Owner",
-            Tagline: "A complex commercial claim with property damage, business interruption, and many suppliers.",
-            Flavor: "A complex commercial claim involving property damage, business interruption, and multiple suppliers. Showcases loss adjusting on a complex loss, business income calculation, escalation to a team leader for a high-value settlement, and coordination across electricians, builders, and forensic accountants.",
-            Incident: "An overnight electrical fault in the cafe's coffee machine power circuit caused a smoke and small fire incident. The fire brigade attended. The kitchen, espresso bar, and ceiling are smoke-damaged. No one was injured. The cafe must close while the cause is investigated and repairs are made.",
-            AgentsFeatured: new[]
-            {
-                "Claims Intake AI Agent (complex-claim flagging)",
-                "Claims Assessment AI Agent (multi-section cover, conditions check)",
-                "Loss Adjusting AI Agent (forensic preparation, scope drafting, BI indicative model)",
-                "Supplier Coordination AI Agent (multi-trade orchestration)",
-                "Claims Team Leader AI Agent (escalation and reserves approval)",
-                "Customer Communications AI Agent (weekly updates, plain-English explanations)",
-                "Settlement AI Agent (staged payments, audit trail)",
-            },
-            DemoHighlight: "Shows how AI agents handle a complex commercial claim with property damage, business interruption, and multiple suppliers, while keeping the small business owner informed and supporting the team leader's high-value approvals.",
-            Steps: new[]
-            {
-                new ScenarioStep(
-                    Number: 1,
-                    Title: "First Notice of Loss",
-                    AgentName: "Claims Intake AI Agent",
-                    AgentIcon: "📥",
-                    Summary: "Capture a complex commercial claim and route to a senior loss adjuster.",
-                    Actions: new[]
-                    {
-                        "Capture incident type (fire/smoke), site address, fire brigade report number, and that the building is not safe to operate.",
-                        "Identify two coverage sections: Property Damage and Business Interruption.",
-                        "Generate a checklist: fire brigade report, photos, 12 months of P&L, payroll register, stock-loss list.",
-                        "Flag the claim as complex / large loss and route to a senior loss adjuster.",
-                        "Open claim CLM-2026-00412.",
-                    }),
-                new ScenarioStep(
-                    Number: 2,
-                    Title: "Coverage Check",
-                    AgentName: "Claims Assessment AI Agent",
-                    AgentIcon: "📋",
-                    Summary: "Read both cover sections and identify policy conditions.",
-                    Actions: new[]
-                    {
-                        "Confirm Property Damage covered for fire and smoke damage.",
-                        "Confirm Business Interruption covered with a 30-day waiting period waived for fire.",
-                        "Confirm Stock — perishables — covered up to sub-limit.",
-                        "Identify an electrical maintenance condition and flag the latest electrical safety certificate must be verified.",
-                        "Produce a structured cover note for the loss adjuster.",
-                    }),
-                new ScenarioStep(
-                    Number: 3,
-                    Title: "Cause Investigation and Site Visit",
-                    AgentName: "Loss Adjusting AI Agent",
-                    AgentIcon: "🔍",
-                    Summary: "Prepare Lara for forensic work and draft the damage scope.",
-                    Actions: new[]
-                    {
-                        "Prepare a background brief covering cover sections, sub-limits, and policy conditions.",
-                        "List key questions: espresso machine service, circuit installer, electrical certificate currency.",
-                        "Recommend an independent forensic electrician.",
-                        "Categorise damage: smoke staining (clean), ceiling tiles (replace), espresso bar joinery (replace), fridges (test), HVAC ducting (clean and test).",
-                        "Draft a damage scope and an estimated band of $95,000–$130,000.",
-                        "Flag complex-claim indicators including possible third-party recovery against the espresso machine manufacturer.",
-                    }),
-                new ScenarioStep(
-                    Number: 4,
-                    Title: "Supplier Coordination",
-                    AgentName: "Supplier Coordination AI Agent",
-                    AgentIcon: "🛠️",
-                    Summary: "Orchestrate multiple suppliers and track SLAs.",
-                    Actions: new[]
-                    {
-                        "Book a forensic electrician next day to confirm cause.",
-                        "Schedule a specialist smoke-cleaning crew for Day 3.",
-                        "Engage a commercial builder for ceiling, joinery, and repaint.",
-                        "Book a refrigeration technician for Day 2 inspections.",
-                        "Engage a forensic accountant to validate the BI loss for Day 5.",
-                        "Track SLAs, follow up overdue quotes, and surface a single status board for Lara and Tom.",
-                    }),
-                new ScenarioStep(
-                    Number: 5,
-                    Title: "Business Interruption Calculation",
-                    AgentName: "Loss Adjusting AI Agent",
-                    AgentIcon: "📊",
-                    Summary: "Brief the forensic accountant and draft an indicative BI loss.",
-                    Actions: new[]
-                    {
-                        "Pre-prepare a brief for the forensic accountant: 12 months of P&L, payroll, and seasonality notes.",
-                        "Draft an indicative BI estimate: $9,200 average weekly gross profit, 6 weeks closure, 4 weeks at 60% capacity reopening.",
-                        "Estimate indicative BI loss of ~$70,000 and stock loss of ~$3,800.",
-                    }),
-                new ScenarioStep(
-                    Number: 6,
-                    Title: "Reserves and Escalation",
-                    AgentName: "Claims Team Leader AI Agent",
-                    AgentIcon: "🧭",
-                    Summary: "Surface the high-value escalation and approve reserves.",
-                    Actions: new[]
-                    {
-                        "Surface combined estimate: property $120,000 + BI $70,000 + stock $3,800 = ~$193,800.",
-                        "Alert Theo: high value above Adam's authority, multiple suppliers, complex BI calculation.",
-                        "Recommend reserves and key approval points.",
-                        "Capture Theo's approval of reserves and BI methodology in a single review.",
-                    }),
-                new ScenarioStep(
-                    Number: 7,
-                    Title: "Customer Communications",
-                    AgentName: "Customer Communications AI Agent",
-                    AgentIcon: "✉️",
-                    Summary: "Keep an anxious business owner informed.",
-                    Actions: new[]
-                    {
-                        "Set up weekly written updates and an on-demand portal summary for Tom.",
-                        "Translate technical findings into plain English (cause was the espresso circuit, not your responsibility).",
-                        "Draft a sensitive note when the reopening date slips by a week due to ceiling material lead time.",
-                        "Detect signs of frustration in call notes and prompt a proactive check-in from Theo.",
-                    }),
-                new ScenarioStep(
-                    Number: 8,
-                    Title: "Interim Payment and Final Settlement",
-                    AgentName: "Settlement AI Agent",
-                    AgentIcon: "💳",
-                    Summary: "Stage payments transparently with a clean audit trail.",
-                    Actions: new[]
-                    {
-                        "Release Interim payment 1 of $25,000 — emergency clean and stock loss, paid in week 1.",
-                        "Release Interim payment 2 of $40,000 — BI advance to cover wages while closed.",
-                        "Settle the balance after final invoices and reconciled BI calculation.",
-                        "Validate each invoice against the approved scope, apply the policy excess once, and check for duplicate invoices across suppliers.",
-                    }),
-                new ScenarioStep(
-                    Number: 9,
-                    Title: "Recovery",
-                    AgentName: "Claims Assessment AI Agent",
-                    AgentIcon: "↩️",
-                    Summary: "Pursue third-party recovery from the espresso machine manufacturer.",
-                    Actions: new[]
-                    {
-                        "Open a third-party recovery thread against the espresso machine manufacturer based on the forensic electrician's findings.",
-                    }),
-            },
-            Icon: "🏪",
+            Icon: "🎉",
             Accent: "#f59e0b"),
 
+        // ── 4. Tom — financial hardship early release ───────────────────────
         new ScenarioDefinition(
-            Id: "life-bereavement",
-            Number: "5",
-            Title: "Life Insurance Bereavement — Compassionate Claim for a Beneficiary",
-            ShortTitle: "Life bereavement",
-            Customer: "Robert Chen",
-            Persona: "Robert Chen — Life Insurance Beneficiary",
-            Tagline: "A quiet, kind, and simple claim that protects the customer's dignity.",
-            Flavor: "A life insurance claim made by a grieving beneficiary. Showcases empathetic communication, document guidance, sensitive identity verification, and a streamlined, low-friction settlement. The agents stay in the background and make the experience as gentle as possible.",
-            Incident: "Robert's mother held a life insurance policy for many years. Robert is the named beneficiary. He is now responsible for lodging the claim, providing documents, and coordinating with the insurer while also managing funeral arrangements and family matters.",
-            AgentsFeatured: new[]
-            {
-                "Customer Communications AI Agent (empathy-first, document guidance, closing letter)",
-                "Claims Intake AI Agent (minimal, gentle data capture; sensitive-case flag)",
-                "Claims Assessment AI Agent (cover and exclusion check)",
-                "Fraud Investigation AI Agent (silent, low-touch verification)",
-                "Claims Team Leader AI Agent (one-page approval)",
-                "Settlement AI Agent (clean payment with payee verification)",
-            },
-            DemoHighlight: "Shows how AI agents can make a bereavement claim quiet, kind, and simple. The same agents that drive efficiency in other scenarios here step back, reduce friction, and protect the customer's dignity — proof that AI in claims is not just about speed, but about appropriate care.",
+            Id: "financial-hardship",
+            Number: "4",
+            Title: "Financial Hardship — Early Release of Super",
+            ShortTitle: "Financial hardship",
+            Customer: "Tom Bradley",
+            Persona: "Tom Bradley — member in financial hardship (direct)",
+            Tagline: "Every hardship rule applied — with precision and kindness.",
+            Flavor: "Vulnerable-member scenario showcasing hardship criteria, the $10,000 statutory cap (partial approval), tax-component and PAYG calculations, a human review and a genuinely kind letter with free support options.",
+            LifeEvent: "Tom, 47, closed his Lygon Street café last year and has been on JobSeeker since April. Behind on his mortgage and power bill, he applies late at night to withdraw $15,000 from his $84,300 super balance on severe financial hardship grounds.",
+            CaseNumber: "REQ-20261111-DEMO04",
+            Outcome: "Partially approved — $10,000 🟡",
+            AgentsFeatured: new[] { Onboarding, Benefits, Leader, Investments, Payments, Comms },
+            DemoHighlight: "Shows agents getting the hard parts exactly right — 26-week test, 21-day letter, the $10,000 cap, $2,068 withheld, $7,932 paid — and a letter Tom will actually understand.",
             Steps: new[]
             {
-                new ScenarioStep(
-                    Number: 1,
-                    Title: "First Contact",
-                    AgentName: "Customer Communications AI Agent",
-                    AgentIcon: "✉️",
-                    Summary: "Detect a sensitive bereavement call and adjust the experience accordingly.",
-                    Actions: new[]
+                new ScenarioStep(1, "Hardship application received", Onboarding, "📥",
+                    "Tom's late-night email arrives with his Centrelink letter.",
+                    new[]
                     {
-                        "Detect within the first 30 seconds that the call is a bereavement claim.",
-                        "Suggest an empathetic call script and suppress upsell prompts and routine satisfaction surveys.",
-                        "Recommend a single point of contact so Robert never has to re-explain his loss.",
-                        "Pre-fill a private case note: 'Bereavement claim. Sensitive. Single point of contact.'",
+                        "Extract: $15,000 requested, JobSeeker since 06/04/2026, Services Australia letter dated 09/11/2026, balance $84,300.",
+                        "Flag vulnerability (financial stress) and that $15,000 exceeds the $10,000 maximum.",
+                        "Open case REQ-20261111-DEMO04 with High priority.",
                     }),
-                new ScenarioStep(
-                    Number: 2,
-                    Title: "First Notice of Loss",
-                    AgentName: "Claims Intake AI Agent",
-                    AgentIcon: "📥",
-                    Summary: "Capture only what is essential and tag the claim as sensitive.",
-                    Actions: new[]
+                new ScenarioStep(2, "Hardship criteria", Benefits, "📋",
+                    "Apply the severe financial hardship rules.",
+                    new[]
                     {
-                        "Capture policyholder full name, date of birth, date of passing, Robert's relationship, and a safe contact method and time.",
-                        "Avoid asking for documents on the call.",
-                        "Generate a gentle, one-page checklist (death certificate, photo ID, bank account, short pre-filled form) sent by email and post.",
-                        "Flag the claim with a 'sensitive case' tag for all later interactions.",
-                        "Open claim CLM-2026-00518.",
+                        "26 continuous weeks of Commonwealth income support — met (31 weeks).",
+                        "Still receiving JobSeeker when he applied — met.",
+                        "Services Australia letter dated within 21 days — met (09/11/2026).",
+                        "No hardship release in the last 12 months — met.",
+                        "Amount: $1,000–$10,000 gross once in any 12 months → recommend partial approval of $10,000.",
                     }),
-                new ScenarioStep(
-                    Number: 3,
-                    Title: "Coverage Check",
-                    AgentName: "Claims Assessment AI Agent",
-                    AgentIcon: "📋",
-                    Summary: "Confirm the policy responds with no exclusions in play.",
-                    Actions: new[]
+                new ScenarioStep(3, "Human review", Leader, "🧭",
+                    "A vulnerable member gets a human touch.",
+                    new[]
                     {
-                        "Confirm the policy was active and premiums paid.",
-                        "Confirm the policy was held over the 2-year non-disclosure period — disclosure exclusions do not apply.",
-                        "Confirm the cause of death is not within any specific exclusion.",
-                        "Identify a straightforward policy with a $250,000 sum insured.",
-                        "Pre-prepare an approval recommendation subject to identity and document verification.",
+                        "Review the vulnerability flag and approve the $10,000 partial release.",
+                        "Ask Cara to include free financial counselling details.",
                     }),
-                new ScenarioStep(
-                    Number: 4,
-                    Title: "Document Guidance",
-                    AgentName: "Customer Communications AI Agent",
-                    AgentIcon: "✉️",
-                    Summary: "Guide Robert through documents with warmth and patience.",
-                    Actions: new[]
+                new ScenarioStep(4, "Redemption plan", Investments, "📈",
+                    "Decide what to sell.",
+                    new[]
                     {
-                        "Acknowledge each document upload with a warm, plain-English message.",
-                        "Identify an interim death certificate and gently explain that the final certificate will be needed.",
-                        "Detect a missing page in the photo ID upload and ask for it gently.",
-                        "Draft a short, kind email when there is any silence longer than 3 days.",
+                        "Draw from Tom's Cash Account first, then sell Balanced units for the rest.",
+                        "Show the impact on his balance: $84,300 → about $74,300.",
                     }),
-                new ScenarioStep(
-                    Number: 5,
-                    Title: "Identity and Probate Check",
-                    AgentName: "Fraud Investigation AI Agent",
-                    AgentIcon: "🛡️",
-                    Summary: "Run silent, low-friction verification.",
-                    Actions: new[]
+                new ScenarioStep(5, "Calculate & pay", Payments, "💳",
+                    "Get the tax right, then pay.",
+                    new[]
                     {
-                        "Verify the death certificate against public registry data.",
-                        "Confirm Robert's identity through standard ID verification.",
-                        "Confirm Robert is the named beneficiary on the policy (no probate required).",
-                        "Assign a Low risk score with explanation — no interview needed.",
-                        "Surface a green tick on Felix's queue: 'No further investigation recommended.'",
+                        "Payee check: the account is in Tom's legal name — match.",
+                        "Components: 6% tax-free → $600 tax-free and $9,400 taxable.",
+                        "PAYG withholding at 22% on the taxable component → $2,068.",
+                        "Pay $7,932 on Friday 13/11/2026 and remit $2,068 to the ATO.",
                     }),
-                new ScenarioStep(
-                    Number: 6,
-                    Title: "Approval",
-                    AgentName: "Claims Team Leader AI Agent",
-                    AgentIcon: "🧭",
-                    Summary: "Bundle the file into a one-page approval brief.",
-                    Actions: new[]
+                new ScenarioStep(6, "A kind explanation", Comms, "✉️",
+                    "Explain the outcome without jargon or judgement.",
+                    new[]
                     {
-                        "Surface that $250,000 is above Adam's authority.",
-                        "Prepare Theo a one-page approval brief: cover, beneficiary, identity check, fraud review outcome, recommended payment.",
-                        "Capture Theo's single-signature approval.",
-                    }),
-                new ScenarioStep(
-                    Number: 7,
-                    Title: "Settlement",
-                    AgentName: "Settlement AI Agent",
-                    AgentIcon: "💳",
-                    Summary: "Pay the verified beneficiary with a clean audit trail.",
-                    Actions: new[]
-                    {
-                        "Calculate the payable amount: $250,000 (no excess applies for life cover).",
-                        "Validate the payee name matches the verified beneficiary.",
-                        "Validate that bank account details have passed account verification.",
-                        "Release payment and record a complete audit trail.",
-                    }),
-                new ScenarioStep(
-                    Number: 8,
-                    Title: "Closing Communication",
-                    AgentName: "Customer Communications AI Agent",
-                    AgentIcon: "✉️",
-                    Summary: "Close with a sincere, non-templated final letter.",
-                    Actions: new[]
-                    {
-                        "Confirm payment in plain language.",
-                        "Acknowledge Robert's loss in a sincere, non-templated tone.",
-                        "Provide a single contact point for any further questions.",
-                        "Suppress the standard cross-sell and feedback survey for a defined period.",
+                        "Explain why $10,000 is the legal maximum and how the tax works.",
+                        "Mention the impact on retirement savings — gently, without lecturing.",
+                        "Include the National Debt Helpline (1800 007 007) and Moneysmart.",
+                        "Human-approved before sending.",
                     }),
             },
-            Icon: "🕊️",
+            Icon: "🤝",
+            Accent: "#10b981"),
+
+        // ── 5. Robert — death benefit under a binding nomination ────────────
+        new ScenarioDefinition(
+            Id: "death-benefit",
+            Number: "5",
+            Title: "Death Benefit — Binding Nomination",
+            ShortTitle: "Death benefit",
+            Customer: "Robert Chen",
+            Persona: "Robert Chen — son of the late Mei Chen",
+            Tagline: "Taking the paperwork weight off a grieving family.",
+            Flavor: "Bereavement scenario showcasing document authenticity, binding-nomination validation, SIS vs tax dependants, per-beneficiary tax components, a Teams approval for the death benefit and compassionate letters.",
+            LifeEvent: "Mei Chen, 81, died on 12 October 2026. Her son Robert, from Box Hill, writes to Caldova on behalf of himself and his sister Lily: their mother held a Caldova Pension (~$486,200) and, they believe, a binding nomination splitting it between them.",
+            CaseNumber: "REQ-20261113-DEMO05",
+            Outcome: "Benefit paid ✅",
+            AgentsFeatured: new[] { Onboarding, Leader, FinCrime, Benefits, Investments, Payments, Comms },
+            DemoHighlight: "Shows agents validating the nomination, getting the tax right to the cent and drafting letters with real care — while a human leads every conversation with the family.",
+            Steps: new[]
+            {
+                new ScenarioStep(1, "Death notification", Onboarding, "📥",
+                    "Robert's email arrives with the claim form and certified documents.",
+                    new[]
+                    {
+                        "Extract: Mei Chen (died 12/10/2026), pension CP-3019042 (~$486,200), binding nomination Robert 50% / Lily 50%.",
+                        "Stop pension payments on Mei's account.",
+                        "Open case REQ-20261113-DEMO05 and flag bereavement for compassionate handling.",
+                    }),
+                new ScenarioStep(2, "Compassionate oversight", Leader, "🧭",
+                    "A senior human owns the case.",
+                    new[]
+                    {
+                        "Take ownership and set clear expectations for the family.",
+                        "Make sure one consistent contact (Cara) speaks with Robert.",
+                    }),
+                new ScenarioStep(3, "Document checks", FinCrime, "🛡️",
+                    "Verify the documents quietly in the background.",
+                    new[]
+                    {
+                        "Certified death certificate (Births, Deaths and Marriages Victoria) — genuine.",
+                        "Robert's and Lily's identity documents — genuine.",
+                        "Low risk — no further action.",
+                    }),
+                new ScenarioStep(4, "Nomination & dependants", Benefits, "📋",
+                    "Confirm who must be paid — and how they're taxed.",
+                    new[]
+                    {
+                        "Nomination signed 18/03/2024 before two adult witnesses who aren't beneficiaries — valid until 18/03/2027.",
+                        "Robert and Lily are Mei's children — SIS dependants — so the nomination is binding.",
+                        "For tax, adult children who weren't financially dependent are non-dependants: the taxable component is taxed at 17%.",
+                        "Recommendation: pay 50/50 as nominated.",
+                    }),
+                new ScenarioStep(5, "Redeem the portfolio", Investments, "📈",
+                    "Turn the pension's investments into cash.",
+                    new[]
+                    {
+                        "Sell the pension's portfolio to cash.",
+                        "Explain that the final amount depends on the sale prices.",
+                    }),
+                new ScenarioStep(6, "Calculate & pay", Payments, "💳",
+                    "Per-beneficiary components and tax, then approval.",
+                    new[]
+                    {
+                        "Each child: $243,100 gross → $92,378 tax-free and $150,722 taxable (38% / 62%).",
+                        "PAYG withholding at 17% on the taxable component → $25,622.74 each.",
+                        "Raise a Microsoft Teams approval (death benefit); Theo approves.",
+                        "Pay $217,477.26 to each of Robert and Lily.",
+                    }),
+                new ScenarioStep(7, "Gentle letters", Comms, "✉️",
+                    "Write the letters the family will keep.",
+                    new[]
+                    {
+                        "Condolence letters to Robert and Lily with the amounts and a simple tax explanation.",
+                        "Explain timing and who to call.",
+                        "Include complaint rights — Caldova's internal dispute resolution, then AFCA.",
+                        "Copy Marcus Tan with the family's consent.",
+                    }),
+            },
+            Icon: "🤍",
             Accent: "#a855f7"),
     };
 

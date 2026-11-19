@@ -14,56 +14,57 @@ import {
   CUSTOMER_PERSONAS,
   STAFF_PERSONAS,
   findCustomerPersona,
-  findStaffByRole,
   type CustomerPersona,
   type ScenarioId,
   type StaffPersona,
+  type StaffRole,
 } from "./personaData";
-import { getScenario } from "./scenarios";
+import {
+  getBeatNarration,
+  getScenario,
+  type BeatAction,
+  type CaseDecisionStatus,
+  type ScenarioNarrationsJson,
+} from "./scenarios";
 import { APP_BASE_URL } from "./stepGate";
 
 /**
- * Claims-industry staff roles, mirroring the cast in
- * `docs/characters.md` and the departments in `res/img-office.png`.
+ * Caldova Client Operations staff roles, mirroring the cast in
+ * `personaData.ts` and the departments in the voxel office.
  */
-export type AgentRole =
-  | "Claims Intake Officer"
-  | "Claims Assessor"
-  | "Loss Adjuster"
-  | "Fraud Investigator"
-  | "Supplier Coordinator"
-  | "Settlement Officer"
-  | "Customer Communications Specialist"
-  | "Claims Team Leader";
+export type AgentRole = StaffRole;
 
-export type ClaimStatus =
-  | "submitted"
-  | "intake"
+export type CaseStatus =
+  | "received"
+  | "onboarding"
   | "assessing"
   | "assessed"
-  | "settling"
-  | "approved"
-  | "rejected"
-  | "communicating"
+  | CaseDecisionStatus
   | "closed";
 
-export interface Claim {
+export interface MemberCase {
   id: string;
   type: string;
+  /** Amount requested on the case. */
   amount: number;
-  status: ClaimStatus;
-  /** The visible folder mesh that travels with the claim. */
+  /** Gross amount paid, invested or commenced by Payments (0 until decided / when declined). */
+  paidAmount: number;
+  status: CaseStatus;
+  /** Outcome recorded by Payments; undefined until decided. */
+  outcome?: ScriptOutcome;
+  /** The visible folder mesh that travels with the case. */
   mesh: Mesh;
   /**
-   * Optional scripted scenario data. Present only on claims started via
-   * `startScripted` — drives deterministic outcomes and inserts extra
-   * "consultation" beats with ambient staff (Loss Adjuster, Fraud,
-   * Supplier Coordinator, Team Leader) between assessor and settlement.
+   * Optional scripted scenario data. Present only on cases started via
+   * `startScripted` — drives deterministic outcomes and inserts
+   * "consultation" beats with specialist staff (Investment Analyst,
+   * Financial Crime, Transfers & Rollovers, Team Leader) before and/or
+   * after the Benefits & Eligibility assessment.
    */
-  script?: ClaimScript;
+  script?: CaseScript;
   /**
    * Identifier of the staff member currently holding / processing the
-   * claim folder. `null` means the folder is on a desk/inbox/archive.
+   * case folder. `null` means the folder is on a desk/inbox/archive.
    */
   currentHolderId: string | null;
 }
@@ -73,44 +74,46 @@ export type ScriptOutcome = "approved" | "rejected" | "partial";
 export interface ScriptExtraBeat {
   role: AgentRole;
   narration: string;
-  /** Seconds the ambient staff member dwells on the folder. */
+  /** Seconds the specialist dwells on the folder. */
   duration: number;
 }
 
-export interface ClaimScript {
+export interface CaseScript {
   scenarioId: ScenarioId;
   /**
-   * Fixed claim id used for the spawned customer's claim folder. Mirrors
-   * the seeded record in the backend so the on-screen claim id matches
-   * the mock data shown on the agent demo pages.
+   * Fixed case number used for the spawned client's folder. Mirrors the
+   * seeded record in the backend so the on-screen case number matches the
+   * mock data shown on the agent demo pages.
    */
   caseId: string;
-  /** Force assessor to approve (true) or reject (false). */
-  approveAtAssessor: boolean;
-  /** Sequential extra consultations between assessor approval & settlement. */
-  extras: ScriptExtraBeat[];
-  /** Extra consultations to run BEFORE the assessor (e.g. Team Leader for life). */
-  preAssessor: ScriptExtraBeat[];
-  /** Final settlement outcome — overrides the random roll. */
-  settlement: ScriptOutcome;
-  /** Narration used when assessor processes the claim. */
-  assessorNarration?: string;
-  /** Narration used when settlement decision is made. */
-  settlementNarration?: string;
-  /** Narration used when comms notifies the customer. */
-  commsNarration?: string;
+  /** Amount requested on the case. */
+  amount: number;
+  /** Gross amount paid / invested / commenced at the payment step. */
+  paidAmount: number;
+  /** Force Benefits & Eligibility to pass the case on (true) or decline it (false). */
+  approveAtBenefits: boolean;
+  /** Sequential consultations between Onboarding and Benefits & Eligibility. */
+  preBenefits: ScriptExtraBeat[];
+  /** Sequential consultations between Benefits & Eligibility and Payments. */
+  postBenefits: ScriptExtraBeat[];
+  /** Final outcome — overrides the random roll. */
+  outcome: ScriptOutcome;
+  /** Case status shown once Payments records the outcome. */
+  decisionStatus: CaseDecisionStatus;
+  /** Activity-log lines for the core pipeline steps. */
+  narrations: ScenarioNarrationsJson;
   /** Hex color used for log entries / banner. */
   color: string;
   /** Persona name shown in banner. */
   personaName: string;
   /** Fired when the camera focus should change. */
   onFocusChange?: (info: BeatFocusInfo) => void;
-  /** Fired once when the scripted claim is fully closed. */
+  /** Fired once when the scripted case is fully closed. */
   onClosed?: () => void;
 }
 
 export interface BeatFocusInfo {
-  /** Stable id of the staff/customer the camera should follow. */
+  /** Stable id of the staff/client the camera should follow. */
   characterId: string;
   /** Activity-log narration for this beat. */
   narration: string;
@@ -119,9 +122,9 @@ export interface BeatFocusInfo {
 }
 
 /**
- * Customer claim scenarios — each one matches a customer persona from
- * `docs/characters.md`. Backed by `personaData.ts` so the simulation,
- * profile cards, and scenario picker stay in sync.
+ * Client request scenarios — each one matches a client persona from
+ * `personaData.ts`, so the simulation, profile cards, and scenario picker
+ * stay in sync.
  */
 const CUSTOMER_SCENARIOS: Array<{
   id: ScenarioId;
@@ -134,13 +137,29 @@ const CUSTOMER_SCENARIOS: Array<{
   id: p.id,
   persona: p.name,
   palette: p.palette as keyof typeof PALETTES,
-  type: p.claim_type,
+  type: p.request_type,
   min: p.amount_min,
   max: p.amount_max,
 }));
 
-/** Unique ID counter — small + readable for the activity log. */
-let nextClaimNum = 1001;
+/** Mint a case number in the canonical `REQ-YYYYMMDD-XXXXXX` format. */
+function mintCaseId(): string {
+  const d = new Date();
+  const ymd = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(
+    d.getDate(),
+  ).padStart(2, "0")}`;
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let suffix = "";
+  for (let i = 0; i < 6; i++) {
+    suffix += alphabet[Math.floor(Math.random() * alphabet.length)];
+  }
+  return `REQ-${ymd}-${suffix}`;
+}
+
+/** Format a dollar amount for the activity log (e.g. "$1,250,000"). */
+function money(amount: number): string {
+  return `$${amount.toLocaleString()}`;
+}
 
 /** Logger contract used by the simulation. */
 export interface SimLogger {
@@ -207,13 +226,13 @@ interface CubicleZone {
  * regular cubicle, so it's modelled identically here).
  */
 const CUBICLE_ZONES: CubicleZone[] = [
-  { cx: -21, cz: 0 }, // Intake
-  { cx: -11, cz: 0 }, // Supplier
-  { cx: -1, cz: 0 }, // Settlement
-  { cx: 9, cz: 0 }, // Communications
-  { cx: -11, cz: 10 }, // Assessor
-  { cx: -1, cz: 10 }, // Loss Adjuster
-  { cx: 9, cz: 10 }, // Fraud
+  { cx: -21, cz: 0 }, // Onboarding
+  { cx: -11, cz: 0 }, // Transfers
+  { cx: -1, cz: 0 }, // Payments
+  { cx: 9, cz: 0 }, // Comms
+  { cx: -11, cz: 10 }, // Benefits
+  { cx: -1, cz: 10 }, // Investments
+  { cx: 9, cz: 10 }, // Financial Crime
   { cx: -21, cz: 10 }, // Team Leader
 ];
 
@@ -345,17 +364,26 @@ function planOfficePath(
   return wps;
 }
 
+/** Which side of the Benefits & Eligibility assessment a consultation runs on. */
+type ConsultPhase = "pre" | "post";
+
 /** Tasks that processing staff agents can be assigned to. */
 type Task =
   | { kind: "idle" }
-  | { kind: "pickup"; claim: Claim }
-  | { kind: "assess"; claim: Claim }
-  | { kind: "carry-to-settlement"; claim: Claim }
-  | { kind: "settle"; claim: Claim }
-  | { kind: "carry-to-comms"; claim: Claim }
-  | { kind: "communicate"; claim: Claim }
-  /** Ambient staff consult on a scripted claim (Loss Adjuster, Fraud, etc). */
-  | { kind: "consult"; claim: Claim; beat: ScriptExtraBeat };
+  | { kind: "pickup"; memberCase: MemberCase }
+  | { kind: "route"; memberCase: MemberCase }
+  | { kind: "assess"; memberCase: MemberCase }
+  | { kind: "carry-to-payments"; memberCase: MemberCase }
+  | { kind: "pay"; memberCase: MemberCase }
+  | { kind: "carry-to-comms"; memberCase: MemberCase }
+  | { kind: "communicate"; memberCase: MemberCase }
+  /** Specialist staff consult on a scripted case (Investments, Financial Crime, etc). */
+  | {
+      kind: "consult";
+      memberCase: MemberCase;
+      beat: ScriptExtraBeat;
+      phase: ConsultPhase;
+    };
 
 interface StaffAgent {
   id: string;
@@ -373,36 +401,37 @@ interface StaffAgent {
   moveQueue: Vector3[];
   /** Optional callback invoked once we reach moveTarget. */
   onArrive: (() => void) | null;
-  /** True for staff that participate in the active claim pipeline. */
+  /** True while the staff member is driven by the case pipeline. */
   active: boolean;
-  /** Rotating status messages used by ambient staff. */
-  ambientMessages?: string[];
-  ambientIndex?: number;
-  ambientTimer?: number;
-  /** Ring buffer of recent claim ids this staff member has touched. */
-  claimsHistory: string[];
+  /** Index into `persona.ambient` for the rotating idle status. */
+  ambientIndex: number;
+  /** Seconds until the idle status rotates to the next ambient line. */
+  ambientTimer: number;
+  /** Ring buffer of recent case numbers this staff member has touched. */
+  caseHistory: string[];
   /** Persona record (typical line, personality, etc) for profile card. */
   persona: StaffPersona;
 }
 
 interface CustomerAgent {
   character: VoxelCharacter;
-  claim: Claim;
+  memberCase: MemberCase;
   persona: string;
-  /** Customer persona id (if known) — used by profile card. */
+  /** Client persona id (if known) — used by profile card. */
   personaId?: ScenarioId;
   state: "entering" | "to-reception" | "leaving" | "done";
   moveTarget: Vector3;
 }
 
 /**
- * Top-level simulation: customers spawn, drop claims at reception, the
- * Claims Intake Officer routes them through Claims Assessor → Settlement
- * Officer → Customer Communications Specialist. Loss Adjuster, Fraud
- * Investigator, Supplier Coordinator and Team Leader are visible at their
- * desks with rotating ambient status to reinforce the office metaphor.
+ * Top-level simulation: clients spawn, drop requests at reception, and the
+ * Onboarding & Requests Officer routes them through Benefits & Eligibility
+ * → Payments → Client Communications. The Investment Analyst, Financial
+ * Crime Investigator, Transfers & Rollovers Coordinator and Team Leader are
+ * visible at their desks with rotating status lines, and join scripted
+ * cases as specialist consultations.
  */
-export class ClaimSimulation {
+export class CaseSimulation {
   private readonly scene: Scene;
   private readonly layout: OfficeLayout;
   private readonly logger: SimLogger;
@@ -410,24 +439,28 @@ export class ClaimSimulation {
   private readonly staff: StaffAgent[] = [];
   private readonly customers: CustomerAgent[] = [];
 
-  /** Claims sitting in the intake inbox awaiting pickup. */
-  private readonly inbox: Claim[] = [];
-  /** Claims that have been assessed, awaiting a Settlement Officer pickup. */
-  private readonly settlementQueue: Claim[] = [];
-  /** Claims waiting for Customer Communications (approved or rejected). */
-  private readonly communicationsQueue: Claim[] = [];
+  /** Cases sitting in the reception inbox awaiting Onboarding pickup. */
+  private readonly inbox: MemberCase[] = [];
+  /** Cases on the Benefits & Eligibility desk awaiting assessment. */
+  private readonly benefitsInbox: MemberCase[] = [];
+  /** Cases back on the Benefits desk after specialist review, awaiting hand-off to Payments. */
+  private readonly benefitsHandoffQueue: MemberCase[] = [];
+  /** Cases that have been assessed, awaiting a Payments pickup. */
+  private readonly paymentsQueue: MemberCase[] = [];
+  /** Cases waiting for Client Communications (any outcome). */
+  private readonly communicationsQueue: MemberCase[] = [];
 
   private spawnTimer = 1.5;
   private autoSpawnPaused = false;
   private paused = false;
   private metrics = { submitted: 0, processing: 0, approved: 0, rejected: 0 };
 
-  /** Track every claim that has touched the office, by id. */
-  private readonly claimsById = new Map<string, Claim>();
-  /** Customer agents indexed by their character.id (e.g. "cust_C-1001"). */
+  /** Track every case that has touched the office, by case number. */
+  private readonly casesById = new Map<string, MemberCase>();
+  /** Client agents indexed by their character.id (e.g. "cust_REQ-…"). */
   private readonly customersByCharId = new Map<string, CustomerAgent>();
 
-  /** Observable fired when a scripted claim's focus character changes. */
+  /** Observable fired when a scripted case's focus character changes. */
   readonly onScriptFocusChange = new Observable<BeatFocusInfo>();
 
   /** The currently highlighted character (hover or click), or null. */
@@ -444,21 +477,21 @@ export class ClaimSimulation {
     /** Map StaffPersona to its desk position from the office layout. */
     const homeFor = (role: AgentRole): Vector3 => {
       switch (role) {
-        case "Claims Intake Officer":
-          return this.layout.intakeDeskPoint;
-        case "Claims Assessor":
-          return this.layout.assessorDeskPoint;
-        case "Loss Adjuster":
-          return this.layout.lossAdjusterDeskPoint;
-        case "Fraud Investigator":
-          return this.layout.fraudDeskPoint;
-        case "Supplier Coordinator":
-          return this.layout.supplierDeskPoint;
-        case "Settlement Officer":
-          return this.layout.settlementDeskPoint;
-        case "Customer Communications Specialist":
+        case "Onboarding & Requests Officer":
+          return this.layout.onboardingDeskPoint;
+        case "Benefits & Eligibility Assessor":
+          return this.layout.benefitsDeskPoint;
+        case "Investment Analyst":
+          return this.layout.investmentsDeskPoint;
+        case "Financial Crime Investigator":
+          return this.layout.finCrimeDeskPoint;
+        case "Transfers & Rollovers Coordinator":
+          return this.layout.transfersDeskPoint;
+        case "Payments Officer":
+          return this.layout.paymentsDeskPoint;
+        case "Client Communications Specialist":
           return this.layout.communicationsDeskPoint;
-        case "Claims Team Leader":
+        case "Client Operations Team Leader":
           return this.layout.teamLeaderDeskPoint;
       }
     };
@@ -482,10 +515,9 @@ export class ClaimSimulation {
         moveQueue: [],
         onArrive: null,
         active: persona.active_in_pipeline,
-        ambientMessages: persona.active_in_pipeline ? undefined : persona.ambient,
         ambientIndex: 0,
         ambientTimer: 3 + Math.random() * 4,
-        claimsHistory: [],
+        caseHistory: [],
         persona,
       };
       this.staff.push(agent);
@@ -496,34 +528,43 @@ export class ClaimSimulation {
         color: persona.color,
         palette,
       });
-      const initialStatus = persona.ambient[0] ?? "Awaiting next claim";
-      this.logger.setAgentStatus(persona.id, false, initialStatus);
+      this.setIdleStatus(agent);
     }
   }
 
-  /** Spawn a new customer with a fresh claim folder. */
-  spawnCustomer(scenarioId?: ScenarioId, script?: ClaimScript): CustomerAgent {
+  /** Show the staff member's resting status (first ambient line) and restart rotation. */
+  private setIdleStatus(s: StaffAgent): void {
+    s.ambientIndex = 0;
+    s.ambientTimer = 4 + Math.random() * 4;
+    this.logger.setAgentStatus(s.id, false, s.persona.ambient[0] ?? "Awaiting next request");
+  }
+
+  /** Spawn a new client with a fresh case folder. */
+  spawnCustomer(scenarioId?: ScenarioId, script?: CaseScript): CustomerAgent {
     const scenario = scenarioId
       ? CUSTOMER_SCENARIOS.find((s) => s.id === scenarioId) ??
         CUSTOMER_SCENARIOS[0]
       : CUSTOMER_SCENARIOS[Math.floor(Math.random() * CUSTOMER_SCENARIOS.length)];
-    const amount = Math.round(
-      scenario.min + Math.random() * (scenario.max - scenario.min),
-    );
-    const claimId = script?.caseId ?? `C-${nextClaimNum++}`;
-    const claim: Claim = {
-      id: claimId,
+    // Unscripted clients get a random amount (to the nearest $100) within
+    // their persona's range; scripted cases use the canonical amount.
+    const amount =
+      script?.amount ??
+      Math.round((scenario.min + Math.random() * (scenario.max - scenario.min)) / 100) * 100;
+    const caseId = script?.caseId ?? mintCaseId();
+    const memberCase: MemberCase = {
+      id: caseId,
       type: scenario.type,
       amount,
-      status: "submitted",
-      mesh: this.makeClaimFolder(claimId),
+      paidAmount: 0,
+      status: "received",
+      mesh: this.makeCaseFolder(caseId),
       currentHolderId: null,
       script,
     };
-    this.claimsById.set(claimId, claim);
+    this.casesById.set(caseId, memberCase);
 
     const palette = PALETTES[scenario.palette];
-    const ch = new VoxelCharacter(this.scene, `cust_${claimId}`, palette);
+    const ch = new VoxelCharacter(this.scene, `cust_${caseId}`, palette);
     ch.root.position = this.layout.spawnPoint.clone();
     ch.root.position.y = 0.2;
     // Slight lateral jitter so they don't overlap (only for unscripted spawns)
@@ -531,22 +572,22 @@ export class ClaimSimulation {
       ch.root.position.x += (Math.random() - 0.5) * 1.5;
     }
 
-    // Customer carries the folder until they reach reception.
-    claim.mesh.parent = ch.getHandAnchor();
-    claim.mesh.position = Vector3.Zero();
-    claim.mesh.rotation = Vector3.Zero();
-    claim.currentHolderId = ch.id;
+    // Client carries the folder until they reach reception.
+    memberCase.mesh.parent = ch.getHandAnchor();
+    memberCase.mesh.position = Vector3.Zero();
+    memberCase.mesh.rotation = Vector3.Zero();
+    memberCase.currentHolderId = ch.id;
 
     const customer: CustomerAgent = {
       character: ch,
-      claim,
+      memberCase,
       persona: scenario.persona,
       personaId: scenario.id,
       state: "entering",
       moveTarget: this.layout.entrancePoint.clone(),
     };
     ch.setWalking(true);
-    // Scripted customers continue the same urgent run they used to cross
+    // Scripted clients continue the same urgent run they used to cross
     // the neighbourhood — they sprint through the door and across the
     // lobby to reception, then drop back to a normal walk on the way out.
     if (script) {
@@ -559,23 +600,28 @@ export class ClaimSimulation {
     this.metrics.processing++;
     this.pushMetrics();
     this.logger.log(
-      `${scenario.persona} arrived with claim ${claim.id} — ${claim.type}, $${claim.amount.toLocaleString()}`,
+      `Request ${memberCase.id} received — ${memberCase.type}, ${money(amount)} (${scenario.persona})`,
       script ? "warn" : "info",
     );
     if (script) {
-      this.fireFocusChange(claim, ch.id, "customer-arrives", `${scenario.persona} arrived at the office`);
+      this.fireFocusChange(
+        memberCase,
+        ch.id,
+        "enter-office",
+        this.beatText(memberCase, "enter-office", `${scenario.persona} arrived at the office`),
+      );
     }
     return customer;
   }
 
-  private makeClaimFolder(id: string): Mesh {
+  private makeCaseFolder(id: string): Mesh {
     const folder = MeshBuilder.CreateBox(
       `folder_${id}`,
       { width: 0.32, height: 0.06, depth: 0.42 },
       this.scene,
     );
     const mat = new StandardMaterial(`folderMat_${id}`, this.scene);
-    // Random-ish folder color (manila / blue / red)
+    // Random-ish folder color (manila / red / blue / green)
     const palette = ["#e8c069", "#d4584b", "#5a8fcf", "#7a9c5a"];
     mat.diffuseColor = Color3.FromHexString(
       palette[Math.floor(Math.random() * palette.length)],
@@ -588,7 +634,7 @@ export class ClaimSimulation {
   /** Per-frame tick. */
   update(dtSec: number): void {
     if (this.paused) return;
-    // Auto-spawn customers periodically (paused during scripted scenarios).
+    // Auto-spawn clients periodically (paused during scripted scenarios).
     if (!this.autoSpawnPaused) {
       this.spawnTimer -= dtSec;
       if (this.spawnTimer <= 0) {
@@ -608,9 +654,9 @@ export class ClaimSimulation {
     for (const c of this.customers) {
       if (c.state === "done") continue;
       c.character.update(dtSec);
-      // Scripted customers (claim.script) sprint into the building and
-      // across the lobby; ambient customers stroll at normal pace.
-      const running = !!c.claim.script && (c.state === "entering" || c.state === "to-reception");
+      // Scripted clients sprint into the building and across the lobby;
+      // ambient clients stroll at normal pace.
+      const running = !!c.memberCase.script && (c.state === "entering" || c.state === "to-reception");
       const speed = running ? customerRunSpeed : customerWalkSpeed;
       const arrived = moveToward(
         c.character.root,
@@ -628,24 +674,26 @@ export class ClaimSimulation {
         case "to-reception": {
           // Drop folder on the inbox tray.
           c.character.setWalking(false);
-          const folder = c.claim.mesh;
+          const folder = c.memberCase.mesh;
           folder.parent = null;
           folder.position = this.layout.inboxPoint.clone();
           // Stack folders slightly so they don't overlap.
           folder.position.y += this.inbox.length * 0.07;
-          this.inbox.push(c.claim);
-          c.claim.currentHolderId = null;
-          this.logger.log(
-            `Claim ${c.claim.id} lodged at reception by ${c.persona}`,
-            c.claim.script ? "warn" : "info",
+          this.inbox.push(c.memberCase);
+          c.memberCase.currentHolderId = null;
+          const lodged = this.beatText(
+            c.memberCase,
+            "lodge-at-reception",
+            `Request ${c.memberCase.id} lodged at reception by ${c.persona}`,
           );
-          if (c.claim.script) {
-            this.fireFocusChange(
-              c.claim,
-              "intake-1",
-              "lodge-at-reception",
-              `${c.persona} lodged claim ${c.claim.id} at reception`,
+          this.logger.log(lodged, c.memberCase.script ? "warn" : "info");
+          if (c.memberCase.script) {
+            const onboarding = this.staff.find(
+              (x) => x.role === "Onboarding & Requests Officer",
             );
+            if (onboarding) {
+              this.fireFocusChange(c.memberCase, onboarding.id, "lodge-at-reception", lodged);
+            }
           }
           c.state = "leaving";
           c.moveTarget = this.layout.exitPoint.clone();
@@ -661,7 +709,7 @@ export class ClaimSimulation {
           break;
       }
     }
-    // Compact the customer array occasionally
+    // Compact the client array occasionally
     if (this.customers.length > 0 && this.customers[0].state === "done") {
       for (let i = this.customers.length - 1; i >= 0; i--) {
         if (this.customers[i].state === "done") this.customers.splice(i, 1);
@@ -704,179 +752,213 @@ export class ClaimSimulation {
     }
   }
 
-  /** Cycle ambient (non-pipeline) staff through their rotating activities. */
+  /**
+   * Rotate idle staff through their ambient status lines. Specialists who
+   * are not on a case are animated here (pipeline staff are animated by
+   * `updateStaff`); pipeline staff only rotate while idle at their desk
+   * and no scripted scenario is running.
+   */
   private updateAmbient(dtSec: number): void {
     for (const s of this.staff) {
-      if (s.active || !s.ambientMessages || s.ambientMessages.length === 0) {
-        continue;
-      }
-      s.character.update(dtSec);
-      s.ambientTimer = (s.ambientTimer ?? 0) - dtSec;
+      if (!s.active) s.character.update(dtSec);
+      const lines = s.persona.ambient;
+      if (lines.length < 2) continue;
+      const idleAtDesk = s.active
+        ? s.task.kind === "idle" &&
+          !s.moveTarget &&
+          s.processTimer <= 0 &&
+          !this.autoSpawnPaused
+        : true;
+      if (!idleAtDesk) continue;
+      s.ambientTimer -= dtSec;
       if (s.ambientTimer <= 0) {
-        s.ambientIndex = ((s.ambientIndex ?? 0) + 1) % s.ambientMessages.length;
+        s.ambientIndex = (s.ambientIndex + 1) % lines.length;
         s.ambientTimer = 4 + Math.random() * 4;
-        this.logger.setAgentStatus(s.id, false, s.ambientMessages[s.ambientIndex]);
+        this.logger.setAgentStatus(s.id, false, lines[s.ambientIndex]);
       }
     }
   }
 
   private tryAssignTask(s: StaffAgent): void {
-    if (s.role === "Claims Intake Officer" && this.inbox.length > 0) {
-      const claim = this.inbox.shift()!;
-      s.task = { kind: "pickup", claim };
-      this.recordClaim(s, claim);
-      this.logger.setAgentStatus(s.id, true, `Picking up ${claim.id}`);
-      if (claim.script) {
-        this.fireFocusChange(claim, s.id, "intake-pickup", `Iris picks up claim ${claim.id}`);
+    if (s.role === "Onboarding & Requests Officer" && this.inbox.length > 0) {
+      const memberCase = this.inbox.shift()!;
+      s.task = { kind: "pickup", memberCase };
+      this.recordCase(s, memberCase);
+      this.logger.setAgentStatus(s.id, true, `Picking up ${memberCase.id}`);
+      if (memberCase.script) {
+        this.fireFocusChange(
+          memberCase,
+          s.id,
+          "onboarding-pickup",
+          this.beatText(memberCase, "onboarding-pickup", `${s.name} picks up request ${memberCase.id}`),
+        );
       }
       this.gotoAndThen(s, this.layout.inboxPoint, () => {
         // Take folder
-        claim.mesh.parent = s.character.getHandAnchor();
-        claim.mesh.position = Vector3.Zero();
-        claim.mesh.rotation = Vector3.Zero();
-        claim.currentHolderId = s.id;
-        // Walk to assessor desk and drop on assessor's inbox.
-        claim.status = "intake";
+        memberCase.mesh.parent = s.character.getHandAnchor();
+        memberCase.mesh.position = Vector3.Zero();
+        memberCase.mesh.rotation = Vector3.Zero();
+        memberCase.currentHolderId = s.id;
+        // Walk to the Benefits & Eligibility desk and drop the folder there.
+        memberCase.status = "onboarding";
         this.logger.log(
-          `Claims Intake routed ${claim.id} to Claims Assessor`,
-          claim.script ? "warn" : "info",
+          `Onboarding & Requests routed ${memberCase.id} to Benefits & Eligibility`,
+          memberCase.script ? "warn" : "info",
         );
-        s.task = { kind: "assess", claim };
-        this.logger.setAgentStatus(s.id, true, `Routing ${claim.id}`);
-        if (claim.script) {
-          this.fireFocusChange(claim, s.id, "intake-route", `Iris routes ${claim.id} to the Claims Assessor`);
+        s.task = { kind: "route", memberCase };
+        this.logger.setAgentStatus(s.id, true, `Routing ${memberCase.id}`);
+        if (memberCase.script) {
+          this.fireFocusChange(
+            memberCase,
+            s.id,
+            "onboarding-route",
+            this.beatText(
+              memberCase,
+              "onboarding-route",
+              `${s.name} routes ${memberCase.id} to Benefits & Eligibility`,
+            ),
+          );
         }
-        const dropPoint = this.layout.assessorDeskPoint.clone();
+        const dropPoint = this.layout.benefitsDeskPoint.clone();
         dropPoint.z -= 1.4; // approach side of desk
         this.gotoAndThen(s, dropPoint, () => {
-          // Drop claim on assessor desk top
-          const drop = this.layout.assessorDeskPoint.clone();
-          drop.y = 1.0;
-          drop.z += 0.4;
-          claim.mesh.parent = null;
-          claim.mesh.position = drop;
-          claim.mesh.rotation = Vector3.Zero();
-          claim.currentHolderId = null;
-          claim.status = "assessing";
-          // For "life" scenario, run any pre-assessor consultations (Team Leader)
-          // before handing off to the assessor.
-          if (claim.script && claim.script.preAssessor.length > 0) {
-            const beat = claim.script.preAssessor.shift()!;
-            this.startConsultation(claim, beat);
+          this.placeOnDesk(memberCase, this.layout.benefitsDeskPoint);
+          memberCase.status = "assessing";
+          // Run any pre-assessment consultations (e.g. Financial Crime KYC,
+          // Team Leader oversight) before Benefits & Eligibility picks it up.
+          if (memberCase.script && memberCase.script.preBenefits.length > 0) {
+            const beat = memberCase.script.preBenefits.shift()!;
+            this.startConsultation(memberCase, beat, "pre");
           } else {
-            // Hand off to assessor queue (assessor will pick it up).
-            this.handoffForAssessor(claim);
+            this.benefitsInbox.push(memberCase);
           }
-          // Intake officer returns home.
+          // Onboarding officer returns home.
           s.task = { kind: "idle" };
           this.logger.setAgentStatus(s.id, false, "Returning to desk");
-          this.gotoAndThen(s, s.homePoint, () => {
-            this.logger.setAgentStatus(s.id, false, "Awaiting next claim");
-          });
+          this.gotoAndThen(s, s.homePoint, () => this.setIdleStatus(s));
         });
       });
       return;
     }
 
-    if (s.role === "Claims Assessor") {
-      // Assessor picks claims that have been routed to its desk.
-      const claim = this.popAssessorReady();
-      if (!claim) return;
-      s.task = { kind: "assess", claim };
-      this.recordClaim(s, claim);
-      this.logger.setAgentStatus(s.id, true, `Assessing ${claim.id}`);
+    if (s.role === "Benefits & Eligibility Assessor") {
+      // Specialist reviews are finished — carry the case to Payments.
+      if (this.benefitsHandoffQueue.length > 0) {
+        const memberCase = this.benefitsHandoffQueue.shift()!;
+        this.carryToPayments(s, memberCase, true);
+        return;
+      }
+      // Otherwise pick up the next case routed to the Benefits desk.
+      const memberCase = this.benefitsInbox.shift();
+      if (!memberCase) return;
+      s.task = { kind: "assess", memberCase };
+      this.recordCase(s, memberCase);
+      this.logger.setAgentStatus(s.id, true, `Assessing ${memberCase.id}`);
       this.logger.log(
-        claim.script?.assessorNarration ??
-          `Claims Assessor inspecting ${claim.id} (${claim.type})`,
-        claim.script ? "warn" : "info",
+        memberCase.script?.narrations.benefits ??
+          `Benefits & Eligibility assessing ${memberCase.id} (${memberCase.type})`,
+        memberCase.script ? "warn" : "info",
       );
-      if (claim.script) {
-        this.fireFocusChange(claim, s.id, "assessor-pickup", `Adam begins assessing ${claim.id}`);
+      if (memberCase.script) {
+        this.fireFocusChange(
+          memberCase,
+          s.id,
+          "benefits-pickup",
+          this.beatText(memberCase, "benefits-pickup", `${s.name} begins assessing ${memberCase.id}`),
+        );
       }
       // Pick up folder from desk
-      const pickupPoint = this.layout.assessorDeskPoint.clone();
+      const pickupPoint = this.layout.benefitsDeskPoint.clone();
       pickupPoint.z -= 1.0;
       this.gotoAndThen(s, pickupPoint, () => {
-        claim.mesh.parent = s.character.getHandAnchor();
-        claim.mesh.position = Vector3.Zero();
-        claim.currentHolderId = s.id;
+        memberCase.mesh.parent = s.character.getHandAnchor();
+        memberCase.mesh.position = Vector3.Zero();
+        memberCase.currentHolderId = s.id;
         // Sit at desk for a "processing" beat
         this.gotoAndThen(s, s.homePoint, () => {
-          s.processTimer = claim.script ? 2.5 : 2.5 + Math.random() * 2.0;
+          s.processTimer = memberCase.script ? 2.5 : 2.5 + Math.random() * 2.0;
         });
       });
       return;
     }
 
-    if (s.role === "Settlement Officer" && this.settlementQueue.length > 0) {
-      const claim = this.settlementQueue.shift()!;
-      s.task = { kind: "settle", claim };
-      this.recordClaim(s, claim);
-      this.logger.setAgentStatus(s.id, true, `Reviewing ${claim.id}`);
+    if (s.role === "Payments Officer" && this.paymentsQueue.length > 0) {
+      const memberCase = this.paymentsQueue.shift()!;
+      s.task = { kind: "pay", memberCase };
+      this.recordCase(s, memberCase);
+      this.logger.setAgentStatus(s.id, true, `Reviewing ${memberCase.id}`);
       this.logger.log(
-        claim.script?.settlementNarration ??
-          `Settlement Officer reviewing ${claim.id} for payout`,
-        claim.script ? "warn" : "info",
+        memberCase.script?.narrations.payment ??
+          `Payments reviewing ${memberCase.id} — ${money(memberCase.amount)}`,
+        memberCase.script ? "warn" : "info",
       );
-      if (claim.script) {
-        this.fireFocusChange(claim, s.id, "settle", `Seth reviews ${claim.id} for settlement`);
+      if (memberCase.script) {
+        this.fireFocusChange(
+          memberCase,
+          s.id,
+          "payment",
+          this.beatText(memberCase, "payment", `${s.name} reviews ${memberCase.id} for payment`),
+        );
       }
-      const pickup = this.layout.settlementDeskPoint.clone();
+      const pickup = this.layout.paymentsDeskPoint.clone();
       pickup.z -= 1.0;
       this.gotoAndThen(s, pickup, () => {
-        claim.mesh.parent = s.character.getHandAnchor();
-        claim.mesh.position = Vector3.Zero();
-        claim.currentHolderId = s.id;
+        memberCase.mesh.parent = s.character.getHandAnchor();
+        memberCase.mesh.position = Vector3.Zero();
+        memberCase.currentHolderId = s.id;
         this.gotoAndThen(s, s.homePoint, () => {
-          s.processTimer = claim.script ? 2.5 : 2.5 + Math.random() * 2.0;
+          s.processTimer = memberCase.script ? 2.5 : 2.5 + Math.random() * 2.0;
         });
       });
       return;
     }
 
     if (
-      s.role === "Customer Communications Specialist" &&
+      s.role === "Client Communications Specialist" &&
       this.communicationsQueue.length > 0
     ) {
-      const claim = this.communicationsQueue.shift()!;
-      s.task = { kind: "communicate", claim };
-      this.recordClaim(s, claim);
-      this.logger.setAgentStatus(s.id, true, `Notifying customer for ${claim.id}`);
-      if (claim.script) {
-        this.fireFocusChange(claim, s.id, "comms-notify", `Cara notifies the customer for ${claim.id}`);
+      const memberCase = this.communicationsQueue.shift()!;
+      s.task = { kind: "communicate", memberCase };
+      this.recordCase(s, memberCase);
+      this.logger.setAgentStatus(s.id, true, `Contacting client — ${memberCase.id}`);
+      if (memberCase.script) {
+        this.fireFocusChange(
+          memberCase,
+          s.id,
+          "comms-notify",
+          this.beatText(memberCase, "comms-notify", `${s.name} contacts the client about ${memberCase.id}`),
+        );
       }
-      // Pick from settlement desk.
-      const pickup = this.layout.settlementDeskPoint.clone();
+      // Pick from the Payments desk.
+      const pickup = this.layout.paymentsDeskPoint.clone();
       pickup.z -= 1.0;
       this.gotoAndThen(s, pickup, () => {
-        claim.mesh.parent = s.character.getHandAnchor();
-        claim.mesh.position = Vector3.Zero();
-        claim.currentHolderId = s.id;
-        // Walk to comms desk and place folder in archive (closed file).
+        memberCase.mesh.parent = s.character.getHandAnchor();
+        memberCase.mesh.position = Vector3.Zero();
+        memberCase.currentHolderId = s.id;
+        // Walk to the comms desk and file the folder in the archive (closed case).
         this.gotoAndThen(s, this.layout.communicationsDeskPoint, () => {
           const slot = this.layout.archivePoint.clone();
           slot.x += (Math.random() - 0.5) * 1.5;
           slot.z += (Math.random() - 0.5) * 0.8;
           slot.y += Math.random() * 0.4;
-          claim.mesh.parent = null;
-          claim.mesh.position = slot;
-          claim.mesh.rotation = new Vector3(0, Math.random() * Math.PI, 0);
-          claim.currentHolderId = null;
-          claim.status = "closed";
+          memberCase.mesh.parent = null;
+          memberCase.mesh.position = slot;
+          memberCase.mesh.rotation = new Vector3(0, Math.random() * Math.PI, 0);
+          memberCase.currentHolderId = null;
+          memberCase.status = "closed";
           this.logger.log(
-            claim.script?.commsNarration ??
-              `Customer notified — claim ${claim.id} closed`,
+            memberCase.script?.narrations.comms ??
+              `Client notified — case ${memberCase.id} closed`,
             "good",
           );
           s.task = { kind: "idle" };
           this.metrics.processing = Math.max(0, this.metrics.processing - 1);
           this.pushMetrics();
-          this.gotoAndThen(s, s.homePoint, () => {
-            this.logger.setAgentStatus(s.id, false, "Awaiting next claim");
-          });
-          // Notify scenario runner that the scripted claim is fully closed.
-          if (claim.script) {
-            const onClosed = claim.script.onClosed;
+          this.gotoAndThen(s, s.homePoint, () => this.setIdleStatus(s));
+          // Notify scenario runner that the scripted case is fully closed.
+          if (memberCase.script) {
+            const onClosed = memberCase.script.onClosed;
             // Defer slightly so the comms beat reads naturally.
             setTimeout(() => onClosed?.(), 600);
           }
@@ -886,254 +968,230 @@ export class ClaimSimulation {
     }
   }
 
-  /** Assessor desk inbox state — at most one claim awaiting assessment. */
-  private assessorReady: Claim | null = null;
-  private handoffForAssessor(claim: Claim): void {
-    this.assessorReady = claim;
+  /** Put a folder down on top of a desk (slightly toward the back edge). */
+  private placeOnDesk(memberCase: MemberCase, desk: Vector3): void {
+    const drop = desk.clone();
+    drop.y = 1.0;
+    drop.z += 0.4;
+    memberCase.mesh.parent = null;
+    memberCase.mesh.position = drop;
+    memberCase.mesh.rotation = Vector3.Zero();
+    memberCase.currentHolderId = null;
   }
-  private popAssessorReady(): Claim | null {
-    if (!this.assessorReady) return null;
-    const c = this.assessorReady;
-    this.assessorReady = null;
-    return c;
+
+  /**
+   * Benefits & Eligibility carries a case to the Payments desk. When
+   * `fromDesk` is true the folder is first collected from the Benefits desk
+   * (after specialist consultations); otherwise it's already in hand.
+   */
+  private carryToPayments(s: StaffAgent, memberCase: MemberCase, fromDesk: boolean): void {
+    s.task = { kind: "carry-to-payments", memberCase };
+    this.recordCase(s, memberCase);
+    this.logger.setAgentStatus(s.id, true, `Hand-off ${memberCase.id}`);
+    if (memberCase.script && fromDesk) {
+      this.fireFocusChange(
+        memberCase,
+        s.id,
+        "benefits-handoff",
+        this.beatText(memberCase, "benefits-handoff", `${s.name} hands ${memberCase.id} to Payments`),
+      );
+    }
+    const deliver = (): void => {
+      const dropPos = this.layout.paymentsDeskPoint.clone();
+      dropPos.z -= 1.4;
+      this.gotoAndThen(s, dropPos, () => {
+        this.placeOnDesk(memberCase, this.layout.paymentsDeskPoint);
+        this.paymentsQueue.push(memberCase);
+        s.task = { kind: "idle" };
+        this.logger.setAgentStatus(s.id, false, "Returning to desk");
+        this.gotoAndThen(s, s.homePoint, () => this.setIdleStatus(s));
+      });
+    };
+    if (!fromDesk) {
+      deliver();
+      return;
+    }
+    const pickup = this.layout.benefitsDeskPoint.clone();
+    pickup.z -= 1.0;
+    this.gotoAndThen(s, pickup, () => {
+      memberCase.mesh.parent = s.character.getHandAnchor();
+      memberCase.mesh.position = Vector3.Zero();
+      memberCase.currentHolderId = s.id;
+      deliver();
+    });
   }
 
   private completeProcessingStep(s: StaffAgent): void {
     const t = s.task;
     if (t.kind === "assess") {
-      const claim = t.claim;
-      // Scripted claims use deterministic outcome; otherwise 85% pass.
-      const valid = claim.script
-        ? claim.script.approveAtAssessor
+      const memberCase = t.memberCase;
+      // Scripted cases use a deterministic result; otherwise 85% pass.
+      const valid = memberCase.script
+        ? memberCase.script.approveAtBenefits
         : Math.random() < 0.85;
       if (valid) {
-        claim.status = "assessed";
+        memberCase.status = "assessed";
         this.logger.log(
-          `Claims Assessor cleared ${claim.id} — forwarding to Settlement`,
-          "good",
+          memberCase.script?.narrations.benefitsResult ??
+            `Benefits & Eligibility cleared ${memberCase.id} — forwarding to Payments`,
+          memberCase.script ? "warn" : "good",
         );
-        if (claim.script) {
-          this.fireFocusChange(claim, s.id, "assessor-process", `Adam cleared ${claim.id}`);
+        if (memberCase.script) {
+          this.fireFocusChange(
+            memberCase,
+            s.id,
+            "benefits-process",
+            this.beatText(memberCase, "benefits-process", `${s.name} cleared ${memberCase.id}`),
+          );
         }
-        // Scripted claim with extras — run the next consultation before settlement.
-        if (claim.script && claim.script.extras.length > 0) {
-          // Drop folder back on assessor desk so the consultant can pick it up.
-          const drop = this.layout.assessorDeskPoint.clone();
-          drop.y = 1.0;
-          drop.z += 0.4;
-          claim.mesh.parent = null;
-          claim.mesh.position = drop;
-          claim.mesh.rotation = Vector3.Zero();
-          claim.currentHolderId = null;
-          // Assessor returns home; consultation runs in parallel.
+        // Scripted case with specialist reviews — run them before Payments.
+        if (memberCase.script && memberCase.script.postBenefits.length > 0) {
+          // Leave the folder on the Benefits desk so the specialist can collect it.
+          this.placeOnDesk(memberCase, this.layout.benefitsDeskPoint);
           s.task = { kind: "idle" };
-          this.logger.setAgentStatus(s.id, false, "Awaiting consultation");
+          this.logger.setAgentStatus(s.id, false, "Awaiting specialist review");
           this.gotoAndThen(s, s.homePoint, () => {
-            this.logger.setAgentStatus(s.id, false, "Awaiting consultation");
+            this.logger.setAgentStatus(s.id, false, "Awaiting specialist review");
           });
-          const beat = claim.script.extras.shift()!;
-          this.startConsultation(claim, beat);
+          const beat = memberCase.script.postBenefits.shift()!;
+          this.startConsultation(memberCase, beat, "post");
           return;
         }
-        // Carry folder to settlement desk.
-        s.task = { kind: "carry-to-settlement", claim };
-        this.logger.setAgentStatus(s.id, true, `Hand-off ${claim.id}`);
-        const drop = this.layout.settlementDeskPoint.clone();
-        drop.z -= 1.4;
-        this.gotoAndThen(s, drop, () => {
-          const placed = this.layout.settlementDeskPoint.clone();
-          placed.y = 1.0;
-          placed.z += 0.4;
-          claim.mesh.parent = null;
-          claim.mesh.position = placed;
-          claim.mesh.rotation = Vector3.Zero();
-          claim.currentHolderId = null;
-          this.settlementQueue.push(claim);
-          s.task = { kind: "idle" };
-          this.logger.setAgentStatus(s.id, false, "Returning to desk");
-          this.gotoAndThen(s, s.homePoint, () => {
-            this.logger.setAgentStatus(s.id, false, "Awaiting next claim");
-          });
-        });
+        this.carryToPayments(s, memberCase, false);
       } else {
-        // Rejected at assessment — send straight to communications.
-        claim.status = "rejected";
+        // Declined at assessment — send straight to Client Communications.
+        memberCase.status = "declined";
+        memberCase.outcome = "rejected";
         this.metrics.rejected++;
         this.pushMetrics();
         this.logger.log(
-          `Claims Assessor declined ${claim.id} (missing documents)`,
+          `Benefits & Eligibility declined ${memberCase.id} — not in good order (missing documents)`,
           "bad",
         );
-        s.task = { kind: "carry-to-comms", claim };
-        this.logger.setAgentStatus(s.id, true, `Hand-off ${claim.id}`);
-        const drop = this.layout.settlementDeskPoint.clone();
+        s.task = { kind: "carry-to-comms", memberCase };
+        this.logger.setAgentStatus(s.id, true, `Hand-off ${memberCase.id}`);
+        const drop = this.layout.paymentsDeskPoint.clone();
         drop.z -= 1.4;
         this.gotoAndThen(s, drop, () => {
-          const placed = this.layout.settlementDeskPoint.clone();
-          placed.y = 1.0;
-          placed.z += 0.4;
-          claim.mesh.parent = null;
-          claim.mesh.position = placed;
-          claim.mesh.rotation = Vector3.Zero();
-          claim.currentHolderId = null;
-          this.communicationsQueue.push(claim);
+          this.placeOnDesk(memberCase, this.layout.paymentsDeskPoint);
+          this.communicationsQueue.push(memberCase);
           s.task = { kind: "idle" };
           this.logger.setAgentStatus(s.id, false, "Returning to desk");
-          this.gotoAndThen(s, s.homePoint, () => {
-            this.logger.setAgentStatus(s.id, false, "Awaiting next claim");
-          });
+          this.gotoAndThen(s, s.homePoint, () => this.setIdleStatus(s));
         });
       }
-    } else if (t.kind === "settle") {
-      const claim = t.claim;
-      let outcome: "approved" | "rejected" | "partial";
-      if (claim.script) {
-        outcome = claim.script.settlement;
+    } else if (t.kind === "pay") {
+      const memberCase = t.memberCase;
+      const script = memberCase.script;
+      let outcome: ScriptOutcome;
+      if (script) {
+        outcome = script.outcome;
       } else {
+        // Larger payments attract more scrutiny in the ambient simulation.
         const approveProb =
-          claim.amount < 5000 ? 0.9 : claim.amount < 12000 ? 0.7 : 0.4;
+          memberCase.amount < 50000 ? 0.9 : memberCase.amount < 250000 ? 0.8 : 0.7;
         outcome = Math.random() < approveProb ? "approved" : "rejected";
       }
+      memberCase.outcome = outcome;
       if (outcome === "approved" || outcome === "partial") {
-        claim.status = "approved";
+        memberCase.paidAmount = script ? script.paidAmount : memberCase.amount;
+        memberCase.status =
+          script?.decisionStatus ??
+          (outcome === "partial" ? "partially approved" : "completed");
         this.metrics.approved++;
-        const tag = outcome === "partial" ? " (partial)" : "";
         this.logger.log(
-          `Settlement APPROVED${tag} ${claim.id} — payout $${claim.amount.toLocaleString()}`,
+          script?.narrations.paymentResult ??
+            (outcome === "partial"
+              ? `Partial payment released — ${memberCase.id}, ${money(memberCase.paidAmount)} of ${money(memberCase.amount)}`
+              : `Payment released — ${memberCase.id}, ${money(memberCase.paidAmount)}`),
           "good",
         );
       } else {
-        claim.status = "rejected";
+        memberCase.paidAmount = 0;
+        memberCase.status = script?.decisionStatus ?? "declined";
         this.metrics.rejected++;
         this.logger.log(
-          `Settlement DECLINED ${claim.id} (escalated for review)`,
+          script?.narrations.paymentResult ??
+            `Request declined — ${memberCase.id} (referred to the Team Leader for review)`,
           "bad",
         );
       }
       this.pushMetrics();
-      // Drop on desk for comms pickup
-      const drop = this.layout.settlementDeskPoint.clone();
-      drop.y = 1.0;
-      drop.z += 0.4;
-      claim.mesh.parent = null;
-      claim.mesh.position = drop;
-      claim.mesh.rotation = Vector3.Zero();
-      claim.currentHolderId = null;
-      this.communicationsQueue.push(claim);
+      // Drop on desk for Client Communications pickup
+      this.placeOnDesk(memberCase, this.layout.paymentsDeskPoint);
+      this.communicationsQueue.push(memberCase);
       s.task = { kind: "idle" };
-      this.logger.setAgentStatus(s.id, false, "Awaiting next claim");
+      this.setIdleStatus(s);
     } else if (t.kind === "consult") {
-      // An ambient staff member finished a scripted consultation: drop the
-      // folder back on the assessor's desk and run the next extra (if any),
-      // otherwise queue for assessor handoff.
-      const claim = t.claim;
-      const drop = this.layout.assessorDeskPoint.clone();
-      drop.y = 1.0;
-      drop.z += 0.4;
-      claim.mesh.parent = null;
-      claim.mesh.position = drop;
-      claim.mesh.rotation = Vector3.Zero();
-      claim.currentHolderId = null;
+      // A specialist finished a scripted consultation: drop the folder back
+      // on the Benefits desk and run the next consultation in the same
+      // phase (if any), otherwise continue the core pipeline.
+      const { memberCase, phase } = t;
+      this.placeOnDesk(memberCase, this.layout.benefitsDeskPoint);
       s.task = { kind: "idle" };
-      this.logger.setAgentStatus(s.id, false, s.persona.ambient[0] ?? "Awaiting next claim");
-      // Send consultant home, then return them to ambient (non-pipeline) state.
+      this.setIdleStatus(s);
+      // Send the specialist home, then return them to ambient (non-pipeline) state.
       this.gotoAndThen(s, s.homePoint, () => {
-        s.active = false;
-        this.logger.setAgentStatus(s.id, false, s.persona.ambient[0] ?? "Awaiting next claim");
+        s.active = s.persona.active_in_pipeline;
+        this.setIdleStatus(s);
       });
-      if (claim.script && claim.script.extras.length > 0) {
-        const beat = claim.script.extras.shift()!;
-        this.startConsultation(claim, beat);
-      } else {
-        // All extras done — queue claim for the Claims Assessor to hand off
-        // to settlement. We re-route via the assessor by adding a synthetic
-        // "carry-to-settlement" task: simpler is to push directly into the
-        // settlement queue (folder is already on assessor desk; we relocate
-        // it). We let the assessor handle it.
-        const assessor = this.staff.find(
-          (x) => x.role === "Claims Assessor",
-        );
-        if (assessor && assessor.task.kind === "idle") {
-          // Assessor picks it back up and carries to settlement.
-          assessor.task = { kind: "assess", claim };
-          this.recordClaim(assessor, claim);
-          this.logger.setAgentStatus(
-            assessor.id,
-            true,
-            `Hand-off ${claim.id}`,
-          );
-          if (claim.script) {
-            this.fireFocusChange(claim, assessor.id, "assessor-handoff", `Adam hands ${claim.id} to Settlement`);
-          }
-          const pickup = this.layout.assessorDeskPoint.clone();
-          pickup.z -= 1.0;
-          this.gotoAndThen(assessor, pickup, () => {
-            claim.mesh.parent = assessor.character.getHandAnchor();
-            claim.mesh.position = Vector3.Zero();
-            claim.currentHolderId = assessor.id;
-            // Now carry to settlement
-            const dropPos = this.layout.settlementDeskPoint.clone();
-            dropPos.z -= 1.4;
-            this.gotoAndThen(assessor, dropPos, () => {
-              const placed = this.layout.settlementDeskPoint.clone();
-              placed.y = 1.0;
-              placed.z += 0.4;
-              claim.mesh.parent = null;
-              claim.mesh.position = placed;
-              claim.mesh.rotation = Vector3.Zero();
-              claim.currentHolderId = null;
-              this.settlementQueue.push(claim);
-              assessor.task = { kind: "idle" };
-              this.logger.setAgentStatus(
-                assessor.id,
-                false,
-                "Returning to desk",
-              );
-              this.gotoAndThen(assessor, assessor.homePoint, () => {
-                this.logger.setAgentStatus(
-                  assessor.id,
-                  false,
-                  "Awaiting next claim",
-                );
-              });
-            });
-          });
-        }
-      }
+      this.advanceAfterConsultation(memberCase, phase);
     }
   }
 
   /**
-   * Start a scripted consultation: an ambient staff member walks to the
-   * assessor's desk, picks up the folder, walks back to their own desk,
-   * dwells for `beat.duration` seconds, then walks back and drops the
-   * folder on the assessor's desk so the next step can run.
+   * Continue a scripted case once a consultation (or a skipped one) is
+   * done: run the next consultation in the same phase, or move the case
+   * on to Benefits & Eligibility ("pre") / the hand-off to Payments ("post").
    */
-  private startConsultation(claim: Claim, beat: ScriptExtraBeat): void {
+  private advanceAfterConsultation(memberCase: MemberCase, phase: ConsultPhase): void {
+    const queue =
+      phase === "pre" ? memberCase.script?.preBenefits : memberCase.script?.postBenefits;
+    if (queue && queue.length > 0) {
+      const beat = queue.shift()!;
+      this.startConsultation(memberCase, beat, phase);
+    } else if (phase === "pre") {
+      this.benefitsInbox.push(memberCase);
+    } else {
+      this.benefitsHandoffQueue.push(memberCase);
+    }
+  }
+
+  /**
+   * Start a scripted consultation: a specialist walks to the Benefits desk,
+   * picks up the folder, walks back to their own desk, dwells for
+   * `beat.duration` seconds, then walks back and drops the folder on the
+   * Benefits desk so the next step can run.
+   */
+  private startConsultation(memberCase: MemberCase, beat: ScriptExtraBeat, phase: ConsultPhase): void {
     const consultant = this.staff.find((x) => x.role === beat.role);
-    if (!consultant) return;
-    // Temporarily activate this consultant so the staff updater drives it.
+    if (!consultant) {
+      // Unknown role in the scenario data — skip it rather than stall the case.
+      this.advanceAfterConsultation(memberCase, phase);
+      return;
+    }
+    // Temporarily activate this specialist so the staff updater drives it.
     consultant.active = true;
-    consultant.task = { kind: "consult", claim, beat };
-    this.recordClaim(consultant, claim);
-    this.logger.setAgentStatus(consultant.id, true, beat.narration);
-    this.logger.log(beat.narration, claim.script ? "warn" : "info");
-    if (claim.script) {
+    consultant.task = { kind: "consult", memberCase, beat, phase };
+    this.recordCase(consultant, memberCase);
+    this.logger.setAgentStatus(consultant.id, true, `Reviewing ${memberCase.id}`);
+    this.logger.log(beat.narration, memberCase.script ? "warn" : "info");
+    if (memberCase.script) {
       this.fireFocusChange(
-        claim,
+        memberCase,
         consultant.id,
         `consult:${beat.role}`,
         beat.narration,
       );
     }
-    // Walk to assessor desk to pick up
-    const pickup = this.layout.assessorDeskPoint.clone();
+    // Walk to the Benefits desk to pick up the folder
+    const pickup = this.layout.benefitsDeskPoint.clone();
     pickup.z -= 1.0;
     this.gotoAndThen(consultant, pickup, () => {
-      claim.mesh.parent = consultant.character.getHandAnchor();
-      claim.mesh.position = Vector3.Zero();
-      claim.currentHolderId = consultant.id;
-      // Walk back to consultant's own desk
+      memberCase.mesh.parent = consultant.character.getHandAnchor();
+      memberCase.mesh.position = Vector3.Zero();
+      memberCase.currentHolderId = consultant.id;
+      // Walk back to the specialist's own desk
       this.gotoAndThen(consultant, consultant.homePoint, () => {
         consultant.processTimer = beat.duration;
       });
@@ -1174,35 +1232,55 @@ export class ClaimSimulation {
   /* Helpers used internally for scripted scenarios + profile cards    */
   /* ---------------------------------------------------------------- */
 
-  private recordClaim(s: StaffAgent, claim: Claim): void {
-    if (s.claimsHistory[0] === claim.id) return;
-    s.claimsHistory.unshift(claim.id);
-    if (s.claimsHistory.length > 8) s.claimsHistory.length = 8;
+  private recordCase(s: StaffAgent, memberCase: MemberCase): void {
+    if (s.caseHistory[0] === memberCase.id) return;
+    s.caseHistory.unshift(memberCase.id);
+    if (s.caseHistory.length > 8) s.caseHistory.length = 8;
+  }
+
+  /** Scenario beat narration for scripted cases, or the generic fallback. */
+  private beatText(memberCase: MemberCase, action: BeatAction, fallback: string): string {
+    if (!memberCase.script) return fallback;
+    return getBeatNarration(memberCase.script.scenarioId, action) ?? fallback;
   }
 
   private fireFocusChange(
-    claim: Claim,
+    memberCase: MemberCase,
     characterId: string,
     stage: string,
     narration: string,
   ): void {
     const info: BeatFocusInfo = { characterId, stage, narration };
     this.onScriptFocusChange.notifyObservers(info);
-    claim.script?.onFocusChange?.(info);
+    memberCase.script?.onFocusChange?.(info);
   }
 
   /* ---------------------------------------------------------------- */
   /* Public API used by main.ts / scenarioRunner / profileCard         */
   /* ---------------------------------------------------------------- */
 
-  /** Look up a claim by id. */
-  getClaim(id: string): { id: string; type: string; amount: number; status: ClaimStatus } | null {
-    const c = this.claimsById.get(id);
+  /** Look up a case by its case number. */
+  getCase(id: string): {
+    id: string;
+    type: string;
+    amount: number;
+    paidAmount: number;
+    status: CaseStatus;
+    outcome?: ScriptOutcome;
+  } | null {
+    const c = this.casesById.get(id);
     if (!c) return null;
-    return { id: c.id, type: c.type, amount: c.amount, status: c.status };
+    return {
+      id: c.id,
+      type: c.type,
+      amount: c.amount,
+      paidAmount: c.paidAmount,
+      status: c.status,
+      outcome: c.outcome,
+    };
   }
 
-  /** True if auto-spawning of random customers is currently paused. */
+  /** True if auto-spawning of random clients is currently paused. */
   isAutoSpawnPaused(): boolean {
     return this.autoSpawnPaused;
   }
@@ -1247,13 +1325,13 @@ export class ClaimSimulation {
   }
 
   /** Look up a staff member by role. */
-  getStaffByRole(role: AgentRole): ReturnType<ClaimSimulation["getStaff"]> {
+  getStaffByRole(role: AgentRole): ReturnType<CaseSimulation["getStaff"]> {
     const s = this.staff.find((x) => x.role === role);
     if (!s) return undefined;
     return this.getStaff(s.id);
   }
 
-  /** Returns the VoxelCharacter for a given id (staff or customer). */
+  /** Returns the VoxelCharacter for a given id (staff or client). */
   getCharacterById(id: string): VoxelCharacter | null {
     const s = this.staff.find((x) => x.id === id);
     if (s) return s.character;
@@ -1290,10 +1368,10 @@ export class ClaimSimulation {
   getCharacterProfile(id: string): CharacterProfile | null {
     const staff = this.staff.find((x) => x.id === id);
     if (staff) {
-      const heldClaim = this.findClaimHeldBy(id);
-      const claims = staff.claimsHistory
-        .map((cid) => this.claimsById.get(cid))
-        .filter((c): c is Claim => !!c)
+      const heldCase = this.findCaseHeldBy(id);
+      const cases = staff.caseHistory
+        .map((cid) => this.casesById.get(cid))
+        .filter((c): c is MemberCase => !!c)
         .map((c) => ({
           id: c.id,
           type: c.type,
@@ -1310,13 +1388,13 @@ export class ClaimSimulation {
         typicalLine: staff.persona.typical_line,
         responsibilities: staff.persona.responsibilities,
         situation: staff.persona.role_short,
-        current: heldClaim
-          ? `Holding ${heldClaim.id} — ${heldClaim.type}`
+        current: heldCase
+          ? `Holding ${heldCase.id} — ${heldCase.type}`
           : describeTask(staff.task),
-        claims,
+        cases,
         scenarioName: "",
         currentHandler: null,
-        activeClaim: null,
+        activeCase: null,
         agentUrl: `${APP_BASE_URL}/agents/${encodeURIComponent(
           staff.persona.app_agent_id,
         )}`,
@@ -1328,35 +1406,35 @@ export class ClaimSimulation {
       const persona = customer.personaId
         ? findCustomerPersona(customer.personaId)
         : undefined;
-      const handler = customer.claim.currentHolderId
-        ? this.staff.find((x) => x.id === customer.claim.currentHolderId)
+      const handler = customer.memberCase.currentHolderId
+        ? this.staff.find((x) => x.id === customer.memberCase.currentHolderId)
         : undefined;
       return {
         kind: "customer",
         id: customer.character.id,
         name: customer.persona,
-        role: persona?.claim_type ?? customer.claim.type,
+        role: persona?.request_type ?? customer.memberCase.type,
         color: persona?.color ?? "#6e7a8a",
-        palette: PALETTES[(persona?.palette ?? "customerHome") as keyof typeof PALETTES],
+        palette: PALETTES[(persona?.palette ?? "customerOnboarding") as keyof typeof PALETTES],
         personality: persona?.personality ?? "",
         typicalLine: persona?.typical_line ?? "",
         responsibilities: persona?.need ?? [],
         situation: persona?.situation_long ?? "",
         current: describeCustomerState(customer),
-        claims: [
+        cases: [
           {
-            id: customer.claim.id,
-            type: customer.claim.type,
-            status: customer.claim.status,
+            id: customer.memberCase.id,
+            type: customer.memberCase.type,
+            status: customer.memberCase.status,
           },
         ],
-        scenarioName: persona?.claim_type ?? "Customer",
+        scenarioName: persona?.request_type ?? "Client",
         currentHandler: handler ? `${handler.name} — ${handler.role}` : null,
-        activeClaim: {
-          id: customer.claim.id,
-          type: customer.claim.type,
-          amount: customer.claim.amount,
-          status: customer.claim.status,
+        activeCase: {
+          id: customer.memberCase.id,
+          type: customer.memberCase.type,
+          amount: customer.memberCase.amount,
+          status: customer.memberCase.status,
         },
         agentUrl: null,
       };
@@ -1365,8 +1443,8 @@ export class ClaimSimulation {
     return null;
   }
 
-  private findClaimHeldBy(id: string): Claim | undefined {
-    for (const c of this.claimsById.values()) {
+  private findCaseHeldBy(id: string): MemberCase | undefined {
+    for (const c of this.casesById.values()) {
       if (c.currentHolderId === id) return c;
     }
     return undefined;
@@ -1374,8 +1452,8 @@ export class ClaimSimulation {
 
   /**
    * Snap the office back to a clean baseline before a scripted scenario
-   * begins, per the JSON `reset` block. Despawns unscripted customers,
-   * clears claim queues / orphan folders, and returns every staff member
+   * begins, per the JSON `reset` block. Despawns unscripted clients,
+   * clears case queues / orphan folders, and returns every staff member
    * to their desk so the camera and the audience start from a known state.
    */
   resetForScenario(scenarioId: ScenarioId): void {
@@ -1383,47 +1461,49 @@ export class ClaimSimulation {
     const reset = def.reset.office;
 
     if (reset.removeUnscriptedCustomers) {
-      // Despawn any non-scripted customer that's currently in flight.
+      // Despawn any non-scripted client that's currently in flight.
       for (const c of this.customers) {
-        if (c.claim.script) continue;
+        if (c.memberCase.script) continue;
         if (c.state === "done") continue;
-        // Detach folder from customer; we'll dispose it via removeClaim.
-        if (c.claim.mesh.parent === c.character.getHandAnchor()) {
-          c.claim.mesh.parent = null;
+        // Detach folder from client; we'll dispose it via removeCase.
+        if (c.memberCase.mesh.parent === c.character.getHandAnchor()) {
+          c.memberCase.mesh.parent = null;
         }
         this.customersByCharId.delete(c.character.id);
         c.character.root.dispose();
         c.state = "done";
-        this.removeClaim(c.claim);
+        this.removeCase(c.memberCase);
       }
-      // Compact the customer array.
+      // Compact the client array.
       for (let i = this.customers.length - 1; i >= 0; i--) {
         if (this.customers[i].state === "done") this.customers.splice(i, 1);
       }
     }
 
     if (reset.clearQueues) {
-      // Drop any folders sitting in the inbox / settlement / comms queues.
-      for (const q of [this.inbox, this.settlementQueue, this.communicationsQueue]) {
+      // Drop any folders sitting in the inbox / benefits / payments / comms queues.
+      for (const q of [
+        this.inbox,
+        this.benefitsInbox,
+        this.benefitsHandoffQueue,
+        this.paymentsQueue,
+        this.communicationsQueue,
+      ]) {
         while (q.length > 0) {
-          const claim = q.shift()!;
-          if (!claim.script) this.removeClaim(claim);
+          const memberCase = q.shift()!;
+          if (!memberCase.script) this.removeCase(memberCase);
         }
       }
-      if (this.assessorReady && !this.assessorReady.script) {
-        this.removeClaim(this.assessorReady);
-      }
-      this.assessorReady = null;
     }
 
     if (reset.snapStaffToDesks) {
       // Force every staff member back to their home desk and a clean state.
       for (const s of this.staff) {
-        // If a staff member is carrying a folder for an unscripted claim, drop it.
-        const held = this.findClaimHeldBy(s.id);
+        // If a staff member is carrying a folder for an unscripted case, drop it.
+        const held = this.findCaseHeldBy(s.id);
         if (held && !held.script) {
           held.mesh.parent = null;
-          this.removeClaim(held);
+          this.removeCase(held);
         }
         s.task = { kind: "idle" };
         s.moveTarget = null;
@@ -1436,21 +1516,20 @@ export class ClaimSimulation {
         s.character.root.position.y = 0.2;
         s.character.root.position.z = s.homePoint.z;
         s.character.root.rotation.y = 0;
-        // Ambient roles return to their first ambient message; pipeline roles
-        // go back to "Awaiting next claim".
+        // Specialists return to their rotating status lines; pipeline staff
+        // go back to "Awaiting next request".
         s.active = s.persona.active_in_pipeline;
-        const initial = s.persona.ambient[0] ?? "Awaiting next claim";
-        this.logger.setAgentStatus(s.id, false, initial);
+        this.setIdleStatus(s);
       }
     }
   }
 
-  /** Dispose a claim's folder mesh and remove it from the registry. */
-  private removeClaim(claim: Claim): void {
-    if (claim.mesh && !claim.mesh.isDisposed()) {
-      claim.mesh.dispose();
+  /** Dispose a case's folder mesh and remove it from the registry. */
+  private removeCase(memberCase: MemberCase): void {
+    if (memberCase.mesh && !memberCase.mesh.isDisposed()) {
+      memberCase.mesh.dispose();
     }
-    this.claimsById.delete(claim.id);
+    this.casesById.delete(memberCase.id);
     this.metrics.processing = Math.max(0, this.metrics.processing - 1);
     this.pushMetrics();
   }
@@ -1458,10 +1537,10 @@ export class ClaimSimulation {
   /**
    * Begin a scripted scenario in the office. The caller is responsible for
    * the neighbourhood walk + scene transition; once that's done it calls
-   * this method which spawns the customer at the office spawn point and
+   * this method which spawns the client at the office spawn point and
    * lets the existing pipeline take over (with deterministic outcomes).
    *
-   * @returns the spawned customer (caller can read its character.id, claim, etc).
+   * @returns the spawned client (caller can read its character.id, case, etc).
    */
   startScripted(scenarioId: ScenarioId, hooks: {
     onFocusChange?: (info: BeatFocusInfo) => void;
@@ -1484,7 +1563,7 @@ export class ClaimSimulation {
       customer: {
         characterId: customer.character.id,
         character: customer.character,
-        claimId: customer.claim.id,
+        caseId: customer.memberCase.id,
         personaName: customer.persona,
       },
       persona,
@@ -1499,14 +1578,14 @@ export class ClaimSimulation {
 export interface CustomerAgentInfo {
   characterId: string;
   character: VoxelCharacter;
-  claimId: string;
+  caseId: string;
   personaName: string;
 }
 
-export interface CharacterProfileClaim {
+export interface CharacterProfileCase {
   id: string;
   type: string;
-  status: ClaimStatus;
+  status: CaseStatus;
 }
 
 export interface CharacterProfile {
@@ -1522,22 +1601,22 @@ export interface CharacterProfile {
   responsibilities: string[];
   situation: string;
   current: string;
-  claims: CharacterProfileClaim[];
-  /** Customer only — friendly scenario name. */
+  cases: CharacterProfileCase[];
+  /** Client only — friendly request type. */
   scenarioName: string;
-  /** Customer only — name of staff currently holding the folder. */
+  /** Client only — name of staff currently holding the folder. */
   currentHandler: string | null;
-  /** Customer only — their in-flight claim. */
-  activeClaim: {
+  /** Client only — their in-flight case. */
+  activeCase: {
     id: string;
     type: string;
     amount: number;
-    status: ClaimStatus;
+    status: CaseStatus;
   } | null;
   /**
    * Staff only — absolute URL to the matching agent walkthrough page in the
    * companion `src/backend` Blazor site (`/agents/{app_agent_id}`). Null for
-   * customers.
+   * clients.
    */
   agentUrl: string | null;
 }
@@ -1547,19 +1626,21 @@ function describeTask(task: Task): string {
     case "idle":
       return "At desk, awaiting work";
     case "pickup":
-      return `Picking up ${task.claim.id}`;
+      return `Picking up ${task.memberCase.id}`;
+    case "route":
+      return `Routing ${task.memberCase.id} to Benefits & Eligibility`;
     case "assess":
-      return `Working on ${task.claim.id}`;
-    case "carry-to-settlement":
-      return `Routing ${task.claim.id} to Settlement`;
-    case "settle":
-      return `Settling ${task.claim.id}`;
+      return `Assessing ${task.memberCase.id}`;
+    case "carry-to-payments":
+      return `Routing ${task.memberCase.id} to Payments`;
+    case "pay":
+      return `Processing payment for ${task.memberCase.id}`;
     case "carry-to-comms":
-      return `Routing ${task.claim.id} to Communications`;
+      return `Routing ${task.memberCase.id} to Client Communications`;
     case "communicate":
-      return `Notifying customer about ${task.claim.id}`;
+      return `Contacting the client about ${task.memberCase.id}`;
     case "consult":
-      return `${task.beat.role} consultation on ${task.claim.id}`;
+      return `Reviewing ${task.memberCase.id}`;
   }
 }
 
@@ -1577,33 +1658,32 @@ function describeCustomerState(c: CustomerAgent): string {
 }
 
 /**
- * Builds a deterministic scenario script for a given customer persona,
- * sourced from the JSON definition in `src/ui/src/scenarios/<id>.json`.
- * The JSON is the single source of truth — narration, consultations,
- * outcome — so editing the JSON updates both the on-screen story and
- * the underlying simulation behaviour.
+ * Builds a deterministic scenario script for a given client persona,
+ * sourced from the JSON definition in `src/scenarios/<id>.json`. The JSON
+ * is the single source of truth — narration, consultations, outcome — so
+ * editing the JSON updates both the on-screen story and the underlying
+ * simulation behaviour.
  */
-function buildScriptForScenario(p: CustomerPersona): ClaimScript {
+function buildScriptForScenario(p: CustomerPersona): CaseScript {
   const def = getScenario(p.id);
+  const toBeat = (c: { role: AgentRole; narration: string; duration: number }): ScriptExtraBeat => ({
+    role: c.role,
+    narration: c.narration,
+    duration: c.duration,
+  });
   return {
     scenarioId: def.id,
     caseId: def.caseId,
-    approveAtAssessor: def.approveAtAssessor,
-    extras: def.extras.map((c) => ({
-      role: c.role as AgentRole,
-      narration: c.narration,
-      duration: c.duration,
-    })),
-    preAssessor: def.preAssessor.map((c) => ({
-      role: c.role as AgentRole,
-      narration: c.narration,
-      duration: c.duration,
-    })),
-    settlement: def.settlement,
+    amount: def.amount,
+    paidAmount: def.paidAmount,
+    approveAtBenefits: def.approveAtBenefits,
+    // Copies, so the simulation can consume them without touching the JSON.
+    preBenefits: def.preBenefits.map(toBeat),
+    postBenefits: def.postBenefits.map(toBeat),
+    outcome: def.outcome,
+    decisionStatus: def.result.status,
+    narrations: { ...def.narrations },
     color: p.color,
     personaName: p.name,
-    assessorNarration: def.narrations.assessor,
-    settlementNarration: def.narrations.settlement,
-    commsNarration: def.narrations.comms,
   };
 }

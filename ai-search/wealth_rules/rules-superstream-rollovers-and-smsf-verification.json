@@ -1,0 +1,34 @@
+{
+  "id": "rules-superstream-rollovers-and-smsf-verification",
+  "title": "Super law rule summary — SuperStream rollovers, insurance-loss warnings & SMSF verification (SVS)",
+  "product": "Caldova Super & Pension",
+  "version": "Rule summary 2026-27 v1.0 — effective 1 July 2026",
+  "summary": "Rules Caldova follows when money moves between super funds: rollovers in and out through SuperStream, the 3-business-day processing standard (SIS reg 6.34A), the mandatory ATO SMSF verification service (SVS) check before any rollover to a self-managed super fund (reg 6.33E), rollover benefit statements and in-specie transfers, and the insurance-loss warning Caldova gives before a member closes an insured account elsewhere. Used by Transfers & Rollovers, Benefits & Eligibility and Financial Crime.",
+  "rules": "Timeframe: a rollover or transfer must be completed within 3 business days of the transferring fund receiving all the information it needs (reg 6.34A). The clock does not start while required information is missing — for example identity verification or a successful SMSF verification. Caldova records what is outstanding and the date it was requested.\nRollovers in: Caldova requests the money from other APRA-regulated funds using the transferring fund's USI and the member's account number. The money and rollover data (preservation amounts, tax components) arrive through SuperStream.\nRollovers out to APRA-regulated funds: paid through SuperStream to the receiving fund's USI after identity and request checks.\nRollovers out to an SMSF: before paying, Caldova must check the SMSF with the ATO SMSF verification service (SVS). Checks: the ABN belongs to a registered SMSF and its regulatory/compliance status; the member's TFN is linked to that SMSF as a member and is not compromised; no date of death is recorded; and the bank account details and electronic service address (ESA) in the request match ATO records. If any check fails the rollover must not be paid — the request is held and escalated to Financial Crime.\nRollover benefit statement (RBS): required when a rollover is not sent as a SuperStream data message, such as an in-specie transfer of assets between platforms. A pension in-specie transfer goes through a temporary accumulation account.\nInsurance-loss warning: before requesting a full rollover that will close an external account, Caldova checks whether the member holds insurance there. If so, it warns that the cover will end when that account closes and requires written confirmation from the member (and adviser, for advised accounts) or evidence that replacement cover is in place before sending that request. Rollovers from uninsured accounts can proceed.\nAlerts and consolidation: the ATO sends members SMSF rollover and change-of-details alerts. Members can find and consolidate super through ATO online services.",
+  "limits": "Caldova cannot pay a rollover to an SMSF that fails SVS, to a bank account not held in the SMSF's name, or where the ESA does not match the ATO record. A rollover cannot move preserved money out of the super system — cash payments to the member need a condition of release. Death benefits to non-dependants cannot be rolled over. Insurance in another fund is never transferred — it ends when that account closes. The 3-business-day standard does not override fraud controls: a request that still needs information is not complete.",
+  "evidenceRequired": [
+    "Rollover request — signed, or submitted online with step-up (MFA) verification",
+    "Identity verification of the member",
+    "External fund details: fund name, USI, member number and amount (full or partial)",
+    "SMSF rollovers: SMSF ABN, ESA and bank account in the fund's name, verified through the ATO SVS (member TFN linked)",
+    "Insurance-loss acknowledgement or evidence of replacement cover (when closing an insured external account)",
+    "Rollover benefit statement for non-SuperStream or in-specie transfers"
+  ],
+  "owner": "Transfers & Rollovers",
+  "tags": [
+    "superstream",
+    "rollover",
+    "3-business-days",
+    "reg-6.34A",
+    "svs",
+    "smsf-verification",
+    "reg-6.33E",
+    "esa",
+    "usi",
+    "rollover-benefit-statement",
+    "in-specie",
+    "insurance-loss-warning",
+    "ato-alerts"
+  ],
+  "lastUpdated": "2026-07-01T00:00:00Z"
+}

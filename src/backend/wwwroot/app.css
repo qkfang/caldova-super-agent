@@ -1,43 +1,43 @@
 /* ============================================================
-   Claims Team in a Day — global theme
+   Wealth Team in a Day — global theme (Caldova Wealth)
    Matches the voxel UI in src/ui: dark navy base, glass-morphism
    panels, orange + light-blue accents. Tuned to feel trustworthy
-   and professional for a claims-industry audience.
+   and professional for a super & wealth operations audience.
    See also: src/ui/src/styles.css for the source design system.
    ============================================================ */
 
 :root {
     /* Surfaces */
-    --zava-bg: #0f1626;
-    --zava-bg-2: #131c30;
-    --zava-panel: rgba(20, 28, 46, 0.82);
-    --zava-panel-solid: #182238;
-    --zava-panel-border: rgba(120, 150, 200, 0.18);
-    --zava-panel-border-strong: rgba(120, 150, 200, 0.32);
+    --cw-bg: #0f1626;
+    --cw-bg-2: #131c30;
+    --cw-panel: rgba(20, 28, 46, 0.82);
+    --cw-panel-solid: #182238;
+    --cw-panel-border: rgba(120, 150, 200, 0.18);
+    --cw-panel-border-strong: rgba(120, 150, 200, 0.32);
 
     /* Text */
-    --zava-text: #eef2f7;
-    --zava-text-strong: #ffffff;
-    --zava-muted: #97a3b6;
-    --zava-muted-2: #6f7a8f;
+    --cw-text: #eef2f7;
+    --cw-text-strong: #ffffff;
+    --cw-muted: #97a3b6;
+    --cw-muted-2: #6f7a8f;
 
     /* Accents */
-    --zava-accent: #ffb347;        /* warm signal — primary action */
-    --zava-accent-warm: #ff7a59;   /* gradient pair for the brand */
-    --zava-accent-2: #6ec1ff;      /* trust blue — links / info */
-    --zava-good: #6dd58c;
-    --zava-bad: #ff7a7a;
-    --zava-warn: #ffd166;
+    --cw-accent: #ffb347;        /* warm signal — primary action */
+    --cw-accent-warm: #ff7a59;   /* gradient pair for the brand */
+    --cw-accent-2: #6ec1ff;      /* trust blue — links / info */
+    --cw-good: #6dd58c;
+    --cw-bad: #ff7a7a;
+    --cw-warn: #ffd166;
 
     /* Sidebar */
-    --zava-sidebar-from: #0b1d3a;
-    --zava-sidebar-to: #1a1330;
+    --cw-sidebar-from: #0b1d3a;
+    --cw-sidebar-to: #1a1330;
 }
 
 html, body {
     font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
-    background: var(--zava-bg);
-    color: var(--zava-text);
+    background: var(--cw-bg);
+    color: var(--cw-text);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
@@ -45,7 +45,7 @@ html, body {
 /* Subtle dotted "secured grid" texture on the main background — a quiet
    trust cue without being noisy. */
 body {
-    background-color: var(--zava-bg);
+    background-color: var(--cw-bg);
     background-image:
         radial-gradient(rgba(110, 193, 255, 0.06) 1px, transparent 1px),
         radial-gradient(circle at 20% -10%, rgba(255, 179, 71, 0.08), transparent 55%),
@@ -55,19 +55,19 @@ body {
 }
 
 a, .btn-link {
-    color: var(--zava-accent-2);
+    color: var(--cw-accent-2);
     text-decoration: none;
 }
 
 a:hover, .btn-link:hover {
-    color: var(--zava-text-strong);
+    color: var(--cw-text-strong);
     text-decoration: underline;
 }
 
 .btn-primary {
     color: #1c2230;
-    background-color: var(--zava-accent);
-    border-color: var(--zava-accent);
+    background-color: var(--cw-accent);
+    border-color: var(--cw-accent);
     font-weight: 600;
     letter-spacing: 0.2px;
 }
@@ -89,7 +89,7 @@ a:hover, .btn-link:hover {
 }
 
 h1, h2, h3, h4, h5, h6 {
-    color: var(--zava-text-strong);
+    color: var(--cw-text-strong);
     letter-spacing: 0.2px;
 }
 
@@ -168,9 +168,9 @@ code {
     width: 44px;
     height: 44px;
     border-radius: 10px;
-    background: var(--zava-panel, rgba(20, 28, 46, 0.82));
-    border: 1px solid var(--zava-panel-border, rgba(120, 150, 200, 0.18));
-    color: var(--zava-accent, #ffb347);
+    background: var(--cw-panel, rgba(20, 28, 46, 0.82));
+    border: 1px solid var(--cw-panel-border, rgba(120, 150, 200, 0.18));
+    color: var(--cw-accent, #ffb347);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -183,7 +183,7 @@ code {
 .full-page-toggle:hover {
     color: #fff;
     background: rgba(255, 179, 71, 0.18);
-    border-color: var(--zava-accent, #ffb347);
+    border-color: var(--cw-accent, #ffb347);
     transform: translateY(-1px);
 }
 .full-page-toggle .icon-collapse { display: none; }
@@ -191,8 +191,8 @@ body.left-nav-hidden .full-page-toggle .icon-expand { display: none; }
 body.left-nav-hidden .full-page-toggle .icon-collapse { display: inline-block; }
 body.left-nav-hidden .full-page-toggle {
     color: #1c2230;
-    background: var(--zava-accent, #ffb347);
-    border-color: var(--zava-accent, #ffb347);
+    background: var(--cw-accent, #ffb347);
+    border-color: var(--cw-accent, #ffb347);
 }
 
 /* When full-page mode is active, hide the sidebar and let main fill the row. */

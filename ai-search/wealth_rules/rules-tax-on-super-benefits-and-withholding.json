@@ -1,0 +1,32 @@
+{
+  "id": "rules-tax-on-super-benefits-and-withholding",
+  "title": "Super law rule summary — Tax on super benefits & PAYG withholding (FY2026-27)",
+  "product": "Caldova Super & Pension",
+  "version": "Rule summary 2026-27 v1.0 — effective 1 July 2026",
+  "summary": "How Caldova splits a benefit payment into tax-free and taxable components and how much PAYG tax to withhold. Applies to lump sums (including severe financial hardship releases), pension payments and death benefits. The Caldova Superannuation Master Fund is a taxed fund, so taxable components are normally 'taxed elements'. Withholding is collected for the ATO and is not necessarily the final tax — the recipient's final tax is worked out when they lodge their tax return. Payments uses this summary with the payment calculator; Client Communications uses it to explain tax in plain English.",
+  "rules": "Components (proportioning rule): every payment carries the same proportions of tax-free and taxable components as the member's interest just before payment. The tax-free component comes mainly from non-concessional (after-tax) contributions; the taxable component is everything else (employer and other concessional contributions and earnings). For a pension the proportions are fixed when the pension starts.\nLump sums to the member — taxable component, taxed element: under 60 (and under preservation age), withhold 22% (20% + 2% Medicare levy); on assessment the rate is the lower of the member's marginal rate and 20% plus Medicare levy. Age 60 and over: nil. Untaxed element (rare at Caldova): 32% up to the untaxed plan cap ($1,935,000 for 2026-27) and 47% above it. Terminal medical condition lump sums are tax-free.\nPension payments: age 60 and over — tax-free, no PAYG withheld. Under 60 (now rare because preservation age is 60) — taxable component taxed at marginal rates, withheld using the ATO tax tables.\nDeath benefits: paid to a death benefits dependant for tax (spouse or former spouse, child under 18, a person financially dependent on the deceased, or a person in an interdependency relationship) — tax-free. Paid to a non-dependant for tax (e.g. an adult child who was not financially dependent) — tax-free component nil; taxable component taxed element withheld at 17% (15% + 2% Medicare levy); untaxed element 32% (can arise where a death benefit includes insurance proceeds). Death benefits to non-dependants must be paid as lump sums and cannot be rolled over.\nNo TFN: if the recipient has not provided a TFN, withhold at the top marginal rate plus Medicare levy (47%).\nWorked example A — $10,000 hardship lump sum, member aged 47, account 6% tax-free: tax-free $600; taxable $9,400; withheld 22% = $2,068; net $7,932.\nWorked example B — $243,100 death benefit share to a non-dependant adult child, pension 38% tax-free: tax-free $92,378; taxable $150,722; withheld 17% = $25,622.74; net $217,477.26.\nReporting: Caldova remits withheld tax to the ATO and issues a PAYG payment summary for super lump sums.",
+  "limits": "Withholding is an estimate, not the final tax: a member under 60 on a low income may receive a refund when their tax return is assessed. Components cannot be changed by choosing which investments are sold — the proportioning rule always applies. Caldova cannot give tax advice; recipients should speak to a registered tax agent or the ATO.",
+  "evidenceRequired": [
+    "TFN of the member (or of each death benefit recipient)",
+    "Account tax components (tax-free / taxable, taxed and untaxed elements)",
+    "Date of birth of the recipient",
+    "Death benefits: evidence of each recipient's dependency status for tax (financial dependency or interdependency), relationship and age",
+    "Bank account in the recipient's own name"
+  ],
+  "owner": "Payments",
+  "tags": [
+    "tax",
+    "payg-withholding",
+    "tax-free-component",
+    "taxable-component",
+    "taxed-element",
+    "proportioning-rule",
+    "22-percent",
+    "17-percent",
+    "death-benefit-tax",
+    "tax-dependant",
+    "no-tfn",
+    "payment-summary"
+  ],
+  "lastUpdated": "2026-07-01T00:00:00Z"
+}

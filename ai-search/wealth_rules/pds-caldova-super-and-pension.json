@@ -1,0 +1,38 @@
+{
+  "id": "pds-caldova-super-and-pension",
+  "title": "Caldova Super & Pension — Product Disclosure Statement (PDS extract)",
+  "product": "Caldova Super & Pension",
+  "version": "PDS v2026.2 — issued 1 October 2026",
+  "summary": "Extract of the Product Disclosure Statement for Caldova Super (accumulation) and Caldova Pension (account-based pension). Issuer: Caldova Superannuation Services Pty Ltd, trustee and RSE licensee of the Caldova Superannuation Master Fund (USI CDV0101AU, ABN 11 222 333 444), Caldova House, Flinders Lane, Melbourne VIC 3000. Caldova is an adviser-led platform super fund with three tiers, each available direct or through a financial adviser: Essential (a simple menu — the six Caldova Managed Portfolios plus the Caldova Cash Account), Select (the full menu — managed portfolios, managed funds and term deposits) and Private (for high-net-worth members — everything in Select plus direct ASX and international equities and private markets). Caldova does not offer a MySuper product. This extract is general information only and does not take into account any person's objectives, financial situation or needs.",
+  "rules": "1 Fees — administration fee tiered on balance: 0.30% p.a. on the first $250,000, 0.15% on $250,000–$1,000,000, 0.05% on $1,000,000–$2,000,000 and nil above $2,000,000, plus an account-keeping fee of $180 p.a. Investment fees (ICR) and a 0.10% buy/sell spread apply to managed portfolios (see the Caldova Super & Pension fee schedule).\n2 Caldova Cash Account — every account keeps at least 1% of its balance in cash for fees, insurance premiums, pension payments and benefits. Money received stays in cash until invested under the member's investment instruction; if cash falls below 1%, Caldova sells investments to restore it.\n3 Insurance — Death, TPD and Income Protection through group cover arranged by the trustee with a third-party life insurer, by application only. There is no automatic cover and cover held in another fund is not transferred. Essential members can apply for Death and TPD only. Premiums are deducted monthly. Cover ends when the account closes, at the cover expiry age, or after 16 continuous months with no contributions or rollovers unless the member has elected to keep it.\n4 Contributions — employer Super Guarantee (12%), salary sacrifice, personal, spouse and downsizer contributions, and rollovers in. 2026-27 caps: concessional $32,500; non-concessional $130,000 (bring-forward up to $390,000 if total super balance is under $1.84 million). Payday Super (from 1 July 2026): SG must reach the fund within 7 business days of payday, and Caldova allocates each contribution to the member's account, or returns it, within 3 business days of receipt.\n5 Withdrawals — preserved benefits are paid only when a condition of release is met, and only to a bank account in the member's name.\n6 Caldova Pension — account-based pension once a condition of release with no cashing restriction is met (or a transition-to-retirement income stream from preservation age 60). Payments monthly, quarterly, half-yearly or annually, paid on the 15th. Minimum annual payments by age (from 4% under 65 to 14% at 95+), pro-rated in the first year and rounded to the nearest $10; no maximum except 10% for TTR. Amounts moved to retirement phase count towards the transfer balance cap ($2.1 million in 2026-27).\n7 Nominations — non-binding; binding (lapsing after 3 years; signed in front of two adult witnesses not named in the nomination); reversionary (pensions only, made at commencement).\n8 Financial hardship — one release of $1,000–$10,000 gross in any 12 months; Caldova requires the Services Australia confirmation letter to be dated within 21 days of the application.\n9 Adviser fees — deducted for personal advice about the member's Caldova account only with the member's written consent (SIS Act s99FA); ongoing fee arrangements must be renewed in writing each year.",
+  "limits": "No MySuper product, so Caldova cannot receive default employer contributions for employees who have not chosen the fund. Non-lapsing binding nominations are not offered. At least 1% of the balance must stay in the Caldova Cash Account. Insurance is never automatic: replacement cover must be applied for and accepted by the insurer before cover held elsewhere is cancelled. A reversionary beneficiary must be eligible to receive a death benefit pension (for example a spouse) and cannot be added after the pension starts. Personal contributions cannot be accepted without a TFN. Caldova does not give personal financial advice — members should speak to their adviser.",
+  "evidenceRequired": [
+    "Signed application for the relevant tier (online or paper)",
+    "Identity verification — electronic (Document Verification Service) or certified copies",
+    "Tax file number (always masked in records, e.g. *** *** 123)",
+    "Adviser authority and Statement of Advice date (accounts opened or managed through an adviser)",
+    "Written adviser fee consent before any adviser fee is deducted",
+    "Insurance-loss acknowledgement for any rollover that will close an insured account elsewhere",
+    "Nomination forms — binding nominations need two adult witnesses who are not nominees, with witness declarations"
+  ],
+  "owner": "Product & Trustee Office",
+  "tags": [
+    "pds",
+    "caldova-super",
+    "caldova-pension",
+    "essential",
+    "select",
+    "private",
+    "no-mysuper",
+    "fees",
+    "cash-account",
+    "insurance",
+    "payday-super",
+    "contribution-caps",
+    "pension",
+    "nominations",
+    "hardship",
+    "adviser-fees"
+  ],
+  "lastUpdated": "2026-10-01T00:00:00Z"
+}

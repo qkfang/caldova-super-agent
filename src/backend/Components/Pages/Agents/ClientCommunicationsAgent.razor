@@ -1,22 +1,22 @@
-@page "/agents/customer-communications"
+@page "/agents/client-communications"
 
-<PageTitle>Customer Communications Agent — Claims Team in a Day</PageTitle>
+<PageTitle>Client Communications Agent — Wealth Team in a Day</PageTitle>
 
 <div class="agent-header" style="--accent: #ec4899">
-    <a class="back-link" href="/"><span aria-hidden="true">←</span> Back to claims office</a>
+    <a class="back-link" href="/"><span aria-hidden="true">←</span> Back to the operations office</a>
     <div class="agent-header-row">
         <div class="agent-header-icon">✉️</div>
         <div>
-            <div class="agent-header-dept">Customer Communications</div>
-            <h1>Customer Communications Agent</h1>
-            <div class="agent-header-persona">Cara — Customer Communications Specialist</div>
-            <p class="tagline">Plain-English, empathetic updates at every step of the claim.</p>
+            <div class="agent-header-dept">Client Communications</div>
+            <h1>Client Communications Agent</h1>
+            <div class="agent-header-persona">Cara — Client Communications Specialist</div>
+            <p class="tagline">Plain-English updates for members and their advisers.</p>
         </div>
     </div>
 </div>
 
 <div class="agent-tab-scope" style="--accent: #ec4899">
-    <nav class="agent-tabs" role="tablist" aria-label="Customer Communications agent details">
+    <nav class="agent-tabs" role="tablist" aria-label="Client Communications agent details">
         <button type="button" class="agent-tab active" data-tab="overview" role="tab" aria-selected="true" tabindex="0">Overview</button>
         <button type="button" class="agent-tab" data-tab="try" role="tab" aria-selected="false" tabindex="-1">Try it out</button>
         <button type="button" class="agent-tab" data-tab="voice" role="tab" aria-selected="false" tabindex="-1">Voice chat</button>
@@ -26,53 +26,64 @@
     <section class="panel" style="--accent: #ec4899">
         <h2>What this agent does</h2>
         <p>
-            Drafts customer-facing emails, SMS, and call scripts that explain claim status and
-            decisions clearly and empathetically — never inventing facts or making promises.
+            Drafts member letters, adviser updates, SMS and call scripts that explain where a request
+            stands and what a decision means — clearly, kindly and accurately. Caldova is adviser-led,
+            so most cases have two audiences: the member and their financial adviser. Cara's agent
+            never invents facts, never gives personal financial advice, and never sends anything
+            sensitive without a human.
         </p>
         <div class="two-col">
             <div>
                 <h3>Responsibilities</h3>
                 <ul>
-                    <li>Generate status updates whenever the claim moves stage.</li>
-                    <li>Translate technical assessment notes into plain English.</li>
-                    <li>Match tone to customer sentiment and situation.</li>
-                    <li>Run a compliance check on every outgoing message.</li>
-                    <li>Provide a call script when a phone follow-up is recommended.</li>
+                    <li>Draft member letters and emails at every milestone — welcome, status, decision, payment.</li>
+                    <li>Draft adviser updates with the exact actions the adviser needs to take.</li>
+                    <li>Explain rules, caps and tax in plain English without losing accuracy.</li>
+                    <li>Match tone to the moment — bereavement, hardship, a fraud scare or a busy adviser.</li>
+                    <li>Check every message: no advice, next steps, timeframes, contact details and complaint rights.</li>
+                    <li>Take calls as Cara through Azure AI Foundry Voice Live.</li>
                 </ul>
             </div>
             <div>
                 <h3>Tools available</h3>
                 <ul>
-                    <li>Email/SMS drafting</li>
-                    <li>Tone adjustment</li>
+                    <li>Member letter &amp; email drafting</li>
+                    <li>Adviser update templates</li>
+                    <li>SMS &amp; call scripts</li>
                     <li>Plain-English rewriter</li>
-                    <li>Template library</li>
-                    <li>Compliance checker</li>
+                    <li>Tone matching (bereavement · hardship · fraud victim)</li>
+                    <li>Compliance checker (disclosures, IDR &amp; AFCA, free-help referrals)</li>
+                    <li>Voice Live (real-time speech)</li>
                 </ul>
                 <h3>Human approval</h3>
                 <p class="approval">
-                    Required for declines, complaint responses, sensitive claims, bereavement,
-                    and any legal or regulatory wording.
+                    Required for declines and partial approvals, complaint responses, hardship and
+                    bereavement communications, anything sent to a fraud victim, and any legal or
+                    regulatory wording.
                 </p>
             </div>
         </div>
     </section>
 
     <section class="panel" style="--accent: #ec4899">
-        <h2>How this agent helps with the claim</h2>
+        <h2>How this agent helps with the case</h2>
         <div class="demo">
             <p>
-                Whenever a claim moves to a new stage, Cara's communications agent drafts the
-                update for the customer in plain, empathetic English — matched to their preferred
-                channel and tone. Acknowledgements, inspection bookings, decisions, and
-                settlement letters are all turned around in seconds, drawing only on facts that
-                are already in the claim file.
+                When a Member Case reaches a milestone — an account opened, a rollover held, a pension
+                started, a hardship decision made, a death benefit paid — Cara's agent reads the case
+                file and drafts what the member and their adviser need to hear, in the right tone and
+                through the right channel: a welcome email for Priya and an action list for her
+                adviser; a calm reassurance letter for Grace, sent only to the details we trusted
+                before her account was tampered with; a "welcome to retirement" schedule for George;
+                a kind explanation of the $10,000 hardship cap for Tom; gentle condolence letters for
+                Robert and Lily.
             </p>
             <p>
-                Every draft is run through a compliance check before it goes anywhere near a
-                customer, and sensitive messages — declines, complaints, bereavement — always
-                go to a human reviewer first. The result is consistently clear, kind updates
-                without anyone in the office spending their day rewriting templates.
+                Every draft carries a tone note and a compliance check — no advice, next steps,
+                timeframes, who to contact, and the right to complain to Caldova first and then to
+                AFCA — and anything sensitive goes to a human before it's sent. Members get clear,
+                consistent, kind communication; advisers get exactly the actions they need; and Cara
+                spends her day on the conversations that matter, not on rewriting templates.
             </p>
         </div>
     </section>
@@ -81,39 +92,40 @@
 
     <div class="agent-tab-panel" data-panel="try" role="tabpanel">
     <section class="panel comms-panel" style="--accent: #ec4899">
-        <h2>Try It Out — Customer Communications Demo</h2>
+        <h2>Try It Out — Client Communications Demo</h2>
         <p class="muted comms-help">
-            Pick a claim Iris has already lodged from the
-            <a href="/agents/claims-intake">Claims Intake</a> demo, and watch
-            Cara draft the customer-facing updates — clear, empathetic, and
-            compliance-checked. All steps run live against the
-            <code>/communications/*</code> endpoints in this app.
+            Pick a Member Case and watch Cara read it, summarise how the member is likely feeling and
+            what happens next, then draft the member letter, the adviser update (when there's an
+            adviser) and an SMS — each with tone and compliance notes, ready for a human to review.
+            All steps run live against the <code>/communications/*</code> endpoints in this app.
         </p>
 
-        <!-- Step 1 — pick a claim -->
+        <!-- Step 1 — pick a case -->
         <div class="comms-step" data-step="1">
             <div class="comms-step-head">
                 <span class="comms-step-num">1</span>
-                <h3>Select a claim</h3>
+                <h3>Select a case</h3>
             </div>
             <p class="muted">
-                The dropdown is populated from claims minted by the Claims Intake
-                demo. If it's empty, run an intake sample first.
+                The list holds the five scenario cases plus any case opened live in the
+                <a href="/agents/onboarding">Onboarding</a> demo.
             </p>
             <div class="comms-pick-row">
-                <select id="comms-claim-select" class="comms-select" disabled>
-                    <option value="">Loading claims…</option>
+                <select id="comms-case-select" class="comms-select" disabled>
+                    <option value="">Loading cases…</option>
                 </select>
-                <button type="button" id="comms-refresh-btn" class="comms-secondary" title="Refresh claim list">↻ Refresh</button>
+                <button type="button" id="comms-refresh-btn" class="comms-secondary" title="Refresh the case list">↻ Refresh</button>
             </div>
-            <div class="comms-claim-summary" id="comms-claim-summary" hidden>
+            <div class="comms-claim-summary" id="comms-case-summary" hidden>
                 <div class="comms-claim-summary-grid">
-                    <div><span class="k">Customer</span><span id="comms-cust-name"></span></div>
-                    <div><span class="k">Policy</span><span id="comms-cust-policy"></span></div>
-                    <div><span class="k">Claim type</span><span id="comms-cust-type"></span></div>
-                    <div><span class="k">Urgency</span><span id="comms-cust-urgency"></span></div>
-                    <div class="span-2"><span class="k">Incident</span><span id="comms-cust-incident"></span></div>
-                    <div class="span-2"><span class="k">Preferred contact</span><span id="comms-cust-pref"></span></div>
+                    <div><span class="k">Client</span><span id="comms-case-client"></span></div>
+                    <div><span class="k">Member no.</span><span id="comms-case-member"></span></div>
+                    <div><span class="k">Request type</span><span id="comms-case-type"></span></div>
+                    <div><span class="k">Priority</span><span id="comms-case-priority"></span></div>
+                    <div><span class="k">Adviser</span><span id="comms-case-adviser"></span></div>
+                    <div><span class="k">Preferred contact</span><span id="comms-case-pref"></span></div>
+                    <div class="span-2"><span class="k">Request</span><span id="comms-case-request"></span></div>
+                    <div class="span-2"><span class="k">Amount</span><span id="comms-case-amount"></span></div>
                 </div>
             </div>
         </div>
@@ -122,17 +134,17 @@
         <div class="comms-step" data-step="2" id="comms-step-2" hidden>
             <div class="comms-step-head">
                 <span class="comms-step-num">2</span>
-                <h3>Engage Customer Communications Agent</h3>
+                <h3>Engage Client Communications Agent</h3>
             </div>
             <p class="muted">
-                Cara reads the claim, drafts customer-facing updates across the most
-                appropriate channels, summarises what comes next, and flags anything
-                that needs a human reviewer before it's sent.
+                Cara reads the case file, works out how the member is likely feeling, and drafts for
+                both audiences — then checks every draft for tone and compliance and flags anything
+                a human must approve before it's sent.
             </p>
-            <button id="comms-process-btn" type="button" disabled>Draft customer updates with Cara</button>
+            <button id="comms-process-btn" type="button" disabled>Draft communications with Cara</button>
             <div id="comms-process-status" class="comms-status" hidden></div>
 
-            <div class="engage-tabs-scope" data-engage-role="communications">
+            <div class="engage-tabs-scope" data-engage-role="client-communications">
                 <div class="engage-tabs" role="tablist">
                     <button type="button" class="engage-tab-btn active" data-engage-tab="narrative">Agent Narrative</button>
                     <button type="button" class="engage-tab-btn" data-engage-tab="reference">Reference</button>
@@ -186,26 +198,39 @@
             </div>
         </div>
 
-        <!-- Step 3 — claim summary & flags -->
+        <!-- Step 3 — Cara's case summary -->
         <div class="comms-step" data-step="3" id="comms-results" hidden>
             <div class="comms-step-head">
                 <span class="comms-step-num">3</span>
-                <h3>Cara's claim summary</h3>
+                <h3>Cara's case summary</h3>
             </div>
 
             <div class="comms-summary-card">
                 <div class="comms-summary-head">
-                    <span class="comms-summary-label">Status &amp; next steps</span>
+                    <span class="comms-summary-label">Where the case stands</span>
+                    <span class="comms-outcome-pill" id="comms-outcome-pill"></span>
                     <span class="comms-stage-pill" id="comms-stage-pill"></span>
                 </div>
-                <p id="comms-summary-text"></p>
-                <ul id="comms-next-steps" class="comms-next-steps"></ul>
+                <div class="comms-summary-grid">
+                    <div class="comms-summary-block">
+                        <div class="comms-summary-sub">Sentiment <span class="comms-sentiment-chip" id="comms-sentiment-label"></span></div>
+                        <p id="comms-sentiment-text"></p>
+                    </div>
+                    <div class="comms-summary-block">
+                        <div class="comms-summary-sub">What happened</div>
+                        <p id="comms-summary-text"></p>
+                    </div>
+                    <div class="comms-summary-block span-2">
+                        <div class="comms-summary-sub">What's next</div>
+                        <ul id="comms-next-steps" class="comms-next-steps"></ul>
+                    </div>
+                </div>
             </div>
 
             <div class="comms-flags" id="comms-flags" hidden>
                 <div class="comms-flags-head">
                     <span class="comms-flags-icon" aria-hidden="true">⚠️</span>
-                    <span class="comms-flags-title">Vulnerability flags — human review</span>
+                    <span class="comms-flags-title">Vulnerability &amp; sensitivity flags</span>
                     <span class="comms-approval-pill" id="comms-approval-pill"></span>
                 </div>
                 <ul id="comms-flags-list"></ul>
@@ -213,43 +238,29 @@
             </div>
         </div>
 
-        <!-- Step 4 — customer-facing drafts -->
+        <!-- Step 4 — drafts for both audiences -->
         <div class="comms-step" data-step="4" id="comms-drafts" hidden>
             <div class="comms-step-head">
                 <span class="comms-step-num">4</span>
-                <h3>Customer-facing drafts</h3>
+                <h3>Drafts for the member and the adviser</h3>
             </div>
             <p class="muted">
-                Email, SMS, and portal updates drafted by Cara — ready for a
-                human reviewer to approve before they're sent.
+                Member letter or email, adviser update and SMS — each with a tone note and a
+                compliance check. Nothing is sent until a human has reviewed it.
             </p>
 
-            <div class="comms-channels">
-                <div class="comms-channel">
-                    <div class="comms-channel-head">
-                        <span class="comms-channel-icon" aria-hidden="true">✉️</span>
-                        <span class="comms-channel-title">Email draft</span>
-                    </div>
-                    <div class="comms-email-subject"><span class="k">Subject</span><span id="comms-email-subject"></span></div>
-                    <div class="comms-channel-body agent-md" id="comms-email-body"></div>
-                </div>
-
-                <div class="comms-channel">
-                    <div class="comms-channel-head">
-                        <span class="comms-channel-icon" aria-hidden="true">📱</span>
-                        <span class="comms-channel-title">SMS draft</span>
-                    </div>
-                    <div class="comms-channel-body comms-sms agent-md" id="comms-sms-body"></div>
-                </div>
-
-                <div class="comms-channel">
-                    <div class="comms-channel-head">
-                        <span class="comms-channel-icon" aria-hidden="true">🔔</span>
-                        <span class="comms-channel-title">Portal status</span>
-                    </div>
-                    <div class="comms-portal-heading" id="comms-portal-heading"></div>
-                    <div class="comms-channel-body agent-md" id="comms-portal-body"></div>
-                </div>
+            <div class="comms-audience">
+                <div class="comms-audience-head"><span aria-hidden="true">✉️</span> Member</div>
+                <div id="comms-drafts-member"></div>
+            </div>
+            <div class="comms-audience">
+                <div class="comms-audience-head"><span aria-hidden="true">🤝</span> Adviser</div>
+                <div id="comms-drafts-adviser"></div>
+                <p class="muted comms-adviser-note" id="comms-adviser-note" hidden></p>
+            </div>
+            <div class="comms-audience">
+                <div class="comms-audience-head"><span aria-hidden="true">📱</span> SMS</div>
+                <div id="comms-drafts-sms"></div>
             </div>
         </div>
     </section>
@@ -260,22 +271,31 @@
         <h2>Voice chat with Cara</h2>
         <p class="muted voice-help">
             Talk to Cara directly from your browser using the
-            <strong>Azure AI Foundry Voice Live API</strong> — a real-time
-            speech-to-speech connection to the Customer Communications
-            Foundry agent. Press the mic, speak naturally, and Cara will
-            reply out loud. You can interrupt her at any time. Optionally
-            pick a claim first so Cara has the context. The mic streams
-            24&nbsp;kHz PCM audio over a secure WebSocket proxy on this
-            server; works best in Chrome / Edge / Safari on
-            <code>localhost</code> or over <code>https</code>.
+            <strong>Azure AI Foundry Voice Live API</strong> — a real-time speech-to-speech
+            connection to Cara's voice agent (<code>client-communications-voice-agent</code>).
+            Press the mic, speak naturally, and Cara answers out loud; you can interrupt her at
+            any time. Pick a case first and Cara treats you as that (already verified) caller.
+            Audio streams as 24&nbsp;kHz PCM over a secure WebSocket proxy on this server and works
+            best in Chrome, Edge or Safari on <code>localhost</code> or over <code>https</code>.
+            When Voice Live isn't available, type a message or tap an opening line below and Cara
+            replies in text — and reads it aloud if <em>Speak replies</em> is on.
         </p>
 
         <div class="voice-context-row">
-            <label class="voice-context-label" for="voice-claim-select">Claim context (optional)</label>
-            <select id="voice-claim-select" class="comms-select voice-select" disabled>
-                <option value="">Loading claims…</option>
+            <label class="voice-context-label" for="voice-case-select">Caller &amp; case (identity already verified)</label>
+            <select id="voice-case-select" class="comms-select voice-select" disabled>
+                <option value="">Loading cases…</option>
             </select>
-            <button type="button" id="voice-refresh-btn" class="comms-secondary" title="Refresh claim list">↻ Refresh</button>
+            <button type="button" id="voice-refresh-btn" class="comms-secondary" title="Refresh the case list">↻ Refresh</button>
+        </div>
+
+        <div class="voice-prompts" id="voice-prompts" aria-label="Suggested opening lines">
+            <span class="voice-prompts-label">Try an opening line</span>
+            <button type="button" class="voice-chip" data-prompt="I'd like to start a pension">I'd like to start a pension</button>
+            <button type="button" class="voice-chip" data-prompt="What's happening with my mum's super?">What's happening with my mum's super?</button>
+            <button type="button" class="voice-chip" data-prompt="Someone changed my details!">Someone changed my details!</button>
+            <button type="button" class="voice-chip" data-prompt="I'm behind on my bills — can I access my super?">I'm behind on my bills — can I access my super?</button>
+            <button type="button" class="voice-chip" data-prompt="My super's scattered across old jobs — can you combine it?">My super's scattered across old jobs — can you combine it?</button>
         </div>
 
         <div class="voice-stage" aria-live="polite">
@@ -297,7 +317,7 @@
         </div>
 
         <div class="voice-text-row">
-            <input type="text" id="voice-text-input" class="voice-text-input" placeholder="…or type a message and press Enter" />
+            <input type="text" id="voice-text-input" class="voice-text-input" placeholder="…or type a message to Cara and press Enter" />
             <button type="button" id="voice-text-send" class="voice-text-send">Send</button>
             <label class="voice-toggle">
                 <input type="checkbox" id="voice-tts-toggle" checked />
@@ -316,7 +336,7 @@
     .comms-panel { --comms-accent: #ec4899; }
     .comms-help { margin-bottom: 0.9rem; }
     .comms-help code { background: rgba(236, 72, 153, 0.12); padding: 1px 6px; border-radius: 4px; font-size: 0.85rem; }
-    .comms-help a { color: var(--comms-accent); }
+    .comms-panel a { color: var(--comms-accent); }
 
     .comms-step {
         border: 1px solid rgba(120, 150, 200, 0.18);
@@ -336,7 +356,7 @@
         color: var(--comms-accent);
         font-size: 0.78rem; font-weight: 700;
     }
-    .comms-step .muted { color: var(--zava-muted, #97a3b6); font-size: 0.9rem; margin: 0.35rem 0 0.7rem 0; }
+    .comms-step .muted { color: var(--cw-muted, #97a3b6); font-size: 0.9rem; margin: 0.35rem 0 0.7rem 0; }
 
     .comms-pick-row { display: flex; flex-wrap: wrap; gap: 0.55rem; align-items: center; }
     .comms-select {
@@ -382,8 +402,8 @@
         .comms-claim-summary-grid .span-2 { grid-column: span 1; }
     }
     .comms-claim-summary-grid .k {
-        display: inline-block; min-width: 110px;
-        color: var(--zava-muted, #97a3b6); font-weight: 600;
+        display: inline-block; min-width: 120px;
+        color: var(--cw-muted, #97a3b6); font-weight: 600;
         text-transform: uppercase; font-size: 0.66rem; letter-spacing: 0.08em;
         margin-right: 0.5rem;
     }
@@ -411,6 +431,7 @@
     }
     @@keyframes comms-spin { to { transform: rotate(360deg); } }
 
+    /* Step 3 — summary */
     .comms-summary-card {
         margin-top: 0.6rem;
         background: color-mix(in srgb, var(--comms-accent) 8%, rgba(15, 22, 38, 0.7));
@@ -418,26 +439,47 @@
         border-radius: 10px;
         padding: 0.75rem 0.95rem;
     }
-    .comms-summary-head { display: flex; align-items: center; gap: 0.55rem; margin-bottom: 0.3rem; }
-    .comms-summary-label {
-        color: #fff; font-weight: 700; font-size: 0.92rem;
-    }
-    .comms-stage-pill {
-        margin-left: auto;
+    .comms-summary-head { display: flex; align-items: center; gap: 0.55rem; margin-bottom: 0.5rem; flex-wrap: wrap; }
+    .comms-summary-label { color: #fff; font-weight: 700; font-size: 0.92rem; margin-right: auto; }
+    .comms-stage-pill, .comms-outcome-pill {
         padding: 0.15rem 0.7rem;
         border-radius: 999px;
         font-size: 0.7rem; font-weight: 700;
-        text-transform: uppercase; letter-spacing: 0.1em;
+        text-transform: uppercase; letter-spacing: 0.08em;
         background: color-mix(in srgb, var(--comms-accent) 18%, transparent);
         color: #ffd6e9;
         border: 1px solid color-mix(in srgb, var(--comms-accent) 45%, transparent);
     }
-    .comms-summary-card p { margin: 0; color: rgba(238, 242, 247, 0.9); font-size: 0.9rem; line-height: 1.5; }
+    .comms-outcome-pill.completed { background: rgba(34, 197, 94, 0.16); color: #86efac; border-color: rgba(34, 197, 94, 0.4); }
+    .comms-outcome-pill.blocked { background: rgba(239, 68, 68, 0.16); color: #fca5a5; border-color: rgba(239, 68, 68, 0.4); }
+    .comms-outcome-pill.partial { background: rgba(245, 158, 11, 0.16); color: #fde68a; border-color: rgba(245, 158, 11, 0.45); }
+    .comms-summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem 1rem; }
+    .comms-summary-grid .span-2 { grid-column: span 2; }
+    @@media (max-width: 820px) {
+        .comms-summary-grid { grid-template-columns: 1fr; }
+        .comms-summary-grid .span-2 { grid-column: span 1; }
+    }
+    .comms-summary-sub {
+        color: var(--cw-muted, #97a3b6);
+        font-size: 0.68rem; font-weight: 700;
+        text-transform: uppercase; letter-spacing: 0.09em;
+        margin-bottom: 0.25rem;
+        display: flex; align-items: center; gap: 0.45rem;
+    }
+    .comms-sentiment-chip {
+        text-transform: none; letter-spacing: 0.01em;
+        font-size: 0.74rem; font-weight: 700;
+        padding: 0.05rem 0.55rem; border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        color: #fff;
+    }
+    .comms-summary-block p { margin: 0; color: rgba(238, 242, 247, 0.9); font-size: 0.88rem; line-height: 1.5; }
     .comms-next-steps {
-        margin: 0.55rem 0 0 1.1rem;
+        margin: 0.1rem 0 0 1.1rem;
         padding: 0;
-        color: rgba(238, 242, 247, 0.85);
-        font-size: 0.85rem;
+        color: rgba(238, 242, 247, 0.88);
+        font-size: 0.86rem;
         line-height: 1.5;
     }
     .comms-next-steps li { margin-bottom: 0.2rem; }
@@ -458,58 +500,90 @@
         border-radius: 999px;
         font-size: 0.7rem; font-weight: 700;
         text-transform: uppercase; letter-spacing: 0.1em;
+        white-space: nowrap;
     }
     .comms-approval-pill.required { background: rgba(239, 68, 68, 0.18); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }
     .comms-approval-pill.optional { background: rgba(34, 197, 94, 0.16); color: #86efac; border: 1px solid rgba(34, 197, 94, 0.4); }
     .comms-flags ul { margin: 0.25rem 0 0.4rem 1.1rem; padding: 0; color: rgba(238, 242, 247, 0.9); font-size: 0.86rem; line-height: 1.5; }
     .comms-flags ul li { margin-bottom: 0.2rem; }
 
-    .comms-channels {
-        margin-top: 0.85rem;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 0.7rem;
+    /* Step 4 — drafts */
+    .comms-audience { margin-top: 0.85rem; }
+    .comms-audience-head {
+        display: flex; align-items: center; gap: 0.45rem;
+        color: #ffd6e9;
+        font-size: 0.72rem; font-weight: 700;
+        text-transform: uppercase; letter-spacing: 0.12em;
+        padding-bottom: 0.3rem;
+        border-bottom: 1px dashed rgba(236, 72, 153, 0.3);
     }
-    @@media (max-width: 820px) { .comms-channels { grid-template-columns: 1fr; } }
-    .comms-channel {
+    .comms-adviser-note { margin: 0.5rem 0 0 0 !important; font-style: italic; }
+    .comms-draft {
         background: rgba(10, 16, 28, 0.7);
         border: 1px solid rgba(120, 150, 200, 0.18);
+        border-left: 3px solid color-mix(in srgb, var(--comms-accent) 70%, transparent);
         border-radius: 10px;
-        padding: 0.7rem 0.85rem;
+        padding: 0.75rem 0.9rem;
+        margin-top: 0.6rem;
     }
-    .comms-channel:first-child { grid-column: span 2; }
-    @@media (max-width: 820px) { .comms-channel:first-child { grid-column: span 1; } }
-    .comms-channel-head { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem; }
-    .comms-channel-title { color: #fff; font-weight: 700; font-size: 0.88rem; }
-    .comms-channel-icon { font-size: 1rem; }
-    .comms-email-subject {
-        font-size: 0.82rem;
-        color: rgba(238, 242, 247, 0.86);
-        margin-bottom: 0.4rem;
-        padding-bottom: 0.4rem;
+    .comms-draft-head { display: flex; align-items: center; gap: 0.55rem; margin-bottom: 0.45rem; flex-wrap: wrap; }
+    .comms-draft-title { color: #fff; font-weight: 700; font-size: 0.9rem; }
+    .comms-draft-channel {
+        font-size: 0.68rem; font-weight: 700;
+        text-transform: uppercase; letter-spacing: 0.08em;
+        color: var(--cw-muted, #97a3b6);
+        border: 1px solid rgba(120, 150, 200, 0.3);
+        border-radius: 999px;
+        padding: 0.05rem 0.5rem;
+    }
+    .comms-draft-meta {
+        display: grid; grid-template-columns: auto 1fr; gap: 0.2rem 0.6rem;
+        font-size: 0.82rem; color: rgba(238, 242, 247, 0.88);
+        margin-bottom: 0.5rem; padding-bottom: 0.45rem;
         border-bottom: 1px dashed rgba(120, 150, 200, 0.2);
     }
-    .comms-email-subject .k {
-        display: inline-block; min-width: 60px;
-        color: var(--zava-muted, #97a3b6); font-weight: 600;
-        text-transform: uppercase; font-size: 0.66rem; letter-spacing: 0.08em;
-        margin-right: 0.5rem;
-    }
-    .comms-portal-heading {
-        font-size: 0.85rem; font-weight: 700; color: #ffd6e9;
-        margin-bottom: 0.35rem;
+    .comms-draft-meta .k {
+        color: var(--cw-muted, #97a3b6); font-weight: 600;
+        text-transform: uppercase; font-size: 0.64rem; letter-spacing: 0.08em;
+        padding-top: 0.15rem;
     }
     .comms-channel-body {
         background: rgba(8, 12, 22, 0.7);
         border: 1px solid rgba(120, 150, 200, 0.16);
         border-radius: 6px;
         padding: 0.65rem 0.8rem;
-        color: rgba(238, 242, 247, 0.88);
-        font-size: 0.84rem;
-        line-height: 1.5;
+        color: rgba(238, 242, 247, 0.9);
+        font-size: 0.85rem;
+        line-height: 1.55;
         margin: 0;
     }
-    .comms-channel-body.comms-sms { font-size: 0.85rem; }
+    .comms-channel-body.comms-sms {
+        font-size: 0.88rem;
+        max-width: 30rem;
+        border-radius: 14px 14px 14px 4px;
+        background: color-mix(in srgb, var(--comms-accent) 10%, rgba(8, 12, 22, 0.8));
+    }
+    .comms-sms-count { font-size: 0.72rem; color: var(--cw-muted, #97a3b6); margin-top: 0.3rem; }
+    .comms-draft-foot {
+        display: grid; grid-template-columns: 1fr 1.3fr; gap: 0.7rem;
+        margin-top: 0.6rem;
+    }
+    @@media (max-width: 820px) { .comms-draft-foot { grid-template-columns: 1fr; } }
+    .comms-draft-foot h5 {
+        margin: 0 0 0.25rem 0;
+        color: var(--cw-muted, #97a3b6);
+        font-size: 0.66rem; font-weight: 700;
+        text-transform: uppercase; letter-spacing: 0.09em;
+    }
+    .comms-tone { font-size: 0.83rem; color: rgba(238, 242, 247, 0.86); line-height: 1.5; margin: 0; }
+    .comms-compliance { list-style: none; margin: 0; padding: 0; font-size: 0.82rem; line-height: 1.45; }
+    .comms-compliance li { display: flex; gap: 0.45rem; margin-bottom: 0.22rem; color: rgba(238, 242, 247, 0.88); }
+    .comms-compliance .mark { flex: 0 0 auto; font-weight: 700; width: 1rem; text-align: center; }
+    .comms-compliance li.pass .mark { color: #86efac; }
+    .comms-compliance li.warn .mark { color: #fde68a; }
+    .comms-compliance li.na .mark { color: var(--cw-muted, #97a3b6); }
+    .comms-compliance .lbl { color: #fff; font-weight: 600; }
+    .comms-compliance .note { color: rgba(238, 242, 247, 0.7); }
 
     /* Voice chat tab */
     .voice-panel { --voice-accent: #ec4899; }
@@ -521,14 +595,37 @@
 
     .voice-context-row {
         display: flex; flex-wrap: wrap; gap: 0.55rem; align-items: center;
-        margin-bottom: 0.85rem;
+        margin-bottom: 0.75rem;
     }
     .voice-context-label {
-        color: var(--zava-muted, #97a3b6);
+        color: var(--cw-muted, #97a3b6);
         font-size: 0.72rem; font-weight: 700;
         text-transform: uppercase; letter-spacing: 0.1em;
     }
     .voice-select { flex: 1 1 320px; }
+
+    .voice-prompts {
+        display: flex; flex-wrap: wrap; gap: 0.45rem; align-items: center;
+        margin-bottom: 0.85rem;
+    }
+    .voice-prompts-label {
+        color: var(--cw-muted, #97a3b6);
+        font-size: 0.7rem; font-weight: 700;
+        text-transform: uppercase; letter-spacing: 0.1em;
+        margin-right: 0.2rem;
+    }
+    .voice-chip {
+        background: color-mix(in srgb, var(--voice-accent) 12%, rgba(10, 16, 28, 0.7));
+        border: 1px solid color-mix(in srgb, var(--voice-accent) 40%, transparent);
+        color: #ffe4f1;
+        border-radius: 999px;
+        padding: 0.3rem 0.8rem;
+        font-size: 0.82rem;
+        cursor: pointer;
+        transition: background 0.15s ease, transform 0.12s ease;
+    }
+    .voice-chip:hover { background: color-mix(in srgb, var(--voice-accent) 24%, rgba(10, 16, 28, 0.7)); transform: translateY(-1px); }
+    .voice-chip:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
 
     .voice-stage {
         display: flex; flex-direction: column; align-items: center;
@@ -674,7 +771,7 @@
         display: flex; flex-direction: column; gap: 0.5rem;
     }
     .voice-transcript .voice-empty {
-        color: var(--zava-muted, #97a3b6);
+        color: var(--cw-muted, #97a3b6);
         font-size: 0.85rem;
         font-style: italic;
         text-align: center;
@@ -706,15 +803,23 @@
         opacity: 0.65;
         font-style: italic;
     }
+    .voice-msg.system {
+        align-self: center;
+        max-width: 92%;
+        background: transparent;
+        border-style: dashed;
+        color: var(--cw-muted, #97a3b6);
+        font-size: 0.8rem;
+        font-style: italic;
+    }
     .voice-msg-role {
         display: block;
         font-size: 0.66rem;
         text-transform: uppercase;
         letter-spacing: 0.1em;
         font-weight: 700;
-        color: var(--zava-muted, #97a3b6);
+        color: var(--cw-muted, #97a3b6);
         margin-bottom: 0.2rem;
     }
     .voice-msg.user .voice-msg-role { color: #ffd6e9; }
 </style>
-

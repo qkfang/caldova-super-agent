@@ -1,183 +1,161 @@
+using System.Text;
 using System.Text.Json;
-using ZavaClaims.Agents;
-using ZavaClaims.App.Models;
-using ZavaClaims.App.Services;
+using CaldovaSuper.Agents;
+using CaldovaSuper.App.Models;
+using CaldovaSuper.App.Services;
 
-namespace ZavaClaims.App.Api;
+namespace CaldovaSuper.App.Api;
 
-record AssessmentProcessRequest(string ClaimNumber);
+record BenefitsProcessRequest(string CaseNumber);
 
 /// <summary>
-/// HTTP endpoints that back the "Try It Out" tab on the Claims Assessment
-/// agent page (<c>/agents/claims-assessment</c>). They let the page:
+/// HTTP endpoints behind the "Try it out" tab on the Benefits &amp;
+/// Eligibility agent page (<c>/agents/benefits-eligibility</c>). They let
+/// the page:
 ///
-/// 1. List the claim cases currently held in the in-memory
-///    <see cref="IntakeClaimStore"/> (created by the Claims Intake demo).
-/// 2. Look a single claim up by its claim number for display.
-/// 3. Engage the Foundry <see cref="ZavaClaims.Agents.ClaimsAssessmentAgent"/>
-///    on the selected claim so the page can render the agent's coverage
-///    recommendation, reasoning and plain-English explanation.
+/// 1. List the Member Cases in the <see cref="CaseStore"/> (the five seeded
+///    scenario cases plus any opened live by the Onboarding demo).
+/// 2. Show one case and the rule documents (PDS, trust deed, super-law and
+///    tax rule summaries, authority matrix) that apply to it.
+/// 3. Engage the Foundry <see cref="BenefitsEligibilityAgent"/> on the case
+///    and return its narrative plus the eligibility checklist parsed from
+///    the trailing <c>```json</c> block it emits (recommendation,
+///    recommendationLabel, recommendationReason, outcomeSummary, items).
+///    When Foundry isn't configured, the call fails or the JSON block is
+///    missing, the deterministic report from
+///    <see cref="ProductDocumentCatalog"/> is returned instead.
 /// </summary>
-public static class AssessmentApi
+public static class BenefitsApi
 {
-    public static void MapAssessmentEndpoints(
+    public static void MapBenefitsEndpoints(
         this WebApplication app,
-        IntakeClaimStore claimStore,
-        ClaimsAgentFactory agentFactory,
+        CaseStore store,
+        CaldovaAgentFactory factory,
         ILogger logger)
     {
-        // Dropdown source — claim cases minted by the Claims Intake demo.
-        app.MapGet("/assessment/claims", () =>
+        // Dropdown source — every Member Case currently held in memory.
+        app.MapGet("/benefits/cases", () =>
         {
-            var claims = claimStore.All().Select(r => new
+            var cases = store.All().Select(r => new
             {
-                claimNumber = r.ClaimNumber,
-                customerName = r.CustomerName,
-                policyNumber = r.PolicyNumber,
-                claimType = r.ClaimType,
-                incidentDate = r.IncidentDate,
-                urgency = r.Urgency,
+                caseNumber = r.CaseNumber,
+                sampleId = r.SampleId,
+                clientName = r.ClientName,
+                memberNumber = r.MemberNumber,
+                product = r.Product,
+                requestType = r.RequestType,
+                receivedDate = r.ReceivedDate,
+                priority = r.Priority,
                 createdAt = r.CreatedAt
             });
-            return Results.Ok(claims);
+            return Results.Ok(cases);
         });
 
-        // Per-claim view used by the Try It Out panel to render the
-        // Claim Case before the agent is engaged.
-        app.MapGet("/assessment/claims/{claimNumber}", (string claimNumber) =>
+        // Full Member Case, rendered on the page before the agent is engaged.
+        app.MapGet("/benefits/cases/{caseNumber}", (string caseNumber) =>
         {
-            var record = claimStore.Get(claimNumber);
+            var record = store.Get(caseNumber);
             return record is null
-                ? Results.NotFound(new { error = $"claim '{claimNumber}' not found" })
+                ? Results.NotFound(new { error = $"case '{caseNumber}' not found" })
                 : Results.Ok(record);
         });
 
-        // Sample policy document for a given policy number — drives the
-        // "Policy document" card on the assessment page so the user can see
-        // exactly what the agent is comparing the claim against.
-        app.MapGet("/assessment/policy/{policyNumber}", (string policyNumber) =>
-        {
-            var policy = PolicyDocumentCatalog.FindPolicy(policyNumber);
-            return policy is null
-                ? Results.NotFound(new { error = $"policy '{policyNumber}' not found" })
-                : Results.Ok(policy);
-        });
+        // Every rule document in the catalogue (diagnostics / reference).
+        app.MapGet("/benefits/rules", () => Results.Ok(ProductDocumentCatalog.All));
 
-        // Visual assessment checklist for a given claim — the per-item
-        // pass/fail breakdown the agent worked through against the policy
-        // document, plus the overall recommendation and reason for it.
-        app.MapGet("/assessment/checklist/{claimNumber}", (string claimNumber) =>
+        // The rule documents applied to one case, plus the clause ids its
+        // eligibility checklist tests, so the page can show exactly which
+        // rules the agent is about to apply.
+        app.MapGet("/benefits/rules/{caseNumber}", (string caseNumber) =>
         {
-            var claim = claimStore.Get(claimNumber);
-            if (claim is null)
-                return Results.NotFound(new { error = $"claim '{claimNumber}' not found" });
+            var record = store.Get(caseNumber);
+            if (record is null)
+                return Results.NotFound(new { error = $"case '{caseNumber}' not found" });
 
-            var report = PolicyDocumentCatalog.BuildReport(claim);
+            var report = ProductDocumentCatalog.BuildReport(record);
             return Results.Ok(new
             {
-                claimNumber = report.ClaimNumber,
-                policyNumber = report.PolicyNumber,
-                recommendation = report.Recommendation.ToString(),
-                recommendationLabel = report.RecommendationLabel,
-                recommendationReason = report.RecommendationReason,
-                settlementPosition = report.SettlementPosition,
-                items = report.Items.Select(i => new
-                {
-                    id = i.Id,
-                    label = i.Label,
-                    status = i.Status.ToString().ToLowerInvariant(),
-                    finding = i.Finding,
-                    clauseRef = i.ClauseRef,
-                }),
+                caseNumber = record.CaseNumber,
+                documents = ProductDocumentCatalog.DocumentsFor(report),
+                checkedClauses = report.Items.Select(i => i.ClauseRef).Distinct().ToArray()
             });
         });
 
-        // Engage the Claims Assessment Agent on the selected claim. Mirrors
-        // /intake/process: when Foundry is configured we invoke the live
-        // ClaimsAssessmentAgent and return its narrative; otherwise we return
-        // a deterministic demo summary so the page still flows.
-        //
-        // Clients can request a live SSE stream of the agent reply by sending
-        // `Accept: text/event-stream`; otherwise the response is a single JSON
-        // envelope as before.
-        app.MapPost("/assessment/process", async (HttpContext httpContext, AssessmentProcessRequest request) =>
+        // Deterministic eligibility report for a case — the same shape as the
+        // agent's JSON block plus the working used for the offline narrative.
+        app.MapGet("/benefits/checklist/{caseNumber}", (string caseNumber) =>
         {
-            if (string.IsNullOrWhiteSpace(request.ClaimNumber))
-                return Results.BadRequest(new { error = "claimNumber is required" });
+            var record = store.Get(caseNumber);
+            if (record is null)
+                return Results.NotFound(new { error = $"case '{caseNumber}' not found" });
 
-            var claim = claimStore.Get(request.ClaimNumber);
-            if (claim is null)
-                return Results.NotFound(new { error = $"claim '{request.ClaimNumber}' not found" });
+            var report = ProductDocumentCatalog.BuildReport(record);
+            return Results.Ok(new
+            {
+                caseNumber = report.CaseNumber,
+                recommendation = report.Recommendation.ToString(),
+                recommendationLabel = report.RecommendationLabel,
+                recommendationReason = report.RecommendationReason,
+                outcomeSummary = report.OutcomeSummary,
+                items = ProjectItems(report),
+                source = "deterministic",
+                ruleDocumentIds = report.RuleDocumentIds,
+                calculations = report.Calculations,
+                missingInformation = report.MissingInformation,
+                plainEnglishExplanation = report.PlainEnglishExplanation,
+                humanApproval = report.HumanApproval
+            });
+        });
 
-            logger.LogInformation("Assessment process: claimNumber={ClaimNumber}", Sanitize(claim.ClaimNumber));
+        // Engage the Benefits & Eligibility Agent on the selected case. The
+        // prompt carries the case, the applicable rule documents and the
+        // checklist ids + clause refs so the agent's JSON lines up with the
+        // UI. Send `Accept: text/event-stream` for a live SSE stream;
+        // otherwise a single JSON envelope is returned.
+        app.MapPost("/benefits/process", async (HttpContext httpContext, BenefitsProcessRequest request) =>
+        {
+            if (string.IsNullOrWhiteSpace(request.CaseNumber))
+                return Results.BadRequest(new { error = "caseNumber is required" });
 
-            // Build a concise rendering of the policy validation checklist so
-            // the agent's narrative can address each clause-level check
-            // directly (rather than only summarising at a high level).
-            var checklistReport = PolicyDocumentCatalog.BuildReport(claim);
-            var checklistBlock = string.Join("\n", checklistReport.Items.Select(i =>
-                $"- id={i.Id} | clause={i.ClauseRef} | {i.Label} — preliminary status: {i.Status} — {i.Finding}"));
+            var record = store.Get(request.CaseNumber);
+            if (record is null)
+                return Results.NotFound(new { error = $"case '{request.CaseNumber}' not found" });
 
-            var prompt =
-                "CLAIM CASE FOR ASSESSMENT\n" +
-                "=========================\n" +
-                $"Claim number: {claim.ClaimNumber}\n" +
-                $"Customer: {claim.CustomerName}\n" +
-                $"Customer email: {claim.CustomerEmail}\n" +
-                $"Customer phone: {claim.CustomerPhone}\n" +
-                $"Policy number: {claim.PolicyNumber}\n" +
-                $"Claim type: {claim.ClaimType}\n" +
-                $"Incident date: {claim.IncidentDate}\n" +
-                $"Incident location: {claim.IncidentLocation}\n" +
-                $"Estimated loss: {claim.EstimatedLoss}\n" +
-                $"Preferred contact: {claim.PreferredContact}\n" +
-                $"Intake urgency: {claim.Urgency} — {claim.UrgencyReason}\n\n" +
-                "INCIDENT DESCRIPTION\n" +
-                "--------------------\n" +
-                claim.IncidentDescription + "\n\n" +
-                "POLICY VALIDATION CHECKLIST (per-clause checks for this claim)\n" +
-                "--------------------------------------------------------------\n" +
-                checklistBlock + "\n\n" +
-                "Please review this claim against the relevant Zava Insurance policy " +
-                "wording for the customer's policy and assess EACH item in the Policy " +
-                "Validation Checklist above. For every checklist item, confirm whether " +
-                "it passes, fails, or needs more information, and cite the supporting " +
-                "policy clause. Then identify coverage and exclusions, list any missing " +
-                "information, and recommend approve / partial / decline in your standard " +
-                "output format. Add a section titled \"Policy Validation Checklist Review\" " +
-                "with one bullet per checklist item before the Plain-English Explanation, " +
-                "and at the very end of your reply emit the fenced ```json``` block " +
-                "described in your system instructions, containing one entry in `items` " +
-                "for every checklist id supplied above (preserve the id and clauseRef).";
+            logger.LogInformation("Benefits process: caseNumber={CaseNumber}", Sanitize(record.CaseNumber));
+
+            var report = ProductDocumentCatalog.BuildReport(record);
+            var documents = ProductDocumentCatalog.DocumentsFor(report);
+            var prompt = BuildPrompt(record, report, documents);
 
             object BuildEnvelope(AgentTraceResult? trace, string? agentError)
             {
                 var rawText = trace?.Text;
 
-                // Try to extract the structured checklist report the agent
-                // is instructed to emit, so Step 4 in the UI can render the
-                // agent's own validation results. Fall back to the
-                // deterministic per-claim report when the agent isn't
-                // configured or didn't produce a parseable JSON block.
-                var agentChecklistReport = TryExtractAgentChecklist(rawText)
-                    ?? ChecklistReportFromBuilt(checklistReport);
+                // Prefer the agent's own checklist; fall back to the
+                // deterministic report when it is missing or unparseable.
+                var checklist = TryExtractAgentChecklist(rawText, report)
+                    ?? ProjectReport(report, "deterministic");
 
-                // Strip the trailing fenced ```json``` block from the
-                // narrative tab so the operator sees a clean prose write-up;
-                // the structured data is exposed via agentChecklistReport
-                // and the unmodified text is still in agentRawOutput.text.
+                // The narrative tab shows the prose only; the JSON block is
+                // still available unmodified in agentRawOutput.text.
                 var notes = StripTrailingJsonFence(rawText);
+                var narrativeSource = "agent";
                 if (string.IsNullOrWhiteSpace(notes))
-                    notes = BuildFallbackAssessment(claim);
+                {
+                    notes = BuildFallbackNarrative(report, documents);
+                    narrativeSource = "deterministic";
+                }
 
                 return new
                 {
-                    claimNumber = claim.ClaimNumber,
+                    caseNumber = record.CaseNumber,
                     agentNotes = notes,
-                    agentConfigured = agentFactory.IsConfigured,
+                    narrativeSource,
+                    agentConfigured = factory.IsConfigured,
                     agentError,
                     agentInput = trace?.Input,
-                    agentChecklistReport,
+                    agentChecklistReport = checklist,
+                    ruleDocumentIds = report.RuleDocumentIds,
                     agentRawOutput = trace is null ? null : new
                     {
                         text = trace.Text,
@@ -191,23 +169,23 @@ public static class AssessmentApi
 
             if (AgentSseStreaming.WantsEventStream(httpContext))
             {
-                var streamingAgent = agentFactory.IsConfigured ? agentFactory.Create("assessment") : null;
-                await AgentSseStreaming.StreamAsync(httpContext, streamingAgent, prompt, BuildEnvelope, logger, "Claims Assessment Agent");
+                var streamingAgent = factory.IsConfigured ? factory.Create("benefits") : null;
+                await AgentSseStreaming.StreamAsync(httpContext, streamingAgent, prompt, BuildEnvelope, logger, "Benefits & Eligibility Agent");
                 return Results.Empty;
             }
 
             AgentTraceResult? traceResult = null;
             string? agentInvocationError = null;
-            if (agentFactory.IsConfigured)
+            if (factory.IsConfigured)
             {
                 try
                 {
-                    var agent = agentFactory.Create("assessment");
+                    var agent = factory.Create("benefits");
                     traceResult = await agent.RunWithTraceAsync(prompt);
                 }
                 catch (Exception ex)
                 {
-                    logger.LogWarning(ex, "Claims Assessment Agent invocation failed; returning deterministic demo summary");
+                    logger.LogWarning(ex, "Benefits & Eligibility Agent invocation failed; returning the deterministic eligibility report");
                     agentInvocationError = ex.Message;
                 }
             }
@@ -216,60 +194,166 @@ public static class AssessmentApi
         });
     }
 
-    private static string BuildFallbackAssessment(IntakeClaimRecord c) =>
-        "1. **Coverage Recommendation** — Need More Info.\n" +
-        "2. **Reasoning** — Foundry agent is not configured in this environment, so " +
-        "the live policy lookup against the Azure AI Search knowledge base is unavailable. " +
-        $"On the surface the {c.ClaimType} loss appears to fall within the standard cover " +
-        $"on policy {c.PolicyNumber}, subject to confirmation of the applicable excess and " +
-        "any policy-specific exclusions.\n" +
-        "3. **Missing Information** —\n" +
-        "   - Confirm policy wording and effective version for this customer.\n" +
-        "   - Confirm the applicable excess / deductible.\n" +
-        "   - Photos / supporting evidence for the items listed in the description.\n" +
-        $"4. **Plain-English Explanation** — Hi {c.CustomerName}, we've received your claim " +
-        $"({c.ClaimNumber}) and we're reviewing it against your policy. We'll be in touch " +
-        "shortly to confirm cover and request anything else we need.\n" +
-        "5. **Human Approval Required** — Yes — final decisions on coverage, exclusions and " +
-        "settlement amounts must be confirmed by the Claims Assessor.";
-
     private static string Sanitize(string value) =>
         value.Replace('\r', ' ').Replace('\n', ' ');
 
-    /// <summary>
-    /// Project the deterministic <see cref="AssessmentReport"/> into the same
-    /// JSON shape the Claims Assessment Agent is asked to emit, so the UI can
-    /// render Step 4 from a single field regardless of whether the agent
-    /// produced the result or we fell back to the built-in catalogue.
-    /// </summary>
-    private static object ChecklistReportFromBuilt(AssessmentReport report) => new
-    {
-        recommendation = report.Recommendation.ToString(),
-        recommendationLabel = report.RecommendationLabel,
-        recommendationReason = report.RecommendationReason,
-        settlementPosition = report.SettlementPosition,
-        items = report.Items.Select(i => new
+    private static string StatusText(ChecklistStatus status) => status.ToString().ToLowerInvariant();
+
+    private static object[] ProjectItems(EligibilityReport report) =>
+        report.Items.Select(i => (object)new
         {
             id = i.Id,
             label = i.Label,
-            status = i.Status.ToString().ToLowerInvariant(),
+            status = StatusText(i.Status),
             finding = i.Finding,
             clauseRef = i.ClauseRef,
-        }).ToArray(),
+        }).ToArray();
+
+    /// <summary>
+    /// Project the deterministic <see cref="EligibilityReport"/> into the
+    /// JSON shape the agent is asked to emit, so the page renders Step 4 from
+    /// one field whichever source produced it.
+    /// </summary>
+    private static object ProjectReport(EligibilityReport report, string source) => new
+    {
+        caseNumber = report.CaseNumber,
+        recommendation = report.Recommendation.ToString(),
+        recommendationLabel = report.RecommendationLabel,
+        recommendationReason = report.RecommendationReason,
+        outcomeSummary = report.OutcomeSummary,
+        items = ProjectItems(report),
+        source,
     };
 
     /// <summary>
-    /// Locate a fenced <c>```json … ```</c> block inside the agent's reply
-    /// and parse it as the structured checklist report described in the
-    /// agent system prompt. Returns null when no parseable block is found.
+    /// Prompt sent to the Benefits &amp; Eligibility Agent: the Member Case,
+    /// the full text of every applicable rule document with clause ids, the
+    /// checklist (ids, clause refs and preliminary findings) and the figures
+    /// on the case file. Contact details are left out — they aren't needed to
+    /// apply the rules.
     /// </summary>
-    private static object? TryExtractAgentChecklist(string? agentText)
+    private static string BuildPrompt(CaseRecord c, EligibilityReport report, IReadOnlyList<ProductRuleDocument> documents)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("MEMBER CASE FOR ELIGIBILITY ASSESSMENT");
+        sb.AppendLine("======================================");
+        sb.AppendLine($"Case number: {c.CaseNumber}");
+        sb.AppendLine($"Client / member: {c.ClientName}");
+        sb.AppendLine($"Member number: {c.MemberNumber}");
+        sb.AppendLine($"Product: {c.Product}");
+        sb.AppendLine($"Request type: {c.RequestType}");
+        sb.AppendLine($"Received: {c.ReceivedDate}");
+        sb.AppendLine($"Adviser: {AdviserText(c)}");
+        sb.AppendLine($"Amount: {c.Amount}");
+        sb.AppendLine($"Onboarding priority: {c.Priority} — {c.PriorityReason}");
+        sb.AppendLine();
+        sb.AppendLine("REQUEST SUMMARY");
+        sb.AppendLine("---------------");
+        sb.AppendLine(c.RequestSummary);
+        sb.AppendLine();
+        sb.AppendLine("RULE DOCUMENTS TO APPLY (cite the clause ids)");
+        sb.AppendLine("---------------------------------------------");
+        foreach (var doc in documents)
+        {
+            sb.AppendLine($"[{doc.Title}] — {doc.DocumentType}, effective {doc.EffectiveDate}; knowledge base title: \"{doc.KnowledgeBaseTitle}\"");
+            foreach (var s in doc.Sections)
+                sb.AppendLine($"  {s.ClauseId} — {s.Title}: {s.Text} ({s.LegalReference})");
+            if (doc.Requirements.Count > 0)
+                sb.AppendLine("  Requirements: " + string.Join(" ", doc.Requirements));
+            if (doc.Restrictions.Count > 0)
+                sb.AppendLine("  Restrictions: " + string.Join(" ", doc.Restrictions));
+            sb.AppendLine();
+        }
+        sb.AppendLine("ELIGIBILITY CHECKLIST (one entry per rule check — keep every id and clauseRef)");
+        sb.AppendLine("-------------------------------------------------------------------------------");
+        foreach (var i in report.Items)
+            sb.AppendLine($"- id={i.Id} | clauseRef={i.ClauseRef} | {i.Label} — preliminary status: {StatusText(i.Status)} — {i.Finding}");
+        sb.AppendLine();
+        if (report.Calculations.Count > 0)
+        {
+            sb.AppendLine("FIGURES ON THE CASE FILE");
+            sb.AppendLine("------------------------");
+            foreach (var line in report.Calculations)
+                sb.AppendLine("- " + line);
+            sb.AppendLine();
+        }
+        sb.Append(
+            "Assess this Member Case as the Benefits & Eligibility Agent. Apply the rule documents above (use the " +
+            "wealth_knowledge index for the full documents and the member's case files). For EVERY checklist item, " +
+            "confirm pass, fail or info, say why, and cite its clause id. Show any caps, pro-rated minimums, tax " +
+            "components or withholding step by step. Use your standard output format, including the \"Eligibility " +
+            "Checklist Review\" section. Then, at the very end of your reply, emit the fenced ```json block described " +
+            "in your instructions with recommendation, recommendationLabel, recommendationReason, outcomeSummary and " +
+            "one entry in items for every checklist id above (keep each id and clauseRef). Recommend only — a human " +
+            "approves. Never give personal financial advice and never show a full TFN.");
+        return sb.ToString();
+    }
+
+    private static string AdviserText(CaseRecord c) =>
+        string.IsNullOrWhiteSpace(c.AdviserPractice)
+            ? c.AdviserName
+            : $"{c.AdviserName} ({c.AdviserPractice})";
+
+    /// <summary>
+    /// Offline narrative in the agent's own output format, built from the
+    /// deterministic report so the page still tells the full story when
+    /// Foundry isn't configured or the call fails.
+    /// </summary>
+    private static string BuildFallbackNarrative(EligibilityReport r, IReadOnlyList<ProductRuleDocument> documents)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine($"**1. Eligibility Recommendation** — {r.RecommendationLabel}");
+        sb.AppendLine();
+        sb.AppendLine($"**2. Reasoning** — {r.RecommendationReason}");
+        sb.AppendLine();
+        sb.AppendLine("Rules applied:");
+        var cited = r.Items.Select(i => i.ClauseRef).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        foreach (var doc in documents)
+        {
+            var clauses = doc.Sections.Where(s => cited.Contains(s.ClauseId)).Select(s => s.ClauseId).ToList();
+            if (clauses.Count == 0) clauses = doc.Sections.Select(s => s.ClauseId).ToList();
+            sb.AppendLine($"- *{doc.Title}* — {string.Join(", ", clauses)}");
+        }
+        sb.AppendLine();
+        sb.AppendLine("**3. Calculations**");
+        if (r.Calculations.Count == 0)
+            sb.AppendLine("- None — no figures to calculate yet.");
+        foreach (var line in r.Calculations)
+            sb.AppendLine("- " + line);
+        sb.AppendLine();
+        sb.AppendLine("**4. Missing Information**");
+        if (r.MissingInformation.Count == 0)
+            sb.AppendLine("- None.");
+        foreach (var line in r.MissingInformation)
+            sb.AppendLine("- " + line);
+        sb.AppendLine();
+        sb.AppendLine("**5. Eligibility Checklist Review**");
+        foreach (var i in r.Items)
+        {
+            var icon = i.Status switch
+            {
+                ChecklistStatus.Pass => "✅",
+                ChecklistStatus.Fail => "❌",
+                _ => "ℹ️",
+            };
+            sb.AppendLine($"- {icon} **{i.Label}** ({i.ClauseRef}) — {StatusText(i.Status)}: {i.Finding}");
+        }
+        sb.AppendLine();
+        sb.AppendLine($"**6. Plain-English Explanation** — {r.PlainEnglishExplanation}");
+        sb.AppendLine();
+        sb.Append($"**7. Human Approval Required** — {r.HumanApproval}");
+        return sb.ToString();
+    }
+
+    /// <summary>
+    /// Locate the fenced <c>```json … ```</c> block in the agent's reply and
+    /// parse it as the eligibility checklist. Takes the last block that
+    /// parses, because the agent is told to put it at the very end.
+    /// </summary>
+    private static object? TryExtractAgentChecklist(string? agentText, EligibilityReport fallback)
     {
         if (string.IsNullOrWhiteSpace(agentText)) return null;
 
-        // Walk the text and consider every fenced ```json block; take the
-        // last one that parses successfully — the agent is instructed to
-        // place the JSON at the end of its reply.
         const string fence = "```";
         object? parsed = null;
         var search = 0;
@@ -290,30 +374,32 @@ public static class AssessmentApi
             if (string.Equals(lang, "json", StringComparison.OrdinalIgnoreCase))
             {
                 var body = agentText.Substring(bodyStart, closeIdx - bodyStart).Trim();
-                var maybe = TryParseChecklistJson(body);
+                var maybe = TryParseChecklistJson(body, fallback);
                 if (maybe is not null) parsed = maybe;
             }
 
             search = closeIdx + fence.Length;
         }
 
-        // Fallback — some models drop the fence; try slicing from the first
-        // '{' to the last '}' and parse that as JSON.
+        // Some models drop the fence — try the outermost braces instead.
         if (parsed is null)
         {
             var firstBrace = agentText.IndexOf('{');
             var lastBrace = agentText.LastIndexOf('}');
             if (firstBrace >= 0 && lastBrace > firstBrace)
-            {
-                var slice = agentText.Substring(firstBrace, lastBrace - firstBrace + 1);
-                parsed = TryParseChecklistJson(slice);
-            }
+                parsed = TryParseChecklistJson(agentText.Substring(firstBrace, lastBrace - firstBrace + 1), fallback);
         }
 
         return parsed;
     }
 
-    private static object? TryParseChecklistJson(string body)
+    /// <summary>
+    /// Parse and normalise the agent's checklist JSON. Missing labels or
+    /// clause refs are filled from the deterministic checklist item with the
+    /// same id; statuses are coerced to pass / fail / info and the
+    /// recommendation to one of the four enum names.
+    /// </summary>
+    private static object? TryParseChecklistJson(string body, EligibilityReport fallback)
     {
         try
         {
@@ -323,32 +409,52 @@ public static class AssessmentApi
             if (!root.TryGetProperty("items", out var itemsEl) || itemsEl.ValueKind != JsonValueKind.Array)
                 return null;
 
-            string? Str(JsonElement el, string name) =>
+            static string? Str(JsonElement el, string name) =>
                 el.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.String ? v.GetString() : null;
+
+            var known = new Dictionary<string, EligibilityChecklistItem>(StringComparer.OrdinalIgnoreCase);
+            foreach (var item in fallback.Items)
+                known.TryAdd(item.Id, item);
 
             var items = new List<object>();
             foreach (var it in itemsEl.EnumerateArray())
             {
                 if (it.ValueKind != JsonValueKind.Object) continue;
-                var status = (Str(it, "status") ?? "info").ToLowerInvariant();
-                if (status is not ("pass" or "fail" or "info")) status = "info";
+                var id = Str(it, "id") ?? string.Empty;
+                known.TryGetValue(id, out var match);
+
+                var label = Str(it, "label");
+                if (string.IsNullOrWhiteSpace(label)) label = match?.Label ?? id;
+                var clauseRef = Str(it, "clauseRef");
+                if (string.IsNullOrWhiteSpace(clauseRef)) clauseRef = match?.ClauseRef ?? string.Empty;
+
                 items.Add(new
                 {
-                    id = Str(it, "id") ?? string.Empty,
-                    label = Str(it, "label") ?? string.Empty,
-                    status,
+                    id,
+                    label,
+                    status = NormaliseStatus(Str(it, "status")),
                     finding = Str(it, "finding") ?? string.Empty,
-                    clauseRef = Str(it, "clauseRef") ?? string.Empty,
+                    clauseRef,
                 });
             }
+            if (items.Count == 0) return null;
+
+            var recommendationLabel = Str(root, "recommendationLabel");
+            var recommendation = NormaliseRecommendation(Str(root, "recommendation"))
+                ?? NormaliseRecommendation(recommendationLabel)
+                ?? EligibilityRecommendation.NeedMoreInfo;
+            if (string.IsNullOrWhiteSpace(recommendationLabel))
+                recommendationLabel = ProductDocumentCatalog.DefaultLabel(recommendation);
 
             return new
             {
-                recommendation = Str(root, "recommendation") ?? "NeedMoreInfo",
-                recommendationLabel = Str(root, "recommendationLabel") ?? "Need More Info",
+                caseNumber = fallback.CaseNumber,
+                recommendation = recommendation.ToString(),
+                recommendationLabel,
                 recommendationReason = Str(root, "recommendationReason") ?? string.Empty,
-                settlementPosition = Str(root, "settlementPosition") ?? string.Empty,
+                outcomeSummary = Str(root, "outcomeSummary") ?? string.Empty,
                 items = items.ToArray(),
+                source = "agent",
             };
         }
         catch (JsonException)
@@ -357,11 +463,31 @@ public static class AssessmentApi
         }
     }
 
+    private static string NormaliseStatus(string? status)
+    {
+        var s = (status ?? string.Empty).Trim().ToLowerInvariant();
+        return s switch
+        {
+            "pass" or "passed" or "met" or "ok" or "yes" => "pass",
+            "fail" or "failed" or "not met" or "no" => "fail",
+            _ => "info",
+        };
+    }
+
+    private static EligibilityRecommendation? NormaliseRecommendation(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return null;
+        var key = new string(value.Where(char.IsLetter).ToArray()).ToLowerInvariant();
+        if (key.StartsWith("partial")) return EligibilityRecommendation.PartialApprove;
+        if (key.StartsWith("approve") || key.StartsWith("approved")) return EligibilityRecommendation.Approve;
+        if (key.StartsWith("decline")) return EligibilityRecommendation.Decline;
+        if (key.StartsWith("need") || key.Contains("moreinfo")) return EligibilityRecommendation.NeedMoreInfo;
+        return null;
+    }
+
     /// <summary>
     /// Remove a trailing fenced <c>```json … ```</c> block from the agent's
-    /// reply so the narrative tab shows only the prose write-up; the
-    /// structured checklist is exposed separately via
-    /// <c>agentChecklistReport</c>.
+    /// reply so the narrative tab shows only the prose write-up.
     /// </summary>
     private static string? StripTrailingJsonFence(string? agentText)
     {
@@ -371,6 +497,7 @@ public static class AssessmentApi
         if (!trimmed.EndsWith("```", StringComparison.Ordinal)) return agentText;
 
         var bodyEnd = trimmed.Length - 3;
+        if (bodyEnd <= 0) return agentText;
         var openIdx = trimmed.LastIndexOf("```", bodyEnd - 1, StringComparison.Ordinal);
         if (openIdx < 0) return agentText;
 

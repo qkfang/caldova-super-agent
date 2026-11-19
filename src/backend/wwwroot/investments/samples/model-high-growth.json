@@ -1,0 +1,59 @@
+{
+  "documentType": "Caldova Managed Portfolio fact sheet",
+  "issuer": "Caldova Investments Limited — responsible entity of Caldova Managed Portfolios",
+  "name": "Caldova Managed Portfolio — High Growth",
+  "shortName": "High Growth",
+  "code": "CMP-HGR",
+  "asAt": "2026-10-31",
+  "style": "Active, multi-asset",
+  "objective": "To earn returns of CPI + 4.5% p.a. over rolling 9-year periods, before fees and taxes.",
+  "growthAllocation": 95,
+  "defensiveAllocation": 5,
+  "investmentFeePercent": 0.45,
+  "buySellSpreadPercent": 0.10,
+  "adminFeeNote": "Caldova Super & Pension admin fee is charged separately on the whole account balance: 0.30% on the first $250,000, 0.15% on $250,000–$1,000,000, 0.05% on $1,000,000–$2,000,000, nil above $2,000,000, plus a $180 p.a. account-keeping fee.",
+  "standardRiskMeasure": {
+    "band": 7,
+    "label": "Very high",
+    "negativeYearsIn20": "6 or greater"
+  },
+  "minimumSuggestedTimeframeYears": 9,
+  "assetAllocation": [
+    { "assetClass": "Australian shares", "type": "growth", "targetPercent": 38, "rangePercent": "28–48" },
+    { "assetClass": "International shares", "type": "growth", "targetPercent": 38, "rangePercent": "28–48" },
+    { "assetClass": "Emerging markets shares", "type": "growth", "targetPercent": 6, "rangePercent": "0–10" },
+    { "assetClass": "Listed property & infrastructure", "type": "growth", "targetPercent": 9, "rangePercent": "0–15" },
+    { "assetClass": "Liquid alternatives", "type": "growth", "targetPercent": 4, "rangePercent": "0–10" },
+    { "assetClass": "International fixed interest (hedged)", "type": "defensive", "targetPercent": 2, "rangePercent": "0–8" },
+    { "assetClass": "Cash & term deposits", "type": "defensive", "targetPercent": 3, "rangePercent": "1–10" }
+  ],
+  "returns": {
+    "periodEnding": "2026-10-31",
+    "oneYearPercent": 12.6,
+    "threeYearPercentPa": 10.8,
+    "fiveYearPercentPa": 8.9,
+    "basis": "Illustrative model returns, net of investment fees and costs, before admin fees and taxes.",
+    "warning": "Past performance is not a reliable indicator of future performance."
+  },
+  "topHoldings": [
+    { "holding": "Australian equities — large-cap core (direct shares)", "weightPercent": 28.0 },
+    { "holding": "Global equities — developed markets (index ETF, unhedged)", "weightPercent": 22.0 },
+    { "holding": "Global equities — active quality managers (managed fund)", "weightPercent": 16.0 },
+    { "holding": "Australian equities — small & mid caps (managed fund)", "weightPercent": 10.0 },
+    { "holding": "Emerging markets equities (index ETF)", "weightPercent": 6.0 }
+  ],
+  "sectorNotes": [
+    "Almost fully invested in growth assets — expect falls in value in about 6 or more years in every 20.",
+    "Includes a 6% allocation to emerging markets shares.",
+    "All holdings are daily-priced and liquid — no unlisted or illiquid assets."
+  ],
+  "suitableFor": "Investors seeking the highest long-term growth who can tolerate large and frequent falls in value and have a timeframe of at least 9 years.",
+  "availableOn": [
+    "Caldova Super — Essential",
+    "Caldova Super — Select",
+    "Caldova Super — Private",
+    "Caldova Pension",
+    "Caldova Wrap"
+  ],
+  "disclaimer": "General information only — not personal financial advice. Caldova Managed Portfolios are fictional products used in the Wealth Team in a Day demo."
+}

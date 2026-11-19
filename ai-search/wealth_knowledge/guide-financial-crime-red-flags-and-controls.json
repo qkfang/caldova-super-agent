@@ -1,0 +1,31 @@
+{
+  "id": "guide-financial-crime-red-flags-and-controls",
+  "title": "Financial crime guide — Super fraud red flags, controls & SMR obligations (AUSTRAC, ATO and ASIC indicators)",
+  "category": "Operations Guide",
+  "requestType": "All",
+  "caseNumber": "",
+  "memberNumber": "",
+  "content": "Guide used by Financial Crime, Onboarding & Requests, Transfers & Rollovers and Payments to recognise and respond to fraud, scams, identity takeover and AML/CTF risk on Caldova Super, Pension and Wrap accounts. The indicators come from AUSTRAC's superannuation-sector indicators of suspicious activity, ATO warnings about fraudulent SMSF rollovers and illegal early release, and ASIC consumer alerts. An indicator is a reason to verify — never an accusation. The member is usually the victim.\n\nRed flags:\n1 Account takeover — a third party changes the mobile or email (by phone or online) and then, within days, requests a withdrawal, rollover or bank-detail change; MFA codes sent to the newly changed number; logins from a new device or a location inconsistent with the member's usual location or a travel notice; late-night password resets.\n2 Fraudulent SMSF rollovers — a newly registered SMSF (days or weeks old) receiving a full balance; the member's TFN not linked to the SMSF; bank account or ESA not matching ATO records; payee name not matching the fund (e.g. a company account).\n3 Document fraud — altered ID (font differences, misaligned fields, missing hologram, edited photo), fake Services Australia letters or fake death certificates.\n4 Hardship fraud — fake hardship documents; a failed hardship application followed by an SMSF rollover request from a member who knows little about SMSFs.\n5 Illegal early release — promoters urging a rollover to an SMSF so the member can 'access their super', targeting people in financial stress, charging high fees and asking for ID documents.\n6 Super-switching lead generators — 'free super health check' or 'lost super' offers, pressure to decide quickly, phone-only contact, unlicensed people in the advice process, promises of high returns.\n7 Elder financial abuse — someone impersonating an older member to request a withdrawal or rollover, coercion into a rollover to a family-controlled SMSF, obtaining log-in details, or misuse of an enduring power of attorney.\n8 AML/CTF — a PEP or sanctions match, unexplained large deposits, or payments to or from unrelated third parties.\n\nControls: hold any withdrawal, rollover out or new payee within 30 days of a change to contact, bank or login details until the member is verified by a call-back to the phone number held BEFORE the change (never a number supplied in the request); step-up verification (SMS code to the verified number) for payments and new payees; dual approval for new payees; pay only to the member's nominated account or the linked receiving fund; SVS and ESA checks before every SMSF rollover; lock online access and reset credentials after a suspected takeover; refer the member to IDCARE (1800 595 160) for identity-theft support; notify the ATO of suspected SMSF fraud. APRA expects MFA (or equivalent) for changes of member details, withdrawals, rollovers and investment switches.\n\nReporting: the reformed AML/CTF obligations apply to existing reporting entities from 31 Mar 2026. A suspicious matter report (SMR) must be lodged with AUSTRAC within 3 business days of forming the suspicion (24 hours for terrorism financing). Lodging an SMR is a human decision made by the Team Leader with the AML/CTF Compliance Officer. Never tip off the person suspected; SMR details are confidential.\n\nRisk rating: Low — no indicators, or one explained indicator. Medium — one unexplained critical indicator (SVS mismatch, altered document, payee mismatch, money out soon after a contact-detail change). High — two or more critical indicators, or a full-balance request combined with any critical indicator. High-risk requests are held and escalated to the Team Leader immediately.",
+  "severity": "high",
+  "department": "Financial Crime",
+  "tags": [
+    "financial-crime",
+    "fraud",
+    "red-flags",
+    "account-takeover",
+    "identity-takeover",
+    "smsf-fraud",
+    "illegal-early-release",
+    "elder-abuse",
+    "lead-generators",
+    "aml-ctf",
+    "austrac",
+    "smr",
+    "3-business-days",
+    "call-back",
+    "mfa",
+    "idcare",
+    "risk-rating"
+  ],
+  "lastUpdated": "2026-10-15T00:00:00Z"
+}

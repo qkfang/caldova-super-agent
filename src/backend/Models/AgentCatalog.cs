@@ -1,10 +1,10 @@
-namespace ZavaClaims.App.Models;
+namespace CaldovaSuper.App.Models;
 
 /// <summary>
-/// Lightweight metadata for one of the eight Zava Insurance agents.
-/// The detailed page content is hand-written in
-/// <c>Components/Pages/Agents/&lt;Agent&gt;.razor</c>; this catalog only
-/// powers navigation (Home, NavMenu) and the chat "references" surface.
+/// Lightweight metadata for one of the eight Caldova Wealth operations
+/// agents. The detailed page content is hand-written in
+/// <c>Components/Pages/Agents/&lt;Agent&gt;.razor</c>; this catalog powers
+/// navigation (Home, NavMenu) and the chat "references" surface.
 /// </summary>
 public record AgentDefinition(
     string Id,
@@ -18,136 +18,136 @@ public record AgentDefinition(
     string Accent);
 
 /// <summary>
-/// Static catalog of all eight Zava Insurance agents. Mirrors the agents in
-/// <c>src/agent/Agents</c>. Per-agent demo pages are static — see
-/// <c>Components/Pages/Agents/</c>.
+/// Static catalog of all eight Caldova Wealth client operations agents.
+/// Mirrors the agents in <c>src/agent/Agents</c> and the team table in
+/// <c>docs/foundry_agents.md</c>.
 /// </summary>
 public static class AgentCatalog
 {
     public static IReadOnlyList<AgentDefinition> All { get; } = new[]
     {
         new AgentDefinition(
-            Id: "claims-intake",
-            Name: "Claims Intake Agent",
-            Department: "Claims Intake",
-            Persona: "Iris — Claims Intake Officer",
-            Tagline: "First notice of loss, captured calmly and completely.",
-            Purpose: "Watches the customer's email inbox and online claim form, receives the first notice of loss, and creates a structured Claim Case so the rest of the office can pick it up.",
+            Id: "onboarding",
+            Name: "Onboarding Agent",
+            Department: "Onboarding & Requests",
+            Persona: "Olivia — Onboarding & Requests Officer",
+            Tagline: "Every application and request, set up right first time.",
+            Purpose: "Reads adviser emails, application forms and member requests, extracts every field, runs the NIGO checklist and opens a structured Member Case so the rest of the team can pick it up.",
             Responsibilities: new[]
             {
-                "Monitor the claims inbox and online form for new customer reports.",
-                "Extract incident details, policy number, contact, and uploaded evidence.",
-                "Classify the claim type (home, motor, travel, business, life).",
-                "Confirm the policy is active and the customer is covered to lodge.",
-                "Generate a missing-information checklist and acknowledge the customer.",
+                "Watch the new-business and member-requests inboxes.",
+                "Extract client, adviser, product, amount and nomination details from forms.",
+                "Run the NIGO checklist — ID, TFN, signatures, witnesses, fee consent, insurance elections.",
+                "Set priority and flag vulnerable members or possible scams.",
+                "Open the Member Case and route it to the right specialist.",
             },
             Icon: "📥",
             Accent: "#0ea5e9"),
 
         new AgentDefinition(
-            Id: "claims-assessment",
-            Name: "Claims Assessment Agent",
-            Department: "Claims Assessment",
-            Persona: "Adam — Claims Assessor",
-            Tagline: "Reads the policy, checks the evidence, recommends the call.",
-            Purpose: "Reviews the open Claim Case against the policy wording and submitted evidence, identifies coverage and exclusions, and recommends approve / partial / decline for a human to confirm.",
+            Id: "benefits-eligibility",
+            Name: "Benefits & Eligibility Agent",
+            Department: "Benefits & Eligibility",
+            Persona: "Ben — Benefits & Eligibility Assessor",
+            Tagline: "Applies the trust deed, PDS and super law — and cites every rule.",
+            Purpose: "Assesses each request against conditions of release, caps, pension standards, nomination rules and fee-consent requirements, then recommends approve, partial or decline for a human to confirm.",
             Responsibilities: new[]
             {
-                "Pull the policy wording, limits, and exclusions for the customer.",
-                "Compare the incident description and evidence against coverage.",
-                "List missing information needed to make a decision.",
-                "Draft a plain-English assessment summary citing policy clauses.",
-                "Recommend approve, partial approve, or decline.",
+                "Check conditions of release, preservation and financial-hardship criteria.",
+                "Apply the transfer balance cap and minimum pension drawdowns.",
+                "Validate binding death benefit nominations and SIS dependants.",
+                "Confirm adviser fee consent (s99FA) and SMSF rollover requirements.",
+                "Recommend approve / partial / decline with every rule cited.",
             },
             Icon: "📋",
             Accent: "#6366f1"),
 
         new AgentDefinition(
-            Id: "loss-adjuster",
-            Name: "Loss Adjuster Agent",
-            Department: "Loss Adjusting",
-            Persona: "Lara — Loss Adjuster",
-            Tagline: "On-the-ground investigator for complex or high-value losses.",
-            Purpose: "Prepares inspection briefs, reviews damage evidence, and drafts a scope of loss for human loss adjusters to confirm in the field.",
+            Id: "investment-analyst",
+            Name: "Investment Analyst Agent",
+            Department: "Investment Solutions",
+            Persona: "Ivy — Investment Analyst",
+            Tagline: "Keeps portfolios on plan — and shows the fees in dollars.",
+            Purpose: "Checks model-portfolio fit against the client's risk profile, compares Caldova Managed Portfolios on fees, returns and risk, designs pension income strategies and redemption plans, and builds the client workbook.",
             Responsibilities: new[]
             {
-                "Analyse damage photos, plumber/contractor reports, and quotes.",
-                "Build an inspection checklist for the human adjuster.",
-                "Draft the scope of loss and likely cause.",
-                "Compare contractor quotes against cost benchmarks.",
-                "Highlight pre-existing damage or underinsurance risks.",
+                "Check the selected model against the SoA risk profile.",
+                "Compare models on annual cost in dollars, allocation and risk.",
+                "Design cash-bucket income strategies for new pensions.",
+                "Plan redemptions for withdrawals and death benefits.",
+                "Produce an Excel workbook and chart via MCP tools.",
             },
-            Icon: "🔍",
+            Icon: "📈",
             Accent: "#f59e0b"),
 
         new AgentDefinition(
-            Id: "fraud-investigation",
-            Name: "Fraud Investigation Agent",
-            Department: "Fraud Investigation",
-            Persona: "Felix — Fraud Investigator",
-            Tagline: "Quietly checks every claim for inconsistencies — fairly and explainably.",
-            Purpose: "Scores the claim for fraud risk, explains every flag in plain English, and recommends investigation steps for a human investigator.",
+            Id: "financial-crime",
+            Name: "Financial Crime Agent",
+            Department: "Financial Crime",
+            Persona: "Felix — Financial Crime Investigator",
+            Tagline: "Protects members from fraud, scams and identity takeover.",
+            Purpose: "Builds the account-activity timeline, checks identity documents for tampering, tests SMSF rollovers against red flags, scores risk explainably and recommends holds and call-backs — the human decides.",
             Responsibilities: new[]
             {
-                "Build a timeline from emails, form data, and documents.",
-                "Compare the claim against prior claim history.",
-                "Run duplicate-receipt and document-tamper checks.",
-                "Produce an explainable risk score with cited indicators.",
-                "Recommend next investigation steps — never accuse the customer.",
+                "Timeline contact-detail changes, new devices and money-out requests.",
+                "Check ID documents and certificates for authenticity.",
+                "Test SMSF rollovers against SVS results and known red flags.",
+                "Produce an explainable risk score — never accusing the member.",
+                "Recommend holds, call-backs on verified numbers and SMR consideration.",
             },
             Icon: "🛡️",
             Accent: "#ef4444"),
 
         new AgentDefinition(
-            Id: "supplier-coordinator",
-            Name: "Supplier Coordinator Agent",
-            Department: "Supplier Coordination",
-            Persona: "Sam — Supplier Coordinator",
-            Tagline: "Books the right repairer at the right time and chases overdue jobs.",
-            Purpose: "Recommends approved suppliers, schedules inspections and repairs, tracks SLAs, and keeps the claim file updated with supplier status.",
+            Id: "transfers-rollovers",
+            Name: "Transfers & Rollovers Agent",
+            Department: "Transfers & Rollovers",
+            Persona: "Rory — Transfers & Rollovers Coordinator",
+            Tagline: "Moves money between funds safely — and on time.",
+            Purpose: "Coordinates SuperStream rollovers in and out, SMSF rollovers, in-specie transfers and pension transfers — warning about insurance that would be lost, verifying SMSFs and tracking counterparty SLAs.",
             Responsibilities: new[]
             {
-                "Match the loss to a suitable supplier in the customer's area.",
-                "Request quotes and book inspection or repair appointments.",
-                "Track SLA breaches and chase overdue suppliers.",
-                "Compare quotes against the approved scope of loss.",
-                "Draft customer-facing booking confirmations.",
+                "Identify counterparties by USI from the external fund directory.",
+                "Warn about insurance cover that ends on rollover.",
+                "Verify SMSFs before any rollover out (SVS, bank and ESA match).",
+                "Generate the transfer request PDF and track the 3-business-day SLA.",
+                "Draft member and adviser transfer updates.",
             },
-            Icon: "🛠️",
+            Icon: "🔁",
             Accent: "#10b981"),
 
         new AgentDefinition(
-            Id: "settlement",
-            Name: "Settlement Agent",
-            Department: "Settlement",
-            Persona: "Seth — Settlement Officer",
-            Tagline: "Does the maths transparently and prepares the payment.",
-            Purpose: "Calculates the payable amount using approved scope, policy limits, excess, depreciation, and prior payments, then prepares the payment and settlement letter for human approval.",
+            Id: "payments",
+            Name: "Payments Agent",
+            Department: "Payments",
+            Persona: "Penny — Payments Officer",
+            Tagline: "Gets the tax right, then waits for the human approval.",
+            Purpose: "Validates the payee, splits tax-free and taxable components, calculates PAYG withholding, checks authority limits and raises a Microsoft Teams approval — releasing money only after a human approves.",
             Responsibilities: new[]
             {
-                "Pull approved scope, supplier invoice, and policy limits.",
-                "Apply excess, depreciation, sub-limits, and prior payments.",
-                "Show the calculation step by step.",
-                "Validate payee details and authority limits.",
-                "Draft the settlement letter and payment instruction.",
+                "Validate the payee and bank details against the case.",
+                "Confirm the eligibility decision and approved amount.",
+                "Calculate components, PAYG withholding and the net payment.",
+                "Check authority limits and raise a Teams approval card.",
+                "Release the payment only after approval.",
             },
             Icon: "💳",
             Accent: "#a855f7"),
 
         new AgentDefinition(
-            Id: "customer-communications",
-            Name: "Customer Communications Agent",
-            Department: "Customer Communications",
-            Persona: "Cara — Customer Communications Specialist",
-            Tagline: "Plain-English, empathetic updates at every step of the claim.",
-            Purpose: "Drafts customer-facing emails, SMS, and call scripts that explain claim status and decisions clearly and empathetically — never inventing facts or making promises.",
+            Id: "client-communications",
+            Name: "Client Communications Agent",
+            Department: "Client Communications",
+            Persona: "Cara — Client Communications Specialist",
+            Tagline: "Plain-English updates for members and their advisers.",
+            Purpose: "Drafts member letters, adviser updates, SMS and call scripts that explain decisions clearly and kindly — matching tone to bereavement, hardship or a fraud scare — and takes calls as Cara via Voice Live.",
             Responsibilities: new[]
             {
-                "Generate status updates whenever the claim moves stage.",
-                "Translate technical assessment notes into plain English.",
-                "Match tone to customer sentiment and situation.",
-                "Run a compliance check on every outgoing message.",
-                "Provide a call script when a phone follow-up is recommended.",
+                "Draft member letters and adviser updates at every stage.",
+                "Explain rules, caps and tax in plain English.",
+                "Match tone to bereavement, hardship and fraud-victim situations.",
+                "Check every message for required disclosures and complaint rights.",
+                "Take calls as Cara through Voice Live.",
             },
             Icon: "✉️",
             Accent: "#ec4899"),
@@ -156,16 +156,16 @@ public static class AgentCatalog
             Id: "team-leader",
             Name: "Team Leader Agent",
             Department: "Team Leader Office",
-            Persona: "Theo — Claims Team Leader",
-            Tagline: "Watches the whole floor — escalations, approvals, and SLA.",
-            Purpose: "Oversees the workload, approves higher-value items, surfaces escalations and SLA breaches, and keeps quality and consistency across the office.",
+            Persona: "Theo — Client Operations Team Leader",
+            Tagline: "Watches the whole floor — SLAs, IDR clocks and approvals.",
+            Purpose: "Oversees workload and service levels, queues human approvals, protects vulnerable members and coordinates the other seven agents in a live group chat on any case.",
             Responsibilities: new[]
             {
-                "Maintain a live dashboard of every claim and its current stage.",
-                "Surface SLA breaches, vulnerable customers, and complaints.",
-                "Receive and digitally approve recommendations from other agents.",
-                "Run quality assurance checks on outgoing decisions and messages.",
-                "Reassign work when a queue is overloaded.",
+                "Track rollover, contribution and complaint (IDR) clocks.",
+                "Queue approvals — holds, high-value payments, death benefits, hardship.",
+                "Make sure vulnerable members get a human touch.",
+                "Run QA sampling and coaching insights.",
+                "Orchestrate the multi-agent group chat on a case.",
             },
             Icon: "🧭",
             Accent: "#14b8a6"),

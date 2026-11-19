@@ -22,6 +22,7 @@ The agents step back and slow down. Humans approve every payment and every word 
 | Case number | `REQ-20261113-DEMO05` |
 | Request type | Death benefit claim |
 | Received | Fri 13 Nov 2026 |
+| Priority | High |
 | Deceased member | Mei Chen (DOB 05/06/1945), who died on Mon 12 Oct 2026 aged 81. Caldova Pension `CP-3019042` |
 | Balance | $486,200 |
 | Adviser | Marcus Tan (ADV-20871), Bayside Financial Partners |
@@ -61,6 +62,7 @@ On 13 Nov 2026 Robert emails Caldova to let us know. He attaches a certified cop
   - gentle language throughout
 - It extracts the deceased member's details, the date of death, the certified death certificate, the beneficiaries' identification and Robert's contact preferences.
 - **Pension payments stop** on notification.
+- It sets the priority to **High** (bereaved family).
 - It opens case `REQ-20261113-DEMO05` and routes it to the Team Leader as case owner.
 
 ---
@@ -119,7 +121,7 @@ On 13 Nov 2026 Robert emails Caldova to let us know. He attaches a certified cop
 *Totals: gross $486,200.00; withheld $51,245.48; net $434,954.52. These figures are based on the $486,200 balance. Final amounts depend on the sale proceeds.*
 
 - `payments_validatePayee`: each payment goes to an account in the beneficiary's own name ✓.
-- `payments_checkAuthorityLimit`: **every death benefit needs human approval**.
+- `payments_checkAuthorityLimit`: **every death benefit needs Team Leader approval**.
 - `payments_requestApproval`: one Microsoft Teams adaptive card per payment goes to Theo.
 - **Theo approves both** in Teams. `payments_releasePayment` then pays Robert and Lily.
 

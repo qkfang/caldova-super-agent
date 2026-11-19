@@ -1,27 +1,28 @@
 using System.Text.Json;
-using ZavaClaims.App.Api;
-using ZavaClaims.App.Components;
-using ZavaClaims.App.Mcp;
-using ZavaClaims.App.Models;
-using ZavaClaims.App.Services;
+using CaldovaSuper.App.Api;
+using CaldovaSuper.App.Components;
+using CaldovaSuper.App.Mcp;
+using CaldovaSuper.App.Models;
+using CaldovaSuper.App.Services;
+
+// Wealth Team in a Day — Caldova Wealth client operations web app.
+// Hosts one page per Foundry agent (/agents/{id}), the five scenario pages
+// (/scenarios/{id}), the Try-it-out demo endpoints for each agent, and the
+// in-process MCP server the Foundry agents call back into.
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-// Chat services (ported from forex-trading-agent/src/research-analytics).
-// ChatService backs the Account page's "Ask AI" document-query chatbot
-// (/api/chat/ask). The floating "Zava Claims Assistant" widget and its
-// /chatkit endpoint have been removed.
+// ChatService backs the Account page's "Ask AI" chatbot (/api/chat/ask).
 builder.Services.AddHttpClient<ChatService>();
 
-// Bind claims-agent configuration (Foundry endpoint, model deployment, search /
-// Bing connections) and register a singleton factory that the Blazor app uses
+// Bind Foundry configuration (project endpoint, model deployment, search /
+// Bing connections) and register a singleton factory that the web app uses
 // to invoke agents from the referenced `agent` library — the same agents the
 // CLI host in `src/agent` exposes.
-var agentOptions = new ClaimsAgentOptions
+var agentOptions = new CaldovaAgentOptions
 {
     ProjectEndpoint = builder.Configuration["AZURE_AI_PROJECT_ENDPOINT"],
     ModelDeploymentName = builder.Configuration["AZURE_AI_MODEL_DEPLOYMENT_NAME"],
@@ -29,69 +30,61 @@ var agentOptions = new ClaimsAgentOptions
     SearchConnectionId = builder.Configuration["AZURE_AI_SEARCH_CONNECTION_ID"],
     SearchIndexName = builder.Configuration["AZURE_AI_SEARCH_INDEX_NAME"],
     BingConnectionId = builder.Configuration["AZURE_BING_CONNECTION_ID"],
-    // APP_MCP_URL must be a publicly reachable URL (e.g. a devtunnel/ngrok
-    // URL) because the Foundry Responses API enumerates MCP tools from the
-    // cloud — it cannot reach http://localhost on the developer's machine.
-    // When unset, agents are created without the MCP tool surface so the
-    // demo runs out of the box; set this to enable supplier/loss-adjuster/
-    // settlement MCP tools.
+    // APP_MCP_URL must be a publicly reachable URL (e.g. a dev tunnel) because
+    // the Foundry Responses API enumerates MCP tools from the cloud — it
+    // cannot reach http://localhost on the developer's machine. When unset,
+    // agents are created without the MCP tool surface so the demo runs out
+    // of the box; set it to enable the investments / transfers / payments
+    // MCP tools.
     AppMcpUrl = builder.Configuration["APP_MCP_URL"],
 };
 builder.Services.AddSingleton(agentOptions);
-builder.Services.AddSingleton<ClaimsAgentFactory>();
+builder.Services.AddSingleton<CaldovaAgentFactory>();
 
-// HttpClient factory for MCP tools (e.g. fetching quote documents from URLs).
+// HttpClient factory for MCP tools (e.g. fetching fact sheets from URLs).
 builder.Services.AddHttpClient();
 
-// MCP server for the in-process tool surface used by Foundry agents.
-// Always registered:
-//   - LossAdjusterMcpTools (analyzeQuote / compareQuotes / generateClaimExcel)
-//   - SupplierMcpTools (lookupSuppliers / generateQuoteRequestPdf)
-//   - SettlementMcpTools (settlement_* payment-flow tools — payee validation,
-//     invoice match, authority check, calculation, Teams approval request,
-//     and gated release)
-//   - TeamsMcpTools (teams_sendApprovalCard — owns the Microsoft Teams
-//     Adaptive Card delivery for the payment-approval flow)
+// MCP server for the in-process tool surface used by Foundry agents:
+//   - InvestmentsMcpTools (analyzeFactSheet / compareModels / generateClientWorkbook)
+//   - TransfersMcpTools   (lookupFunds / verifySmsf / generateTransferRequestPdf)
+//   - PaymentsMcpTools    (payments_* — payee validation, case approval,
+//     benefit calculation, authority check, Teams approval request, gated release)
+//   - TeamsMcpTools       (teams_sendApprovalCard — Microsoft Teams Adaptive Card delivery)
 builder.Services.AddMcpServer()
     .WithHttpTransport(options => { options.Stateless = true; })
-    .WithTools<LossAdjusterMcpTools>()
-    .WithTools<ZavaClaims.App.Mcp.SupplierMcpTools>()
-    .WithTools<SettlementMcpTools>()
-    .WithTools<ZavaClaims.App.Mcp.TeamsMcpTools>();
+    .WithTools<InvestmentsMcpTools>()
+    .WithTools<TransfersMcpTools>()
+    .WithTools<PaymentsMcpTools>()
+    .WithTools<TeamsMcpTools>();
 builder.Services.AddCors();
 
-// In-memory store of claim cases minted by the Claims Intake demo's
-// "Try It Out" tab. Lets later agents in the demo flow look the case up
-// by claim number.
-builder.Services.AddSingleton<IntakeClaimStore>();
+// In-memory Member Case store, seeded with the five scenario cases and
+// extended by the Onboarding demo's "Try it out" tab.
+builder.Services.AddSingleton<CaseStore>();
 builder.Services.AddSingleton<TeamLeaderGroupChatService>();
 
-// Settlement payment-flow services (always registered). The Settlement
-// MCP tools and the /settlement/* HTTP endpoints depend on these.
-// TeamsMcpTools owns the teams_sendApprovalCard MCP tool and is also
-// invoked in-process by SettlementMcpTools and the /settlement/process
-// API for the deterministic demo fallback path.
+// Payments flow services. PaymentsMcpTools and the /payments/* endpoints
+// depend on these; TeamsMcpTools is also invoked in-process for the
+// deterministic demo fallback path.
 builder.Services.AddSingleton<PaymentApprovalStore>();
-builder.Services.AddSingleton<ZavaClaims.App.Mcp.TeamsMcpTools>();
+builder.Services.AddSingleton<TeamsMcpTools>();
 
-// Fraud Investigation document-authenticity demo: loads the static sample
-// manifest from wwwroot/fraud/samples/manifest.json and tracks per-claim
-// case-document attachments. Always registered — falls back to manifest
-// expectations when Content Understanding isn't configured.
-builder.Services.AddSingleton<FraudCaseDocumentStore>();
-builder.Services.AddSingleton<FraudDocumentVerifier>(sp => new FraudDocumentVerifier(
-    sp.GetRequiredService<FraudCaseDocumentStore>(),
+// Financial Crime document-authenticity demo: loads the static sample
+// manifest from wwwroot/fincrime/samples/manifest.json and tracks per-case
+// document attachments. Falls back to manifest expectations when Content
+// Understanding isn't configured.
+builder.Services.AddSingleton<FinCrimeCaseDocumentStore>();
+builder.Services.AddSingleton<FinCrimeDocumentVerifier>(sp => new FinCrimeDocumentVerifier(
+    sp.GetRequiredService<FinCrimeCaseDocumentStore>(),
     sp.GetRequiredService<IConfiguration>(),
-    sp.GetRequiredService<ILogger<FraudDocumentVerifier>>()));
+    sp.GetRequiredService<ILogger<FinCrimeDocumentVerifier>>()));
 
-// Quote-request PDF generator used by both the deterministic
-// /supplier/process flow and the SupplierMcpTools MCP tool surface so the
-// Supplier Coordinator agent can produce a downloadable PDF for the demo.
-builder.Services.AddSingleton<QuoteRequestPdfService>();
+// Transfer / rollover request PDF generator used by both the deterministic
+// /transfers/process flow and the TransfersMcpTools MCP tool surface.
+builder.Services.AddSingleton<TransferRequestPdfService>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
@@ -100,13 +93,13 @@ app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages:
 app.UseAntiforgery();
 
 // CORS + MCP Accept-header normalisation are always enabled because the MCP
-// server hosts the loss-adjuster, supplier and settlement tool surfaces.
+// server hosts the investments, transfers and payments tool surfaces.
 app.UseCors(policy => policy
     .AllowAnyOrigin()
     .AllowAnyMethod()
     .AllowAnyHeader());
 
-// Normalize Accept header for MCP requests so Foundry agent / browser
+// Normalise the Accept header for MCP requests so Foundry agent / browser
 // clients negotiate against the streaming + JSON content type the
 // ModelContextProtocol server expects.
 app.Use(async (context, next) =>
@@ -122,13 +115,10 @@ app.Use(async (context, next) =>
     await next();
 });
 
-// MCP server is registered unconditionally so SupplierMcpTools,
-// LossAdjusterMcpTools and SettlementMcpTools are always available.
 app.MapMcp("/mcp");
 
-// In Development, force browsers to never cache static assets, Razor pages,
-// or any other response from http://localhost:5212/. This prevents stale JS
-// / HTML / CSS from being served while iterating on the demo locally.
+// In Development, force browsers to never cache static assets or pages so
+// stale JS / HTML / CSS is never served while iterating locally.
 if (app.Environment.IsDevelopment())
 {
     app.Use(async (context, next) =>
@@ -145,8 +135,8 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-// Serve dynamically-generated loss-adjuster output files (Excel workbooks
-// produced by the generateClaimExcel MCP tool) from wwwroot/loss-adjuster/output/.
+// Serves dynamically-generated files (e.g. workbooks written by the
+// generateClientWorkbook MCP tool to wwwroot/investments/output/).
 app.UseStaticFiles(new StaticFileOptions
 {
     OnPrepareResponse = ctx =>
@@ -165,14 +155,13 @@ app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-// Enable WebSocket support for the Voice Live proxy that powers the
-// Customer Communications agent's voice chat tab.
+// WebSocket support for the Voice Live proxy behind Cara's voice chat tab.
 app.UseWebSockets();
 
-// ── Markdown rendering endpoint (used by per-agent pages to format agent output) ──
+// ── Markdown rendering endpoint (used by agent pages to format agent output) ──
 app.MapMarkdownEndpoints();
 
-// ── Document-query chatbot endpoint (advanced chat with references) ──────────
+// ── "Ask AI" chatbot endpoint (Account page) ────────────────────────────────
 app.MapPost("/api/chat/ask", async (HttpContext ctx, ChatService chatService) =>
 {
     using var reader = new StreamReader(ctx.Request.Body);
@@ -185,9 +174,8 @@ app.MapPost("/api/chat/ask", async (HttpContext ctx, ChatService chatService) =>
 
     var agentResponse = await chatService.SendMessageWithOptionsAsync(message, temperature);
 
-    // Build references: surface relevant Zava claims agents from the AgentCatalog
-    // based on simple keyword matching against the user's question. Mirrors the
-    // article-reference behaviour of the source repo's /api/chat/ask endpoint.
+    // References: surface the relevant Caldova operations agents from the
+    // AgentCatalog using simple keyword matching against the question.
     var keywords = (message ?? string.Empty).ToLowerInvariant()
         .Split(' ', StringSplitOptions.RemoveEmptyEntries)
         .Where(w => w.Length > 3)
@@ -210,7 +198,7 @@ app.MapPost("/api/chat/ask", async (HttpContext ctx, ChatService chatService) =>
             Category = x.Agent.Department,
             Sentiment = "Neutral",
             Author = x.Agent.Persona,
-            PublishedDate = "Zava claims office",
+            PublishedDate = "Caldova client operations",
             Url = $"/agents/{x.Agent.Id}"
         })
         .ToList();
@@ -218,28 +206,42 @@ app.MapPost("/api/chat/ask", async (HttpContext ctx, ChatService chatService) =>
     return Results.Ok(new { response = agentResponse, references });
 });
 
-// ── Claims Intake demo endpoints (Try It Out tab on /agents/claims-intake) ──
+// ── Try-it-out endpoints, one group per agent ───────────────────────────────
 {
-    var intakeLogger = app.Services.GetRequiredService<ILogger<Program>>();
-    var intakeStore = app.Services.GetRequiredService<IntakeClaimStore>();
-    var intakeFactory = app.Services.GetRequiredService<ClaimsAgentFactory>();
+    var logger = app.Services.GetRequiredService<ILogger<Program>>();
+    var loggerFactory = app.Services.GetRequiredService<ILoggerFactory>();
+    var caseStore = app.Services.GetRequiredService<CaseStore>();
+    var factory = app.Services.GetRequiredService<CaldovaAgentFactory>();
 
-    // Pre-populate the in-memory claim store with one record per persona in
-    // IntakeSampleCatalog so every "Try It Out" demo page has claims to pick
-    // from straight away, without first lodging one in Claims Intake.
-    intakeStore.SeedDefaults();
+    // Pre-populate the case store with the five scenario cases so every
+    // agent page has cases to pick from straight away.
+    caseStore.SeedDefaults();
 
-    app.MapIntakeEndpoints(intakeStore, intakeFactory, intakeLogger);
-    app.MapLossAdjusterEndpoints(intakeStore, intakeFactory, intakeLogger);
-    app.MapTeamLeaderEndpoints(intakeStore, intakeFactory, intakeLogger);
+    app.MapOnboardingEndpoints(caseStore, factory, logger);              // /onboarding/*
+    app.MapBenefitsEndpoints(caseStore, factory, logger);                // /benefits/*
+    app.MapInvestmentsEndpoints(caseStore, factory, logger);             // /investments/*
+    app.MapFinancialCrimeEndpoints(                                      // /fincrime/*
+        caseStore,
+        factory,
+        app.Services.GetRequiredService<FinCrimeCaseDocumentStore>(),
+        app.Services.GetRequiredService<FinCrimeDocumentVerifier>(),
+        logger);
+    app.MapTransfersEndpoints(caseStore, factory, logger);               // /transfers/*
+    app.MapPaymentsEndpoints(caseStore, factory, logger);                // /payments/*
+    app.MapCommunicationsEndpoints(caseStore, factory, logger);          // /communications/*
+    app.MapCommunicationsVoiceLiveEndpoints(agentOptions, factory, loggerFactory);
+    app.MapTeamLeaderEndpoints(caseStore, factory, logger);              // /team-leader/*
+    app.MapTeamLeaderGroupChatEndpoints(
+        app.Services.GetRequiredService<TeamLeaderGroupChatService>(), logger);
 
-    var groupChatService = app.Services.GetRequiredService<TeamLeaderGroupChatService>();
-    app.MapTeamLeaderGroupChatEndpoints(groupChatService, intakeLogger);
+    // Agent metadata — powers the "Agent Prompt & Tools" sub-tab on every
+    // agent page; static, so it works without Foundry configured.
+    app.MapAgentMetadataEndpoints(agentOptions);
 }
 
-// ── Loss Adjuster output download endpoint ──
-//    Streams .xlsx files written by the generateClaimExcel MCP tool.
-app.MapGet("/loss-adjuster/download/{fileName}", (string fileName, IWebHostEnvironment env) =>
+// ── Investment workbook download ────────────────────────────────────────────
+//    Streams .xlsx files written by the generateClientWorkbook MCP tool.
+app.MapGet("/investments/download/{fileName}", (string fileName, IWebHostEnvironment env) =>
 {
     if (string.IsNullOrWhiteSpace(fileName) ||
         fileName.Contains("..") ||
@@ -249,7 +251,7 @@ app.MapGet("/loss-adjuster/download/{fileName}", (string fileName, IWebHostEnvir
         return Results.BadRequest(new { error = "Invalid file name." });
     }
 
-    var dir = Path.Combine(env.WebRootPath ?? "wwwroot", "loss-adjuster", "output");
+    var dir = Path.Combine(env.WebRootPath ?? "wwwroot", "investments", "output");
     var path = Path.Combine(dir, fileName);
     var fullDir = Path.GetFullPath(dir);
     var fullPath = Path.GetFullPath(path);
@@ -265,61 +267,5 @@ app.MapGet("/loss-adjuster/download/{fileName}", (string fileName, IWebHostEnvir
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         fileName);
 });
-
-// ── Claims Assessment demo endpoints (Try It Out tab on /agents/claims-assessment) ──
-{
-    var assessmentLogger = app.Services.GetRequiredService<ILogger<Program>>();
-    var assessmentStore = app.Services.GetRequiredService<IntakeClaimStore>();
-    var assessmentFactory = app.Services.GetRequiredService<ClaimsAgentFactory>();
-    app.MapAssessmentEndpoints(assessmentStore, assessmentFactory, assessmentLogger);
-}
-
-// ── Settlement demo endpoints (Try It Out tab on /agents/settlement) ────────
-{
-    var settlementLogger = app.Services.GetRequiredService<ILogger<Program>>();
-    var settlementStore = app.Services.GetRequiredService<IntakeClaimStore>();
-    var settlementFactory = app.Services.GetRequiredService<ClaimsAgentFactory>();
-    app.MapSettlementEndpoints(settlementStore, settlementFactory, settlementLogger);
-}
-
-// ── Fraud Investigation demo endpoints (Try It Out tab on /agents/fraud-investigation) ──
-{
-    var fraudLogger = app.Services.GetRequiredService<ILogger<Program>>();
-    var intakeStore = app.Services.GetRequiredService<IntakeClaimStore>();
-    var fraudFactory = app.Services.GetRequiredService<ClaimsAgentFactory>();
-    var fraudDocStore = app.Services.GetRequiredService<FraudCaseDocumentStore>();
-    var fraudVerifier = app.Services.GetRequiredService<FraudDocumentVerifier>();
-    app.MapFraudEndpoints(intakeStore, fraudFactory, fraudDocStore, fraudVerifier, fraudLogger);
-}
-
-// ── Customer Communications demo endpoints (Try It Out tab on
-//    /agents/customer-communications) ────────────────────────────────────────
-{
-    var commsLogger = app.Services.GetRequiredService<ILogger<Program>>();
-    var intakeStore = app.Services.GetRequiredService<IntakeClaimStore>();
-    var commsFactory = app.Services.GetRequiredService<ClaimsAgentFactory>();
-    app.MapCommunicationsEndpoints(intakeStore, commsFactory, commsLogger);
-
-    // Voice Live (real-time speech-to-speech) proxy + config for the
-    // Customer Communications voice chat tab.
-    var commsLoggerFactory = app.Services.GetRequiredService<ILoggerFactory>();
-    app.MapCommunicationsVoiceLiveEndpoints(agentOptions, commsFactory, commsLoggerFactory);
-}
-
-// ── Supplier Coordination demo endpoints (Try It Out tab on
-//    /agents/supplier-coordinator) ─────────────────────────────────────────
-{
-    var supplierLogger = app.Services.GetRequiredService<ILogger<Program>>();
-    var supplierStore = app.Services.GetRequiredService<IntakeClaimStore>();
-    var supplierFactory = app.Services.GetRequiredService<ClaimsAgentFactory>();
-    app.MapSupplierEndpoints(supplierStore, supplierFactory, supplierLogger);
-}
-
-// ── Agent metadata (powers the "Agent Prompt & Tools" sub-tab on every
-//    agent page; static + does not require Foundry to be configured). ──
-{
-    var metadataOptions = app.Services.GetRequiredService<ClaimsAgentOptions>();
-    app.MapAgentMetadataEndpoints(metadataOptions);
-}
 
 app.Run();

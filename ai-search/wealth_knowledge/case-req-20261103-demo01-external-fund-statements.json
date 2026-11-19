@@ -1,0 +1,27 @@
+{
+  "id": "case-req-20261103-demo01-external-fund-statements",
+  "title": "REQ-20261103-DEMO01 — External fund statements: Southern Cross Industry Super ($96,400, $520k Death & TPD) & Harbourline Retail Super ($41,800) (Priya Natarajan)",
+  "category": "Case Evidence",
+  "requestType": "New account & consolidation",
+  "caseNumber": "REQ-20261103-DEMO01",
+  "memberNumber": "CS-2049817",
+  "content": "Summary of the two external super statements supplied with Priya Natarajan's application pack (online statements downloaded 31 Oct 2026). Used by Transfers & Rollovers to raise the SuperStream rollover requests and by Benefits & Eligibility for the insurance-loss check.\n\n1. Southern Cross Industry Super — USI SCI0001AU. Member number 88213045. Industry fund accumulation account (default fund of a previous employer). Balance about $96,400 — the final rollover amount depends on unit prices on the day it is paid. Preservation: preserved $96,400; restricted non-preserved $0; unrestricted non-preserved $0. Tax components: tax-free $0; taxable (taxed element) $96,400. Insurance: Death & TPD cover, sum insured $520,000, premium about $6.10 a week deducted monthly. IMPORTANT: the cover ends when the account is closed by a full rollover — it is not transferred to Caldova. Last employer contribution received 30 Sep 2026. Exit fee: nil.\n\n2. Harbourline Retail Super — USI HRB0007AU. Member number HR-4471902. Retail fund accumulation account. Balance about $41,800. Preservation: preserved $41,800. Tax components: tax-free $0; taxable (taxed element) $41,800. Insurance: none (cancelled at Priya's request in 2021). Fees 0.85% p.a. plus $78 p.a. Exit fee: nil.\n\nTotal to consolidate: about $138,200 ($96,400 + $41,800).\n\nRollover plan (in line with the SoA): Harbourline — request now through SuperStream; no insurance is lost. Southern Cross — HOLD: do not send the request until the adviser and Priya confirm in writing that she accepts losing the $520,000 Death & TPD cover, or replacement cover is in place with Caldova's group insurer. Under SIS reg 6.34A each transferring fund must complete the rollover within 3 business days of receiving all the information it needs.\n\nOn receipt, Payments invests each rollover in the Growth model and keeps 1% in the Caldova Cash Account: Harbourline $41,800 → $418 cash + $41,382 Growth; Southern Cross $96,400 → $964 cash + $95,436 Growth. The 0.10% buy spread applies to the amounts invested.",
+  "severity": "medium",
+  "department": "Transfers & Rollovers",
+  "tags": [
+    "priya-natarajan",
+    "REQ-20261103-DEMO01",
+    "CS-2049817",
+    "southern-cross-industry-super",
+    "SCI0001AU",
+    "harbourline-retail-super",
+    "HRB0007AU",
+    "death-tpd-520000",
+    "insurance-loss-warning",
+    "superstream",
+    "rollover-in",
+    "preserved",
+    "consolidation"
+  ],
+  "lastUpdated": "2026-11-03T23:00:00Z"
+}

@@ -1,0 +1,35 @@
+{
+  "id": "trust-deed-death-benefits-and-nominations",
+  "title": "Caldova Superannuation Master Fund Trust Deed — Death benefits & nominations (rules extract)",
+  "product": "Caldova Super & Pension",
+  "version": "Trust deed consolidated to 1 July 2026 — Part 9 (death benefits)",
+  "summary": "Plain-English extract of the trust deed rules that govern how Caldova Superannuation Services Pty Ltd, as trustee of the Caldova Superannuation Master Fund, pays a member's benefit when they die: who can receive it, how binding death benefit nominations (BDBNs) are made and when they are valid, non-binding nominations, reversionary pensions, payment to the legal personal representative (estate) and the form of payment. Benefits & Eligibility cite the clause numbers (TD 9.x) when assessing a death benefit claim. The deed sits alongside the SIS Act and SIS Regulations — in particular reg 6.17A for binding nominations.",
+  "rules": "TD 9.1 Payment on death — when a member dies the trustee pays the member's benefit (account balance plus any insured death benefit received) as soon as practicable to one or more of the member's dependants and/or the legal personal representative (LPR).\nTD 9.2 Dependants — a SIS dependant is the member's spouse (including a de facto partner of any gender), a child of any age (including adopted, step and ex-nuptial children) or a person in an interdependency relationship with the member.\nTD 9.3 Binding death benefit nomination — the trustee must pay in line with a valid, in-force BDBN and has no discretion. To be valid the nomination must: be in writing on the Caldova form; be signed and dated by the member in the presence of two witnesses who are each aged 18 or over and not named as a beneficiary in the nomination; include a declaration signed by each witness that the member signed and dated it in their presence; nominate only SIS dependants and/or the LPR; and state clear proportions totalling 100%.\nTD 9.4 Lapsing — a Caldova BDBN lapses 3 years after the date it was signed, last confirmed or amended. Caldova does not accept non-lapsing nominations. A member can revoke or replace a BDBN at any time using the same formalities.\nTD 9.5 Invalid or partly invalid nomination — if a nomination fails the formalities or has lapsed, or a nominee has died or is no longer a dependant, it is not binding (in whole or for that share) and the trustee decides the distribution, treating the nomination as an indication of the member's wishes.\nTD 9.6 Non-binding nomination — guides the trustee but does not bind it.\nTD 9.7 Reversionary pension — a pension may be set up at commencement to revert to a reversionary beneficiary (for example a spouse). On death the pension continues to that person; the reversionary nomination takes priority over any BDBN for that pension account.\nTD 9.8 Form of payment — a death benefit may be paid as a lump sum, or as a pension to an eligible dependant (a spouse; or a child under 18, under 25 and financially dependent, or with a disability). Death benefits to anyone else, including adult children, must be paid as lump sums and cannot be rolled over.\nTD 9.9 Pension accounts — pension payments stop when Caldova is notified of the member's death unless the pension reverts. Investments are redeemed to cash and the benefit paid reflects actual sale proceeds.",
+  "limits": "The trustee cannot follow a nomination that is invalid — for example only one witness, a witness who is a named beneficiary, missing witness declarations, unsigned or undated — or that has lapsed; it is treated as non-binding. A BDBN cannot direct a benefit straight to someone who is not a SIS dependant (such as a sibling, friend or charity); the member would need to nominate the LPR so the benefit is paid under the will. Payment to the LPR requires a grant of probate or letters of administration. For discretionary distributions the trustee notifies the proposed distribution and allows a 28-day objection period; complaints about death benefit distributions have a 90-day internal dispute resolution timeframe after that period ends, then AFCA.",
+  "evidenceRequired": [
+    "Certified copy of the death certificate",
+    "The member's BDBN or other nominations held on file (with lapse date)",
+    "Death benefit claim form and certified identity for each claimant",
+    "Evidence of relationship (e.g. birth certificates, marriage certificate, evidence of a de facto or interdependency relationship)",
+    "Statement of financial dependency from each claimant (needed for the tax treatment and for discretionary decisions)",
+    "Grant of probate or letters of administration (only when paying the LPR)",
+    "Bank account details in each payee's own name"
+  ],
+  "owner": "Benefits & Eligibility",
+  "tags": [
+    "trust-deed",
+    "death-benefit",
+    "bdbn",
+    "binding-death-benefit-nomination",
+    "reg-6.17A",
+    "two-witnesses",
+    "lapsing-3-years",
+    "sis-dependant",
+    "non-binding",
+    "reversionary",
+    "lpr",
+    "estate",
+    "lump-sum"
+  ],
+  "lastUpdated": "2026-07-01T00:00:00Z"
+}

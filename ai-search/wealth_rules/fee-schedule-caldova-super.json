@@ -1,0 +1,29 @@
+{
+  "id": "fee-schedule-caldova-super",
+  "title": "Caldova Super & Pension — Fee schedule 2026-27",
+  "product": "Caldova Super & Pension",
+  "version": "Fee schedule effective 1 July 2026",
+  "summary": "Fees and costs for Caldova Super and Caldova Pension accounts in every tier (Essential, Select and Private). The administration fee is tiered on the account balance and falls as the balance grows; a flat account-keeping fee applies to each account; investment fees depend on the investments chosen (indicative Caldova Managed Portfolio ICRs below); and a buy/sell spread applies to transactions. Adviser fees are separate and are only deducted with the member's written consent. Investment Solutions uses this schedule to show members and advisers their fees in dollars, not just percentages.",
+  "rules": "Administration fee (per account, per year; calculated daily and deducted monthly from the Caldova Cash Account): 0.30% on the first $250,000; 0.15% on the balance from $250,000 to $1,000,000; 0.05% on the balance from $1,000,000 to $2,000,000; nil on the balance above $2,000,000.\nAccount-keeping fee: $180 per year ($15 per month).\nInvestment fees and costs — indicative ICR p.a. (dollars per $100,000 invested): Conservative 0.32% ($320); Balanced 0.38% ($380); Growth 0.42% ($420); High Growth 0.45% ($450); Index Balanced 0.18% ($180); Sustainable Growth 0.49% ($490).\nBuy/sell spread: 0.10% on each buy into and each sell out of a managed portfolio — a transaction cost reflected in the price, not a fee paid to Caldova.\nExit fee: nil (exit fees are banned in super). Switching fee: nil. Insurance premiums: as set by the group insurer, deducted monthly. Adviser fees: as agreed between the member and their adviser, with written consent (SIS s99FA); Caldova pays them to the adviser's practice.\nLow-balance fee cap: if an account is below $6,000 at 30 June, administration and investment fees and costs for that year are capped at 3% of the balance and any amount above the cap is refunded.\nWorked examples (fees per year, balance assumed constant):\n(1) $138,200 in Growth — administration $414.60 + account-keeping $180 + investment fees $580.44 = $1,175.04 (0.85%). Same balance in Balanced: $414.60 + $180 + $525.16 = $1,119.76. In Index Balanced: $414.60 + $180 + $248.76 = $843.36.\n(2) $84,300 in Balanced (Essential) — $252.90 + $180 + $320.34 = $753.24 (0.89%).\n(3) $1,250,000 pension — administration $750 (first $250,000) + $1,125 (next $750,000) + $125 (next $250,000) = $2,000, plus $180 = $2,180 before investment fees. With $1,094,000 in Balanced ($4,157.20) and $156,000 in cash and term deposits (no ICR): about $6,337.20 in total.\n(4) $2,500,000 — administration $750 + $1,125 + $500 + nil = $2,375, plus $180 = $2,555 before investment fees.",
+  "limits": "These are Caldova's fictional 2026-27 rates for the demo. ICRs are indicative, can change and are not a reliable indicator of future costs. Fees are shown inclusive of GST less any reduced input tax credits. Brokerage on direct equities (Private tier) and term deposit rates (Select and Private tiers) are set out in the investment menu. Examples assume the balance stays constant for the year and ignore investment returns.",
+  "evidenceRequired": [
+    "Current fee schedule version and effective date",
+    "Member's investment selections and balances (to convert ICRs into dollars)",
+    "Signed adviser fee consent before any adviser fee is deducted"
+  ],
+  "owner": "Product & Trustee Office",
+  "tags": [
+    "fee-schedule",
+    "fees",
+    "administration-fee",
+    "tiered-fee",
+    "account-keeping-fee",
+    "icr",
+    "investment-fees",
+    "buy-sell-spread",
+    "exit-fee-nil",
+    "low-balance-fee-cap",
+    "fees-in-dollars"
+  ],
+  "lastUpdated": "2026-07-01T00:00:00Z"
+}

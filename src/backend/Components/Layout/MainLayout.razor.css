@@ -10,7 +10,7 @@ main {
 }
 
 .sidebar {
-    background: linear-gradient(180deg, var(--zava-sidebar-from) 0%, var(--zava-sidebar-to) 100%);
+    background: linear-gradient(180deg, var(--cw-sidebar-from) 0%, var(--cw-sidebar-to) 100%);
     border-right: 1px solid rgba(120, 150, 200, 0.14);
     box-shadow: 0 0 30px rgba(0, 0, 0, 0.45);
 }
@@ -42,13 +42,13 @@ main {
         white-space: nowrap;
         margin-left: 1.5rem;
         text-decoration: none;
-        color: var(--zava-muted);
+        color: var(--cw-muted);
         font-size: 0.85rem;
         letter-spacing: 0.3px;
     }
 
     .top-row ::deep a:hover, .top-row ::deep .btn-link:hover {
-        color: var(--zava-text-strong);
+        color: var(--cw-text-strong);
         text-decoration: none;
     }
 
@@ -114,7 +114,7 @@ main {
 }
 
     #blazor-error-ui .reload {
-        color: var(--zava-accent);
+        color: var(--cw-accent);
         font-weight: 600;
     }
 

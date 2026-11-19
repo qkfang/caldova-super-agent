@@ -1,21 +1,22 @@
 using System.Net.WebSockets;
 using Azure.Core;
 using Azure.Identity;
-using ZavaClaims.App.Services;
+using CaldovaSuper.App.Services;
 
-namespace ZavaClaims.App.Api;
+namespace CaldovaSuper.App.Api;
 
 /// <summary>
 /// Browser ↔ Azure AI Foundry Voice Live API WebSocket proxy that powers
-/// the "Voice chat" tab on <c>/agents/customer-communications</c>.
+/// the "Voice chat" tab on <c>/agents/client-communications</c>.
 ///
 /// Voice Live is a low-latency speech-to-speech WebSocket service hosted
 /// at
 /// <c>wss://&lt;resource&gt;.services.ai.azure.com/voice-live/realtime</c>,
 /// reusing the Azure OpenAI Realtime event schema. It accepts a Foundry
-/// <c>agent_id</c> + <c>agent-project-name</c> so the live conversation is
-/// driven by the same Customer Communications Agent (Cara) the demo uses
-/// elsewhere.
+/// <c>agent-name</c> + <c>agent-project-name</c> so the live call is driven
+/// by Cara's conversational voice agent
+/// (<c>client-communications-voice-agent</c>) — members and advisers talk to
+/// Caldova Wealth's Client Communications Specialist directly.
 ///
 /// Browsers can't set <c>Authorization</c> headers on a <c>new WebSocket()</c>,
 /// so this proxy:
@@ -23,7 +24,7 @@ namespace ZavaClaims.App.Api;
 /// 1. Accepts the browser's WebSocket upgrade on
 ///    <c>/communications/voice-live</c>.
 /// 2. Acquires a bearer token via <see cref="DefaultAzureCredential"/> for
-///    the Cognitive Services scope.
+///    the Azure AI scope.
 /// 3. Opens a <see cref="ClientWebSocket"/> to the Voice Live endpoint.
 /// 4. Pumps frames bidirectionally between the two sockets until either
 ///    side closes.
@@ -35,27 +36,27 @@ public static class CommunicationsVoiceLiveProxy
     // 2026-01-01-preview surface; older preview versions only support the
     // classic Agent Service `asst_xxx` flow.
     private const string VoiceLiveApiVersion = "2026-01-01-preview";
-    // Voice Live attaches to a *voice-specific* Cara agent
-    // (CustomerCommunicationsVoiceAgent) whose instructions are
-    // conversational and explicitly forbid speaking the written
-    // "Channel / Customer Sentiment / Draft Message / Tone & Compliance /
-    // Approval Required" template. The standard customer-communications
-    // agent is still used for written-channel drafts.
-    private const string CommunicationsAgentId = "customer-communications-voice-agent";
+    // Voice Live attaches to the *voice-specific* Cara agent
+    // (ClientCommunicationsVoiceAgent) whose instructions are conversational
+    // and explicitly forbid speaking the written "Channel & Audience /
+    // Sentiment / Draft Message / Tone & Compliance Check / Human Approval
+    // Required" template. The standard client-communications agent is still
+    // used for written drafts on the Try it out tab.
+    private const string CommunicationsAgentId = "client-communications-voice-agent";
     private const string CommunicationsAgentRole = "communications-voice";
     private const string AzureAiScope = "https://ai.azure.com/.default";
     private const string CognitiveServicesScope = "https://cognitiveservices.azure.com/.default";
 
     public static void MapCommunicationsVoiceLiveEndpoints(
         this WebApplication app,
-        ClaimsAgentOptions options,
-        ClaimsAgentFactory agentFactory,
+        CaldovaAgentOptions options,
+        CaldovaAgentFactory agentFactory,
         ILoggerFactory loggerFactory)
     {
         var logger = loggerFactory.CreateLogger("CommunicationsVoiceLiveProxy");
 
         // Lightweight config probe so the front-end can decide whether to
-        // even offer the live mic button.
+        // offer the live mic button (and otherwise fall back to typed chat).
         app.MapGet("/communications/voice-live/config", () =>
         {
             var (host, project) = TryParseProjectEndpoint(options.ProjectEndpoint);
@@ -89,7 +90,7 @@ public static class CommunicationsVoiceLiveProxy
             }
 
             // Make sure the Foundry agent version exists in the project so
-            // Voice Live can resolve the agent_id. ClaimsAgent constructors
+            // Voice Live can resolve the agent name. CaldovaAgent constructors
             // call CreateAgentVersion under the hood; we discard the result.
             try
             {
@@ -98,7 +99,7 @@ public static class CommunicationsVoiceLiveProxy
             }
             catch (Exception ex)
             {
-                logger.LogWarning(ex, "Could not ensure Customer Communications agent exists; Voice Live may fail to resolve agent_id.");
+                logger.LogWarning(ex, "Could not ensure the Client Communications voice agent exists; Voice Live may fail to resolve the agent.");
             }
 
             // Acquire a Foundry / Speech bearer token. Try the modern

@@ -1,9 +1,9 @@
 using System.ComponentModel;
 using System.Text.Json;
 using ModelContextProtocol.Server;
-using ZavaClaims.App.Services;
+using CaldovaSuper.App.Services;
 
-namespace ZavaClaims.App.Mcp;
+namespace CaldovaSuper.App.Mcp;
 
 /// <summary>
 /// MCP tools that back the Supplier Coordinator agent. Exposes a supplier

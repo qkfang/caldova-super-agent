@@ -1,10 +1,10 @@
 using System.Text;
 using System.Text.Json;
 
-namespace ZavaClaims.App.Services;
+namespace CaldovaSuper.App.Services;
 
 /// <summary>
-/// Talks to the configured Foundry "claims research assistant" agent. If no agent
+/// Talks to the configured Foundry "member assistant" agent. If no agent
 /// endpoint is configured, returns a friendly demo response so the chatbots in the
 /// UI still work end-to-end.
 /// Ported from forex-trading-agent/src/research-analytics/Services/ChatService.cs.
@@ -49,7 +49,7 @@ public class ChatService
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Failed to get response from Foundry agent");
-            return "Sorry, the Zava claims assistant is currently unavailable. Please try again later.";
+            return "Sorry, the Caldova member assistant is currently unavailable. Please try again later.";
         }
     }
 
@@ -62,15 +62,16 @@ public class ChatService
         var trimmed = (userMessage ?? string.Empty).Trim();
         if (string.IsNullOrEmpty(trimmed))
         {
-            return "Please enter a question about your claim or the claims process.";
+            return "Please enter a question about your account, a request in progress, or how super rules work.";
         }
 
         return
-            "Thanks for your message — this is the Zava Insurance claims assistant (demo mode).\n\n" +
+            "Thanks for your message — this is the Caldova Wealth member assistant (demo mode).\n\n" +
             $"You asked: \"{trimmed}\"\n\n" +
-            "In production, our specialised claims agents (Intake, Assessment, Loss Adjusting, Fraud, " +
-            "Supplier Coordination, Settlement, Customer Communications, Team Leader) would coordinate " +
-            "to answer this. Configure the FoundryAgent:EndpointUrl setting to connect this chatbot to a " +
+            "In production, Caldova's specialised operations agents (Onboarding, Benefits & Eligibility, " +
+            "Investment Solutions, Financial Crime, Transfers & Rollovers, Payments, Client Communications, " +
+            "Team Leader) would coordinate to answer this — general information only, never personal " +
+            "financial advice. Configure the FoundryAgent:EndpointUrl setting to connect this chatbot to a " +
             "live agent.";
     }
 }

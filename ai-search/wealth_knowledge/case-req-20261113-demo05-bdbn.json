@@ -1,0 +1,27 @@
+{
+  "id": "case-req-20261113-demo05-bdbn",
+  "title": "REQ-20261113-DEMO05 — Binding death benefit nomination signed 18 Mar 2024: Robert Chen 50% / Lily Chen 50%, valid and binding (Mei Chen, CP-3019042)",
+  "category": "Case Evidence",
+  "requestType": "Death benefit claim",
+  "caseNumber": "REQ-20261113-DEMO05",
+  "memberNumber": "CP-3019042",
+  "content": "Caldova binding death benefit nomination (lapsing) held on file for Mei Chen (DOB 05/06/1945), Caldova Pension CP-3019042. Lodged through her adviser Marcus Tan (Bayside Financial Partners) and recorded by Caldova on 21 Mar 2024.\n\nForm details: signed and dated by Mei Chen on 18 Mar 2024. Nominees: Robert Chen (son, DOB 30/01/1974) — 50%; Lily Chen (daughter, DOB 11/05/1977) — 50%; total 100%. Witness 1: Marcus Tan (adviser; over 18; not a nominee) — signed 18 Mar 2024 with witness declaration. Witness 2: Joanne Ruiz (client services manager, Bayside Financial Partners; over 18; not a nominee) — signed 18 Mar 2024 with witness declaration. Both declarations state that Mei signed and dated the nomination in their presence. Lapse date: 18 Mar 2027 (3 years after signing — Caldova nominations are lapsing). No later nomination, revocation or amendment is on file, and CP-3019042 has no reversionary beneficiary.\n\nValidity assessment (Benefits & Eligibility; trust deed TD 9.3–9.5; SIS reg 6.17A):\n• In writing on the Caldova form ✅\n• Signed and dated by the member ✅\n• Two witnesses aged 18+ who are not named in the nomination ✅\n• Witness declarations completed ✅\n• In force at the date of death — 12 Oct 2026 is before the 18 Mar 2027 lapse date ✅\n• Nominees are SIS dependants — children of any age ✅\n• Both nominees alive ✅\n• Shares clear and totalling 100% ✅\nResult: VALID and BINDING. The trustee must pay 50% to Robert and 50% to Lily and has no discretion; the will and probate are not needed.\n\nTax status (separate from the SIS test): Robert (52) and Lily (49) are adult children who were not financially dependent on Mei and not in an interdependency relationship with her, so they are NOT death benefits dependants for tax. Each share must be paid as a lump sum (it cannot be paid as a pension or rolled over), and the taxable component (taxed element) has 17% withheld (15% + 2% Medicare levy).",
+  "severity": "high",
+  "department": "Benefits & Eligibility",
+  "tags": [
+    "mei-chen",
+    "robert-chen",
+    "lily-chen",
+    "REQ-20261113-DEMO05",
+    "CP-3019042",
+    "bdbn",
+    "binding-death-benefit-nomination",
+    "valid-binding",
+    "two-witnesses",
+    "lapsing-18-mar-2027",
+    "sis-dependant",
+    "non-dependant-for-tax",
+    "50-50"
+  ],
+  "lastUpdated": "2026-11-13T02:00:00Z"
+}

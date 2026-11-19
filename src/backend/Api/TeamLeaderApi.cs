@@ -1,7 +1,7 @@
-using ZavaClaims.Agents;
-using ZavaClaims.App.Services;
+using CaldovaSuper.Agents;
+using CaldovaSuper.App.Services;
 
-namespace ZavaClaims.App.Api;
+namespace CaldovaSuper.App.Api;
 
 record TeamLeaderProcessRequest(string ClaimNumber);
 

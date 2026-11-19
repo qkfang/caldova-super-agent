@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 
-namespace ZavaClaims.Agents;
+namespace CaldovaSuper.Agents;
 
 public record SearchCitation(string Title, string Url);
 
@@ -55,8 +55,8 @@ public record PendingToolApproval(string ResponseId, string ApprovalItemId, stri
 public record AgentStepResult(string? Result, PendingToolApproval? Pending, string? ResponseId);
 
 /// <summary>
-/// Base wrapper around an Azure AI Foundry declarative agent. Each claims-office
-/// staff character is implemented as a subclass of <see cref="ClaimsAgent"/>
+/// Base wrapper around an Azure AI Foundry declarative agent. Each operations-office
+/// staff character is implemented as a subclass of <see cref="CaldovaAgent"/>
 /// (which in turn inherits from this <see cref="BaseAgent"/>) so that every
 /// agent shares the same response-handling, MCP approval and citation logic.
 ///
@@ -173,7 +173,7 @@ public abstract class BaseAgent
     /// Resumes a previous agent run by chaining a new user message off
     /// <paramref name="previousResponseId"/> and then auto-approving any
     /// further MCP tool calls until the model finishes. Used by the
-    /// Settlement Agent's "approve in popup" flow so the human-approval
+    /// Payments Agent's "approve in popup" flow so the human-approval
     /// decision flows back to the same agent in the same conversation and
     /// it can call the payment-release MCP tool to actually release the
     /// payment.

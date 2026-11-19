@@ -1,8 +1,8 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
-using ZavaClaims.Agents;
+using CaldovaSuper.Agents;
 
-namespace ZavaClaims.App.Api;
+namespace CaldovaSuper.App.Api;
 
 /// <summary>
 /// Server-Sent Events helper used by every agent "Try It Out" /process endpoint
@@ -54,7 +54,7 @@ internal static class AgentSseStreaming
     /// </summary>
     public static async Task StreamAsync(
         HttpContext httpContext,
-        ClaimsAgent? agent,
+        CaldovaAgent? agent,
         string prompt,
         Func<AgentTraceResult?, string?, object> buildEnvelope,
         ILogger logger,
@@ -109,12 +109,12 @@ internal static class AgentSseStreaming
     /// <summary>
     /// Same as <see cref="StreamAsync"/> but resumes a previous Foundry agent
     /// conversation by chaining off <paramref name="previousResponseId"/> via
-    /// <see cref="ZavaClaims.Agents.BaseAgent.ChatStreamingTraceAsync"/>. Used by
+    /// <see cref="CaldovaSuper.Agents.BaseAgent.ChatStreamingTraceAsync"/>. Used by
     /// the "Chat with the agent" follow-up panels on each agent page.
     /// </summary>
     public static async Task StreamChatAsync(
         HttpContext httpContext,
-        ClaimsAgent? agent,
+        CaldovaAgent? agent,
         string previousResponseId,
         string message,
         Func<AgentTraceResult?, string?, object> buildEnvelope,

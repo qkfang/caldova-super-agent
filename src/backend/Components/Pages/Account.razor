@@ -2,9 +2,9 @@
 
 @* My Account page with the "Ask AI" document-query chatbot.
    Ported from forex-trading-agent/src/research-analytics/Pages/Account/Index.cshtml.
-   In Zava the "references" surface relevant claims agents from the AgentCatalog. *@
+   In Caldova the "references" surface the relevant operations agents from the AgentCatalog. *@
 
-<PageTitle>My Account — Zava Insurance</PageTitle>
+<PageTitle>My Account — Caldova Wealth</PageTitle>
 
 <div class="account-profile-header mb-4">
     <div class="d-flex align-items-center gap-3">
@@ -14,7 +14,7 @@
         <div>
             <h1 class="mb-0 fw-bold" style="font-size:1.4rem;">Welcome back</h1>
             <div class="text-muted small mt-1">
-                Signed in as a Zava Insurance customer · Use the panel below to query your claims and policies.
+                Signed in as a Caldova Super member · Use the panel below to ask about your account, requests and super rules.
             </div>
         </div>
     </div>
@@ -43,8 +43,8 @@
             <div class="d-flex align-items-center gap-2 ms-3">
                 <label class="form-label mb-0 small fw-semibold">Model</label>
                 <select class="form-select form-select-sm aichat-select" id="aichat-model" style="width:auto;">
-                    <option value="zava-claims-insight">zava-claims-insight</option>
-                    <option value="zava-claims-research">zava-claims-research</option>
+                    <option value="caldova-wealth-insight">caldova-wealth-insight</option>
+                    <option value="caldova-wealth-research">caldova-wealth-research</option>
                 </select>
             </div>
             <button class="btn btn-sm btn-outline-secondary ms-auto" id="aichat-clear" type="button" title="Clear conversation">
@@ -60,14 +60,14 @@
                 <div class="aichat-messages flex-fill overflow-auto p-3" id="aichat-messages">
                     <div class="aichat-welcome">
                         <i class="fa-solid fa-brain fa-2x mb-2"></i>
-                        <p class="mb-1 fw-semibold">Zava Claims AI Assistant</p>
-                        <p class="small text-muted">Ask about your claim, policy coverage, or how the claims office works. Relevant claims agents will appear on the right.</p>
+                        <p class="mb-1 fw-semibold">Caldova Wealth AI Assistant</p>
+                        <p class="small text-muted">Ask about your account, a request in progress, or how super rules work. Relevant operations agents will appear on the right.</p>
                     </div>
                 </div>
                 <div class="aichat-composer p-2">
                     <div class="input-group">
                         <textarea class="form-control aichat-input" id="aichat-input"
-                                  placeholder="Ask about your claim..." rows="2"
+                                  placeholder="e.g. How much can I withdraw on hardship grounds?" rows="2"
                                   style="resize:none;"></textarea>
                         <button class="btn btn-primary aichat-send-btn" id="aichat-send" type="button">
                             <i class="fa-solid fa-paper-plane"></i>

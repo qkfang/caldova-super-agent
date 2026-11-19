@@ -1,11 +1,11 @@
-import type { ClaimSimulation, CharacterProfile } from "./claimSimulation";
+import type { CaseSimulation, CharacterProfile } from "./caseSimulation";
 import { renderCharacterFigureSvg } from "./characterFigure";
 
 /**
  * Floating profile card shown when a character is clicked.
  *
  * The card auto-refreshes once per second by re-querying the simulation
- * so live status (current task, claim id) stays current. Closes on
+ * so live status (current task, case number) stays current. Closes on
  * Escape, click-outside, or the close button.
  */
 export class ProfileCard {
@@ -13,7 +13,7 @@ export class ProfileCard {
   private currentId: string | null = null;
   private refreshHandle: number | null = null;
 
-  constructor(private readonly sim: ClaimSimulation) {
+  constructor(private readonly sim: CaseSimulation) {
     const el = document.createElement("div");
     el.id = "profile-card";
     el.className = "profile-card hidden";
@@ -141,13 +141,13 @@ export class ProfileCard {
 
     const headerColor = p.color;
     const titleLine =
-      p.kind === "staff" ? p.role : `Customer — ${p.scenarioName}`;
+      p.kind === "staff" ? p.role : `Client — ${p.scenarioName}`;
 
     const responsibilities = p.responsibilities
       .map((r) => `<li>${escape(r)}</li>`)
       .join("");
 
-    const claimsList = p.claims
+    const casesList = p.cases
       .slice(0, 6)
       .map(
         (c) =>
@@ -172,20 +172,20 @@ export class ProfileCard {
           </div>`
         : "";
 
-    const claimBlock =
-      p.kind === "customer" && p.activeClaim
+    const caseBlock =
+      p.kind === "customer" && p.activeCase
         ? `<div class="profile-current">
-            <div class="label">Claim</div>
-            <div class="value"><strong>${escape(p.activeClaim.id)}</strong> — ${escape(
-              p.activeClaim.type,
-            )} · $${p.activeClaim.amount.toLocaleString()} · ${escape(
-            p.activeClaim.status,
+            <div class="label">Case</div>
+            <div class="value"><strong>${escape(p.activeCase.id)}</strong> — ${escape(
+              p.activeCase.type,
+            )} · $${p.activeCase.amount.toLocaleString()} · ${escape(
+            p.activeCase.status,
           )}</div>
           </div>`
         : "";
 
-    const claimsHeading = p.claims.length
-      ? `<h3>Recent claims</h3><ul class="profile-claims">${claimsList}</ul>`
+    const casesHeading = p.cases.length
+      ? `<h3>Recent cases</h3><ul class="profile-cases">${casesList}</ul>`
       : "";
 
     const agentLinkBlock =
@@ -207,7 +207,7 @@ export class ProfileCard {
       <section>
         ${currentBlock}
         ${handlerBlock}
-        ${claimBlock}
+        ${caseBlock}
         ${
           p.situation
             ? `<p class="profile-situation">${escape(p.situation)}</p>`
@@ -224,7 +224,7 @@ export class ProfileCard {
             ? `<h3>Responsibilities</h3><ul>${responsibilities}</ul>`
             : ""
         }
-        ${claimsHeading}
+        ${casesHeading}
         ${agentLinkBlock}
       </section>
     `;

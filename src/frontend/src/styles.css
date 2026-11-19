@@ -243,7 +243,7 @@ aside h2 {
 }
 #spawn-btn:hover { filter: brightness(1.05); }
 
-/* Simulation speed control (x1 / x2 / x5) — sits next to the Submit a claim
+/* Simulation speed control (x1 / x2 / x5) — sits next to the Submit a request
  * button in the footer hint. Matches the rounded-pill scene-toggle style so
  * it feels like a built-in HUD control. */
 .sim-speed {
@@ -580,14 +580,14 @@ body.left-nav-hidden #log-panel { display: none; }
   position: absolute; left: 0;
   color: var(--accent);
 }
-.profile-card .profile-claims li {
+.profile-card .profile-cases li {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--panel-border);
   border-radius: 6px;
   padding: 4px 8px 4px 22px;
 }
-.profile-card .profile-claims li::before { left: 8px; }
-.profile-card .profile-claims .status {
+.profile-card .profile-cases li::before { left: 8px; }
+.profile-card .profile-cases .status {
   float: right;
   font-size: 10px;
   color: var(--accent-2);
@@ -895,7 +895,7 @@ body.left-nav-hidden #log-panel { display: none; }
   color: #1c2230;
 }
 
-/* ---------- Customer result banner (approved $$ / denied) ---------- */
+/* ---------- Client result banner (completed / partial / declined / blocked) ---------- */
 .customer-result {
   position: fixed;
   top: 96px;
@@ -935,6 +935,7 @@ body.left-nav-hidden #log-panel { display: none; }
 }
 .customer-result.rejected .cr-amount { color: var(--bad); }
 .customer-result.partial .cr-amount { color: var(--warn); }
+.customer-result.blocked .cr-amount { color: var(--good); }
 .customer-result .cr-icon {
   font-size: 32px;
   line-height: 1;
@@ -942,6 +943,7 @@ body.left-nav-hidden #log-panel { display: none; }
 .customer-result.rejected .cr-card { border-color: rgba(255, 122, 122, 0.5); }
 .customer-result.approved .cr-card { border-color: rgba(109, 213, 140, 0.5); }
 .customer-result.partial .cr-card { border-color: rgba(255, 209, 102, 0.5); }
+.customer-result.blocked .cr-card { border-color: rgba(20, 184, 166, 0.6); }
 .customer-result.playing {
   animation: cr-bounce 0.6s ease-out;
 }
@@ -951,7 +953,8 @@ body.left-nav-hidden #log-panel { display: none; }
   100% { transform: translate(-50%, 0) scale(1); opacity: 1; }
 }
 .customer-result.approved.playing .cr-icon,
-.customer-result.partial.playing .cr-icon {
+.customer-result.partial.playing .cr-icon,
+.customer-result.blocked.playing .cr-icon {
   animation: cr-coins 1.4s ease-in-out infinite;
 }
 @keyframes cr-coins {
@@ -983,7 +986,7 @@ body.left-nav-hidden #log-panel { display: none; }
   flex-shrink: 0;
 }
 .summary-customer-name { font-weight: 700; font-size: 14px; }
-.summary-customer-claim { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.summary-customer-case { font-size: 12px; color: var(--muted); margin-top: 2px; }
 .summary-customer-outcome {
   margin-top: 6px;
   font-weight: 700;
@@ -993,6 +996,7 @@ body.left-nav-hidden #log-panel { display: none; }
 .summary-customer-outcome.approved { color: var(--good); }
 .summary-customer-outcome.rejected { color: var(--bad); }
 .summary-customer-outcome.partial { color: var(--warn); }
+.summary-customer-outcome.blocked { color: #2dd4bf; }
 .summary-section {
   padding: 16px 20px 0;
 }
@@ -1189,12 +1193,12 @@ body.scenario-active #log-panel {
   opacity: 0.32;
   transition: opacity 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
 }
-#agents-panel[data-active-staff-id="intake-1"] .agent-card[data-id="intake-1"],
-#agents-panel[data-active-staff-id="assessor-1"] .agent-card[data-id="assessor-1"],
-#agents-panel[data-active-staff-id="loss-1"] .agent-card[data-id="loss-1"],
-#agents-panel[data-active-staff-id="fraud-1"] .agent-card[data-id="fraud-1"],
-#agents-panel[data-active-staff-id="supplier-1"] .agent-card[data-id="supplier-1"],
-#agents-panel[data-active-staff-id="settlement-1"] .agent-card[data-id="settlement-1"],
+#agents-panel[data-active-staff-id="onboarding-1"] .agent-card[data-id="onboarding-1"],
+#agents-panel[data-active-staff-id="benefits-1"] .agent-card[data-id="benefits-1"],
+#agents-panel[data-active-staff-id="investments-1"] .agent-card[data-id="investments-1"],
+#agents-panel[data-active-staff-id="fincrime-1"] .agent-card[data-id="fincrime-1"],
+#agents-panel[data-active-staff-id="transfers-1"] .agent-card[data-id="transfers-1"],
+#agents-panel[data-active-staff-id="payments-1"] .agent-card[data-id="payments-1"],
 #agents-panel[data-active-staff-id="comms-1"] .agent-card[data-id="comms-1"],
 #agents-panel[data-active-staff-id="lead-1"] .agent-card[data-id="lead-1"] {
   opacity: 1;

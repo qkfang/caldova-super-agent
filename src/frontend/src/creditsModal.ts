@@ -1,6 +1,6 @@
 /**
  * Credits modal — pays tribute to the people and tools that helped shape
- * Claims Team in a Day. Opened from the "Credits" link in the footer.
+ * Wealth Team in a Day. Opened from the "Credits" link in the footer.
  */
 export class CreditsModal {
   private readonly overlay: HTMLDivElement;
@@ -21,7 +21,7 @@ export class CreditsModal {
         </header>
         <div class="credits-body">
           <p class="credits-lead">
-            <strong>Claims Team in a Day</strong> — a Zava Insurance demo —
+            <strong>Wealth Team in a Day</strong> — a Caldova Wealth demo —
             was brought to life with the help of a few standout collaborators.
           </p>
 
@@ -39,8 +39,8 @@ export class CreditsModal {
             <h3>Hinesh</h3>
             <p class="credit-role">Creative spark · Voxel frontend concept</p>
             <p>
-              For the brilliant idea of a voxel-styled, isometric claims
-              office and neighbourhood — turning an enterprise claims
+              For the brilliant idea of a voxel-styled, isometric operations
+              office and neighbourhood — turning an enterprise operations
               workflow into something you can actually <em>see</em>. The
               entire visual metaphor of this demo started with that vision.
             </p>

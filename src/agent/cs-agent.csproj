@@ -6,8 +6,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <NoWarn>$(NoWarn);OPENAI001;CS0108</NoWarn>
-    <RootNamespace>ZavaClaims</RootNamespace>
-    <AssemblyName>zc-agent</AssemblyName>
+    <RootNamespace>CaldovaSuper</RootNamespace>
+    <AssemblyName>cs-agent</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

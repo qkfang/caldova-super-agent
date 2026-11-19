@@ -1,0 +1,58 @@
+{
+  "documentType": "Caldova Managed Portfolio fact sheet",
+  "issuer": "Caldova Investments Limited — responsible entity of Caldova Managed Portfolios",
+  "name": "Caldova Managed Portfolio — Sustainable Growth",
+  "shortName": "Sustainable Growth",
+  "code": "CMP-SUS",
+  "asAt": "2026-10-31",
+  "style": "Active, multi-asset with ESG screens",
+  "objective": "To earn returns of CPI + 4.0% p.a. over rolling 7-year periods, before fees and taxes, while applying Caldova's environmental, social and governance (ESG) exclusions.",
+  "growthAllocation": 80,
+  "defensiveAllocation": 20,
+  "investmentFeePercent": 0.49,
+  "buySellSpreadPercent": 0.10,
+  "adminFeeNote": "Caldova Super & Pension admin fee is charged separately on the whole account balance: 0.30% on the first $250,000, 0.15% on $250,000–$1,000,000, 0.05% on $1,000,000–$2,000,000, nil above $2,000,000, plus a $180 p.a. account-keeping fee.",
+  "standardRiskMeasure": {
+    "band": 6,
+    "label": "High",
+    "negativeYearsIn20": "4 to less than 6"
+  },
+  "minimumSuggestedTimeframeYears": 7,
+  "assetAllocation": [
+    { "assetClass": "Australian shares (ESG-screened)", "type": "growth", "targetPercent": 31, "rangePercent": "21–41" },
+    { "assetClass": "International shares (ESG-screened)", "type": "growth", "targetPercent": 37, "rangePercent": "27–47" },
+    { "assetClass": "Renewable infrastructure & green property", "type": "growth", "targetPercent": 8, "rangePercent": "0–15" },
+    { "assetClass": "Impact & liquid alternatives", "type": "growth", "targetPercent": 4, "rangePercent": "0–10" },
+    { "assetClass": "Green & social bonds", "type": "defensive", "targetPercent": 12, "rangePercent": "5–20" },
+    { "assetClass": "Cash & term deposits", "type": "defensive", "targetPercent": 8, "rangePercent": "2–15" }
+  ],
+  "returns": {
+    "periodEnding": "2026-10-31",
+    "oneYearPercent": 10.3,
+    "threeYearPercentPa": 8.7,
+    "fiveYearPercentPa": 7.2,
+    "basis": "Illustrative model returns, net of investment fees and costs, before admin fees and taxes.",
+    "warning": "Past performance is not a reliable indicator of future performance."
+  },
+  "topHoldings": [
+    { "holding": "Global equities — ESG leaders (managed fund)", "weightPercent": 22.0 },
+    { "holding": "Australian equities — ESG-screened core (direct shares)", "weightPercent": 21.0 },
+    { "holding": "Global equities — climate transition (index ETF)", "weightPercent": 15.0 },
+    { "holding": "Green & social bonds — AUD hedged (managed fund)", "weightPercent": 12.0 },
+    { "holding": "Renewable infrastructure (listed, index ETF)", "weightPercent": 8.0 }
+  ],
+  "sectorNotes": [
+    "Excludes fossil-fuel producers, tobacco, controversial weapons and gambling, and companies with serious UN Global Compact breaches.",
+    "Illustrative carbon intensity is about 45% below the unscreened benchmark.",
+    "The screens narrow the investable universe, so returns can differ noticeably from unscreened Growth in any year."
+  ],
+  "suitableFor": "Investors seeking long-term growth who want ESG exclusions applied, can accept larger short-term falls in value, and have a timeframe of at least 7 years.",
+  "availableOn": [
+    "Caldova Super — Essential",
+    "Caldova Super — Select",
+    "Caldova Super — Private",
+    "Caldova Pension",
+    "Caldova Wrap"
+  ],
+  "disclaimer": "General information only — not personal financial advice. Caldova Managed Portfolios are fictional products used in the Wealth Team in a Day demo."
+}

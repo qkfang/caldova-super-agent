@@ -1,0 +1,27 @@
+{
+  "id": "case-req-20261111-demo04-benefit-components-and-tax",
+  "title": "REQ-20261111-DEMO04 — Hardship payment calculation: $10,000 gross, 6% tax-free, $2,068 PAYG withheld, $7,932 net (Tom Bradley)",
+  "category": "Case Evidence",
+  "requestType": "Financial hardship release",
+  "caseNumber": "REQ-20261111-DEMO04",
+  "memberNumber": "CS-1030412",
+  "content": "Payment calculation for the severe financial hardship release on Caldova Super (Essential) CS-1030412 — Tom Bradley, age 47.\n\nAmount: Tom requested $15,000. The maximum single severe financial hardship release is $10,000 gross (minimum $1,000), once in any 12-month period, so the recommended outcome is a PARTIAL approval of $10,000 gross. The remaining $5,000 cannot be released under this condition of release. Team Leader approval is required before release (vulnerable member).\n\nAccount tax components before payment: balance $84,300 — tax-free component $5,058 (6%); taxable component (taxed element) $79,242 (94%). Under the proportioning rule every payment carries the same 6% / 94% split.\n\nCalculation:\n• Gross payment: $10,000\n• Tax-free component (6%): $600\n• Taxable component, taxed element (94%): $9,400\n• PAYG withheld — Tom is under 60 (and under preservation age), so 22% (20% + 2% Medicare levy) applies to the taxed element: $9,400 × 22% = $2,068\n• Net payment: $10,000 − $2,068 = $7,932\n\nPayment: $7,932 to Tom's nominated account (name 'Thomas Bradley', account ending 7741 — payee name and BSB match ✅), scheduled for Fri 13 Nov 2026 after approval. The $2,068 withheld is remitted to the ATO and shown on a PAYG payment summary. Withholding is not necessarily the final tax: the taxable component is included in Tom's tax return and taxed at the lower of his marginal rate and 20% plus Medicare levy, so some of the tax may be refunded when he lodges.\n\nRedemption plan (Investment Solutions): use Caldova Cash Account money above the 1% minimum first, then sell Balanced model units for the rest (0.10% sell spread applies). Expected balance after payment: about $74,300, before market movements and transaction costs.\n\nNext eligibility: no further severe financial hardship release can be paid before 13 Nov 2027 (12 months after this payment), and only if the criteria are met again. Release on compassionate grounds — for example to prevent foreclosure on his home — is a separate application decided by the ATO.",
+  "severity": "high",
+  "department": "Payments",
+  "tags": [
+    "tom-bradley",
+    "REQ-20261111-DEMO04",
+    "CS-1030412",
+    "hardship-payment",
+    "partial-approval",
+    "10000-gross",
+    "tax-free-600",
+    "taxable-9400",
+    "payg-2068",
+    "net-7932",
+    "22-percent",
+    "proportioning-rule",
+    "13-nov-2026"
+  ],
+  "lastUpdated": "2026-11-11T03:10:00Z"
+}

@@ -2,9 +2,9 @@ using System.Collections.Concurrent;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
-using ZavaClaims.App.Models;
+using CaldovaSuper.App.Models;
 
-namespace ZavaClaims.App.Services;
+namespace CaldovaSuper.App.Services;
 
 /// <summary>
 /// Outcome of running one authenticity check against a sample document.

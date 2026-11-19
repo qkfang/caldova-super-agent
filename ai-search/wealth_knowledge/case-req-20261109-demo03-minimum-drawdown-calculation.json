@@ -1,0 +1,28 @@
+{
+  "id": "case-req-20261109-demo03-minimum-drawdown-calculation",
+  "title": "REQ-20261109-DEMO03 — Minimum pension payment calculation FY2026-27: $38,870 pro-rated, 5% at age 66 (George Papadopoulos, CP-3077881)",
+  "category": "Case Evidence",
+  "requestType": "Pension commencement",
+  "caseNumber": "REQ-20261109-DEMO03",
+  "memberNumber": "CS-1077881",
+  "content": "Minimum annual payment calculation for Caldova Pension CP-3077881 (George Papadopoulos), prepared by Benefits & Eligibility and checked by Payments.\n\nInputs: commencement date 16 Nov 2026; commencement balance $1,250,000; George's age at commencement 66, so the minimum percentage is 5% (age band 65–74). Financial year 1 Jul 2026 – 30 Jun 2027 = 365 days.\n\nStep 1 — full-year minimum: $1,250,000 × 5% = $62,500.\nStep 2 — pro-rate for the first year: days from 16 Nov 2026 to 30 Jun 2027 inclusive = 227 (November 15 + December 31 + January 31 + February 28 + March 31 + April 30 + May 31 + June 30). $62,500 × 227 ÷ 365 = $38,869.86.\nStep 3 — round to the nearest $10: $38,870. This is the minimum that must be paid by 30 June 2027.\n\nRequested income: $78,000 a year paid monthly ($6,500 on the 15th). Payments scheduled in FY2026-27: 15 Dec 2026 to 15 Jun 2027 = 7 payments × $6,500 = $45,500, which is above the $38,870 minimum ✅. There is no maximum for an account-based pension (the 10% maximum applies only to transition-to-retirement income streams), and the full $78,000 a year is above the full-year minimum of $62,500 ✅.\n\nFuture years: the minimum is recalculated each 1 July from the balance on that day and George's age then (5% until age 74, 6% from 75). For example, a balance of $1,200,000 on 1 Jul 2027 would give a 2027-28 minimum of $60,000, still below the requested $78,000.\n\nTax: George is over 60, so his pension payments are tax-free and no PAYG is withheld. Earnings on the pension's investments are tax-exempt in retirement phase.\n\nIncome strategy (Investment Solutions): keep two years of payments — $156,000 ($78,000 × 2) — in cash and term deposits (both available on the Select menu) as an income 'bucket', and invest the remaining $1,094,000 in the Balanced model; top up the bucket from Balanced each year. Estimated Caldova fees on the pension: administration $2,000 + account-keeping $180 + Balanced investment fees $4,157.20 (0.38% of $1,094,000) = about $6,337.20 a year.",
+  "severity": "medium",
+  "department": "Benefits & Eligibility",
+  "tags": [
+    "george-papadopoulos",
+    "REQ-20261109-DEMO03",
+    "CP-3077881",
+    "minimum-drawdown",
+    "minimum-pension-payment",
+    "pro-rata",
+    "227-days",
+    "38870",
+    "5-percent",
+    "age-65-74",
+    "rounding-nearest-10",
+    "cash-bucket",
+    "156000",
+    "balanced-model"
+  ],
+  "lastUpdated": "2026-11-09T02:20:00Z"
+}

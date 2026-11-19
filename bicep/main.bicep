@@ -1,4 +1,4 @@
-@description('Base resource name abbreviation for the Zava Claims demo')
+@description('Base resource name abbreviation for the Caldova Wealth demo (Wealth Team in a Day)')
 param baseName string = 'zc'
 
 @description('Azure region for all resources')
@@ -8,8 +8,8 @@ param location string = 'eastus2'
 param principals array = []
 
 var commonTags = {
-  workload: 'zava-claims-agent'
-  demo: 'claims-office'
+  workload: 'caldova-super-agent'
+  demo: 'wealth-operations-office'
 }
 
 // Short, deterministic suffix for globally-unique resource names (storage, key vault).
@@ -64,7 +64,7 @@ module keyVault 'keyvault.bicep' = {
 }
 
 // ---------------------------------------------------------------------------
-// Azure AI Search (claims knowledge + policy requirement indexes)
+// Azure AI Search (wealth knowledge index: rules + member case files)
 // ---------------------------------------------------------------------------
 module aiSearch 'aisearch.bicep' = {
   name: 'aiSearchDeployment'
@@ -106,7 +106,7 @@ module appService 'appservice.bicep' = {
     modelDeploymentName: foundry.outputs.deploymentName
     bingConnectionId: foundry.outputs.bingProjectConnectionId
     searchConnectionId: foundry.outputs.aiSearchProjectConnectionId
-    searchIndexName: 'claims_knowledge'
+    searchIndexName: 'wealth_knowledge'
   }
 }
 
@@ -154,7 +154,7 @@ resource principalAIDeveloperRole 'Microsoft.Authorization/roleAssignments@2022-
 //
 // The backend Web App is the identity that signs Voice Live WebSocket
 // upgrades (CommunicationsVoiceLiveProxy.cs) and that drives the
-// ClaimsAgent factory + Foundry agent CRUD. Without these roles Voice
+// CaldovaAgentFactory + Foundry agent CRUD. Without these roles Voice
 // Live accepts the bearer token but rejects the agent attach with
 // "Failed to initialize AI agent, check connection string and the
 // identity permissions".
@@ -196,10 +196,11 @@ resource backendAIDeveloperRole 'Microsoft.Authorization/roleAssignments@2022-04
 //   can read/write documents directly when needed)
 // Foundry account & project managed identities → Search Index Data Reader +
 //   Search Service Contributor (so the AzureAISearchTool wired into each
-//   ClaimsAgent can issue queries against the claims_knowledge index using
+//   CaldovaAgent can issue queries against the wealth_knowledge index using
 //   the Foundry-side managed identity)
-// User principals → Search Index Data Contributor (operators running the
-//   ai-search/setup-index.ps1 / ingest-documents.ps1 helper scripts)
+// User principals → Search Index Data Contributor + Search Service Contributor
+//   (operators running the ai-search/setup-index.ps1 / ingest-documents.ps1
+//   helper scripts, which create the indexes and upload documents)
 // ---------------------------------------------------------------------------
 var searchIndexDataReaderRoleId = '1407120a-92aa-4202-b7e9-c0e197c71c8f'
 var searchIndexDataContributorRoleId = '8ebe5a00-799e-43f5-93ac-243d3dce84a7'
@@ -280,6 +281,19 @@ resource principalSearchIndexDataContributor 'Microsoft.Authorization/roleAssign
   }
 }]
 
+// ai-search/setup-index.ps1 creates the wealth_knowledge / wealth_rules
+// indexes, which needs Search Service Contributor (index management) on top
+// of the data-plane role above.
+resource principalSearchServiceContributor 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for principal in principals: {
+  name: guid(searchResource.id, principal.id, searchServiceContributorRoleId)
+  scope: searchResource
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', searchServiceContributorRoleId)
+    principalId: principal.id
+    principalType: principal.principalType
+  }
+}]
+
 // ---------------------------------------------------------------------------
 // Outputs
 // ---------------------------------------------------------------------------
@@ -306,5 +320,5 @@ output logAnalyticsName string = monitoring.outputs.logAnalyticsName
 
 output aiSearchName string = aiSearch.outputs.name
 output aiSearchEndpoint string = aiSearch.outputs.endpoint
-output aiSearchIndexName string = 'claims_knowledge'
+output aiSearchIndexName string = 'wealth_knowledge'
 output aiSearchProjectConnectionId string = foundry.outputs.aiSearchProjectConnectionId

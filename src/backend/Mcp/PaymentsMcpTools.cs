@@ -2,9 +2,9 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Text.Json;
 using ModelContextProtocol.Server;
-using ZavaClaims.App.Services;
+using CaldovaSuper.App.Services;
 
-namespace ZavaClaims.App.Mcp;
+namespace CaldovaSuper.App.Mcp;
 
 /// <summary>
 /// MCP tool surface for the Settlement Agent. Exposes the payment-flow

@@ -1,7 +1,8 @@
 /**
  * Visual palettes & style options for the voxel cast.
  *
- * Each entry maps to a persona in `docs/characters.md`. Style options
+ * Each entry maps to a persona in `personaData.ts` (staff and clients of
+ * Caldova Wealth Client Operations). Style options
  * (hair, glasses, beard, lower body shape, etc.) let the simple block
  * character read as a distinct individual — inspired by Mojang-style
  * voxel character packs.
@@ -52,91 +53,88 @@ export interface VoxelCharacterPalette {
 }
 
 export const PALETTES: Record<string, VoxelCharacterPalette> = {
-  // ----- Customers (mapped to the 5 personas in docs/characters.md) -----
-  // Michael — Home Insurance Customer (stressed homeowner, cap + stubble)
-  customerHome: {
-    skin: "#f3c79b", hair: "#5a3a25", shirt: "#4f8fd6", pants: "#2d3344",
-    shoes: "#1a1a1a", accent: "#ffffff", hairStyle: "cap", facial: "stubble",
-    shirtLogo: true,
+  // ----- Clients (one per scripted scenario in personaData.ts) -----
+  // Priya Natarajan (34) — new job at a Docklands fintech; young
+  // professional in a smart blue blazer with a ponytail.
+  customerOnboarding: {
+    skin: "#c68e6a", hair: "#1a1410", shirt: "#3a8fd6", pants: "#2a3344",
+    shoes: "#1a1a1a", accent: "#ffd166", hairStyle: "ponytail",
   },
-  // Aisha — Motor Insurance Customer (busy commuter, ponytail)
-  customerMotor: {
-    skin: "#e8b48a", hair: "#2d2418", shirt: "#d36b5b", pants: "#3a2f24",
-    shoes: "#1a1a1a", accent: "#ffd9a8", hairStyle: "ponytail",
+  // Grace Williams (63) — retired school principal travelling in Italy;
+  // grey bun, cardigan and a bright travel scarf.
+  customerProtection: {
+    skin: "#f3c79b", hair: "#c9c6c0", shirt: "#5a7fa8", pants: "#3a3a44",
+    shoes: "#3a2a20", accent: "#e8a33d", hairStyle: "bun", lowerBody: "skirt",
   },
-  // Tom — Small Business Owner (café owner, beanie + beard)
-  customerBusiness: {
-    skin: "#f5d2b3", hair: "#9a5a2a", shirt: "#7ab97a", pants: "#2a3344",
-    shoes: "#1a1a1a", accent: "#ffffff", hairStyle: "beanie", facial: "beard",
+  // George Papadopoulos (66) — retired electrical contractor; grey hair,
+  // glasses, moustache and his favourite mustard polo.
+  customerRetirement: {
+    skin: "#d9a37e", hair: "#bdbab4", shirt: "#d9a03a", pants: "#2d3344",
+    shoes: "#3a2a20", hairStyle: "short", glasses: true, facial: "moustache",
   },
-  // Grace — Travel Insurance Customer (frustrated traveller, bun)
-  customerTravel: {
-    skin: "#d9a37e", hair: "#1a1a1a", shirt: "#c188d4", pants: "#3a3a44",
-    shoes: "#1a1a1a", accent: "#ffd166", hairStyle: "bun", lowerBody: "skirt",
+  // Tom Bradley (47) — former Lygon St café owner; beanie and beard.
+  customerHardship: {
+    skin: "#f5d2b3", hair: "#7a5a3a", shirt: "#6f8f6a", pants: "#2a3344",
+    shoes: "#1a1a1a", accent: "#e8e2d6", hairStyle: "beanie", facial: "beard",
   },
-  // Robert — Life Insurance Beneficiary (quiet, formal, glasses)
-  customerLife: {
-    skin: "#e8c69a", hair: "#1f1a18", shirt: "#3a3a44", pants: "#1c1c22",
+  // Robert Chen (52) — acting for the family after his mother's death;
+  // quiet, dark formal suit, glasses.
+  customerBereavement: {
+    skin: "#e8c69a", hair: "#1f1a18", shirt: "#33353f", pants: "#1c1c22",
     shoes: "#1a1a1a", accent: "#22252e", hairStyle: "short", glasses: true,
   },
 
-  // ----- Staff (mapped to docs/characters.md staff cast) -----
-  // Staff shirts are deliberately matched to each cubicle's accent floor
-  // mat colour (see `cubicles` in officeScene.ts) so each role reads
-  // visually with their department zone at a glance.
-  // Iris — Claims Intake Officer (intake blue cubicle)
-  intakeOfficer: {
-    skin: "#f3c79b", hair: "#3a2418", shirt: "#3a5fb0", pants: "#3a2a55",
-    shoes: "#1a1a1a", accent: "#f4c463", hairStyle: "ponytail",
+  // ----- Staff (Caldova Client Operations team) -----
+  // Staff shirts are deliberately matched to each department's accent
+  // colour (see `cubicles` in officeScene.ts and the canon accents) so each
+  // role reads visually with their department zone at a glance.
+  // Olivia — Onboarding & Requests Officer (onboarding sky-blue cubicle)
+  onboardingOfficer: {
+    skin: "#f3c79b", hair: "#3a2418", shirt: "#0ea5e9", pants: "#1e3a5f",
+    shoes: "#1a1a1a", accent: "#ffd166", hairStyle: "ponytail",
     lowerBody: "dress",
   },
-  // Adam — Claims Assessor (assessor light-blue cubicle)
-  claimsAssessor: {
-    skin: "#e8b48a", hair: "#1a1a1a", shirt: "#6ec1ff", pants: "#2d3344",
+  // Ben — Benefits & Eligibility Assessor (benefits indigo cubicle)
+  benefitsAssessor: {
+    skin: "#e8b48a", hair: "#1a1a1a", shirt: "#6366f1", pants: "#2d3344",
     shoes: "#1a1a1a", accent: "#1c2230", hairStyle: "short", glasses: true,
     shirtLogo: true,
   },
-  // Lara — Loss Adjuster (loss-adjuster orange cubicle)
-  lossAdjuster: {
-    skin: "#d9a37e", hair: "#2d1a10", shirt: "#ffb347", pants: "#3a2f24",
+  // Ivy — Investment Analyst (investments amber cubicle)
+  investmentAnalyst: {
+    skin: "#d9a37e", hair: "#2d1a10", shirt: "#f59e0b", pants: "#3a2f24",
     shoes: "#1a1a1a", accent: "#3a2a20", hairStyle: "bun",
   },
-  // Felix — Fraud Investigator (fraud red cubicle)
-  fraudInvestigator: {
-    skin: "#e8b48a", hair: "#1a1a1a", shirt: "#e8504c", pants: "#1c2230",
-    shoes: "#1a1a1a", accent: "#ffd166", hairStyle: "long", glasses: true,
+  // Felix — Financial Crime Investigator (financial-crime red cubicle)
+  finCrimeInvestigator: {
+    skin: "#e8b48a", hair: "#1a1a1a", shirt: "#ef4444", pants: "#1c2230",
+    shoes: "#1a1a1a", accent: "#1c2230", hairStyle: "short", facial: "stubble",
   },
-  // Sam — Supplier Coordinator (supplier green cubicle)
-  supplierCoord: {
-    skin: "#f3c79b", hair: "#cfa050", shirt: "#2e8a6e", pants: "#3a3a44",
-    shoes: "#1a1a1a", accent: "#ffffff", hairStyle: "cap", facial: "beard",
-    shirtLogo: true,
+  // Rory — Transfers & Rollovers Coordinator (transfers emerald cubicle)
+  transfersCoord: {
+    skin: "#f3c79b", hair: "#b5562a", shirt: "#10b981", pants: "#3a3a44",
+    shoes: "#1a1a1a", accent: "#ffffff", hairStyle: "short", shirtLogo: true,
   },
-  // Seth — Settlement Officer (settlement brown cubicle)
-  settlementOfficer: {
-    skin: "#f5d2b3", hair: "#3a2418", shirt: "#a06a4c", pants: "#1c2230",
-    shoes: "#1a1a1a", accent: "#ffb347", hairStyle: "short",
+  // Penny — Payments Officer (payments purple cubicle)
+  paymentsOfficer: {
+    skin: "#f5d2b3", hair: "#6a3a1e", shirt: "#a855f7", pants: "#2a2440",
+    shoes: "#1a1a1a", accent: "#ffd166", hairStyle: "long", lowerBody: "skirt",
   },
-  // Cara — Customer Communications Specialist (comms magenta cubicle)
+  // Cara — Client Communications Specialist (comms pink cubicle)
   commsSpecialist: {
-    skin: "#e8c69a", hair: "#5a3a25", shirt: "#b56fbf", pants: "#3a3a44",
-    shoes: "#1a1a1a", accent: "#ffffff", hairStyle: "bun", lowerBody: "skirt",
+    skin: "#8d5a3b", hair: "#1a1410", shirt: "#ec4899", pants: "#3a3a44",
+    shoes: "#1a1a1a", accent: "#ffffff", hairStyle: "afro",
   },
-  // Theo — Claims Team Leader (grey suit, beard, confident)
+  // Theo — Client Operations Team Leader (beige suit, teal tie, beard)
   teamLeader: {
     skin: "#e8b48a", hair: "#5a4a35", shirt: "#cdb497", pants: "#2a2f3a",
-    shoes: "#1a1a1a", accent: "#1c2230", hairStyle: "short", facial: "beard",
-  },
-  // Jordan Pierce — Contents Claimant (apartment block, under fraud review)
-  customerContents: {
-    skin: "#c69770", hair: "#1a1a1a", shirt: "#7a6a8a", pants: "#2a2a32",
-    shoes: "#1a1a1a", accent: "#cfcfcf", hairStyle: "short", facial: "stubble",
+    shoes: "#1a1a1a", accent: "#14b8a6", hairStyle: "short", facial: "beard",
   },
 
   // ----- Ambient lobby cast (visual-only background staff) -----
   // Reception greeter — front-of-house in the lobby, smart navy dress,
-  // long hair, friendly accent scarf. Distinct from intakeOfficer so the
-  // two read as different roles when visible together.
+  // long hair, friendly accent scarf. Distinct from onboardingOfficer so
+  // the two read as different roles when visible together.
   receptionGreeter: {
     skin: "#f0c8a4", hair: "#2a1a12", shirt: "#2a3a5c", pants: "#2a3a5c",
     shoes: "#1a1a1a", accent: "#ffd166", hairStyle: "long",
@@ -152,5 +150,22 @@ export const PALETTES: Record<string, VoxelCharacterPalette> = {
     skin: "#d9a37e", hair: "#3a2418", shirt: "#7a4f2a", pants: "#3a2a20",
     shoes: "#1a1a1a", accent: "#ffb347", hairStyle: "cap", facial: "beard",
     shirtLogo: true,
+  },
+
+  // ----- Ambient Melbourne street cast (neighbourhood pedestrians) -----
+  // CBD commuter — charcoal suit, glasses, red tie.
+  cityCommuter: {
+    skin: "#e8c69a", hair: "#2a2420", shirt: "#3a4150", pants: "#22252e",
+    shoes: "#1a1a1a", accent: "#c44a3a", hairStyle: "short", glasses: true,
+  },
+  // Uni student — oversized hoodie, hood up.
+  cityStudent: {
+    skin: "#c68e6a", hair: "#4a5a7a", shirt: "#4a5a7a", pants: "#2d3344",
+    shoes: "#f4f0e6", hairStyle: "hood",
+  },
+  // Weekend jogger — bright running top, cap, black shorts.
+  cityJogger: {
+    skin: "#f5d2b3", hair: "#c8a050", shirt: "#f59e0b", pants: "#1c1c22",
+    shoes: "#f4f0e6", accent: "#1c2230", hairStyle: "cap",
   },
 };

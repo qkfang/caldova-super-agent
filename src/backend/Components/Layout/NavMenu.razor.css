@@ -1,4 +1,4 @@
-/* Sidebar — Zava Insurance branded navigation. */
+/* Sidebar — Caldova Wealth branded navigation. */
 
 .brand-row {
     min-height: 4.25rem;
@@ -14,7 +14,7 @@
     align-items: center;
     gap: 0.7rem;
     text-decoration: none;
-    color: var(--zava-text-strong, #fff);
+    color: var(--cw-text-strong, #fff);
 }
 
 .brand-link:hover { text-decoration: none; }

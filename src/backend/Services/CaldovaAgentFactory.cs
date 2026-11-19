@@ -2,25 +2,25 @@ using Azure.AI.Projects;
 using Azure.Identity;
 using Microsoft.Extensions.Logging;
 using OpenAI.Responses;
-using ZavaClaims.Agents;
+using CaldovaSuper.Agents;
 
-namespace ZavaClaims.App.Services;
+namespace CaldovaSuper.App.Services;
 
 /// <summary>
-/// Factory for the Azure AI Foundry claims agents defined in the
-/// <c>agent</c> project. The Blazor app references <c>src/agent</c> as a
-/// .NET library and uses this factory to invoke the same agents the CLI
-/// host exposes — analogous to how
+/// Factory for the Caldova Wealth Foundry agents defined in the <c>agent</c>
+/// project. The Blazor app references <c>src/agent</c> as a .NET library and
+/// uses this factory to invoke the same agents the CLI host exposes —
+/// analogous to how
 /// <see href="https://github.com/qkfang/quant-agent/tree/main/src/quantapi">quantapi</see>
 /// instantiates <c>QuantAgent</c> subclasses from <c>quantlib</c>.
 /// </summary>
-public class ClaimsAgentFactory
+public class CaldovaAgentFactory
 {
-    private readonly ClaimsAgentOptions _options;
+    private readonly CaldovaAgentOptions _options;
     private readonly ILoggerFactory _loggerFactory;
     private readonly Lazy<AIProjectClient> _aiProjectClient;
 
-    public ClaimsAgentFactory(ClaimsAgentOptions options, ILoggerFactory loggerFactory)
+    public CaldovaAgentFactory(CaldovaAgentOptions options, ILoggerFactory loggerFactory)
     {
         _options = options;
         _loggerFactory = loggerFactory;
@@ -31,22 +31,22 @@ public class ClaimsAgentFactory
     public bool IsConfigured => _options.IsConfigured;
 
     /// <summary>
-    /// Create an agent for the given role identifier. The identifier is the
-    /// same kebab-case name used by the CLI flags in <c>src/agent</c>
-    /// (e.g. <c>intake</c>, <c>assessment</c>, <c>loss-adjuster</c>,
-    /// <c>fraud</c>, <c>supplier</c>, <c>settlement</c>,
-    /// <c>communications</c>, <c>team-leader</c>).
+    /// Create an agent for the given role key. Keys match the CLI flags in
+    /// <c>src/agent</c> (<c>onboarding</c>, <c>benefits</c>,
+    /// <c>investments</c>, <c>fincrime</c>, <c>transfers</c>,
+    /// <c>payments</c>, <c>communications</c>, <c>communications-voice</c>,
+    /// <c>team-leader</c>); the page route ids are accepted as aliases.
     /// </summary>
-    /// <param name="role">Kebab-case role identifier.</param>
+    /// <param name="role">Kebab-case role key or route id.</param>
     /// <param name="extraTools">Optional Foundry response tools (e.g. an
     /// MCP tool surface) to wire onto the agent in addition to the default
     /// Azure AI Search and Bing tools.</param>
-    public ClaimsAgent Create(string role, IList<ResponseTool>? extraTools = null)
+    public CaldovaAgent Create(string role, IList<ResponseTool>? extraTools = null)
     {
         if (!IsConfigured)
         {
             throw new InvalidOperationException(
-                "Claims agent factory is not configured. Set AZURE_AI_PROJECT_ENDPOINT and " +
+                "Caldova agent factory is not configured. Set AZURE_AI_PROJECT_ENDPOINT and " +
                 "AZURE_AI_MODEL_DEPLOYMENT_NAME in appsettings.json or environment variables.");
         }
 
@@ -61,27 +61,25 @@ public class ClaimsAgentFactory
 
         return role.ToLowerInvariant() switch
         {
-            "intake" or "claims-intake"
-                => new ClaimsIntakeAgent(client, deployment, search, index, bing, _loggerFactory.CreateLogger<ClaimsIntakeAgent>()),
-            "assessment" or "claims-assessment"
-                => new ClaimsAssessmentAgent(client, deployment, search, index, bing, _loggerFactory.CreateLogger<ClaimsAssessmentAgent>()),
-            "loss-adjuster" or "loss-adjusting"
-                => new LossAdjusterAgent(client, deployment, search, index, bing, _loggerFactory.CreateLogger<LossAdjusterAgent>(), mcpUri),
-            "fraud" or "fraud-investigation"
-                => new FraudInvestigationAgent(client, deployment, search, index, bing, _loggerFactory.CreateLogger<FraudInvestigationAgent>()),
-            "supplier" or "supplier-coordination"
-                => new SupplierCoordinatorAgent(client, deployment, search, index, bing,
-                    string.IsNullOrWhiteSpace(_options.AppMcpUrl) ? null : $"{_options.AppMcpUrl!.TrimEnd('/')}/mcp",
-                    _loggerFactory.CreateLogger<SupplierCoordinatorAgent>()),
-            "settlement"
-                => new SettlementAgent(client, deployment, search, index, bing, _loggerFactory.CreateLogger<SettlementAgent>(), extraTools),
-            "communications" or "customer-communications"
-                => new CustomerCommunicationsAgent(client, deployment, search, index, bing, _loggerFactory.CreateLogger<CustomerCommunicationsAgent>()),
-            "communications-voice" or "customer-communications-voice"
-                => new CustomerCommunicationsVoiceAgent(client, deployment, search, index, bing, _loggerFactory.CreateLogger<CustomerCommunicationsVoiceAgent>()),
+            "onboarding" or "intake"
+                => new OnboardingAgent(client, deployment, search, index, bing, _loggerFactory.CreateLogger<OnboardingAgent>()),
+            "benefits" or "benefits-eligibility"
+                => new BenefitsEligibilityAgent(client, deployment, search, index, bing, _loggerFactory.CreateLogger<BenefitsEligibilityAgent>()),
+            "investments" or "investment-analyst"
+                => new InvestmentAnalystAgent(client, deployment, search, index, bing, _loggerFactory.CreateLogger<InvestmentAnalystAgent>(), mcpUri),
+            "fincrime" or "financial-crime"
+                => new FinancialCrimeAgent(client, deployment, search, index, bing, _loggerFactory.CreateLogger<FinancialCrimeAgent>()),
+            "transfers" or "transfers-rollovers"
+                => new TransfersRolloversAgent(client, deployment, search, index, bing, mcpUri, _loggerFactory.CreateLogger<TransfersRolloversAgent>()),
+            "payments"
+                => new PaymentsAgent(client, deployment, search, index, bing, _loggerFactory.CreateLogger<PaymentsAgent>(), extraTools),
+            "communications" or "client-communications"
+                => new ClientCommunicationsAgent(client, deployment, search, index, bing, _loggerFactory.CreateLogger<ClientCommunicationsAgent>()),
+            "communications-voice" or "client-communications-voice"
+                => new ClientCommunicationsVoiceAgent(client, deployment, search, index, bing, _loggerFactory.CreateLogger<ClientCommunicationsVoiceAgent>()),
             "team-leader" or "leader"
                 => new TeamLeaderAgent(client, deployment, search, index, bing, _loggerFactory.CreateLogger<TeamLeaderAgent>()),
-            _ => throw new ArgumentException($"Unknown claims agent role: '{role}'.", nameof(role))
+            _ => throw new ArgumentException($"Unknown Caldova agent role: '{role}'.", nameof(role))
         };
     }
 

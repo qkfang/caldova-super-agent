@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace ZavaClaims.App.Services;
+namespace CaldovaSuper.App.Services;
 
 /// <summary>
 /// One sample document available to the Fraud Investigation Try-It-Out tab.
@@ -92,7 +92,7 @@ public class FraudCaseDocumentStore
 
     /// <summary>
     /// Deterministic mapping of seeded claim sample IDs (from
-    /// <see cref="ZavaClaims.App.Models.IntakeSampleCatalog"/>) to the
+    /// <see cref="CaldovaSuper.App.Models.IntakeSampleCatalog"/>) to the
     /// fraud sample doc IDs that should appear as that claim's case file.
     /// </summary>
     private void SeedCaseDefaults()

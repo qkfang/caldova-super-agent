@@ -1,11 +1,12 @@
 /**
- * Single source of truth for staff and customer persona data.
+ * Single source of truth for staff and client persona data.
  *
  * All persona-level facts (name, role/situation, personality, typical line,
- * scenario palette, claim type & range) live here so that the simulation,
- * the profile-card UI, and the scenario picker never disagree.
+ * scenario palette, request type & amount range) live here so that the
+ * simulation, the profile-card UI, and the scenario picker never disagree.
  *
- * Mirrors `docs/characters.md` and matches the palette keys defined in
+ * Mirrors the Caldova Wealth canon (team in docs/foundry_agents.md and
+ * docs/characters.md) and matches the palette keys defined in
  * `characterPalettes.ts`.
  */
 import type { PALETTES } from "./characterPalettes";
@@ -13,33 +14,35 @@ import type { PALETTES } from "./characterPalettes";
 export type PaletteKey = keyof typeof PALETTES;
 
 export type StaffRole =
-  | "Claims Intake Officer"
-  | "Claims Assessor"
-  | "Loss Adjuster"
-  | "Fraud Investigator"
-  | "Supplier Coordinator"
-  | "Settlement Officer"
-  | "Customer Communications Specialist"
-  | "Claims Team Leader";
+  | "Onboarding & Requests Officer"
+  | "Benefits & Eligibility Assessor"
+  | "Investment Analyst"
+  | "Financial Crime Investigator"
+  | "Transfers & Rollovers Coordinator"
+  | "Payments Officer"
+  | "Client Communications Specialist"
+  | "Client Operations Team Leader";
 
 export interface StaffPersona {
   /** Stable id used for click hitboxes and HUD agent cards. */
   id: string;
   name: string;
   role: StaffRole;
+  /** Department name shown in the UI (e.g. "Benefits & Eligibility"). */
+  department: string;
   /** Human-readable role/duties summary (one line). */
   role_short: string;
   palette: PaletteKey;
-  /** Swatch color used in the agents panel. */
+  /** Swatch color used in the agents panel (department accent). */
   color: string;
   personality: string;
   /** Bullet list of "what they do". */
   responsibilities: string[];
-  /** Verbatim line from docs/characters.md. */
+  /** Signature line for the profile card. */
   typical_line: string;
-  /** Default ambient (non-pipeline) status messages — used by ambient staff. */
+  /** Rotating status lines shown while the staff member is idle at their desk. */
   ambient: string[];
-  /** True for staff that participate in the active claim pipeline. */
+  /** True for staff that participate in every case (the core pipeline). */
   active_in_pipeline: boolean;
   /**
    * Id of the matching agent walkthrough page in the companion `src/backend`
@@ -50,24 +53,29 @@ export interface StaffPersona {
 }
 
 // Order matches docs/scenario-N-*.md and scenarioNumbers.ts:
-//   1 motor, 2 travel, 3 home, 4 business, 5 life.
-export type ScenarioId = "motor" | "travel" | "home" | "business" | "life";
+//   1 onboarding, 2 protection, 3 retirement, 4 hardship, 5 bereavement.
+export type ScenarioId =
+  | "onboarding"
+  | "protection"
+  | "retirement"
+  | "hardship"
+  | "bereavement";
 
 export interface CustomerPersona {
   id: ScenarioId;
   name: string;
   /** Short summary used in scenario-picker cards. */
   situation: string;
-  /** Long-form narrative — used in profile card. */
+  /** Long-form narrative — used in the profile card and the banner. */
   situation_long: string;
   need: string[];
   concern: string;
   personality: string;
   typical_line: string;
   palette: PaletteKey;
-  /** Headline claim type (matches existing CUSTOMER_SCENARIOS). */
-  claim_type: string;
-  /** Random claim amount range. */
+  /** Headline request type (matches the backend RequestType values). */
+  request_type: string;
+  /** Amount range used when this persona appears as an unscripted client. */
   amount_min: number;
   amount_max: number;
   /** Scenario "color" used to tint the now-playing banner / log entries. */
@@ -75,198 +83,237 @@ export interface CustomerPersona {
 }
 
 /* ------------------------------------------------------------------------ */
-/* Staff cast — Claims Office personas, mirroring docs/characters.md         */
+/* Staff cast — Caldova Client Operations                                   */
 /* ------------------------------------------------------------------------ */
 
 export const STAFF_PERSONAS: StaffPersona[] = [
   {
-    id: "intake-1",
-    name: "Iris",
-    role: "Claims Intake Officer",
-    role_short: "First point of contact when a customer lodges a claim.",
-    palette: "intakeOfficer",
-    color: "#f4c463",
-    personality: "Calm, organised, patient, and reassuring.",
-    responsibilities: [
-      "Records claim details",
-      "Checks basic policy information",
-      "Confirms the type of loss or incident",
-      "Requests required documents",
-      "Explains the next steps in the claims process",
-    ],
-    typical_line:
-      "I’ll lodge this now and send you a checklist of what we need to assess it.",
-    ambient: ["Awaiting next claim"],
-    active_in_pipeline: true,
-    app_agent_id: "claims-intake",
-  },
-  {
-    id: "assessor-1",
-    name: "Adam",
-    role: "Claims Assessor",
+    id: "onboarding-1",
+    name: "Olivia",
+    role: "Onboarding & Requests Officer",
+    department: "Onboarding & Requests",
     role_short:
-      "Reviews the claim and determines whether it is covered under the policy.",
-    palette: "claimsAssessor",
-    color: "#5fb8a8",
-    personality: "Analytical, detail-focused, fair, and careful.",
+      "The front door for every application and member request — new accounts, pensions, withdrawals, rollovers and death notifications.",
+    palette: "onboardingOfficer",
+    color: "#0ea5e9",
+    personality: "Calm, meticulous and welcoming.",
     responsibilities: [
-      "Reviews policy wording",
-      "Checks coverage, limits, and exclusions",
-      "Assesses submitted evidence",
-      "Requests missing information",
-      "Recommends approval, partial approval, or denial",
+      "Reads adviser emails, application forms and member requests",
+      "Extracts every field and runs the NIGO (not in good order) checklist",
+      "Checks ID verification, TFN, signatures, fee consent, nominations and investment choices",
+      "Opens the Member Case and sets its priority",
+      "Routes the case to the right specialist team",
     ],
     typical_line:
-      "Based on the policy, the damage appears covered, but we still need the repair report.",
-    ambient: ["Awaiting next claim"],
-    active_in_pipeline: true,
-    app_agent_id: "claims-assessment",
-  },
-  {
-    id: "loss-1",
-    name: "Lara",
-    role: "Loss Adjuster",
-    role_short:
-      "Investigates damage or complex losses and estimates repair costs.",
-    palette: "lossAdjuster",
-    color: "#7a9c5a",
-    personality: "Methodical, evidence-driven, fair, and field-savvy.",
-    responsibilities: [
-      "Inspects damaged property",
-      "Reviews inspection photos and reports",
-      "Estimates repair / replacement costs",
-      "Drafts the loss assessment report",
-      "Coordinates with contractors",
-    ],
-    typical_line:
-      "I’ll review the inspection photos and confirm the repair scope today.",
+      "I’ll get this set up properly first time — let me check nothing’s missing.",
     ambient: [
-      "Reviewing inspection photos",
-      "Estimating repair costs",
-      "Drafting assessment report",
-      "Calling contractor",
+      "Awaiting next request",
+      "Checking NIGO items",
+      "Chasing a missing TFN declaration",
+      "Logging adviser application packs",
+      "Opening new Member Cases",
+    ],
+    active_in_pipeline: true,
+    app_agent_id: "onboarding",
+  },
+  {
+    id: "benefits-1",
+    name: "Ben",
+    role: "Benefits & Eligibility Assessor",
+    department: "Benefits & Eligibility",
+    role_short:
+      "Applies the trust deed, PDS and super law to every request, and recommends approve, partial or decline.",
+    palette: "benefitsAssessor",
+    color: "#6366f1",
+    personality: "Analytical, fair and precise.",
+    responsibilities: [
+      "Checks conditions of release and preservation",
+      "Applies financial-hardship criteria and payment limits",
+      "Tests transfer balance cap space and minimum pension drawdowns",
+      "Confirms BDBN validity and SIS dependants",
+      "Verifies adviser fee consent (s99FA) and TMD fit — always citing the clause",
+    ],
+    typical_line:
+      "You’re eligible — here’s the rule that says so, and here’s what we still need.",
+    ambient: [
+      "Awaiting next request",
+      "Reviewing BDBN witness declarations",
+      "Checking a condition of release",
+      "Calculating minimum drawdowns",
+      "Testing transfer balance cap space",
+    ],
+    active_in_pipeline: true,
+    app_agent_id: "benefits-eligibility",
+  },
+  {
+    id: "investments-1",
+    name: "Ivy",
+    role: "Investment Analyst",
+    department: "Investment Solutions",
+    role_short:
+      "Owns the model-portfolio menu and makes sure every portfolio still fits the client’s plan.",
+    palette: "investmentAnalyst",
+    color: "#f59e0b",
+    personality: "Curious, data-driven and plain-speaking.",
+    responsibilities: [
+      "Checks model fit against the risk profile and Statement of Advice",
+      "Compares model portfolios on fees ($ p.a.), returns and risk",
+      "Builds income and cash-bucket strategies for pensions",
+      "Plans redemptions and switches",
+      "Produces the client workbook and charts",
+    ],
+    typical_line:
+      "Let’s make sure the portfolio still fits the plan — and show the fees in dollars, not just percentages.",
+    ambient: [
+      "Comparing model portfolios",
+      "Reviewing the Growth model fact sheet",
+      "Building a pension cash bucket",
+      "Checking buy/sell spreads",
+      "Updating the fee comparison workbook",
     ],
     active_in_pipeline: false,
-    app_agent_id: "loss-adjuster",
+    app_agent_id: "investment-analyst",
   },
   {
-    id: "fraud-1",
+    id: "fincrime-1",
     name: "Felix",
-    role: "Fraud Investigator",
+    role: "Financial Crime Investigator",
+    department: "Financial Crime",
     role_short:
-      "Reviews suspicious or inconsistent claims to protect the business.",
-    palette: "fraudInvestigator",
-    color: "#7a4f9c",
-    personality: "Sharp, sceptical, evidence-led, and discreet.",
+      "Protects members from fraud, scams and identity takeover, and runs AML/CTF checks.",
+    palette: "finCrimeInvestigator",
+    color: "#ef4444",
+    personality: "Observant, sceptical and discreet — never accusatory.",
     responsibilities: [
-      "Cross-checks claim history",
-      "Verifies timeline and statements",
-      "Reviews supporting documents",
-      "Flags anomalies for further review",
-      "Compiles investigation notes",
+      "Checks ID documents for tampering",
+      "Builds the account-activity timeline (contact-detail changes, new devices)",
+      "Screens for PEP and sanctions matches",
+      "Flags SMSF rollover red flags with an explainable risk score",
+      "Recommends holds and call-backs — an SMR to AUSTRAC stays a human decision",
     ],
     typical_line:
-      "I’m running a quick fraud check on this claim — usually clears within the hour.",
+      "Something doesn’t add up — let’s verify with the member on a number we already trust.",
     ambient: [
-      "Cross-checking claim history",
-      "Verifying timeline",
-      "Compiling investigation notes",
-      "Reviewing documents",
+      "Running PEP & sanctions screening",
+      "Reviewing change-of-details alerts",
+      "Checking new-device logins",
+      "Verifying ID document security features",
+      "Reviewing SMSF rollover red flags",
     ],
     active_in_pipeline: false,
-    app_agent_id: "fraud-investigation",
+    app_agent_id: "financial-crime",
   },
   {
-    id: "supplier-1",
-    name: "Sam",
-    role: "Supplier Coordinator",
+    id: "transfers-1",
+    name: "Rory",
+    role: "Transfers & Rollovers Coordinator",
+    department: "Transfers & Rollovers",
     role_short:
-      "Arranges repairers, builders, assessors, and other third parties.",
-    palette: "supplierCoord",
-    color: "#e07a3a",
-    personality: "Practical, well-connected, and customer-aware.",
+      "Moves money between Caldova and the outside world — SuperStream rollovers, SMSFs, in-specie transfers and the ATO.",
+    palette: "transfersCoord",
+    color: "#10b981",
+    personality: "Organised, persistent and counterparty-savvy.",
     responsibilities: [
-      "Books approved repairers and contractors",
-      "Tracks supplier quotes and timelines",
-      "Schedules inspections",
-      "Coordinates rental cars and temporary services",
-      "Updates supplier status",
+      "Looks up external funds by USI and lodges SuperStream rollovers",
+      "Warns when a rollover will end insurance cover",
+      "Verifies SMSFs with the ATO SMSF verification service (SVS)",
+      "Generates transfer and rollover request forms",
+      "Tracks the 3-business-day SLA and chases counterparties",
     ],
     typical_line:
-      "I’ll line up an approved repairer today and book a rental car so you’re not stuck.",
+      "Your old funds have the request — the money should land within three business days.",
     ambient: [
-      "Booking approved repairer",
-      "Tracking supplier quotes",
-      "Scheduling inspection",
-      "Updating supplier status",
+      "Reconciling SuperStream rollovers",
+      "Running SVS check",
+      "Chasing an external fund",
+      "Tracking rollover SLAs",
+      "Lodging transfer balance account reports",
     ],
     active_in_pipeline: false,
-    app_agent_id: "supplier-coordinator",
+    app_agent_id: "transfers-rollovers",
   },
   {
-    id: "settlement-1",
-    name: "Seth",
-    role: "Settlement Officer",
-    role_short: "Calculates the payout and prepares settlement.",
-    palette: "settlementOfficer",
-    color: "#3a5fb0",
-    personality: "Numbers-focused, precise, transparent, and customer-fair.",
+    id: "payments-1",
+    name: "Penny",
+    role: "Payments Officer",
+    department: "Payments",
+    role_short:
+      "Releases money correctly — lump sums, pension payments, death benefits, hardship payments and rollovers out.",
+    palette: "paymentsOfficer",
+    color: "#a855f7",
+    personality: "Precise, transparent and unflappable.",
     responsibilities: [
-      "Calculates the final settlement amount",
-      "Applies excess and policy limits",
-      "Prepares payment instructions",
-      "Confirms settlement details with the customer",
+      "Validates payee and bank details",
+      "Splits tax-free and taxable components",
+      "Calculates PAYG withholding",
+      "Checks authority limits and raises a Microsoft Teams approval card",
+      "Releases money only after human approval, and invests incoming rollovers",
     ],
     typical_line:
-      "Once we deduct the excess, your settlement comes to $4,820 — paid into your nominated account.",
-    ambient: ["Awaiting next claim"],
+      "Gross $10,000, tax withheld $2,068 — $7,932 lands in your account on Friday.",
+    ambient: [
+      "Awaiting next request",
+      "Validating payee BSB",
+      "Calculating PAYG withholding",
+      "Preparing the pension payment run",
+      "Investing incoming rollovers",
+    ],
     active_in_pipeline: true,
-    app_agent_id: "settlement",
+    app_agent_id: "payments",
   },
   {
     id: "comms-1",
     name: "Cara",
-    role: "Customer Communications Specialist",
+    role: "Client Communications Specialist",
+    department: "Client Communications",
     role_short:
-      "Keeps the customer informed and supported throughout the claim.",
+      "Talks to members and advisers — clear updates, letters and calls in plain English.",
     palette: "commsSpecialist",
-    color: "#c14a7a",
-    personality: "Warm, articulate, empathetic, and clear.",
+    color: "#ec4899",
+    personality: "Warm, clear and empathetic.",
     responsibilities: [
-      "Sends status updates and outcome letters",
-      "Explains decisions in plain English",
-      "Handles customer questions and concerns",
-      "Coordinates timely responses across departments",
-      "Ensures empathetic, on-brand messaging",
+      "Drafts member letters, adviser updates, SMS and call scripts",
+      "Explains decisions in plain English — no jargon",
+      "Matches tone for bereavement, hardship and scam victims",
+      "Checks every message for required disclosures and IDR/AFCA rights",
+      "Takes calls as Cara through the voice agent",
     ],
-    typical_line:
-      "I’ll send you an update today and walk you through what happens next.",
-    ambient: ["Awaiting next claim"],
+    typical_line: "I’ll explain exactly what happens next — no jargon.",
+    ambient: [
+      "Awaiting next request",
+      "Drafting an adviser update",
+      "Plain-English check on a member letter",
+      "Returning a member call",
+      "Sending an SMS confirmation",
+    ],
     active_in_pipeline: true,
-    app_agent_id: "customer-communications",
+    app_agent_id: "client-communications",
   },
   {
     id: "lead-1",
     name: "Theo",
-    role: "Claims Team Leader",
+    role: "Client Operations Team Leader",
+    department: "Team Leader Office",
     role_short:
-      "Monitors escalations, workload, and quality across the team.",
+      "Runs the floor — workload, SLAs, IDR clocks, approvals, quality and vulnerable members.",
     palette: "teamLeader",
-    color: "#cdb497",
-    personality: "Calm, decisive, supportive, and quality-focused.",
+    color: "#14b8a6",
+    personality: "Decisive, supportive and commercially aware.",
     responsibilities: [
-      "Reviews escalations and high-value claims",
-      "Monitors team workload and SLAs",
-      "Coaches staff",
-      "Approves complex or sensitive claims",
+      "Monitors queues, rollover SLAs and IDR clocks",
+      "Approves declines, partial approvals and financial-crime blocks",
+      "Personally reviews vulnerable-member cases",
+      "Samples completed cases for quality",
+      "Coordinates the specialist agents on complex cases",
     ],
     typical_line:
-      "Let me have a look — we’ll make sure this is handled right.",
+      "Let’s get this right for the member — I’ll take the approval.",
     ambient: [
-      "Reviewing escalations",
-      "Monitoring team workload",
-      "Coaching staff",
-      "Approving high-value claim",
+      "Reviewing the SLA dashboard",
+      "Checking IDR clocks",
+      "Approving a high-value payment",
+      "QA sampling closed cases",
+      "Coaching the team",
     ],
     active_in_pipeline: false,
     app_agent_id: "team-leader",
@@ -274,126 +321,132 @@ export const STAFF_PERSONAS: StaffPersona[] = [
 ];
 
 /* ------------------------------------------------------------------------ */
-/* Customer cast — five claim scenarios from docs/characters.md             */
+/* Client cast — five scripted Melbourne life events                        */
 /* ------------------------------------------------------------------------ */
 
 export const CUSTOMER_PERSONAS: CustomerPersona[] = [
   // Order matches docs/scenario-N-*.md and scenarioNumbers.ts:
-  //   1. motor   2. travel   3. home   4. business   5. life
+  //   1. onboarding   2. protection   3. retirement   4. hardship   5. bereavement
   {
-    id: "motor",
-    name: "Aisha",
-    situation: "Rear-ended at an intersection.",
+    id: "onboarding",
+    name: "Priya Natarajan",
+    situation:
+      "Starting a new job in Docklands — consolidating her old super into one Caldova account.",
     situation_long:
-      "Her car was damaged in a rear-end accident. She depends on her car for work and cannot afford long delays.",
+      "Priya (34) is a product manager who has just started at a Docklands fintech and lives in a Southbank apartment. Her adviser, Hannah Lewis of Yarra Private Wealth, has sent Caldova an application pack for a new Caldova Super (Select) account in the Growth model, consolidating about $138,200 from Southern Cross Industry Super and Harbourline Retail Super.",
     need: [
-      "Wants a repairer assigned",
-      "Needs help arranging a rental car",
-      "Wants updates on repair timing",
+      "One super account, set up properly and digitally",
+      "Her two old funds (about $138,200) rolled over without fuss",
+      "The Growth model portfolio from her Statement of Advice",
+      "Her partner Arjun nominated as her beneficiary",
     ],
     concern:
-      "She depends on her car for work and cannot afford long delays.",
-    personality: "Busy, direct, and time-sensitive.",
+      "She is busy with the new job — she doesn’t want paperwork bouncing back, or to lose anything valuable when her old funds close.",
+    personality: "Busy, organised, and wants it done digitally.",
     typical_line:
-      "I use the car every day, so I need to understand the timeline.",
-    palette: "customerMotor",
-    claim_type: "Motor — rear-end collision",
-    amount_min: 800,
-    amount_max: 9500,
-    color: "#d36b5b",
-  },
-  {
-    id: "travel",
-    name: "Grace",
-    situation: "Luggage lost during an overseas trip.",
-    situation_long:
-      "Her luggage was lost during an overseas trip. She does not have receipts for every lost item.",
-    need: [
-      "Wants reimbursement for clothing, medication, and essential items",
-      "Needs guidance on what documents are acceptable",
-      "Wants a simple process while travelling",
-    ],
-    concern:
-      "She does not have receipts for every lost item.",
-    personality: "Frustrated, overwhelmed, and looking for practical help.",
-    typical_line:
-      "I bought these things years ago. I don’t know how I’m supposed to prove every purchase.",
-    palette: "customerTravel",
-    claim_type: "Travel — lost luggage",
-    amount_min: 200,
-    amount_max: 4000,
-    color: "#c188d4",
-  },
-  {
-    id: "home",
-    name: "Michael",
-    situation: "Burst pipe damaged the kitchen.",
-    situation_long:
-      "His kitchen was damaged after a burst pipe. The family cannot properly use the kitchen, and he is unsure whether water damage is covered.",
-    need: [
-      "Wants repairs approved quickly",
-      "Needs clear instructions on what evidence to provide",
-      "Wants to know whether temporary accommodation or urgent repairs are covered",
-    ],
-    concern:
-      "His family cannot properly use the kitchen, and he is unsure whether water damage is covered.",
-    personality: "Stressed, practical, and eager for a fast answer.",
-    typical_line:
-      "I just need to know if this is covered and how soon repairs can start.",
-    palette: "customerHome",
-    claim_type: "Home — burst pipe damage",
-    amount_min: 1500,
-    amount_max: 18000,
+      "I’ve got three super accounts from old jobs — I just want one, set up properly.",
+    palette: "customerOnboarding",
+    request_type: "New account & consolidation",
+    amount_min: 95000,
+    amount_max: 185000,
     color: "#3a8fd6",
   },
   {
-    id: "business",
-    name: "Tom",
-    situation: "Café smoke-damaged after an electrical fire.",
+    id: "protection",
+    name: "Grace Williams",
+    situation:
+      "Travelling in Italy — someone is trying to move her super while she’s away.",
     situation_long:
-      "His café suffered smoke damage after an electrical fire. Every day the café is closed means lost revenue and staff uncertainty.",
+      "Grace (63) is a retired school principal from Williamstown with $612,400 in Caldova Super (Select). She left Melbourne Airport on 18 October for a long-planned trip through Italy and has a travel notice on file. While she is away, someone using her identity has changed her contact details and asked to roll her entire balance to a brand-new SMSF.",
     need: [
-      "Wants property damage assessed",
-      "Needs business interruption support",
-      "Wants clarity on lost income coverage",
+      "Her $612,400 kept safe",
+      "To be contacted on the number she already trusts",
+      "Her online access locked down and reset",
+      "Clear reassurance about what happens next",
     ],
     concern:
-      "Every day the café is closed means lost revenue and staff uncertainty.",
-    personality: "Anxious, business-minded, and focused on reopening quickly.",
-    typical_line:
-      "The repairs are one thing, but I’m also losing revenue while we’re closed.",
-    palette: "customerBusiness",
-    claim_type: "Business — café smoke damage",
-    amount_min: 4000,
-    amount_max: 35000,
-    color: "#e07a3a",
+      "She is overseas and had no idea anything was happening — the alert went to an email she isn’t checking.",
+    personality: "Independent and careful — rattled when she hears.",
+    typical_line: "I’m in Florence — I haven’t asked anyone to move my super!",
+    palette: "customerProtection",
+    request_type: "Rollover out to SMSF",
+    amount_min: 480000,
+    amount_max: 700000,
+    color: "#d9534f",
   },
   {
-    id: "life",
-    name: "Robert",
-    situation: "Beneficiary claim after bereavement.",
+    id: "retirement",
+    name: "George Papadopoulos",
+    situation: "Just retired — wants a steady pension income from his super.",
     situation_long:
-      "He is making a claim after a family member passed away. The paperwork feels overwhelming during a period of grief.",
+      "George (66) is a retired electrical contractor from Oakleigh, married to Helen (63). With his adviser Marcus Tan of Bayside Financial Partners, he is asking Caldova to start an account-based pension with $1,250,000 of his $1,284,600 balance, paying $78,000 a year in monthly instalments, with Helen as his reversionary beneficiary.",
     need: [
-      "Wants a compassionate and clear process",
-      "Needs help understanding required documents",
-      "Wants reassurance about timelines and next steps",
+      "A reliable $6,500 every month",
+      "Helen protected as his reversionary beneficiary",
+      "A cash buffer so he never has to sell in a downturn",
+      "Plain answers on tax and the transfer balance cap",
     ],
     concern:
-      "The paperwork feels overwhelming during a period of grief.",
-    personality: "Quiet, emotional, and sensitive to tone.",
+      "He is a little anxious about “running out” after forty years of earning.",
+    personality: "Proud, practical, and a little anxious about running out.",
     typical_line:
-      "I’m trying to get this sorted, but it’s a difficult time for the family.",
-    palette: "customerLife",
-    claim_type: "Life — beneficiary claim",
+      "Forty years on the tools — I just want a steady income and to stop worrying.",
+    palette: "customerRetirement",
+    request_type: "Pension commencement",
+    amount_min: 900000,
+    amount_max: 1400000,
+    color: "#e8a33d",
+  },
+  {
+    id: "hardship",
+    name: "Tom Bradley",
+    situation: "His Lygon St café has closed — he needs help catching up on bills.",
+    situation_long:
+      "Tom (47) ran a small café on Lygon Street, Carlton, until it closed in mid-2025. He has received JobSeeker continuously since 6 April 2026 and is behind on his mortgage and utility bills. He is applying to release $15,000 of his $84,300 Caldova Super (Essential) balance on severe financial hardship grounds.",
+    need: [
+      "Money to catch up on the mortgage and utilities",
+      "A quick, respectful decision",
+      "To understand the tax and the impact on his retirement",
+      "Pointers to free financial counselling",
+    ],
+    concern:
+      "He never thought he would need to touch his super and feels embarrassed asking.",
+    personality: "Proud, embarrassed and stressed.",
+    typical_line:
+      "I never thought I’d need to touch my super — I just need to catch up on the bills.",
+    palette: "customerHardship",
+    request_type: "Financial hardship release",
     amount_min: 5000,
-    amount_max: 50000,
+    amount_max: 15000,
+    color: "#e07a2c",
+  },
+  {
+    id: "bereavement",
+    name: "Robert Chen",
+    situation: "His mum has passed away — her pension is paid to the family.",
+    situation_long:
+      "Robert (52) lives in Box Hill. His mother, Mei Chen, died on 12 October 2026 aged 81, holding a Caldova Pension worth $486,200. Acting for himself and his sister Lily, he has sent Caldova the death certificate and their IDs. Mei’s binding nomination splits her benefit 50/50 between her two children.",
+    need: [
+      "A gentle, clear process during a hard time",
+      "Confirmation that Mum’s nomination will be followed",
+      "A plain-English explanation of the tax",
+      "A realistic timeline for the payments",
+    ],
+    concern:
+      "The paperwork feels overwhelming while the family is grieving.",
+    personality: "Quiet, grieving, and organised for the family.",
+    typical_line:
+      "Mum always said she’d sorted everything — I just want to do this right for her.",
+    palette: "customerBereavement",
+    request_type: "Death benefit (binding nomination)",
+    amount_min: 300000,
+    amount_max: 600000,
     color: "#6e7a8a",
   },
 ];
 
-// Scripted scenario beats now live in src/ui/src/scenarios/<id>.json
-// (see src/ui/src/scenarios/index.ts for the typed loader).
+// Scripted scenario beats live in src/scenarios/<id>.json
+// (see src/scenarios/index.ts for the typed loader).
 
 /* ------------------------------------------------------------------------ */
 /* Helpers                                                                  */

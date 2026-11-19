@@ -1,127 +1,112 @@
-# Claims Team in a Day — Agent Web App (`src/app`)
+# Wealth Team in a Day — Operations Web App (`src/backend`)
 
-A .NET 10 Blazor Server web app for the **Zava Insurance** claims office that gives
-every AI agent in [`src/agent/Agents`](../agent/Agents) its own page.
-
-Each page explains:
-
-- The agent's role and persona (mapped to a staff character from `docs/characters.md`).
-- The agent's purpose, responsibilities, tools, and human-approval rules.
-- Two worked **demo scenarios** showing how the agent helps with a real claim:
-  - **Scenario 1 — Michael Harris** (Home insurance, burst pipe / kitchen water damage).
-  - **Scenario 2 — Aisha Khan** (Motor insurance, rear-end collision).
-
-For each scenario the page shows:
-
-1. The trigger that wakes the agent (e.g. an inbound email or form submission).
-2. The actions the agent performs in order.
-3. The handoff to the next agent or human in the claims office.
+A .NET 10 Blazor Server web app for the **Caldova Wealth** client operations
+office. Every Microsoft Foundry agent in [`src/agent/Agents`](../agent/Agents)
+gets its own page with an **Overview** tab (role, responsibilities, tools,
+human-approval rules) and a **Try it out** tab that runs the agent live
+against a real Member Case. The same app hosts the five scenario walkthroughs,
+the in-process **MCP server** the Foundry agents call back into, and the
+Voice Live proxy for Cara.
 
 ## Run
 
 ```bash
-dotnet run --project src/app/app.csproj
+dotnet run --project src/backend/cs-backend.csproj
 ```
 
-Then open the URL shown in the console (typically <http://localhost:5212>).
+Then open <http://localhost:5212>. With no Foundry configuration every
+Try-it-out flow still completes using deterministic, scenario-accurate
+results — so the demo works offline. Configure Foundry (below) to see the
+real agents stream their reasoning, cite the knowledge base and call MCP
+tools.
 
 ## Routes
 
-- `/` — the claims office landing page with one card per agent.
-- `/agents/{id}` — the dedicated page for a given agent.
+| Route | What it is |
+| --- | --- |
+| `/` | Operations office landing page — hero, scenario chips and one card per agent |
+| `/agents/{id}` | Agent page (Overview + Try it out) |
+| `/scenarios/{id}` | Scenario walkthrough — what each agent does, step by step |
+| `/account` | "Ask AI" member chatbot with related-agent references |
+| `/mcp` | MCP server (investments, transfers, payments and Teams tools) |
 
-Valid agent ids:
+### Agent pages
 
-| Id                          | Department              |
-| --------------------------- | ----------------------- |
-| `claims-intake`             | Claims Intake           |
-| `claims-assessment`         | Claims Assessment       |
-| `loss-adjuster`             | Loss Adjusting          |
-| `fraud-investigation`       | Fraud Investigation     |
-| `supplier-coordinator`      | Supplier Coordination   |
-| `settlement`                | Settlement              |
-| `customer-communications`   | Customer Communications |
-| `team-leader`               | Team Leader Office      |
+| Route id | Agent (staff) | Try-it-out endpoints | Foundry capability on show |
+| --- | --- | --- | --- |
+| `onboarding` | Onboarding Agent (Olivia) | `/onboarding/*` | Document extraction → Member Case, NIGO checklist |
+| `benefits-eligibility` | Benefits & Eligibility Agent (Ben) | `/benefits/*` | Azure AI Search grounding with cited rules, structured JSON checklist |
+| `investment-analyst` | Investment Analyst Agent (Ivy) | `/investments/*` | MCP tools: fact sheets → comparison table, Mermaid chart, Excel workbook |
+| `financial-crime` | Financial Crime Agent (Felix) | `/fincrime/*` | Azure Content Understanding document authenticity + explainable risk |
+| `transfers-rollovers` | Transfers & Rollovers Agent (Rory) | `/transfers/*` | MCP tools: fund directory, SMSF verification, transfer-request PDF |
+| `payments` | Payments Agent (Penny) | `/payments/*` | MCP payment tools + Microsoft Teams approval card, gated release |
+| `client-communications` | Client Communications Agent (Cara) | `/communications/*` | Tone-matched drafts for members and advisers + Voice Live |
+| `team-leader` | Team Leader Agent (Theo) | `/team-leader/*` | Floor dashboard + multi-agent group chat orchestration |
+
+Every engage step shows five sub-tabs — **Agent Narrative**, **Reference**,
+**Agent Prompt & Tools** (from `/agents/{id}/metadata`), **Agent Input** and
+**Raw Output** — so the audience can see exactly what the agent saw, which
+tools it called and what it produced.
+
+### Seeded Member Cases
+
+`CaseStore.SeedDefaults()` creates one case per scenario at start-up, so every
+page has something to work on immediately (cases minted live by the
+Onboarding demo are added alongside them):
+
+| Case | Member | Request |
+| --- | --- | --- |
+| `REQ-20261103-DEMO01` | Priya Natarajan | New account & consolidation (via Yarra Private Wealth) |
+| `REQ-20261106-DEMO02` | Grace Williams | Rollover out to SMSF — identity takeover, blocked |
+| `REQ-20261109-DEMO03` | George Papadopoulos | Pension commencement (via Bayside Financial Partners) |
+| `REQ-20261111-DEMO04` | Tom Bradley | Financial hardship release (partial) |
+| `REQ-20261113-DEMO05` | Robert Chen for Mei Chen | Death benefit claim (binding nomination) |
 
 ## Configuration
 
 The app references the [`agent`](../agent) project as a .NET library and uses
-the same Azure AI Foundry configuration keys as the CLI host. Set them in
+the same Foundry configuration keys as the CLI host. Set them in
 `appsettings.json`, `appsettings.Development.json`, or as environment variables:
 
 | Key | Purpose |
 | --- | --- |
-| `AZURE_AI_PROJECT_ENDPOINT` | Azure AI Foundry project endpoint URL |
-| `AZURE_AI_MODEL_DEPLOYMENT_NAME` | Default chat model deployment (e.g. `gpt-4.1`) |
+| `AZURE_AI_PROJECT_ENDPOINT` | Microsoft Foundry project endpoint URL |
+| `AZURE_AI_MODEL_DEPLOYMENT_NAME` | Chat model deployment (e.g. `gpt-5.4`) |
 | `AZURE_TENANT_ID` | Optional tenant ID for `DefaultAzureCredential` |
-| `AZURE_AI_SEARCH_CONNECTION_ID` | Foundry connection ID for the claims knowledge base |
-| `AZURE_AI_SEARCH_INDEX_NAME` | Azure AI Search index name |
+| `AZURE_AI_SEARCH_CONNECTION_ID` | Foundry connection ID for Azure AI Search |
+| `AZURE_AI_SEARCH_INDEX_NAME` | Knowledge index (`wealth_knowledge` — see [`ai-search/`](../../ai-search)) |
 | `AZURE_BING_CONNECTION_ID` | Foundry Bing grounding connection ID |
+| `APP_MCP_URL` | Public base URL of this app (e.g. a dev tunnel) so Foundry can reach `/mcp` |
 
-When these values are set, the app's DI container exposes a
-`ClaimsAgentFactory` that constructs the same agents the CLI exposes (see
-[`Services/ClaimsAgentFactory.cs`](Services/ClaimsAgentFactory.cs)). Inject
-the factory into a Blazor component or service and call
-`factory.Create("intake").RunStreamingAsync(message)` — the same pattern
-[`quantapi`](https://github.com/qkfang/quant-agent/tree/main/src/quantapi)
-uses to invoke `quantlib` agents.
+When the endpoint and model are set, `CaldovaAgentFactory.IsConfigured` is
+`true` and pages invoke the real agents (`factory.Create("payments")`, …).
+Otherwise the deterministic demo results are used.
 
-If the configuration is empty, `ClaimsAgentFactory.IsConfigured` is `false`
-and the static demo pages still render normally.
+## Financial Crime — document authenticity
 
-## Fraud Investigation — document authenticity
+The Financial Crime Try-it-out tab runs a per-document authenticity pass over
+the documents attached to each case (identity documents, bank statements,
+SMSF registration letters, death certificates). Sample documents live under
+[`wwwroot/fincrime/samples/`](wwwroot/fincrime/samples/) with a
+[`manifest.json`](wwwroot/fincrime/samples/manifest.json); they are visibly
+fictitious ("SPECIMEN — DEMO ONLY") and were generated once by
+[`tools/generate_fincrime_samples.py`](../../tools/generate_fincrime_samples.py).
 
-The Try-It-Out tab on `/agents/fraud-investigation` runs a per-document
-authenticity pass over the scan documents and IDs attached to each claim.
-Eight illustrative sample documents (real + deliberately-fake pairs of
-driver licences, passports, receipts, and repair quotes) ship under
-[`wwwroot/fraud/samples/`](wwwroot/fraud/samples/) with a manifest at
-[`manifest.json`](wwwroot/fraud/samples/manifest.json). The mocks are
-visibly fictitious ("Zava State", "Specimen") and were generated once by
-[`tools/generate_fraud_samples.py`](../../tools/generate_fraud_samples.py);
-the runtime never invokes that script.
+`FinCrimeDocumentVerifier` sends each document to Azure Content Understanding
+with a shared authenticity field schema (document type, issuer, holder name,
+document number, dates, tamper indicators, security features, consistency
+summary) and folds the result into a small deterministic checks layer, giving
+each document a verdict (`legit` / `suspicious` / `fake`), the checks performed
+and the reasons any failed. The findings are passed to Felix so his risk
+narrative cites each document by number. Without Content Understanding the
+verifier falls back to the manifest's expected verdicts, so the story still
+plays end to end.
 
-Each seeded claim has a deterministic set of case documents attached
-(see `FraudCaseDocumentStore.SeedCaseDefaults`) and the user can attach
-additional samples via the **📎 Add sample docs** popover on Step 2b.
+## Payments — human approval in Microsoft Teams
 
-Verification flow:
-
-1. The page POSTs the claim number and the selected document IDs to
-   `POST /fraud/process` (or `POST /fraud/documents/verify` for a
-   document-only run).
-2. `FraudDocumentVerifier` resolves each ID to a public URL under
-   `wwwroot/fraud/samples/`, calls
-   `ContentUnderstandingService.AnalyzeWithCustomFieldsAsync` with the
-   shared authenticity field schema (document type, issuer, holder name,
-   document number, dates, totals, tamper indicators, security features,
-   and a consistency summary), and folds the results into a small
-   deterministic checks layer.
-3. Each document gets a verdict (`legit` / `suspicious` / `fake`), the
-   list of checks performed (with pass / fail / warn / n/a), and the
-   reasons any check failed.
-4. The findings are summarised back into the agent prompt so Felix's
-   risk narrative cites each document by number when it explains the
-   risk indicators.
-
-When `ContentUnderstandingService` isn't registered (i.e. when the notice
-intelligence services aren't configured) the verifier falls back to the
-manifest's `expected` value and the rules layer still produces a useful
-verdict + checks list, so the demo tells a complete story end-to-end
-without any Azure resources.
-
-New endpoints:
-
-| Method | Path | Purpose |
-| --- | --- | --- |
-| GET | `/fraud/samples` | Returns the static sample manifest. |
-| GET | `/fraud/claims/{claimNumber}/documents` | Returns documents pre-attached to a claim. |
-| POST | `/fraud/documents/verify` | Verify a list of documents against a claim. |
-| POST | `/fraud/process` | Engage the Fraud Investigation Agent (now accepts an optional `documentIds` array). |
-
-## Future work
-
-Once `src/ui` is wired up, the clickable links in the voxel office should
-deep-link to `/agents/{id}` so a viewer can step from a department in the
-office directly into the agent's demo page. Actually invoking the agents
-from these pages is intentionally out of scope for now.
+Penny's agent calls the `payments_*` MCP tools to validate the payee, confirm
+the eligibility decision, calculate tax components and PAYG withholding, check
+authority limits and raise an approval request. `teams_sendApprovalCard`
+posts an Adaptive Card to Microsoft Teams; `payments_releasePayment` refuses
+to run until the approver has approved. The page also offers an in-page
+approve/reject fallback for demos without Teams.

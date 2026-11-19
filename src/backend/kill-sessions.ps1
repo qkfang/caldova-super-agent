@@ -1,22 +1,22 @@
 <#
 .SYNOPSIS
-    Kills running Zava Claims processes that lock build outputs.
+    Kills running Caldova Wealth demo processes that lock build outputs.
 
 .DESCRIPTION
     During iterative development, `dotnet build` / `dotnet run` against the
     backend often fails with MSB3026/MSB3027 errors like:
 
         The process cannot access the file
-        'C:\...\src\backend\bin\Debug\net10.0\zc-agent.dll' because it is
-        being used by another process. The file is locked by: "zc-backend (12345)"
+        'C:\...\src\backend\bin\Debug\net10.0\cs-agent.dll' because it is
+        being used by another process. The file is locked by: "cs-backend (12345)"
 
     This happens when a previous `dotnet run` (or the debugger) is still
     holding the DLLs. This script stops any matching processes so the next
     build can succeed.
 
     By default it targets:
-      - zc-backend
-      - zc-agent
+      - cs-backend
+      - cs-agent
       - dotnet (only when running one of the above projects)
 
 .PARAMETER IncludeAllDotnet
@@ -36,7 +36,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-$targetNames = @('zc-backend', 'zc-agent')
+$targetNames = @('cs-backend', 'cs-agent')
 $killed = @()
 
 # 1. Direct process names (the published / built executables).
@@ -61,9 +61,9 @@ foreach ($d in $dotnetProcs) {
     if (-not $cmd) { continue }
 
     $isOurs = $IncludeAllDotnet -or
-              ($cmd -match 'zc-backend') -or
-              ($cmd -match 'zc-agent') -or
-              ($cmd -match 'zava-claims')
+              ($cmd -match 'cs-backend') -or
+              ($cmd -match 'cs-agent') -or
+              ($cmd -match 'caldova-super')
 
     if ($isOurs) {
         try {
@@ -79,7 +79,7 @@ foreach ($d in $dotnetProcs) {
 }
 
 if ($killed.Count -eq 0) {
-    Write-Host "No matching Zava Claims processes were running." -ForegroundColor Green
+    Write-Host "No matching Caldova Wealth demo processes were running." -ForegroundColor Green
 }
 else {
     # Give the OS a moment to release file handles.

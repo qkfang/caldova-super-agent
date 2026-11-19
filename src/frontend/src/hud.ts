@@ -1,4 +1,4 @@
-import { AgentRole, SimLogger } from "./claimSimulation";
+import { AgentRole, SimLogger } from "./caseSimulation";
 import type { VoxelCharacterPalette } from "./voxelCharacter";
 import { renderCharacterFigureSvg } from "./characterFigure";
 

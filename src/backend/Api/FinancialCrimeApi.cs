@@ -1,9 +1,9 @@
 using System.Text;
 using System.Text.RegularExpressions;
-using ZavaClaims.Agents;
-using ZavaClaims.App.Services;
+using CaldovaSuper.Agents;
+using CaldovaSuper.App.Services;
 
-namespace ZavaClaims.App.Api;
+namespace CaldovaSuper.App.Api;
 
 record FraudProcessRequest(string ClaimNumber, List<string>? DocumentIds);
 record FraudVerifyRequest(string ClaimNumber, List<string> DocumentIds);

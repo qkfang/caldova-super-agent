@@ -1,11 +1,14 @@
-# Creates / updates the two Azure AI Search indexes used by Claims Team in a Day
-# (Zava Insurance) and uploads the mock JSON documents from the sibling folders.
+# Creates / updates the two Azure AI Search indexes used by Wealth Team in a Day
+# (Caldova Wealth) and uploads the mock JSON documents from the sibling folders:
+#   wealth_knowledge  <- wealth_knowledge/*.json (case files + operational guides)
+#                        + wealth_rules/*.json projected onto the knowledge schema
+#   wealth_rules      <- wealth_rules/*.json (product & rule documents)
 # Adapted from https://github.com/qkfang/quant-agent/blob/main/ai-search/setup-index.ps1.
 
-$SearchServiceName = "search-zc"            # Update to the full aiSearchName output from main.bicep, e.g. srch-zc-abc123 (the deployment appends a 6-char unique suffix)
-$ResourceGroupName = "rg-zava-claims"
-$IndexPrefix = "claims"
-$FoundryEndpoint = "https://aif-zc.cognitiveservices.azure.com"  # Update to match foundryAccountEndpoint output
+$SearchServiceName = "search-cs"            # Update to the aiSearchName output from main.bicep (search-<baseName>, e.g. search-cs)
+$ResourceGroupName = "rg-caldova-super"
+$IndexPrefix = "wealth"
+$FoundryEndpoint = "https://aif-cs.cognitiveservices.azure.com"  # Update to match foundryAccountEndpoint output
 
 $ErrorActionPreference = "Stop"
 
@@ -17,7 +20,7 @@ $apiVersion = "2024-07-01"
 $token = (az account get-access-token --resource "https://search.azure.com" --query accessToken -o tsv)
 $headers = @{
     "Authorization" = "Bearer $token"
-    "Content-Type"  = "application/json"
+    "Content-Type"  = "application/json; charset=utf-8"
 }
 
 function New-SearchIndex {
@@ -37,8 +40,35 @@ function New-SearchIndex {
     }
 }
 
+function ConvertTo-KnowledgeDocument {
+    # The Foundry agents query only the wealth_knowledge index, so every
+    # wealth_rules document is also uploaded there in the knowledge schema and
+    # can be retrieved and cited by its title.
+    param([object]$RuleDoc)
+
+    $sections = @($RuleDoc.summary)
+    if ($RuleDoc.rules) { $sections += "Key rules: $($RuleDoc.rules)" }
+    if ($RuleDoc.limits) { $sections += "Limits and exceptions: $($RuleDoc.limits)" }
+    if ($RuleDoc.evidenceRequired) { $sections += "Evidence required: $(@($RuleDoc.evidenceRequired) -join '; ')" }
+    $sections += "Product: $($RuleDoc.product). Version: $($RuleDoc.version). Owner: $($RuleDoc.owner)."
+
+    [pscustomobject]@{
+        id           = $RuleDoc.id
+        title        = $RuleDoc.title
+        category     = "Product & Rules"
+        requestType  = "All"
+        caseNumber   = ""
+        memberNumber = ""
+        content      = ($sections -join "`n`n")
+        severity     = "reference"
+        department   = $RuleDoc.owner
+        tags         = @($RuleDoc.tags)
+        lastUpdated  = $RuleDoc.lastUpdated
+    }
+}
+
 function Upload-Documents {
-    param([string]$IndexName, [string]$DocumentFolder)
+    param([string]$IndexName, [string]$DocumentFolder, [string]$RulesFolder)
 
     $files = Get-ChildItem -Path $DocumentFolder -Filter "*.json"
     if ($files.Count -eq 0) {
@@ -48,9 +78,17 @@ function Upload-Documents {
 
     $docs = @()
     foreach ($file in $files) {
-        $doc = Get-Content $file.FullName -Raw | ConvertFrom-Json
+        $doc = Get-Content $file.FullName -Raw -Encoding utf8 | ConvertFrom-Json
         $doc | Add-Member -NotePropertyName "@search.action" -NotePropertyValue "upload" -Force
         $docs += $doc
+    }
+
+    if ($RulesFolder) {
+        foreach ($file in Get-ChildItem -Path $RulesFolder -Filter "*.json") {
+            $doc = ConvertTo-KnowledgeDocument -RuleDoc (Get-Content $file.FullName -Raw -Encoding utf8 | ConvertFrom-Json)
+            $doc | Add-Member -NotePropertyName "@search.action" -NotePropertyValue "upload" -Force
+            $docs += $doc
+        }
     }
 
     $body = @{ value = $docs } | ConvertTo-Json -Depth 20
@@ -67,8 +105,10 @@ function Upload-Documents {
 
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
-# --- claims_knowledge index ------------------------------------------------
-# Mock claim case records, decision notes, fraud signals, supplier playbooks.
+# --- wealth_knowledge index ------------------------------------------------
+# Member case files (one or more per demo scenario), operational guides
+# (financial-crime red flags, authority matrix, fund directory, NIGO checklist)
+# and a knowledge-schema copy of every product & rule document.
 $knowledgeIndexName = "${IndexPrefix}_knowledge"
 $knowledgeIndexDef = @{
     name   = $knowledgeIndexName
@@ -76,9 +116,9 @@ $knowledgeIndexDef = @{
         @{ name = "id"; type = "Edm.String"; key = $true; filterable = $true }
         @{ name = "title"; type = "Edm.String"; searchable = $true; filterable = $true; sortable = $true; analyzer = "en.microsoft" }
         @{ name = "category"; type = "Edm.String"; searchable = $true; filterable = $true; facetable = $true }
-        @{ name = "claimType"; type = "Edm.String"; filterable = $true; facetable = $true }
-        @{ name = "claimNumber"; type = "Edm.String"; filterable = $true; searchable = $true }
-        @{ name = "policyNumber"; type = "Edm.String"; filterable = $true; searchable = $true }
+        @{ name = "requestType"; type = "Edm.String"; filterable = $true; facetable = $true }
+        @{ name = "caseNumber"; type = "Edm.String"; filterable = $true; searchable = $true }
+        @{ name = "memberNumber"; type = "Edm.String"; filterable = $true; searchable = $true }
         @{ name = "content"; type = "Edm.String"; searchable = $true; analyzer = "en.microsoft" }
         @{ name = "severity"; type = "Edm.String"; filterable = $true; facetable = $true }
         @{ name = "department"; type = "Edm.String"; filterable = $true; facetable = $true }
@@ -130,7 +170,7 @@ $knowledgeIndexDef = @{
                     )
                     prioritizedKeywordsFields = @(
                         @{ fieldName = "category" }
-                        @{ fieldName = "claimType" }
+                        @{ fieldName = "requestType" }
                         @{ fieldName = "department" }
                     )
                 }
@@ -140,26 +180,27 @@ $knowledgeIndexDef = @{
 }
 
 New-SearchIndex -IndexName $knowledgeIndexName -IndexDefinition $knowledgeIndexDef
-Upload-Documents -IndexName $knowledgeIndexName -DocumentFolder (Join-Path $scriptDir "claims_knowledge")
+Upload-Documents -IndexName $knowledgeIndexName -DocumentFolder (Join-Path $scriptDir "wealth_knowledge") -RulesFolder (Join-Path $scriptDir "wealth_rules")
 
-# --- claims_policy index ---------------------------------------------------
-# Mock Zava Insurance policy requirement / coverage documents.
-$policyIndexName = "${IndexPrefix}_policy"
-$policyIndexDef = @{
-    name   = $policyIndexName
+# --- wealth_rules index ----------------------------------------------------
+# Caldova product & rule documents (PDS, IDPS guide, trust deed, super-law rule
+# summaries, fee schedule, managed portfolio menu) in their structured form.
+$rulesIndexName = "${IndexPrefix}_rules"
+$rulesIndexDef = @{
+    name   = $rulesIndexName
     fields = @(
         @{ name = "id"; type = "Edm.String"; key = $true; filterable = $true }
-        @{ name = "policyName"; type = "Edm.String"; searchable = $true; filterable = $true; sortable = $true; analyzer = "en.microsoft" }
-        @{ name = "productLine"; type = "Edm.String"; filterable = $true; facetable = $true }
+        @{ name = "title"; type = "Edm.String"; searchable = $true; filterable = $true; sortable = $true; analyzer = "en.microsoft" }
+        @{ name = "product"; type = "Edm.String"; filterable = $true; facetable = $true }
         @{ name = "version"; type = "Edm.String"; filterable = $true }
         @{ name = "summary"; type = "Edm.String"; searchable = $true; analyzer = "en.microsoft" }
-        @{ name = "coverage"; type = "Edm.String"; searchable = $true; analyzer = "en.microsoft" }
-        @{ name = "exclusions"; type = "Edm.String"; searchable = $true; analyzer = "en.microsoft" }
+        @{ name = "rules"; type = "Edm.String"; searchable = $true; analyzer = "en.microsoft" }
+        @{ name = "limits"; type = "Edm.String"; searchable = $true; analyzer = "en.microsoft" }
         @{ name = "evidenceRequired"; type = "Collection(Edm.String)"; searchable = $true; filterable = $true; facetable = $true }
         @{ name = "owner"; type = "Edm.String"; filterable = $true }
         @{ name = "tags"; type = "Collection(Edm.String)"; searchable = $true; filterable = $true; facetable = $true }
         @{ name = "lastUpdated"; type = "Edm.DateTimeOffset"; filterable = $true; sortable = $true }
-        @{ name = "summaryVector"; type = "Collection(Edm.Single)"; searchable = $true; dimensions = 1536; vectorSearchProfile = "vector-profile-policy" }
+        @{ name = "summaryVector"; type = "Collection(Edm.Single)"; searchable = $true; dimensions = 1536; vectorSearchProfile = "vector-profile-rules" }
     )
     vectorSearch = @{
         algorithms = @(
@@ -176,7 +217,7 @@ $policyIndexDef = @{
         )
         profiles = @(
             @{
-                name = "vector-profile-policy"
+                name = "vector-profile-rules"
                 algorithm = "hnsw-algorithm"
                 vectorizer = "openai-vectorizer"
             }
@@ -194,19 +235,19 @@ $policyIndexDef = @{
         )
     }
     semantic = @{
-        defaultConfiguration = "semantic-config-policy"
+        defaultConfiguration = "semantic-config-rules"
         configurations = @(
             @{
-                name = "semantic-config-policy"
+                name = "semantic-config-rules"
                 prioritizedFields = @{
-                    titleField = @{ fieldName = "policyName" }
+                    titleField = @{ fieldName = "title" }
                     prioritizedContentFields = @(
                         @{ fieldName = "summary" }
-                        @{ fieldName = "coverage" }
-                        @{ fieldName = "exclusions" }
+                        @{ fieldName = "rules" }
+                        @{ fieldName = "limits" }
                     )
                     prioritizedKeywordsFields = @(
-                        @{ fieldName = "productLine" }
+                        @{ fieldName = "product" }
                         @{ fieldName = "owner" }
                     )
                 }
@@ -215,7 +256,7 @@ $policyIndexDef = @{
     }
 }
 
-New-SearchIndex -IndexName $policyIndexName -IndexDefinition $policyIndexDef
-Upload-Documents -IndexName $policyIndexName -DocumentFolder (Join-Path $scriptDir "claims_policy")
+New-SearchIndex -IndexName $rulesIndexName -IndexDefinition $rulesIndexDef
+Upload-Documents -IndexName $rulesIndexName -DocumentFolder (Join-Path $scriptDir "wealth_rules")
 
-Write-Host "`nSetup complete. Indexes '${IndexPrefix}_knowledge' and '${IndexPrefix}_policy' created with semantic search and vector search enabled."
+Write-Host "`nSetup complete. Indexes '${IndexPrefix}_knowledge' and '${IndexPrefix}_rules' created with semantic search and vector search enabled."

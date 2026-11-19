@@ -1,141 +1,156 @@
 using System.Collections.Concurrent;
-using ZavaClaims.App.Models;
+using CaldovaSuper.App.Models;
 
-namespace ZavaClaims.App.Services;
+namespace CaldovaSuper.App.Services;
 
 /// <summary>
-/// One submitted intake form, keyed by the random claim number minted at
-/// submission time. Held in memory so the next agent in the demo flow
-/// (Claims Assessment) can pick the case up by its claim number.
+/// One Member Case — the shared record every agent in the Caldova client
+/// operations office reads from. Minted by the Onboarding demo (or seeded at
+/// start-up) and looked up by case number on every other agent page.
 /// </summary>
-public record IntakeClaimRecord(
-    string ClaimNumber,
+/// <param name="CaseNumber">Case number, <c>REQ-YYYYMMDD-XXXXXX</c>.</param>
+/// <param name="SampleId">Id of the <see cref="RequestSample"/> the case came from.</param>
+/// <param name="ClientName">Member / client name (for a death benefit, the claimant).</param>
+/// <param name="MemberNumber">Caldova member or account number (e.g. <c>CS-1058220</c>, <c>CP-3019042</c>).</param>
+/// <param name="Product">Product and tier (e.g. "Caldova Super — Select").</param>
+/// <param name="RequestType">One of the canonical request types (see <see cref="RequestTypes"/>).</param>
+/// <param name="ReceivedDate">Date the request was received (<c>yyyy-MM-dd</c>).</param>
+/// <param name="AdviserName">Financial adviser on the account, or "None (direct member)".</param>
+/// <param name="AdviserPractice">Advice practice, or empty for direct members.</param>
+/// <param name="RequestSummary">One-paragraph plain-English summary of the request.</param>
+/// <param name="Amount">Headline amount in AUD, formatted (e.g. "AUD 15,000 requested").</param>
+/// <param name="Priority">"Standard", "High" or "Urgent".</param>
+public record CaseRecord(
+    string CaseNumber,
     string SampleId,
-    string CustomerName,
-    string CustomerEmail,
-    string CustomerPhone,
-    string PolicyNumber,
-    string ClaimType,
-    string IncidentDate,
-    string IncidentLocation,
-    string IncidentDescription,
-    string EstimatedLoss,
+    string ClientName,
+    string ClientEmail,
+    string ClientPhone,
+    string MemberNumber,
+    string Product,
+    string RequestType,
+    string ReceivedDate,
+    string AdviserName,
+    string AdviserPractice,
+    string RequestSummary,
+    string Amount,
     string PreferredContact,
-    string Urgency,
-    string UrgencyReason,
+    string Priority,
+    string PriorityReason,
     DateTimeOffset CreatedAt);
 
-/// <summary>
-/// In-memory store of intake claims minted by the Claims Intake demo page.
-/// The store generates a random claim number on every <see cref="Add"/> call
-/// and lets later agents look the case up by claim number.
-/// </summary>
-public class IntakeClaimStore
+/// <summary>Canonical request types used across the demo.</summary>
+public static class RequestTypes
 {
-    private readonly ConcurrentDictionary<string, IntakeClaimRecord> _records =
+    public const string NewAccount = "New account & consolidation";
+    public const string RolloverOutSmsf = "Rollover out to SMSF";
+    public const string PensionCommencement = "Pension commencement";
+    public const string FinancialHardship = "Financial hardship release";
+    public const string DeathBenefit = "Death benefit claim";
+}
+
+/// <summary>
+/// In-memory store of Member Cases. The Onboarding demo mints a fresh case
+/// number on every <see cref="Add"/> call; later agents look the case up by
+/// case number.
+/// </summary>
+public class CaseStore
+{
+    private readonly ConcurrentDictionary<string, CaseRecord> _records =
         new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
-    /// Mint a fresh claim number, persist the supplied details, and return
-    /// the resulting <see cref="IntakeClaimRecord"/>.
+    /// Mint a fresh case number, persist the supplied details, and return
+    /// the resulting <see cref="CaseRecord"/>.
     /// </summary>
-    public IntakeClaimRecord Add(
+    public CaseRecord Add(
         string sampleId,
-        IntakeExtractedFields fields,
-        string urgency,
-        string urgencyReason)
+        RequestExtractedFields fields,
+        string priority,
+        string priorityReason)
     {
-        var claimNumber = GenerateClaimNumber();
-        var record = new IntakeClaimRecord(
-            ClaimNumber: claimNumber,
-            SampleId: sampleId,
-            CustomerName: fields.CustomerName,
-            CustomerEmail: fields.CustomerEmail,
-            CustomerPhone: fields.CustomerPhone,
-            PolicyNumber: fields.PolicyNumber,
-            ClaimType: fields.ClaimType,
-            IncidentDate: fields.IncidentDate,
-            IncidentLocation: fields.IncidentLocation,
-            IncidentDescription: fields.IncidentDescription,
-            EstimatedLoss: fields.EstimatedLoss,
-            PreferredContact: fields.PreferredContact,
-            Urgency: urgency,
-            UrgencyReason: urgencyReason,
-            CreatedAt: DateTimeOffset.UtcNow);
-
-        _records[claimNumber] = record;
+        var caseNumber = GenerateCaseNumber();
+        var record = FromFields(caseNumber, sampleId, fields, priority, priorityReason, DateTimeOffset.UtcNow);
+        _records[caseNumber] = record;
         return record;
     }
 
-    public IntakeClaimRecord? Get(string claimNumber) =>
-        !string.IsNullOrWhiteSpace(claimNumber) && _records.TryGetValue(claimNumber, out var r)
+    public CaseRecord? Get(string caseNumber) =>
+        !string.IsNullOrWhiteSpace(caseNumber) && _records.TryGetValue(caseNumber, out var r)
             ? r : null;
 
-    public IReadOnlyList<IntakeClaimRecord> All() =>
+    public IReadOnlyList<CaseRecord> All() =>
         _records.Values.OrderByDescending(r => r.CreatedAt).ToList();
 
     /// <summary>
-    /// Pre-populate the store with one claim record per persona in
-    /// <see cref="IntakeSampleCatalog"/> so the downstream demo pages
-    /// (Assessment, Loss Adjuster, Fraud, Supplier Coordination,
-    /// Settlement, Customer Communications) all have claims to pick from
-    /// the moment the app starts — without requiring the user to lodge
-    /// one through the Claims Intake demo first.
-    ///
-    /// No-op if the store already contains records, so it's safe to call
-    /// at startup.
+    /// Pre-populate the store with one case per sample in
+    /// <see cref="RequestSampleCatalog"/> (the five canonical scenarios) so
+    /// every downstream demo page has cases to pick from the moment the app
+    /// starts. Case numbers are deterministic —
+    /// <c>REQ-{received yyyyMMdd}-DEMO{n}</c> — and match the case ids used by
+    /// the 3D frontend scenario scripts (e.g. <c>REQ-20261103-DEMO01</c>).
+    /// No-op if the store already contains records.
     /// </summary>
     public void SeedDefaults()
     {
         if (!_records.IsEmpty) return;
 
-        var samples = IntakeSampleCatalog.All;
         var now = DateTimeOffset.UtcNow;
         var index = 0;
 
-        foreach (var sample in samples)
+        foreach (var sample in RequestSampleCatalog.All)
         {
             index++;
-
-            // Use a deterministic, demo-flavoured claim number so the
-            // seeded entries are easy to spot in logs and UI, while still
-            // following the CLM-YYYYMMDD-XXXXXX shape used by Add().
-            var stamp = sample.ExpectedFields.IncidentDate.Replace("-", string.Empty);
+            var stamp = sample.ExpectedFields.ReceivedDate.Replace("-", string.Empty);
             if (stamp.Length != 8)
             {
                 stamp = now.ToString("yyyyMMdd");
             }
-            var claimNumber = $"CLM-{stamp}-DEMO{index:00}";
+            var caseNumber = $"REQ-{stamp}-DEMO{index:00}";
 
-            var record = new IntakeClaimRecord(
-                ClaimNumber: claimNumber,
-                SampleId: sample.Id,
-                CustomerName: sample.ExpectedFields.CustomerName,
-                CustomerEmail: sample.ExpectedFields.CustomerEmail,
-                CustomerPhone: sample.ExpectedFields.CustomerPhone,
-                PolicyNumber: sample.ExpectedFields.PolicyNumber,
-                ClaimType: sample.ExpectedFields.ClaimType,
-                IncidentDate: sample.ExpectedFields.IncidentDate,
-                IncidentLocation: sample.ExpectedFields.IncidentLocation,
-                IncidentDescription: sample.ExpectedFields.IncidentDescription,
-                EstimatedLoss: sample.ExpectedFields.EstimatedLoss,
-                PreferredContact: sample.ExpectedFields.PreferredContact,
-                Urgency: sample.ExpectedUrgency,
-                UrgencyReason: sample.ExpectedUrgencyReason,
-                // Stagger CreatedAt so All()'s ordering is stable and the
-                // first persona (Michael) shows at the top of the dropdown.
-                CreatedAt: now.AddMinutes(-index));
-
-            _records[claimNumber] = record;
+            // Stagger CreatedAt so All() lists scenario 1 (Priya) first.
+            _records[caseNumber] = FromFields(
+                caseNumber,
+                sample.Id,
+                sample.ExpectedFields,
+                sample.ExpectedPriority,
+                sample.ExpectedPriorityReason,
+                now.AddMinutes(-index));
         }
     }
 
+    private static CaseRecord FromFields(
+        string caseNumber,
+        string sampleId,
+        RequestExtractedFields f,
+        string priority,
+        string priorityReason,
+        DateTimeOffset createdAt) =>
+        new(
+            CaseNumber: caseNumber,
+            SampleId: sampleId,
+            ClientName: f.ClientName,
+            ClientEmail: f.ClientEmail,
+            ClientPhone: f.ClientPhone,
+            MemberNumber: f.MemberNumber,
+            Product: f.Product,
+            RequestType: f.RequestType,
+            ReceivedDate: f.ReceivedDate,
+            AdviserName: f.AdviserName,
+            AdviserPractice: f.AdviserPractice,
+            RequestSummary: f.RequestSummary,
+            Amount: f.Amount,
+            PreferredContact: f.PreferredContact,
+            Priority: priority,
+            PriorityReason: priorityReason,
+            CreatedAt: createdAt);
+
     /// <summary>
-    /// Generate a claim number of the form <c>CLM-YYYYMMDD-XXXXXX</c>.
-    /// The 6-character suffix uses cryptographically-strong randomness so
-    /// two near-simultaneous submissions cannot collide.
+    /// Generate a case number of the form <c>REQ-YYYYMMDD-XXXXXX</c>. The
+    /// 6-character suffix uses cryptographically-strong randomness so two
+    /// near-simultaneous submissions cannot collide.
     /// </summary>
-    private static string GenerateClaimNumber()
+    private static string GenerateCaseNumber()
     {
         const string alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no I/O/0/1
         Span<byte> buf = stackalloc byte[6];
@@ -146,6 +161,6 @@ public class IntakeClaimStore
             chars[i] = alphabet[buf[i] % alphabet.Length];
         }
         var stamp = DateTimeOffset.UtcNow.ToString("yyyyMMdd");
-        return $"CLM-{stamp}-{new string(chars)}";
+        return $"REQ-{stamp}-{new string(chars)}";
     }
 }

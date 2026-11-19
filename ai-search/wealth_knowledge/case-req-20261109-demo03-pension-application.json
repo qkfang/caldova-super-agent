@@ -1,0 +1,28 @@
+{
+  "id": "case-req-20261109-demo03-pension-application",
+  "title": "REQ-20261109-DEMO03 — Caldova Pension application: $1,250,000 account-based pension, $78,000 p.a. monthly, Helen as reversionary (George Papadopoulos, CS-1077881 → CP-3077881)",
+  "category": "Case File",
+  "requestType": "Pension commencement",
+  "caseNumber": "REQ-20261109-DEMO03",
+  "memberNumber": "CS-1077881",
+  "content": "Pension application received on 9 Nov 2026 from adviser Marcus Tan (adviser code ADV-20871, Bayside Financial Partners, Brighton) for George Papadopoulos (DOB 03/04/1960, age 66; Oakleigh VIC 3166; georgep@example.com; 0419 331 077). George is a retired electrical contractor — forty years on the tools — who wants a steady income and to stop worrying about running out. His wife Helen Papadopoulos is 63.\n\nSource account: Caldova Super (Select) CS-1077881, balance $1,284,600 at 9 Nov 2026.\n\nRequest: start a Caldova Pension (account-based) with $1,250,000 in a new pension account, CP-3077881, leaving $34,600 in the accumulation account CS-1077881. Requested start date: 16 Nov 2026. Income: $78,000 a year paid monthly — $6,500 on the 15th of each month, first payment 15 Dec 2026 — to George's nominated bank account (account name matches the member ✅). Reversionary beneficiary: Helen Papadopoulos (spouse) — the pension continues to Helen if George dies first. Investment instruction (Statement of Advice dated 4 Nov 2026): Caldova Managed Portfolio — Balanced, with a cash reserve to fund pension payments, to be set by Caldova Investment Solutions.\n\nDocuments: Caldova Pension application signed and dated by George on 6 Nov 2026; reversionary nomination with Helen's details and confirmation that they are married; identity verified at onboarding (proof of age); TFN held (*** *** 507); adviser declaration that George has never had a retirement-phase income stream. Tax components of CS-1077881 before commencement: 9% tax-free, 91% taxable — so the pension's components are fixed at commencement as tax-free $112,500 and taxable $1,137,500.\n\nNIGO checklist: all items in good order ✅.\n\nChecks required (Benefits & Eligibility): condition of release — age 65+ (no retirement declaration needed); transfer balance cap — general cap $2.1 million for 2026-27; minimum annual payment — 5% at age 66, pro-rated for the first year; reversionary nominee eligible (spouse).\n\nRouting and approvals: Benefits & Eligibility → Investment Solutions (income strategy: two-year cash reserve; compare strategies) → Transfers & Rollovers (internal transfer CS-1077881 → CP-3077881; transfer balance credit reported to the ATO) → Payments (commence the pension; Team Leader approval in Microsoft Teams is required because the commencement amount is $1,000,000 or more) → Client Communications ('welcome to retirement' letter to George; confirmation to Marcus).",
+  "severity": "medium",
+  "department": "Onboarding & Requests",
+  "tags": [
+    "george-papadopoulos",
+    "REQ-20261109-DEMO03",
+    "CS-1077881",
+    "CP-3077881",
+    "pension-application",
+    "account-based-pension",
+    "pension-commencement",
+    "1250000",
+    "78000-pa",
+    "monthly-6500",
+    "reversionary-helen",
+    "marcus-tan",
+    "bayside-financial-partners",
+    "team-leader-approval"
+  ],
+  "lastUpdated": "2026-11-08T23:30:00Z"
+}

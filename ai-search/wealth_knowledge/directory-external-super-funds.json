@@ -1,0 +1,29 @@
+{
+  "id": "directory-external-super-funds",
+  "title": "Directory — External super funds & counterparties (USI, SuperStream contacts, insurance notes, typical timeframes)",
+  "category": "Directory",
+  "requestType": "All",
+  "caseNumber": "",
+  "memberNumber": "",
+  "content": "Counterparty directory used by Transfers & Rollovers to look up external funds by USI, send and chase SuperStream rollovers, and check insurance before a rollover closes an account. All funds and contact details are fictional. Rollovers between APRA-regulated funds travel through SuperStream using each fund's USI. SMSFs have no USI — they are identified by ABN, electronic service address (ESA) and bank account, and must be verified through the ATO SMSF verification service (SVS) before any payment. The statutory standard for every fund is completion within 3 business days of receiving all required information (SIS reg 6.34A).\n\n• Caldova Superannuation Master Fund (Caldova Super & Pension) — USI CDV0101AU; ABN 11 222 333 444; trustee Caldova Superannuation Services Pty Ltd. Rollover queries: rollovers@caldova.example.\n• Southern Cross Industry Super — USI SCI0001AU. Industry fund. Default Death & TPD cover for employer-sponsored members; cover ends when an account is closed by a full rollover. Rollovers: rollovers@southerncross.example, 1300 975 707. Typical: clean SuperStream rollovers completed in 1–2 business days.\n• Harbourline Retail Super — USI HRB0007AU. Retail fund; insurance is optional (opt-in). Rollovers: rollovers@harbourline.example, 1300 975 708. Typical: 2–3 business days; may ask for identity re-verification on balances over $100,000.\n• Bellarine Public Sector Super — USI BPS0004AU. Public sector fund; defined benefit members need a benefit quote before a rollover (allow 10 business days for the quote). Transfers: transfers@bellarine.example, 1300 975 709.\n• Murray River Wrap Super — USI MRW0009AU. Platform (wrap) super fund; in-specie transfers available with a rollover benefit statement — ASX shares usually 3–4 business days, international shares up to 3 months. Transitions: transitions@murrayriver.example, 1300 975 710.\n• Otway Mutual Super — USI OMS0005AU. Industry fund; default insurance for members aged 25+ with balances of $6,000 or more. Rollovers: rollovers@otway.example, 1300 975 711.\n• ATO-held super — lost or inactive super held by the ATO. Members transfer it to Caldova through ATO online services (myGov); the ATO pays it electronically.\n• Self-managed super funds — no USI. Before any rollover, verify through SVS: registered SMSF ABN and status, member's TFN linked, no date of death, and bank account and ESA matching ATO records.\n\nFlagged SMSF: 'GW Family Superannuation Fund' (ABN 66 777 888 999, registered 28 Oct 2026) — SVS NOT VERIFIED on 6 Nov 2026 (case REQ-20261106-DEMO02). Refer any request involving this ABN to Financial Crime.\n\nChasing: if an inbound rollover has not arrived 3 business days after the transferring fund accepted the request, chase the fund by email and phone; escalate to the Team Leader after 10 business days. Before requesting a full rollover from any insured fund, confirm the member's insurance-loss acknowledgement or replacement cover is on file.",
+  "severity": "low",
+  "department": "Transfers & Rollovers",
+  "tags": [
+    "fund-directory",
+    "counterparties",
+    "usi",
+    "superstream",
+    "rollover",
+    "southern-cross-industry-super",
+    "SCI0001AU",
+    "harbourline-retail-super",
+    "HRB0007AU",
+    "CDV0101AU",
+    "smsf",
+    "svs",
+    "ato-held-super",
+    "chasing",
+    "insurance-check"
+  ],
+  "lastUpdated": "2026-11-06T00:30:00Z"
+}

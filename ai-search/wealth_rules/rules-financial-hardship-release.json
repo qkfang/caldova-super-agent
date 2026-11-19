@@ -1,0 +1,34 @@
+{
+  "id": "rules-financial-hardship-release",
+  "title": "Super law rule summary — Severe financial hardship early release (Caldova hardship policy)",
+  "product": "Caldova Super & Pension",
+  "version": "Rule summary 2026-27 v1.0 — Caldova hardship policy HP-3",
+  "summary": "How Caldova assesses applications to release preserved super on severe financial hardship grounds (SIS reg 6.01(5)(a)). Members apply directly to Caldova, not the ATO. The member must have received an eligible Commonwealth income support payment continuously for 26 weeks, still be receiving it, and be unable to meet reasonable and immediate family living expenses. The release is a single lump sum of at least $1,000 and at most $10,000 gross (before tax), and only one release is allowed in any 12-month period. Caldova treats every hardship applicant as potentially vulnerable, so each release needs Team Leader approval.",
+  "rules": "Eligibility (all must be met): (a) an eligible Commonwealth income support payment — e.g. JobSeeker Payment, Youth Allowance, Parenting Payment, Disability Support Pension or Carer Payment — received continuously for at least 26 weeks; (b) still being received on the date of application; (c) the member cannot meet reasonable and immediate family living expenses, shown by a statutory declaration and supporting evidence such as overdue notices; (d) no severe financial hardship release from any Caldova account in the previous 12 months.\nEvidence standard (policy HP-3): a Services Australia (Centrelink) confirmation letter showing the payment type, the start date and that payment is current, dated no more than 21 days before Caldova receives the application. Name and date of birth must match the member record.\nAmount: minimum $1,000 and maximum $10,000 gross per release. If more than $10,000 is requested, the trustee can approve only $10,000 — a partial approval — and the balance of the request cannot be released under this condition. One release in any 12-month period, measured from the date of the last hardship payment.\nTax: the release is a super lump sum. For members under 60 the taxable component (taxed element) has PAYG withheld at 22% (20% plus 2% Medicare levy); the tax-free component is not taxed. The split follows the account's tax components (proportioning rule).\nProcess: Onboarding captures the application and documents → Benefits & Eligibility assess → Team Leader approves (vulnerable member) → Investment Solutions plan the redemption (cash above the 1% minimum first) → Payments validate the payee and pay → Client Communications explain the decision, the tax and free support (National Debt Helpline 1800 007 007; Moneysmart).",
+  "limits": "Not available if the income support has not been continuous for 26 weeks, has stopped, or a release was paid in the last 12 months, or if less than $1,000 is requested. A letter older than 21 days is not a decline — Caldova asks for a fresh letter. The $10,000 cap cannot be exceeded even when debts are larger. A separate test applies to members who have reached preservation age plus 39 weeks, have received income support for a cumulative 39 weeks since then and are not gainfully employed — no cap applies under that test. Members facing foreclosure on their home, or needing money for medical treatment, palliative care or funeral costs, may be eligible for release on compassionate grounds, which is decided by the ATO, not the fund. Caldova never charges a fee to apply and warns members about third parties who charge to 'unlock' super.",
+  "evidenceRequired": [
+    "Caldova severe financial hardship application (signed and dated)",
+    "Services Australia confirmation letter — payment type, start date and current status — dated within 21 days of the application",
+    "Commonwealth statutory declaration that the member cannot meet reasonable and immediate family living expenses",
+    "Evidence of expenses (e.g. mortgage arrears notice, overdue utility bills, council rates notice)",
+    "Nominated bank account in the member's own name",
+    "TFN held (otherwise tax is withheld at the top marginal rate)"
+  ],
+  "owner": "Benefits & Eligibility",
+  "tags": [
+    "financial-hardship",
+    "severe-financial-hardship",
+    "early-release",
+    "jobseeker",
+    "26-weeks",
+    "services-australia-letter",
+    "21-days",
+    "10000-cap",
+    "once-in-12-months",
+    "partial-approval",
+    "vulnerable-member",
+    "compassionate-grounds",
+    "reg-6.01"
+  ],
+  "lastUpdated": "2026-07-01T00:00:00Z"
+}

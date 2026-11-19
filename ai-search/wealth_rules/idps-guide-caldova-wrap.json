@@ -1,0 +1,32 @@
+{
+  "id": "idps-guide-caldova-wrap",
+  "title": "Caldova Wrap — IDPS Guide (extract)",
+  "product": "Caldova Wrap",
+  "version": "IDPS Guide v2026.1 — issued 1 July 2026",
+  "summary": "Extract of the Investor Directed Portfolio Service (IDPS) Guide for Caldova Wrap, Caldova's platform for investing outside super. The service is run by Caldova Investments Limited as responsible entity and operator, which also acts as administrator and custodian. Individuals, joint investors, companies, family trusts and SMSF trustees use Caldova Wrap — usually with a financial adviser — to hold, transact and report on all their investments in one account. Assets are held by the custodian on the investor's behalf; the investor remains the beneficial owner and receives one consolidated annual tax report. Unlike super, there are no preservation rules or contribution caps, so money can be withdrawn at any time, subject to investment liquidity.",
+  "rules": "Investment menu: the six Caldova Managed Portfolios, managed funds, ETFs and ASX-listed securities, international shares and term deposits. Every account keeps at least 1% in the Caldova Cash Account for fees and payments.\nFees (illustrative for the demo): administration fee on the same tiered basis as Caldova Super — 0.30% p.a. on the first $250,000, 0.15% to $1,000,000, 0.05% to $2,000,000, nil above — plus a $180 p.a. account-keeping fee. Managed portfolio investment fees (ICR) and the 0.10% buy/sell spread apply.\nTax: investors are taxed on income and realised capital gains. Caldova tracks tax parcels for every holding, applies the investor's chosen parcel-selection method when units or shares are sold, and issues an annual tax report.\nTransfers in: in-specie transfers of ASX shares from another platform or a broker-sponsored HIN usually take 3–4 business days once the transfer forms are in good order; international securities can take up to 3 months.\nWithdrawals: paid only to a bank account in the investor's name. Adding a new bank account needs approval from a second authorised adviser administrator, and withdrawals above $5,000 need a six-digit SMS code entered by the investor.\nAdviser fees: deducted only with the investor's signed and dated written consent; ongoing fee arrangements are renewed in writing each year (renewal window from 60 days before to 150 days after the reference day).\nAML/CTF: before the account opens Caldova verifies each individual investor and, for companies and trusts, the directors, trustees and beneficial owners (25% or more), and screens everyone against PEP and sanctions lists. Customer due diligence continues for the life of the account.",
+  "limits": "Caldova Wrap cannot hold super money — super belongs in Caldova Super. Withdrawals depend on investment liquidity: term deposits may need notice and attract break costs, and some managed funds take longer to redeem. At least 1% must stay in the Caldova Cash Account. New payees and withdrawals above $5,000 are subject to dual verification. Caldova does not give personal financial advice.",
+  "evidenceRequired": [
+    "Signed application including investor type (individual, joint, company, trust, SMSF trustee)",
+    "Identity verification for each individual investor, director, trustee and beneficial owner",
+    "Company or trust documents (e.g. ASIC company extract, trust deed extract)",
+    "Bank account in the investor's name for withdrawals and income",
+    "Adviser authority and signed adviser fee consent (if adviser fees apply)",
+    "Transfer forms for in-specie transfers (off-market transfer or broker-to-broker)"
+  ],
+  "owner": "Caldova Investments Limited — Wrap Product",
+  "tags": [
+    "idps",
+    "caldova-wrap",
+    "non-super",
+    "managed-portfolios",
+    "in-specie",
+    "kyc",
+    "aml-ctf",
+    "beneficial-owners",
+    "withdrawals",
+    "dual-approval",
+    "tax-report"
+  ],
+  "lastUpdated": "2026-07-01T00:00:00Z"
+}

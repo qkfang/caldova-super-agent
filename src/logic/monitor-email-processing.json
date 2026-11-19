@@ -11,7 +11,7 @@
                         "messages": [
                             {
                                 "role": "system",
-                                "content": "review the content of the inbound claims-team email and attachments to decide which sub-workflow agent to invoke (claims intake/processing or customer return/acknowledgement email).\n\nemail_subject: @{triggerBody()?['subject']}\nemail_body: @{triggerBody()?['body']}"
+                                "content": "you are the email orchestrator for the Caldova Wealth client operations mailbox (requests@caldova.example).\nreview the content of the inbound email and attachments to decide which sub-workflow agent to invoke:\n- Tool_member_request: a new member or adviser request, or new information for an existing case (REQ-YYYYMMDD-XXXXXX), e.g. new account applications and super consolidation, pension applications, withdrawal or financial hardship applications, rollover requests, death notifications, change of details, adviser fee consent forms.\n- Tool_return_email: an acknowledgement or outbound status email, e.g. a request-received acknowledgement, or a case status update or completion notice to a member or adviser.\n\nemail_from: @{triggerBody()?['from']}\nemail_subject: @{triggerBody()?['subject']}\nemail_body: @{triggerBody()?['body']}"
                             }
                         ],
                         "agentModelType": "AzureOpenAI",
@@ -34,14 +34,14 @@
                     }
                 },
                 "tools": {
-                    "Tool_claims": {
+                    "Tool_member_request": {
                         "actions": {
-                            "claims_workflow": {
+                            "member_request_workflow": {
                                 "type": "Workflow",
                                 "inputs": {
                                     "host": {
                                         "workflow": {
-                                            "id": "claims-email-processing"
+                                            "id": "member-request-processing"
                                         }
                                     },
                                     "body": {
@@ -59,13 +59,13 @@
                                     "value": false
                                 },
                                 "runAfter": {
-                                    "claims_workflow": [
+                                    "member_request_workflow": [
                                         "SUCCEEDED"
                                     ]
                                 }
                             }
                         },
-                        "description": "this tool is to process insurance claim email related process"
+                        "description": "this tool is to capture a new member or adviser request (application, pension, withdrawal, financial hardship, rollover, death notification, change of details) or new information for an existing case, by running the member-request-processing workflow"
                     },
                     "Tool_return_email": {
                         "actions": {
@@ -98,7 +98,7 @@
                                 }
                             }
                         },
-                        "description": "this tool is to send return/acknowledgement emails to customers"
+                        "description": "this tool is to handle acknowledgement and outbound status emails to members and advisers, by running the return-email-processing workflow"
                     }
                 },
                 "runAfter": {

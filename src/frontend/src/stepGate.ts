@@ -1,7 +1,8 @@
 /**
  * Step gate — a modal that pauses the scripted simulation at the start of
- * each major pipeline step (intake, assessment, loss adjusting, supplier
- * coordination, fraud, team leader, settlement, customer communications).
+ * each major pipeline step (onboarding, benefits & eligibility, investment
+ * review, financial crime, transfers & rollovers, team leader review,
+ * payments, client communications).
  *
  * The popup names the staff member taking the case, lists the AI sub-agents
  * delegated under them (matching docs/foundry_agents.md), and offers:
@@ -10,15 +11,16 @@
  *
  * Auto-play can also be enabled up-front via the scenario picker.
  */
+import type { StaffRole } from "./personaData";
 
 export type StageKey =
-  | "intake-pickup"
-  | "assessor-pickup"
-  | "consult:Loss Adjuster"
-  | "consult:Supplier Coordinator"
-  | "consult:Fraud Investigator"
-  | "consult:Claims Team Leader"
-  | "settle"
+  | "onboarding-pickup"
+  | "benefits-pickup"
+  | "consult:Investment Analyst"
+  | "consult:Financial Crime Investigator"
+  | "consult:Transfers & Rollovers Coordinator"
+  | "consult:Client Operations Team Leader"
+  | "payment"
   | "comms-notify";
 
 export interface StageInfo {
@@ -28,9 +30,9 @@ export interface StageInfo {
   stepNumber?: number;
   /** Total step count (filled at runtime). */
   totalSteps?: number;
-  /** Friendly staff role label (e.g. "Claims Intake Officer"). */
-  staffRole: string;
-  /** Staff persona name (e.g. "Iris"). */
+  /** Staff role label (e.g. "Onboarding & Requests Officer"). */
+  staffRole: StaffRole;
+  /** Staff persona name (e.g. "Olivia"). */
   staffName: string;
   /** Staff swatch color. */
   staffColor: string;
@@ -38,7 +40,7 @@ export interface StageInfo {
   narration: string;
   /** AI sub-agents delegated for this step. */
   agents: { name: string; description: string }[];
-  /** Agent id used to deep-link the walkthrough page in the `src/app` site. */
+  /** Agent id used to deep-link the walkthrough page in the `src/backend` site. */
   appAgentId: string;
 }
 
@@ -56,137 +58,152 @@ export const APP_BASE_URL: string = (
     ?.VITE_APP_BASE_URL ?? ""
 ).replace(/\/+$/, "");
 
-/** Stage configuration — title, AI sub-agents (from docs/characters.md), and
- * the matching `src/app` agent id used to deep-link the walkthrough page. */
+/** Stage configuration — title, staff role, AI sub-agents, and the matching
+ * `src/backend` agent route id used to deep-link the walkthrough page. */
 export const STAGE_CONFIG: Record<
   StageKey,
   {
     title: string;
-    /** Matches an Id in `src/app/Models/AgentCatalog.cs`. */
+    /** Staff role that owns this step. */
+    role: StaffRole;
+    /** Matches an Id in `src/backend/Models/AgentCatalog.cs` (route `/agents/{id}`). */
     appAgentId: string;
     agents: { name: string; description: string }[];
   }
 > = {
-  "intake-pickup": {
-    title: "Claims Intake",
-    appAgentId: "claims-intake",
+  "onboarding-pickup": {
+    title: "Onboarding & Requests",
+    role: "Onboarding & Requests Officer",
+    appAgentId: "onboarding",
     agents: [
       {
-        name: "Agent Iris #1 — Intake Triage Assistant",
+        name: "Agent Olivia #1 — Form Extraction",
         description:
-          "Captures first notice of loss, extracts policy & incident details, and triages urgency for Iris.",
+          "Reads adviser emails, application forms and member requests, and extracts every field into the Member Case for Olivia.",
       },
       {
-        name: "Agent Iris #2 — Document Checklist Assistant",
+        name: "Agent Olivia #2 — NIGO Checklist",
         description:
-          "Builds the right document checklist for the claim type and chases missing items.",
+          "Runs the not-in-good-order checklist — ID, TFN, signatures, fee consent, nominations, investment and insurance elections — and sets the priority.",
       },
     ],
   },
-  "assessor-pickup": {
-    title: "Claims Assessment",
-    appAgentId: "claims-assessment",
+  "benefits-pickup": {
+    title: "Benefits & Eligibility",
+    role: "Benefits & Eligibility Assessor",
+    appAgentId: "benefits-eligibility",
     agents: [
       {
-        name: "Agent Adam #1 — Coverage Analysis Assistant",
+        name: "Agent Ben #1 — Eligibility Rules",
         description:
-          "Reads the policy schedule and drafts a preliminary coverage opinion with citations.",
+          "Checks conditions of release, hardship criteria, the transfer balance cap and minimum drawdowns, citing the PDS, trust deed and SIS clause.",
       },
       {
-        name: "Agent Adam #2 — Evidence Review Assistant",
+        name: "Agent Ben #2 — Nominations & Consent",
         description:
-          "Summarises photos, invoices and reports, and highlights gaps for Adam to follow up.",
+          "Validates BDBNs and SIS dependants, adviser fee consent (s99FA) and TMD fit, and drafts the approve / partial / decline recommendation.",
       },
     ],
   },
-  "consult:Loss Adjuster": {
-    title: "Loss Adjusting",
-    appAgentId: "loss-adjuster",
+  "consult:Investment Analyst": {
+    title: "Investment Review",
+    role: "Investment Analyst",
+    appAgentId: "investment-analyst",
     agents: [
       {
-        name: "Agent Lara #1 — Site Visit Assistant",
+        name: "Agent Ivy #1 — Portfolio Fit",
         description:
-          "Prepares pre-visit briefings and inspection checklists, then summarises on-site findings.",
+          "Checks the model portfolio against the client's risk profile and Statement of Advice, and plans redemptions and cash buckets.",
       },
       {
-        name: "Agent Lara #2 — Valuation & Reporting Assistant",
+        name: "Agent Ivy #2 — Fee Comparison",
         description:
-          "Cross-references quotes and market rates, drafts a loss valuation and assessment report.",
+          "Compares model portfolios on fees in dollars, returns and risk, and builds the client workbook and chart.",
       },
     ],
   },
-  "consult:Supplier Coordinator": {
-    title: "Supplier Coordination",
-    appAgentId: "supplier-coordinator",
+  "consult:Financial Crime Investigator": {
+    title: "Financial Crime Review",
+    role: "Financial Crime Investigator",
+    appAgentId: "financial-crime",
     agents: [
       {
-        name: "Agent Sam #1 — Supplier Coordination Assistant",
+        name: "Agent Felix #1 — ID Authenticity",
         description:
-          "Recommends approved suppliers, drafts booking requests, and tracks ETAs and quotes.",
+          "Scans ID documents, bank statements and certificates for signs of tampering.",
+      },
+      {
+        name: "Agent Felix #2 — Risk Timeline",
+        description:
+          "Builds the account-activity timeline, screens PEP and sanctions lists, and explains the risk score with recommended holds and call-backs.",
       },
     ],
   },
-  "consult:Fraud Investigator": {
-    title: "Fraud Review",
-    appAgentId: "fraud-investigation",
+  "consult:Transfers & Rollovers Coordinator": {
+    title: "Transfers & Rollovers",
+    role: "Transfers & Rollovers Coordinator",
+    appAgentId: "transfers-rollovers",
     agents: [
       {
-        name: "Agent Felix #1 — Anomaly Detection Assistant",
+        name: "Agent Rory #1 — Fund Lookup & SVS",
         description:
-          "Scans narratives, timelines and documents for inconsistencies and assigns a structured risk indicator.",
+          "Finds external funds by USI, verifies SMSFs with the ATO SMSF verification service, and warns about insurance cover lost on rollover.",
       },
       {
-        name: "Agent Felix #2 — Verification Assistant",
+        name: "Agent Rory #2 — Rollover Requests",
         description:
-          "Cross-checks claim history, drafts third-party verification queries, and prepares an initial findings pack.",
+          "Generates the SuperStream rollover or transfer request, tracks the 3-business-day SLA and chases counterparties.",
       },
     ],
   },
-  "consult:Claims Team Leader": {
+  "consult:Client Operations Team Leader": {
     title: "Team Leader Review",
+    role: "Client Operations Team Leader",
     appAgentId: "team-leader",
     agents: [
       {
-        name: "Agent Theo #1 — Workload & Escalation Assistant",
+        name: "Agent Theo #1 — SLA & Escalations",
         description:
-          "Monitors queue volumes, SLA risk, and ageing claims, and surfaces priority escalations.",
+          "Monitors queues, rollover SLAs and IDR clocks, and surfaces the cases that need a decision.",
       },
       {
-        name: "Agent Theo #2 — Quality & Complaints Assistant",
+        name: "Agent Theo #2 — Approvals & Quality",
         description:
-          "Samples completed claims for quality review and flags regulatory or reputational risk.",
+          "Prepares approval recommendations for declines, blocks and vulnerable-member cases, and samples closed cases for quality.",
       },
     ],
   },
-  settle: {
-    title: "Settlement",
-    appAgentId: "settlement",
+  payment: {
+    title: "Payments",
+    role: "Payments Officer",
+    appAgentId: "payments",
     agents: [
       {
-        name: "Agent Seth #1 — Settlement Calculation Assistant",
+        name: "Agent Penny #1 — Benefit Calculator",
         description:
-          "Aggregates assessment outcomes, costs and adjustments, and drafts the settlement statement.",
+          "Splits tax-free and taxable components, and calculates PAYG withholding and the net payment.",
       },
       {
-        name: "Agent Seth #2 — Adjustment Validation Assistant",
+        name: "Agent Penny #2 — Payment Controls",
         description:
-          "Re-checks excess, sub-limits and depreciation, and flags figures outside expected ranges.",
+          "Validates payee and bank details, checks authority limits, raises the Microsoft Teams approval card, and releases money only after approval.",
       },
     ],
   },
   "comms-notify": {
-    title: "Customer Communications",
-    appAgentId: "customer-communications",
+    title: "Client Communications",
+    role: "Client Communications Specialist",
+    appAgentId: "client-communications",
     agents: [
       {
-        name: "Agent Cara #1 — Status Update Assistant",
+        name: "Agent Cara #1 — Letters & Updates",
         description:
-          "Drafts status updates and outcome letters tailored to the claim stage and customer.",
+          "Drafts member letters, adviser updates and SMS in plain English, matched to the case outcome.",
       },
       {
-        name: "Agent Cara #2 — Tone & Plain-English Assistant",
+        name: "Agent Cara #2 — Tone & Compliance",
         description:
-          "Reviews drafts for empathy, clarity and brand tone, rewriting jargon into plain English.",
+          "Checks tone for bereavement, hardship and scam victims, and confirms required disclosures and IDR/AFCA rights — never personal advice.",
       },
     ],
   },

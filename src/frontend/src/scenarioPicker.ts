@@ -2,8 +2,8 @@ import { CUSTOMER_PERSONAS, type ScenarioId } from "./personaData";
 import { SCENARIO_NUMBER } from "./scenarioNumbers";
 
 /**
- * Modal dialog shown when the user clicks "Submit a claim". Lists the
- * five scenario personas plus a Random option. On confirm, calls the
+ * Modal dialog shown when the user clicks "Submit a request". Lists the
+ * five client scenarios plus a Random option. On confirm, calls the
  * provided onPick callback and closes itself.
  *
  * The picker also exposes an "Auto-play" checkbox: when checked, the
@@ -30,13 +30,13 @@ export class ScenarioPicker {
     overlay.innerHTML = `
       <div class="modal-card" role="document">
         <header>
-          <h2 id="scenario-picker-title">Submit a claim</h2>
+          <h2 id="scenario-picker-title">Submit a request</h2>
           <button class="close" aria-label="Close">×</button>
         </header>
         <p class="modal-intro">
-          Pick one of our five customer scenarios to follow them through the
-          claims journey — from the neighbourhood incident, all the way to
-          settlement.
+          Pick one of five client scenarios and follow the request from a
+          Melbourne life event through Caldova Client Operations — request,
+          verify, assess, action and confirm.
         </p>
         <ul class="scenario-grid"></ul>
         <footer>
@@ -72,7 +72,7 @@ export class ScenarioPicker {
       `;
       (li.querySelector(".scenario-name") as HTMLElement).textContent = p.name;
       (li.querySelector(".scenario-type") as HTMLElement).textContent =
-        p.claim_type;
+        p.request_type;
       (li.querySelector(".scenario-situation") as HTMLElement).textContent =
         p.situation;
       const handler = (): void => {

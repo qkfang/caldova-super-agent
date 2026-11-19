@@ -3,31 +3,34 @@
  *
  * Each scenario lives in its own `<id>.json` file in this folder so the
  * simulation can be fully triggered and played out from data alone:
- *  - Customer + incident zone (neighbourhood theme)
+ *  - Client + life-event zone (Melbourne neighbourhood)
  *  - Reset block — snaps every staff member back to their desk and clears
- *    any leftover ambient claim folders before the scripted run begins.
- *  - Beat list — narration, action, and dwell time for every step.
- *  - Pre-assessor / extras consultation hooks (Loss Adjuster, Fraud,
- *    Supplier Coordinator, Team Leader) and the deterministic settlement
- *    outcome.
+ *    any leftover ambient case folders before the scripted run begins.
+ *  - Beat list — the narration shown in the banner / step gate for every
+ *    step, in the order the case moves through the office.
+ *  - Consultation hooks — specialists (Investment Analyst, Financial Crime,
+ *    Transfers & Rollovers, Team Leader) who work the case before and/or
+ *    after Benefits & Eligibility — plus the deterministic outcome.
  *
- * `personaData.ts` and `claimSimulation.ts` import these to drive the
+ * `personaData.ts` and `caseSimulation.ts` import these to drive the
  * scripted flow, so one JSON edit changes both the on-screen narration
  * and the underlying simulation behaviour.
  */
 import type { ScenarioId, StaffRole } from "../personaData";
 
-import home from "./home.json";
-import motor from "./motor.json";
-import business from "./business.json";
-import travel from "./travel.json";
-import life from "./life.json";
+import onboarding from "./onboarding.json";
+import protection from "./protection.json";
+import retirement from "./retirement.json";
+import hardship from "./hardship.json";
+import bereavement from "./bereavement.json";
 
+/** `rejected` is shown as "blocked" for financial-crime scenarios. */
 export type ScenarioOutcome = "approved" | "rejected" | "partial";
 
 export interface ScenarioConsultation {
   role: StaffRole;
   narration: string;
+  /** Seconds the specialist dwells on the case at their desk. */
   duration: number;
 }
 
@@ -36,16 +39,16 @@ export type BeatAction =
   | "walk-to-office"
   | "enter-office"
   | "lodge-at-reception"
-  | "intake-pickup"
-  | "intake-route"
-  | "assessor-pickup"
-  | "assessor-process"
-  | "loss-adjuster-review"
-  | "fraud-review"
-  | "supplier-coordinate"
+  | "onboarding-pickup"
+  | "onboarding-route"
+  | "benefits-pickup"
+  | "benefits-process"
+  | "investment-review"
+  | "fincrime-review"
+  | "transfers-coordinate"
   | "team-leader-review"
-  | "assessor-handoff"
-  | "settle"
+  | "benefits-handoff"
+  | "payment"
   | "comms-notify"
   | "customer-leave";
 
@@ -63,9 +66,9 @@ export interface ScenarioResetJson {
   office: {
     /** Snap every staff member back to their home desk. */
     snapStaffToDesks: boolean;
-    /** Clear inbox / settlement / comms / assessor-ready queues. */
+    /** Clear inbox / payments / comms / benefits-ready queues. */
     clearQueues: boolean;
-    /** Despawn every non-scripted customer currently in flight. */
+    /** Despawn every non-scripted client currently in flight. */
     removeUnscriptedCustomers: boolean;
   };
   neighbourhood: {
@@ -73,38 +76,77 @@ export interface ScenarioResetJson {
   };
 }
 
+/** Activity-log lines written as the case moves through the core pipeline. */
+export interface ScenarioNarrationsJson {
+  /** Logged when Benefits & Eligibility picks the case up. */
+  benefits: string;
+  /** Logged when Benefits & Eligibility finishes the assessment. */
+  benefitsResult: string;
+  /** Logged when Payments picks the case up. */
+  payment: string;
+  /** Logged when Payments records the outcome. */
+  paymentResult: string;
+  /** Logged when Client Communications closes the case. */
+  comms: string;
+}
+
+/** Case status label recorded by Payments when the outcome is decided. */
+export type CaseDecisionStatus =
+  | "completed"
+  | "partially approved"
+  | "declined"
+  | "blocked";
+
+/** End-of-scenario wording for the result banner and summary modal. */
+export interface ScenarioResultJson {
+  /** Case status shown once Payments records the outcome. */
+  status: CaseDecisionStatus;
+  /** Headline on the client result banner. */
+  headline: string;
+  /** Big figure on the result banner (e.g. "$7,932 net"). */
+  figure: string;
+  /** Icon on the result banner. */
+  icon: string;
+  /** Outcome line in the scenario summary modal. */
+  summary: string;
+}
+
 export interface ScenarioDefinition {
   id: ScenarioId;
   scenarioNumber: number;
   /**
-   * Fixed claim case number used when this scenario is launched. Mirrors
-   * the seeded entries minted by `IntakeClaimStore.SeedDefaults` in the
-   * backend so the scripted simulation, intake mock data, and downstream
-   * agent pages all reference the same claim id.
+   * Fixed case number used when this scenario is launched. Mirrors the
+   * seeded entries in the backend `CaseStore.SeedDefaults` so the scripted
+   * simulation, the onboarding mock data, and downstream agent pages all
+   * reference the same case.
    */
   caseId: string;
   customerId: ScenarioId;
   incidentZone: ScenarioId;
-  approveAtAssessor: boolean;
-  settlement: ScenarioOutcome;
-  narrations: {
-    assessor: string;
-    settlement: string;
-    comms: string;
-  };
-  preAssessor: ScenarioConsultation[];
-  extras: ScenarioConsultation[];
+  /** Amount requested on the case (shown when it arrives). */
+  amount: number;
+  /** Gross amount paid, invested or commenced at the payment step (0 when blocked). */
+  paidAmount: number;
+  /** Force Benefits & Eligibility to pass the case on (true) or decline it outright (false). */
+  approveAtBenefits: boolean;
+  outcome: ScenarioOutcome;
+  narrations: ScenarioNarrationsJson;
+  /** Specialists consulted after Onboarding and before Benefits & Eligibility. */
+  preBenefits: ScenarioConsultation[];
+  /** Specialists consulted after Benefits & Eligibility and before Payments. */
+  postBenefits: ScenarioConsultation[];
   beats: ScenarioBeatJson[];
+  result: ScenarioResultJson;
   reset: ScenarioResetJson;
 }
 
 /** Single source of truth for every scripted scenario. */
 export const SCENARIOS: Record<ScenarioId, ScenarioDefinition> = {
-  home: home as ScenarioDefinition,
-  motor: motor as ScenarioDefinition,
-  business: business as ScenarioDefinition,
-  travel: travel as ScenarioDefinition,
-  life: life as ScenarioDefinition,
+  onboarding: onboarding as ScenarioDefinition,
+  protection: protection as ScenarioDefinition,
+  retirement: retirement as ScenarioDefinition,
+  hardship: hardship as ScenarioDefinition,
+  bereavement: bereavement as ScenarioDefinition,
 };
 
 export function getScenario(id: ScenarioId): ScenarioDefinition {
@@ -114,4 +156,12 @@ export function getScenario(id: ScenarioId): ScenarioDefinition {
     throw new Error(`Unknown scenario id: ${id}. Valid IDs are: ${valid}`);
   }
   return s;
+}
+
+/** Narration for the first beat with the given action, if the scenario defines one. */
+export function getBeatNarration(
+  id: ScenarioId,
+  action: BeatAction,
+): string | undefined {
+  return getScenario(id).beats.find((b) => b.action === action)?.narration;
 }

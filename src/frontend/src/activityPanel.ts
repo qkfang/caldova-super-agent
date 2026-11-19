@@ -12,7 +12,7 @@
  */
 import { APP_BASE_URL, type StageInfo } from "./stepGate";
 import { PALETTES } from "./characterPalettes";
-import { findStaffByRole, type StaffRole } from "./personaData";
+import { findStaffByRole } from "./personaData";
 
 export interface ActivityPanelStage {
   staffName: string;
@@ -27,7 +27,7 @@ export interface ActivityPanelStage {
 
 /** Map a StageInfo (from stepGate) to the activity panel view-model. */
 export function stageToActivity(stage: StageInfo): ActivityPanelStage {
-  const persona = findStaffByRole(stage.staffRole as StaffRole);
+  const persona = findStaffByRole(stage.staffRole);
   return {
     staffName: stage.staffName,
     staffRole: stage.staffRole,
@@ -123,8 +123,8 @@ export class ActivityPanel {
       const li = document.createElement("li");
       li.className = "activity-agent";
       // Use the same persona palette for the agent face so it reads as a
-      // mini-clone of the staff persona — reinforcing the "Agent Iris #N"
-      // naming scheme from docs/characters.md.
+      // mini-clone of the staff persona — reinforcing the "Agent Olivia #N"
+      // naming scheme from docs/foundry_agents.md.
       li.innerHTML = `
         <div class="activity-agent-avatar" aria-hidden="true">${paletteFaceSvg(
           stage.staffPaletteKey,

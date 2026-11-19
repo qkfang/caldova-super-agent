@@ -1,0 +1,58 @@
+{
+  "documentType": "Caldova Managed Portfolio fact sheet",
+  "issuer": "Caldova Investments Limited — responsible entity of Caldova Managed Portfolios",
+  "name": "Caldova Managed Portfolio — Conservative",
+  "shortName": "Conservative",
+  "code": "CMP-CON",
+  "asAt": "2026-10-31",
+  "style": "Active, multi-asset",
+  "objective": "To earn returns of CPI + 1.5% p.a. over rolling 3-year periods, before fees and taxes, with low volatility.",
+  "growthAllocation": 30,
+  "defensiveAllocation": 70,
+  "investmentFeePercent": 0.32,
+  "buySellSpreadPercent": 0.10,
+  "adminFeeNote": "Caldova Super & Pension admin fee is charged separately on the whole account balance: 0.30% on the first $250,000, 0.15% on $250,000–$1,000,000, 0.05% on $1,000,000–$2,000,000, nil above $2,000,000, plus a $180 p.a. account-keeping fee.",
+  "standardRiskMeasure": {
+    "band": 3,
+    "label": "Low to medium",
+    "negativeYearsIn20": "1 to less than 2"
+  },
+  "minimumSuggestedTimeframeYears": 3,
+  "assetAllocation": [
+    { "assetClass": "Australian shares", "type": "growth", "targetPercent": 12, "rangePercent": "5–20" },
+    { "assetClass": "International shares", "type": "growth", "targetPercent": 13, "rangePercent": "5–20" },
+    { "assetClass": "Listed property & infrastructure", "type": "growth", "targetPercent": 5, "rangePercent": "0–10" },
+    { "assetClass": "Australian fixed interest", "type": "defensive", "targetPercent": 25, "rangePercent": "15–35" },
+    { "assetClass": "International fixed interest (hedged)", "type": "defensive", "targetPercent": 20, "rangePercent": "10–30" },
+    { "assetClass": "Cash & term deposits", "type": "defensive", "targetPercent": 25, "rangePercent": "15–40" }
+  ],
+  "returns": {
+    "periodEnding": "2026-10-31",
+    "oneYearPercent": 6.2,
+    "threeYearPercentPa": 5.4,
+    "fiveYearPercentPa": 3.8,
+    "basis": "Illustrative model returns, net of investment fees and costs, before admin fees and taxes.",
+    "warning": "Past performance is not a reliable indicator of future performance."
+  },
+  "topHoldings": [
+    { "holding": "Australian fixed interest — investment-grade core (managed fund)", "weightPercent": 25.0 },
+    { "holding": "Cash at call & term deposits — Australian ADIs (3–12 months)", "weightPercent": 25.0 },
+    { "holding": "Global aggregate bonds — AUD hedged (index ETF)", "weightPercent": 20.0 },
+    { "holding": "Global equities — developed markets (index ETF)", "weightPercent": 13.0 },
+    { "holding": "Australian equities — large-cap core (direct shares)", "weightPercent": 12.0 }
+  ],
+  "sectorNotes": [
+    "Fixed interest is investment grade only, with an average duration of about 4.5 years.",
+    "Cash is held at call and in term deposits with Australian authorised deposit-taking institutions.",
+    "All holdings are daily-priced and liquid — no unlisted or illiquid assets."
+  ],
+  "suitableFor": "Investors who want stability of capital and income, can accept small falls in value, and have a timeframe of at least 3 years. Often used for the defensive part of a retirement income strategy.",
+  "availableOn": [
+    "Caldova Super — Essential",
+    "Caldova Super — Select",
+    "Caldova Super — Private",
+    "Caldova Pension",
+    "Caldova Wrap"
+  ],
+  "disclaimer": "General information only — not personal financial advice. Caldova Managed Portfolios are fictional products used in the Wealth Team in a Day demo."
+}

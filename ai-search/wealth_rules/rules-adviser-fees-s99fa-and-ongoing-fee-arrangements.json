@@ -1,0 +1,32 @@
+{
+  "id": "rules-adviser-fees-s99fa-and-ongoing-fee-arrangements",
+  "title": "Super law rule summary — Adviser fees from super (SIS s99FA) & ongoing fee arrangements",
+  "product": "Caldova Super & Pension; Caldova Wrap",
+  "version": "Rule summary 2026-27 v1.0 — reflects the 2024 ongoing fee arrangement reforms",
+  "summary": "When Caldova may deduct a financial adviser's fee from a member's account and pay it to the adviser's practice. For super, section 99FA of the SIS Act stops the trustee charging advice fees to a member's account unless strict conditions are met, and the sole purpose test and the adviser's best-interests duty still apply. Ongoing fee arrangements must also meet Part 7.7A Division 3 of the Corporations Act: written consent to enter into or renew the arrangement and to deduct the fees, renewed every year. Benefits & Eligibility check every consent before Payments sets up, changes or continues an adviser fee.",
+  "rules": "s99FA conditions for super (all must be met): (1) the fee is for personal advice to the member about their interest in Caldova Super or Pension — not about other assets, family members or other products; (2) the member has given a written request or written consent to deduct the fee (verbal consent is never accepted; electronic signatures are fine); (3) Caldova holds a copy of that request or consent; (4) for an ongoing fee arrangement, the Corporations Act Pt 7.7A Div 3 requirements are met.\nCaldova adviser fee consent form — must show: member name, member number (the account the fee is deducted from); adviser name, adviser code and practice; the fee amount in dollars including GST (or a reasonable estimate and how it is worked out); frequency of deductions; the services the member is entitled to; the fee period (12 months); that the arrangement can be ended and consent withdrawn at any time; member signature and date.\nOngoing fee arrangements: the client must renew in writing every year. The renewal window opens 60 days before and closes 150 days after the reference day (the anniversary of the day the arrangement was entered into, unless a different reference day was agreed and disclosed). If no renewal is signed by the end of the window, the consent ceases, the arrangement terminates and Caldova stops deducting the fee. Consent to renew and consent to deduct can be combined in one form.\nWithdrawal: a member can withdraw or vary consent at any time by written notice to Caldova or the adviser (email or SMS is enough); Caldova stops deductions immediately on receipt.\nCaldova controls: consent checked at set-up; each deduction checked against the consented amount; monthly deductions (annual fee ÷ 12); renewal reminder sent to the adviser when the window opens; automatic stop when consent ceases; fees shown in dollars on member statements.",
+  "limits": "Caldova will not deduct fees for general advice; advice about non-super matters from a super account; fees without a signed and dated written consent; amounts above the consented amount; or fees after consent has been withdrawn, has ceased or the arrangement has terminated. Fees deducted in breach are refunded to the member's account. Product commissions are not paid on Caldova investment products.",
+  "evidenceRequired": [
+    "Caldova Adviser Fee Consent form, signed and dated by the member",
+    "Statement of Advice (or Record of Advice) date supporting the advice service",
+    "Adviser authority on the account (adviser code and practice)",
+    "Annual renewal and consent for ongoing fee arrangements",
+    "Written notice if the member withdraws or varies consent"
+  ],
+  "owner": "Benefits & Eligibility",
+  "tags": [
+    "adviser-fees",
+    "s99fa",
+    "ongoing-fee-arrangement",
+    "fee-consent",
+    "written-consent",
+    "renewal",
+    "reference-day",
+    "60-days-before",
+    "150-days-after",
+    "sole-purpose-test",
+    "best-interests-duty",
+    "corporations-act-7.7a"
+  ],
+  "lastUpdated": "2026-07-01T00:00:00Z"
+}

@@ -2,7 +2,7 @@ using System.ComponentModel;
 using System.Text.Json;
 using ModelContextProtocol.Server;
 
-namespace ZavaClaims.App.Mcp;
+namespace CaldovaSuper.App.Mcp;
 
 /// <summary>
 /// MCP tool surface that owns Microsoft Teams notifications for the

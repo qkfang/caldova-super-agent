@@ -1,10 +1,12 @@
 /**
- * End-of-scenario UI: a customer result animation (approved $$ / denied)
- * shown above the comms area, plus a summary modal that lists every
- * staff member, AI sub-agents involved, and the customer outcome.
+ * End-of-scenario UI: a client result animation (completed / partially
+ * approved / declined / blocked) shown above the comms area, plus a
+ * summary modal that lists every staff member, the AI sub-agents involved,
+ * and the client outcome.
  */
 
 import type { CustomerPersona } from "./personaData";
+import type { ScenarioResultJson } from "./scenarios";
 import type { StageInfo } from "./stepGate";
 
 export type ScenarioOutcome = "approved" | "rejected" | "partial";
@@ -12,14 +14,26 @@ export type ScenarioOutcome = "approved" | "rejected" | "partial";
 export interface ScenarioSummary {
   scenarioNumber: number;
   persona: CustomerPersona;
-  claimId: string;
+  caseId: string;
+  /** Amount requested on the case. */
   amount: number;
+  /** Gross amount paid / invested / commenced. */
+  paidAmount: number;
   outcome: ScenarioOutcome;
+  /** Scenario-specific wording (scripted runs). */
+  result?: ScenarioResultJson;
   /** Steps actually executed during the scenario, in order. */
   steps: StageInfo[];
 }
 
-/** Brief overlay above the canvas showing the customer outcome. */
+const money = (amount: number): string => `$${amount.toLocaleString()}`;
+
+/** CSS modifier for an outcome — financial-crime blocks get their own style. */
+function outcomeClass(outcome: ScenarioOutcome, result?: ScenarioResultJson): string {
+  return result?.status === "blocked" ? "blocked" : outcome;
+}
+
+/** Brief overlay above the canvas showing the client outcome. */
 export class CustomerResultBanner {
   private readonly el: HTMLDivElement;
 
@@ -42,30 +56,33 @@ export class CustomerResultBanner {
     this.el = el;
   }
 
-  show(persona: CustomerPersona, outcome: ScenarioOutcome, amount: number): void {
-    this.el.classList.remove("approved", "rejected", "partial");
-    this.el.classList.add(outcome);
+  show(
+    persona: CustomerPersona,
+    outcome: ScenarioOutcome,
+    paidAmount: number,
+    result?: ScenarioResultJson,
+  ): void {
+    this.el.classList.remove("approved", "rejected", "partial", "blocked");
+    this.el.classList.add(outcomeClass(outcome, result));
     (this.el.querySelector(".cr-avatar") as HTMLElement).style.background =
       persona.color;
     (this.el.querySelector(".cr-name") as HTMLElement).textContent =
       persona.name;
     const headline =
-      outcome === "approved"
-        ? "Claim approved — payout on its way!"
+      result?.headline ??
+      (outcome === "approved"
+        ? "Request completed — payment on its way"
         : outcome === "partial"
-          ? "Partial settlement approved"
-          : "Claim declined — review options provided";
+          ? "Request partially approved"
+          : "Request declined — next steps explained");
     (this.el.querySelector(".cr-headline") as HTMLElement).textContent = headline;
     const amountEl = this.el.querySelector(".cr-amount") as HTMLElement;
-    if (outcome === "approved" || outcome === "partial") {
-      amountEl.textContent = `$${amount.toLocaleString()}`;
-      amountEl.style.display = "block";
-    } else {
-      amountEl.textContent = "";
-      amountEl.style.display = "none";
-    }
+    const figure =
+      result?.figure ?? (outcome === "rejected" ? "" : money(paidAmount));
+    amountEl.textContent = figure;
+    amountEl.style.display = figure ? "block" : "none";
     (this.el.querySelector(".cr-icon") as HTMLElement).textContent =
-      outcome === "rejected" ? "✕" : "💰";
+      result?.icon ?? (outcome === "rejected" ? "✕" : "✅");
 
     this.el.classList.remove("hidden");
     // Force reflow so the CSS animation re-runs each time.
@@ -100,7 +117,7 @@ export class ScenarioSummaryModal {
           <div class="summary-customer-dot"></div>
           <div class="summary-customer-text">
             <div class="summary-customer-name"></div>
-            <div class="summary-customer-claim"></div>
+            <div class="summary-customer-case"></div>
             <div class="summary-customer-outcome"></div>
           </div>
         </section>
@@ -138,19 +155,20 @@ export class ScenarioSummaryModal {
       summary.persona.color;
     (o.querySelector(".summary-customer-name") as HTMLElement).textContent =
       `Scenario #${summary.scenarioNumber} — ${summary.persona.name}`;
-    (o.querySelector(".summary-customer-claim") as HTMLElement).textContent =
-      `${summary.persona.claim_type} • Claim ${summary.claimId} • $${summary.amount.toLocaleString()}`;
+    (o.querySelector(".summary-customer-case") as HTMLElement).textContent =
+      `${summary.persona.request_type} • Case ${summary.caseId} • ${money(summary.amount)}`;
 
     const outcomeLine =
-      summary.outcome === "approved"
-        ? `Outcome: APPROVED — paid $${summary.amount.toLocaleString()}`
+      summary.result?.summary ??
+      (summary.outcome === "approved"
+        ? `Outcome: COMPLETED — ${money(summary.paidAmount)} paid`
         : summary.outcome === "partial"
-          ? `Outcome: PARTIAL — paid $${summary.amount.toLocaleString()}`
-          : "Outcome: DECLINED";
+          ? `Outcome: PARTIALLY APPROVED — ${money(summary.paidAmount)} of ${money(summary.amount)} paid`
+          : "Outcome: DECLINED");
     const oc = o.querySelector(".summary-customer-outcome") as HTMLElement;
     oc.textContent = outcomeLine;
-    oc.classList.remove("approved", "rejected", "partial");
-    oc.classList.add(summary.outcome);
+    oc.classList.remove("approved", "rejected", "partial", "blocked");
+    oc.classList.add(outcomeClass(summary.outcome, summary.result));
 
     const stepsList = o.querySelector(".summary-steps") as HTMLOListElement;
     stepsList.innerHTML = "";

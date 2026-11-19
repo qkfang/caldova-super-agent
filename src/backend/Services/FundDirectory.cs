@@ -1,4 +1,4 @@
-namespace ZavaClaims.App.Services;
+namespace CaldovaSuper.App.Services;
 
 /// <summary>
 /// One supplier directory entry — extends <see cref="Supplier"/> with an

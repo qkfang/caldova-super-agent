@@ -5,13 +5,13 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
-    <RootNamespace>ZavaClaims.App</RootNamespace>
-    <AssemblyName>zc-backend</AssemblyName>
+    <RootNamespace>CaldovaSuper.App</RootNamespace>
+    <AssemblyName>cs-backend</AssemblyName>
     <NoWarn>$(NoWarn);OPENAI001;SCME0001</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\agent\zc-agent.csproj" />
+    <ProjectReference Include="..\agent\cs-agent.csproj" />
   </ItemGroup>
 
   <ItemGroup>

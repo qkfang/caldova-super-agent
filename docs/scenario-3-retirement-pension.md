@@ -20,6 +20,7 @@ This is the **golden-path** scenario for the demo (see [agent-demo.md](agent-dem
 | Case number | `REQ-20261109-DEMO03` |
 | Request type | Pension commencement |
 | Received | Mon 9 Nov 2026, from the adviser |
+| Priority | High |
 | Member | George Papadopoulos (DOB 03/04/1960, age 66). Caldova Super (Select) `CS-1077881` |
 | Spouse | Helen, George's wife (63) |
 | Adviser | Marcus Tan (ADV-20871), Bayside Financial Partners, Brighton |
@@ -59,6 +60,7 @@ After forty years as an electrical contractor, George has put down the tools. Wi
   - the investment instructions
   - the nominated bank account for payments
 - NIGO checklist: nothing is missing.
+- It sets the priority to **High**: a pension commencement of $1 million or more, due to start on 16 Nov.
 - It opens case `REQ-20261109-DEMO03` and routes it to Benefits & Eligibility.
 
 ---

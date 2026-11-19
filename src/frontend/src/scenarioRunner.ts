@@ -1,10 +1,10 @@
 import { Scene, Vector3 } from "@babylonjs/core";
 import { CameraDirector } from "./cameraDirector";
 import {
-  ClaimSimulation,
+  CaseSimulation,
   type BeatFocusInfo,
   type CustomerAgentInfo,
-} from "./claimSimulation";
+} from "./caseSimulation";
 import {
   CUSTOMER_PERSONAS,
   findCustomerPersona,
@@ -23,6 +23,7 @@ import {
   type StageKey,
 } from "./stepGate";
 import { SCENARIO_NUMBER } from "./scenarioNumbers";
+import { getBeatNarration, getScenario } from "./scenarios";
 import {
   CustomerResultBanner,
   ScenarioSummaryModal,
@@ -32,8 +33,8 @@ import { ActivityPanel, stageToActivity } from "./activityPanel";
 
 /**
  * Hook the runner uses to drive the neighbourhood scene's per-scenario
- * incident animation (e.g. the burst-pipe water spurt). Implemented by
- * the result of `buildNeighbourhood`.
+ * life-event animation (e.g. the retirement banner and confetti).
+ * Implemented by the result of `buildNeighbourhood`.
  */
 export interface NeighbourhoodIncidentController {
   playIncident(id: ScenarioId): void;
@@ -70,17 +71,17 @@ export interface ScenarioRunnerHooks {
 }
 
 /**
- * ScenarioRunner orchestrates a scripted customer journey from the
- * neighbourhood incident zone all the way through the claims office.
+ * ScenarioRunner orchestrates a scripted client journey from the
+ * Melbourne life-event zone all the way through the operations office.
  */
 export class ScenarioRunner {
   private state: RunnerState = "idle";
   private nhCustomer: VoxelCharacter | null = null;
-  /** Remaining waypoints the customer is walking through (last one is the office door). */
+  /** Remaining waypoints the client is walking through (last one is the office door). */
   private nhRoute: Vector3[] = [];
   private nhArriveDelay = 0;
   private currentPersona: CustomerPersona | null = null;
-  private currentClaimId: string | null = null;
+  private currentCaseId: string | null = null;
   private inflightInfo: CustomerAgentInfo | null = null;
   private focusObserver: { remove: () => void } | null = null;
   /** Cancellation token incremented to ignore stale callbacks. */
@@ -106,7 +107,7 @@ export class ScenarioRunner {
     private readonly nhCamera: CameraDirector,
     private readonly officeCamera: CameraDirector,
     private readonly zones: IncidentZones,
-    private readonly sim: ClaimSimulation,
+    private readonly sim: CaseSimulation,
     private readonly hud: HudLogger,
     private readonly hooks: ScenarioRunnerHooks,
     private readonly incidents: NeighbourhoodIncidentController,
@@ -143,7 +144,7 @@ export class ScenarioRunner {
       `${persona.name} — ${persona.situation}`,
     );
 
-    // Switch to the neighbourhood scene and place the customer at their zone.
+    // Switch to the neighbourhood scene and place the client at their zone.
     this.hooks.setActiveScene("neighbourhood");
 
     const palette = PALETTES[persona.palette];
@@ -153,10 +154,10 @@ export class ScenarioRunner {
     ch.root.position = start;
     this.nhCustomer = ch;
 
-    // Highlight the customer in the neighbourhood scene.
+    // Highlight the client in the neighbourhood scene.
     ch.setHighlight(true);
 
-    // Camera focuses on the incident zone at a friendly orbit.
+    // Camera focuses on the life-event zone at a friendly orbit.
     this.nhCamera.focusNode(ch.root, {
       radius: 22,
       beta: Math.PI / 3.4,
@@ -164,21 +165,19 @@ export class ScenarioRunner {
     });
 
     this.state = "neighbourhood-arrive";
-    // Hold the customer at the incident zone a little longer so the
-    // viewer can watch the scripted "story of the accident" animation
-    // play out (e.g. burst pipe water spurt) before they walk to the
-    // office.
+    // Hold the client at the life-event zone a little longer so the
+    // viewer can watch the scripted life-event animation play out (e.g.
+    // the retirement banner and confetti) before they head to the office.
     this.nhArriveDelay = 4.5;
-    this.hooks.updateBannerNarration(
-      `${persona.name} — ${persona.situation_long}`,
-    );
-    this.hud.log(
-      `${persona.name} reports ${persona.claim_type} from the neighbourhood`,
-      "warn",
-    );
+    const arrival =
+      getBeatNarration(persona.id, "arrive-at-zone") ??
+      `${persona.name} — ${persona.situation_long}`;
+    this.hooks.updateBannerNarration(arrival);
+    this.hud.log(arrival, "warn");
 
-    // Kick off the per-scenario incident animation in the neighbourhood
-    // (e.g. burst pipe spurts water, rear-end collision shakes both cars).
+    // Kick off the per-scenario life-event animation in the neighbourhood
+    // (e.g. celebration confetti for a new job, a red alert ring for an
+    // identity-takeover attempt).
     this.incidents.playIncident(persona.id);
 
     // Sanity check: if state changes underneath us, abort.
@@ -187,7 +186,7 @@ export class ScenarioRunner {
 
   /**
    * Cancel the in-flight scenario (banner ✕ click). Despawns the
-   * neighbourhood customer and lets any in-office claim continue silently
+   * neighbourhood client and lets any in-office case continue silently
    * but releases camera focus and re-enables auto-spawn.
    */
   cancel(): void {
@@ -211,7 +210,7 @@ export class ScenarioRunner {
     this.hooks.setSceneToggleDisabled(false);
     this.state = "idle";
     this.currentPersona = null;
-    this.currentClaimId = null;
+    this.currentCaseId = null;
     this.inflightInfo = null;
     this.executedSteps = [];
     this.gatedStagesSeen.clear();
@@ -221,7 +220,7 @@ export class ScenarioRunner {
 
   /**
    * Per-frame tick — advances the neighbourhood walk + arrival delay.
-   * Office-stage progression is driven by the ClaimSimulation pipeline
+   * Office-stage progression is driven by the CaseSimulation pipeline
    * itself; we just track state changes.
    */
   update(dtSec: number): void {
@@ -231,7 +230,7 @@ export class ScenarioRunner {
       this.nhArriveDelay -= dtSec;
       if (this.nhArriveDelay <= 0) {
         // Begin walking toward the office door, routed along the road
-        // grid so the customer doesn't stride straight through houses,
+        // grid so the client doesn't stride straight through houses,
         // shops, or the central roundabout island.
         this.state = "neighbourhood-walk";
         this.nhRoute = this.buildNhRoute();
@@ -239,15 +238,13 @@ export class ScenarioRunner {
         this.nhCustomer?.setWalking(true);
         this.nhCustomer?.setRunning(true);
         if (this.currentPersona) {
-          this.hooks.updateBannerNarration(
-            `${this.currentPersona.name} heads to the Zava Insurance Claims Office.`,
-          );
-          this.hud.log(
-            `${this.currentPersona.name} heads to the Zava Insurance Claims Office`,
-            "warn",
-          );
+          const walk =
+            getBeatNarration(this.currentPersona.id, "walk-to-office") ??
+            `${this.currentPersona.name} heads to Caldova Client Operations.`;
+          this.hooks.updateBannerNarration(walk);
+          this.hud.log(walk, "warn");
         }
-        // Camera tracks the customer
+        // Camera tracks the client
         if (this.nhCustomer) {
           this.nhCamera.focusNode(this.nhCustomer.root, {
             radius: 18,
@@ -265,18 +262,18 @@ export class ScenarioRunner {
   private nhWalkRefocusTimer = 0;
 
   /**
-   * Build a list of waypoints from the customer's current position to
+   * Build a list of waypoints from the client's current position to
    * the office front door. The route hugs the main road sidewalks (at
    * z≈±3.4 and x≈±3.4) so the character walks around houses, the
    * roundabout island, and other scenery rather than clipping through
    * them in a straight line.
    *
-   * The Zava Insurance Claims Office is anchored at world (-10, 0, 8)
-   * with its south-facing entrance at z≈4, so every route ends by
-   * approaching x=-10 along the north-side sidewalk and walking north
-   * up the office front walkway. The final `door` waypoint (pushed at
-   * the end) sits just inside the doorway, so the customer is seen
-   * walking INTO the Zava Claims building before the scene transitions.
+   * The Caldova Wealth — Client Operations building is anchored at world
+   * (-10, 0, 8) with its south-facing entrance at z≈4, so every route
+   * ends by approaching x=-10 along the north-side sidewalk and walking
+   * north up the office front walkway. The final `door` waypoint (pushed
+   * at the end) sits just inside the doorway, so the client is seen
+   * walking INTO the Caldova building before the scene transitions.
    */
   private buildNhRoute(): Vector3[] {
     const door = this.zones.officeDoor.clone();
@@ -288,34 +285,34 @@ export class ScenarioRunner {
     const S = -3.4; // south sidewalk z
     const W = -3.4; // west sidewalk x
     // Approach point at the foot of the office front walkway — sits on
-    // the north sidewalk directly south of the Zava Claims entrance.
+    // the north sidewalk directly south of the Caldova entrance.
     const OX = -10; // office walkway x
     let waypoints: Array<[number, number]> = [];
     switch (id) {
-      case "home":
-        // Spawn (~14, 10) NE of centre — step south onto the north
+      case "retirement":
+        // Oakleigh (~14, 10) NE of centre — step south onto the north
         // sidewalk, walk west along it to the foot of the office
-        // walkway, then continue north into the Zava Claims doorway.
+        // walkway, then continue north into the Caldova doorway.
         waypoints = [[14, N], [OX, N]];
         break;
-      case "motor":
-        // Spawn (~23.5, -2) is on the road south of centre — cross to
+      case "onboarding":
+        // Docklands (~23.5, -2) is on the road south of centre — cross to
         // the north sidewalk, then walk west to the office walkway.
         waypoints = [[23.5, N], [OX, N]];
         break;
-      case "business":
-        // Spawn (~-17, -12) south-west — walk north to the south
+      case "hardship":
+        // Lygon St (~-17, -12) south-west — walk north to the south
         // sidewalk, east to the SW corner of the roundabout, north
         // across to the north sidewalk, then west to the office.
         waypoints = [[-17, S], [W, S], [W, N], [OX, N]];
         break;
-      case "travel":
-        // Spawn (~-24, 14) north-west — south to the north sidewalk,
+      case "protection":
+        // Airport (~-24, 14) north-west — south to the north sidewalk,
         // then east along it to the office walkway.
         waypoints = [[-24, N], [OX, N]];
         break;
-      case "life":
-        // Spawn (~15, -14) south-east — north to the south sidewalk,
+      case "bereavement":
+        // Box Hill (~15, -14) south-east — north to the south sidewalk,
         // west to the SW corner of the roundabout, north across to the
         // north sidewalk, then west to the office walkway.
         waypoints = [[15, S], [W, S], [W, N], [OX, N]];
@@ -330,7 +327,7 @@ export class ScenarioRunner {
 
   private advanceNhWalk(dtSec: number): void {
     if (!this.nhCustomer || this.nhRoute.length === 0) return;
-    // Customer runs to the claims office at double walking speed so the
+    // Client runs to the operations office at double walking speed so the
     // scripted journey doesn't dawdle through the neighbourhood.
     const speed = 6.4;
     this.nhCustomer.update(dtSec);
@@ -373,13 +370,14 @@ export class ScenarioRunner {
     this.state = "transition";
     const persona = this.currentPersona!;
     this.hooks.updateBannerNarration(
-      `${persona.name} arrives at the office.`,
+      getBeatNarration(persona.id, "enter-office") ??
+        `${persona.name} arrives at the office.`,
     );
 
     // Brief CSS fade
     await this.hooks.fadeTransition();
 
-    // Tear down the neighbourhood customer and stop its incident
+    // Tear down the neighbourhood client and stop its life-event
     // animation now that the scene is no longer being shown.
     this.cleanupNeighbourhoodCustomer();
     this.incidents.clearIncident();
@@ -387,7 +385,7 @@ export class ScenarioRunner {
     // Switch scenes
     this.hooks.setActiveScene("office");
 
-    // Hand off to the simulation: spawn the scripted customer in the office.
+    // Hand off to the simulation: spawn the scripted client in the office.
     const myRunId = this.runId;
     const inflight = this.sim.startScripted(persona.id, {
       onFocusChange: (info) => {
@@ -400,11 +398,11 @@ export class ScenarioRunner {
       },
     });
     this.inflightInfo = inflight.customer;
-    this.currentClaimId = inflight.customer.claimId;
+    this.currentCaseId = inflight.customer.caseId;
 
     this.state = "office";
 
-    // Initial focus on the customer entering the office.
+    // Initial focus on the client entering the office.
     this.officeCamera.focusNode(inflight.customer.character.root, {
       radius: 20,
       beta: Math.PI / 3.2,
@@ -450,47 +448,17 @@ export class ScenarioRunner {
   private buildStageInfo(stage: StageKey, narration: string): StageInfo | null {
     const cfg = STAGE_CONFIG[stage];
     if (!cfg) return null;
-    // Resolve the staff member for this stage.
-    const role = this.staffRoleForStage(stage);
-    const persona = findStaffByRole(role);
+    // Resolve the staff member who owns this stage.
+    const persona = findStaffByRole(cfg.role);
     return {
       title: cfg.title,
-      staffRole: role,
+      staffRole: cfg.role,
       staffName: persona.name,
       staffColor: persona.color,
       narration,
       agents: cfg.agents,
       appAgentId: cfg.appAgentId,
     };
-  }
-
-  private staffRoleForStage(stage: StageKey):
-    | "Claims Intake Officer"
-    | "Claims Assessor"
-    | "Loss Adjuster"
-    | "Supplier Coordinator"
-    | "Fraud Investigator"
-    | "Claims Team Leader"
-    | "Settlement Officer"
-    | "Customer Communications Specialist" {
-    switch (stage) {
-      case "intake-pickup":
-        return "Claims Intake Officer";
-      case "assessor-pickup":
-        return "Claims Assessor";
-      case "consult:Loss Adjuster":
-        return "Loss Adjuster";
-      case "consult:Supplier Coordinator":
-        return "Supplier Coordinator";
-      case "consult:Fraud Investigator":
-        return "Fraud Investigator";
-      case "consult:Claims Team Leader":
-        return "Claims Team Leader";
-      case "settle":
-        return "Settlement Officer";
-      case "comms-notify":
-        return "Customer Communications Specialist";
-    }
   }
 
   private showThoughtBulbsForStage(
@@ -552,26 +520,28 @@ export class ScenarioRunner {
     this.activityPanel.hide();
     const persona = this.currentPersona;
     this.hud.log(
-      `${persona?.name ?? "Customer"} scenario complete`,
+      `${persona?.name ?? "Client"} scenario complete`,
       "good",
     );
     this.hooks.updateBannerNarration(
-      `${persona?.name ?? "Customer"} — claim closed.`,
+      `${persona?.name ?? "Client"} — case closed.`,
     );
 
-    // Resolve outcome from the claim status & show the customer result animation.
+    // Resolve the outcome recorded by Payments & show the client result animation.
     let outcome: ScenarioOutcome = "approved";
     let amount = 0;
-    if (this.currentClaimId) {
-      const claim = this.sim.getClaim(this.currentClaimId);
-      if (claim) {
-        amount = claim.amount;
-        if (claim.status === "rejected") outcome = "rejected";
-        else if (claim.status === "approved") outcome = "approved";
+    let paidAmount = 0;
+    if (this.currentCaseId) {
+      const memberCase = this.sim.getCase(this.currentCaseId);
+      if (memberCase) {
+        amount = memberCase.amount;
+        paidAmount = memberCase.paidAmount;
+        outcome = memberCase.outcome ?? outcome;
       }
     }
+    const result = persona ? getScenario(persona.id).result : undefined;
     if (persona) {
-      this.resultBanner.show(persona, outcome, amount);
+      this.resultBanner.show(persona, outcome, paidAmount, result);
     }
 
     // After a short hold, show the summary modal. The user dismisses it to
@@ -582,14 +552,16 @@ export class ScenarioRunner {
       this.closingHandle = null;
       if (myRunId !== this.runId) return;
       this.resultBanner.hide();
-      if (persona && this.currentClaimId) {
+      if (persona && this.currentCaseId) {
         this.summaryModal.open(
           {
             scenarioNumber: SCENARIO_NUMBER[persona.id],
             persona,
-            claimId: this.currentClaimId,
+            caseId: this.currentCaseId,
             amount,
+            paidAmount,
             outcome,
+            result,
             steps: this.executedSteps,
           },
           () => this.finishScenario(),
@@ -609,7 +581,7 @@ export class ScenarioRunner {
     this.hooks.setSceneToggleDisabled(false);
     this.state = "idle";
     this.currentPersona = null;
-    this.currentClaimId = null;
+    this.currentCaseId = null;
     this.inflightInfo = null;
     this.executedSteps = [];
     this.gatedStagesSeen.clear();

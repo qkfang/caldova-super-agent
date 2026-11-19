@@ -74,7 +74,7 @@ resource bingAccount 'Microsoft.Bing/accounts@2020-06-10' = {
 }
 
 // Azure AI Search connections — exposed to the Foundry account and to the
-// project so the AzureAISearchTool wired up on each ClaimsAgent can resolve
+// project so the AzureAISearchTool wired up on each CaldovaAgent can resolve
 // the connection by id. Mirrors the quant-agent foundry.bicep.
 resource aiSearchConnection 'Microsoft.CognitiveServices/accounts/connections@2025-10-01-preview' = if (aiSearchEndpoint != '') {
   parent: foundry

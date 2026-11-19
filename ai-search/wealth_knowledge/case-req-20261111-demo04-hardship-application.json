@@ -1,0 +1,26 @@
+{
+  "id": "case-req-20261111-demo04-hardship-application",
+  "title": "REQ-20261111-DEMO04 — Severe financial hardship application: $15,000 requested (Tom Bradley, Caldova Super Essential CS-1030412)",
+  "category": "Case File",
+  "requestType": "Financial hardship release",
+  "caseNumber": "REQ-20261111-DEMO04",
+  "memberNumber": "CS-1030412",
+  "content": "Application lodged online on 11 Nov 2026 by Tom Bradley (DOB 19/08/1979, age 47; tom.bradley@example.com; 0422 304 120), a direct member with no adviser. Account: Caldova Super (Essential) CS-1030412, balance $84,300, invested in Caldova Managed Portfolio — Balanced plus the Caldova Cash Account. Tom owned a small café on Lygon Street, Carlton, which closed in mid-2025. He has received JobSeeker Payment continuously since Mon 6 Apr 2026 and is behind on his mortgage and bills. In his words: 'I never thought I'd need to touch my super — I just need to catch up on the bills.'\n\nAmount requested: $15,000 gross, to cover mortgage arrears of $11,550 (three missed repayments of $3,850), an electricity final notice of $1,186, an overdue water account of $426 and overdue council rates of $1,838 — total $15,000.\n\nDocuments attached: Services Australia (Centrelink) income support confirmation letter dated Mon 9 Nov 2026; Commonwealth statutory declaration signed 10 Nov 2026 stating he cannot meet reasonable and immediate family living expenses; lender's arrears notice dated 2 Nov 2026; electricity final notice; water and council rates reminders.\n\nPayment details: nominated bank account in the name 'Thomas Bradley' (account ending 7741), on file since 2019 and unchanged — no recent change to contact or bank details. TFN held (*** *** 386). Previous hardship releases: none.\n\nNIGO checklist: application signed and dated ✅; identity verified ✅; Services Australia letter present and dated within 21 days (9 Nov → 11 Nov = 2 days) ✅; statutory declaration ✅; evidence of expenses ✅; bank account in the member's own name ✅.\n\nIntake notes for Benefits & Eligibility: appears eligible on the 26-week test (31 continuous weeks, still receiving), but the amount requested is above the $10,000 legal maximum for a single severe financial hardship release, so a partial approval of $10,000 gross is likely. Vulnerability: financial stress and embarrassment — the Team Leader must review before any release. Communications should be plain-English, kind and non-judgemental, and point Tom to free help: the National Debt Helpline (1800 007 007) and Moneysmart.",
+  "severity": "high",
+  "department": "Onboarding & Requests",
+  "tags": [
+    "tom-bradley",
+    "REQ-20261111-DEMO04",
+    "CS-1030412",
+    "essential",
+    "financial-hardship",
+    "severe-financial-hardship",
+    "early-release",
+    "15000-requested",
+    "jobseeker",
+    "mortgage-arrears",
+    "vulnerable-member",
+    "national-debt-helpline"
+  ],
+  "lastUpdated": "2026-11-11T01:30:00Z"
+}

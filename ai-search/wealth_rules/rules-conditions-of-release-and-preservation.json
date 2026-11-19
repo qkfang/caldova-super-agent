@@ -1,0 +1,33 @@
+{
+  "id": "rules-conditions-of-release-and-preservation",
+  "title": "Super law rule summary — Conditions of release & preservation (FY2026-27)",
+  "product": "Caldova Super & Pension",
+  "version": "Rule summary 2026-27 v1.0 — effective 1 July 2026",
+  "summary": "When preserved super can be paid out, based on Schedule 1 of the SIS Regulations as applied by Caldova. A member's benefit is made up of preserved, restricted non-preserved and unrestricted non-preserved amounts; preserved and restricted amounts can only be cashed when a condition of release is met, and then only up to that condition's cashing restriction. Preservation age is 60 for everyone born after 30 June 1964, so in 2026-27 it is effectively 60 for all members. Benefits & Eligibility use this summary to decide whether a withdrawal, pension commencement or early release can proceed; Onboarding uses it to check the request type and evidence.",
+  "rules": "Conditions of release (cashing restriction in brackets):\n1 Retirement after reaching preservation age — members aged 60–64 give a written declaration that an employment arrangement has ended and they never intend to work 10 or more hours a week again (nil).\n2 Ceasing an employment arrangement on or after age 60 (nil for amounts accrued up to that point).\n3 Reaching age 65 — no retirement or work test; the whole balance becomes unrestricted non-preserved (nil).\n4 Transition to retirement — from preservation age while still working, as a non-commutable income stream paying between 4% and 10% of the balance each year (restricted).\n5 Death (nil) — paid as a death benefit under the trust deed.\n6 Permanent incapacity (nil).\n7 Temporary incapacity — non-commutable income stream for the period of incapacity, usually from insured income protection.\n8 Terminal medical condition — two registered medical practitioners, at least one a specialist, certify an illness likely to result in death within 24 months; lump sums are tax-free (nil).\n9 Severe financial hardship — 26 continuous weeks of eligible Commonwealth income support and unable to meet reasonable and immediate family living expenses: one lump sum of $1,000–$10,000 in any 12 months, applied for through the fund (see the severe financial hardship rule summary).\n10 Compassionate grounds — medical treatment or medical transport, home or vehicle modifications for a severe disability, palliative care, funeral costs for a dependant, or preventing foreclosure of a mortgage or forced sale of the home. Approved by the ATO, not the fund; the fund pays the amount the ATO approves.\n11 Other ATO-authorised releases — e.g. First Home Super Saver releases, and release authorities for contributions over the caps or for Division 293 tax.\nUnrestricted non-preserved amounts can be paid at any time. Rollovers between complying funds are not cash payments and do not need a condition of release — preserved money stays preserved in the receiving fund.",
+  "limits": "Preserved super cannot be released to pay debts (other than through the hardship or compassionate grounds rules), to buy a home (outside the First Home Super Saver scheme) or simply because the member needs money. Promoters who offer early access through an SMSF are operating illegally — amounts released illegally are taxed at the member's marginal rate and penalties can apply. A transition-to-retirement income stream cannot be cashed as a lump sum (except unrestricted amounts) and its earnings are taxed in the fund until the member retires or turns 65. Evidence is required for every condition; Caldova never relies on a verbal statement.",
+  "evidenceRequired": [
+    "Proof of age (identity verified at onboarding)",
+    "Retirement declaration (members aged 60–64 relying on retirement)",
+    "Medical certificates — two practitioners including a specialist (terminal medical condition) or permanent incapacity certification",
+    "Services Australia confirmation letter dated within 21 days plus statutory declaration (severe financial hardship)",
+    "ATO approval letter or release authority (compassionate grounds, First Home Super Saver, contributions over the caps, Division 293)",
+    "Certified death certificate (death)"
+  ],
+  "owner": "Benefits & Eligibility",
+  "tags": [
+    "conditions-of-release",
+    "preservation",
+    "preservation-age-60",
+    "retirement",
+    "age-65",
+    "transition-to-retirement",
+    "terminal-medical-condition",
+    "permanent-incapacity",
+    "severe-financial-hardship",
+    "compassionate-grounds",
+    "illegal-early-release",
+    "sis-schedule-1"
+  ],
+  "lastUpdated": "2026-07-01T00:00:00Z"
+}

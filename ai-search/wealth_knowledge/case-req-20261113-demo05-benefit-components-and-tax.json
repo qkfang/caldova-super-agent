@@ -1,0 +1,29 @@
+{
+  "id": "case-req-20261113-demo05-benefit-components-and-tax",
+  "title": "REQ-20261113-DEMO05 — Death benefit calculation per beneficiary: $243,100 gross, 38% tax-free, $25,622.74 withheld, $217,477.26 net (Robert & Lily Chen)",
+  "category": "Case Evidence",
+  "requestType": "Death benefit claim",
+  "caseNumber": "REQ-20261113-DEMO05",
+  "memberNumber": "CP-3019042",
+  "content": "Indicative death benefit payment calculation for Caldova Pension CP-3019042 (Mei Chen, died 12 Oct 2026), prepared by Payments for Team Leader approval.\n\nBenefit: pension balance $486,200 on 13 Nov 2026. The portfolio is redeemed to cash before payment, so final amounts depend on the sale proceeds — the figures below are indicative at $486,200 and will be recalculated on the actual proceeds.\n\nTax components (fixed when Mei's pension started; proportioning rule): tax-free 38% = $184,756; taxable (taxed element) 62% = $301,444. No untaxed element (no insurance proceeds).\n\nSplit under the binding nomination: Robert Chen 50%, Lily Chen 50%.\n\nPer beneficiary (Robert and Lily each):\n• Gross: $243,100\n• Tax-free component (38%): $92,378\n• Taxable component, taxed element (62%): $150,722\n• PAYG withheld at 17% (15% + 2% Medicare levy), because adult children who were not financially dependent are non-dependants for tax: $150,722 × 17% = $25,622.74\n• Net payment: $243,100 − $25,622.74 = $217,477.26\n\nTotals: gross $486,200; tax withheld $51,245.48 (remitted to the ATO); net paid $434,954.52.\n\nForm of payment: lump sums only — a death benefit to a non-dependant for tax cannot be rolled over or paid as a pension. Each payment goes to a bank account in the beneficiary's own name.\n\nApproval: every death benefit needs Team Leader approval, so a Microsoft Teams approval card is raised before release. Each payment ($243,100) is below the $250,000 single-payment limit — the approval is required because it is a death benefit. Both payments are released together once approved.\n\nTax explanation for the letters: the tax-free part ($92,378 each) is not taxed. Tax on the taxable part is withheld at 17%; Robert and Lily each include the taxable component in their tax return, the tax on it is capped at 15% plus Medicare levy, and they receive a credit for the amount withheld.\n\nComplaint rights: if Robert or Lily are unhappy with the decision or the service, Caldova's internal dispute resolution (IDR) team will respond in writing — complaints about a death benefit distribution have up to 90 days after the 28-day objection period ends. If the complaint is not resolved, they can go to the Australian Financial Complaints Authority (AFCA).",
+  "severity": "high",
+  "department": "Payments",
+  "tags": [
+    "mei-chen",
+    "robert-chen",
+    "lily-chen",
+    "REQ-20261113-DEMO05",
+    "CP-3019042",
+    "death-benefit-payment",
+    "486200",
+    "243100-each",
+    "tax-free-38",
+    "taxable-62",
+    "17-percent",
+    "25622.74",
+    "217477.26",
+    "team-leader-approval",
+    "afca"
+  ],
+  "lastUpdated": "2026-11-13T03:00:00Z"
+}

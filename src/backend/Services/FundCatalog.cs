@@ -1,4 +1,4 @@
-namespace ZavaClaims.App.Services;
+namespace CaldovaSuper.App.Services;
 
 /// <summary>
 /// One supplier in Zava's approved network — a repairer, builder, assessor,
@@ -44,7 +44,7 @@ public record SupplierMatch(
 /// Deterministic catalogue of Zava's approved suppliers, grouped by claim
 /// type. Used by the Supplier Coordination "Try It Out" demo to match a
 /// claim to a recommended supplier and to provide a candidate list to the
-/// live <see cref="ZavaClaims.Agents.SupplierCoordinatorAgent"/> when one
+/// live <see cref="CaldovaSuper.Agents.SupplierCoordinatorAgent"/> when one
 /// is configured.
 /// </summary>
 public static class SupplierCatalog

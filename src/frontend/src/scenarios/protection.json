@@ -1,38 +1,61 @@
 {
-  "id": "travel",
-  "scenarioNumber": 4,
-  "caseId": "CLM-20260505-DEMO02",
-  "customerId": "travel",
-  "incidentZone": "travel",
-  "approveAtAssessor": true,
-  "settlement": "rejected",
+  "id": "protection",
+  "scenarioNumber": 2,
+  "caseId": "REQ-20261106-DEMO02",
+  "customerId": "protection",
+  "incidentZone": "protection",
+  "amount": 612400,
+  "paidAmount": 0,
+  "approveAtBenefits": true,
+  "outcome": "rejected",
   "narrations": {
-    "assessor": "Adam reviews Travel — lost luggage for Grace and flags it for fraud review",
-    "settlement": "Seth reviews settlement for Grace — declined on fraud grounds",
-    "comms": "Cara explains to Grace that the claim is DENIED following the fraud review — claim closed"
+    "benefits": "Ben assessing REQ-20261106-DEMO02: full-balance rollover to an SMSF — ATO SMSF verification service (SVS) check required",
+    "benefitsResult": "Ben: SVS FAILED — Grace's TFN is not linked to the SMSF and the bank details and ESA don't match. Escalated to Financial Crime",
+    "payment": "Penny reviews REQ-20261106-DEMO02 — outbound rollover of $612,400 on hold",
+    "paymentResult": "Request BLOCKED — REQ-20261106-DEMO02 outbound rollover cancelled; no funds leave Grace's account",
+    "comms": "Cara reaches Grace on her previously verified number; credentials reset, IDCARE referral and reassurance letter sent — case closed"
   },
-  "preAssessor": [],
-  "extras": [
+  "preBenefits": [],
+  "postBenefits": [
     {
-      "role": "Fraud Investigator",
-      "narration": "Felix runs a fraud check and finds inconsistencies in the timeline and supporting documents.",
+      "role": "Financial Crime Investigator",
+      "narration": "Felix rates the risk HIGH: contact details changed less than 96 hours before a full-balance rollover, a new device on a Sydney IP while Grace's travel notice says Italy, an SMSF registered 9 days ago, a tampered driver licence and a payee-name mismatch.",
+      "duration": 3.0
+    },
+    {
+      "role": "Transfers & Rollovers Coordinator",
+      "narration": "Rory holds the SuperStream rollover — the 3-business-day clock only runs once all required information is received — and cancels the request with the receiving fund.",
+      "duration": 2.5
+    },
+    {
+      "role": "Client Operations Team Leader",
+      "narration": "Theo approves the block, locks Grace's online access and refers the case for a suspicious matter report to AUSTRAC — a human decision, due within 3 business days.",
       "duration": 2.5
     }
   ],
   "beats": [
-    { "at": "customer", "action": "arrive-at-zone",     "narration": "Grace realises her luggage didn't arrive and contacts Zava Insurance.", "duration": 2.0 },
-    { "at": "customer", "action": "walk-to-office",     "narration": "Grace heads from the travel hub through the neighbourhood to the Zava Insurance Claims Office to lodge her claim." },
-    { "at": "customer", "action": "enter-office",       "narration": "Grace walks into the Zava Claims building and approaches reception." },
-    { "at": "customer", "action": "lodge-at-reception", "narration": "Grace lodges her Travel — lost luggage claim at the Zava Insurance reception." },
-    { "at": "Claims Intake Officer", "action": "intake-pickup", "narration": "Iris captures the airline reference and items list." },
-    { "at": "Claims Intake Officer", "action": "intake-route",  "narration": "Iris routes the claim to the Claims Assessor." },
-    { "at": "Claims Assessor", "action": "assessor-pickup", "narration": "Adam reviews the travel policy and item evidence." },
-    { "at": "Claims Assessor", "action": "assessor-process","narration": "Adam notes inconsistencies in the items list — escalates to fraud review.", "duration": 2.5 },
-    { "at": "Fraud Investigator","action": "fraud-review","narration": "Felix runs a fraud check and finds inconsistencies in the timeline and supporting documents.", "duration": 2.5 },
-    { "at": "Claims Assessor", "action": "assessor-handoff","narration": "Adam hands the fraud-flagged claim to Settlement with a recommendation to decline." },
-    { "at": "Settlement Officer","action": "settle","narration": "Seth declines the claim on fraud grounds and prepares the decline notice.", "duration": 2.5, "outcome": "rejected" },
-    { "at": "Customer Communications Specialist","action": "comms-notify","narration": "Cara calls Grace with the final decision — claim DENIED following the fraud review — and explains the outcome and review options in plain English.", "duration": 2.0 }
+    {"at": "customer", "action": "arrive-at-zone", "narration": "Grace flew out of Melbourne Airport on 18 October for a long-planned trip through Italy — a travel notice is on file. Back home, someone has taken over her identity.", "duration": 2.0},
+    {"at": "customer", "action": "walk-to-office", "narration": "A request to roll Grace's entire $612,400 balance to a new SMSF heads to Caldova — lodged in her name, but not by her."},
+    {"at": "customer", "action": "enter-office", "narration": "The rollover request in Grace's name reaches Caldova Client Operations."},
+    {"at": "customer", "action": "lodge-at-reception", "narration": "The request lands in the Onboarding inbox: roll over the full balance of member CS-1058220 to the \"GW Family Superannuation Fund\"."},
+    {"at": "Onboarding & Requests Officer", "action": "onboarding-pickup", "narration": "Olivia's agent extracts the request — full balance to an SMSF, a driver licence attached, and contact details changed by phone on 2 November."},
+    {"at": "Onboarding & Requests Officer", "action": "onboarding-route", "narration": "Olivia opens case REQ-20261106-DEMO02 and routes it to Benefits & Eligibility to check the rollover rules."},
+    {"at": "Benefits & Eligibility Assessor", "action": "benefits-pickup", "narration": "Ben checks the rollover against super law — any rollover to an SMSF must first pass the ATO SMSF verification service (SVS)."},
+    {"at": "Benefits & Eligibility Assessor", "action": "benefits-process", "narration": "SVS fails: the SMSF's ABN is registered, but Grace's TFN isn't linked to it and the bank details and ESA don't match. Ben escalates to Financial Crime.", "duration": 2.5},
+    {"at": "Financial Crime Investigator", "action": "fincrime-review", "narration": "Felix rates the risk HIGH: contact details changed less than 96 hours before a full-balance rollover, a new device on a Sydney IP while Grace's travel notice says Italy, an SMSF registered 9 days ago, a tampered driver licence and a payee-name mismatch.", "duration": 3.0},
+    {"at": "Transfers & Rollovers Coordinator", "action": "transfers-coordinate", "narration": "Rory holds the SuperStream rollover — the 3-business-day clock only runs once all required information is received — and cancels the request with the receiving fund.", "duration": 2.5},
+    {"at": "Client Operations Team Leader", "action": "team-leader-review", "narration": "Theo approves the block, locks Grace's online access and refers the case for a suspicious matter report to AUSTRAC — a human decision, due within 3 business days.", "duration": 2.5},
+    {"at": "Benefits & Eligibility Assessor", "action": "benefits-handoff", "narration": "Ben passes the blocked case to Payments to make sure nothing can leave the account."},
+    {"at": "Payments Officer", "action": "payment", "narration": "Penny cancels the outbound rollover payment and confirms no funds leave Grace's account — the full $612,400 stays put.", "duration": 2.5, "outcome": "rejected"},
+    {"at": "Client Communications Specialist", "action": "comms-notify", "narration": "Cara calls Grace on her previously verified mobile (0403 118 220). Grace confirms she never asked — her credentials are reset and a reassurance letter follows.", "duration": 2.0}
   ],
+  "result": {
+    "status": "blocked",
+    "headline": "Request blocked — Grace's super is safe",
+    "figure": "$612,400 protected",
+    "icon": "🛡️",
+    "summary": "Outcome: BLOCKED — fake SMSF rollover stopped; no funds left the account ($612,400 protected)"
+  },
   "reset": {
     "office": {
       "snapStaffToDesks": true,
@@ -40,7 +63,7 @@
       "removeUnscriptedCustomers": true
     },
     "neighbourhood": {
-      "incidentZone": "travel"
+      "incidentZone": "protection"
     }
   }
 }

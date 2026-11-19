@@ -1,25 +1,39 @@
 @page "/"
 
-<PageTitle>Claims Team in a Day — Zava Insurance</PageTitle>
+<PageTitle>Wealth Team in a Day — Caldova Wealth</PageTitle>
 
 <div class="hero">
     <div class="hero-inner">
         <div class="eyebrow">
             <span class="eyebrow-dot"></span>
-            Zava Insurance · Claims Operations
+            Caldova Wealth · Client Operations · Melbourne
         </div>
-        <h1>An AI claims team your customers can <span class="hl">trust</span>.</h1>
+        <h1>An AI operations team your advisers and members can <span class="hl">trust</span>.</h1>
         <p class="lead">
-            A coordinated team of specialised AI agents that supports human staff through every step
-            of the claims lifecycle — intake, assessment, loss adjusting, fraud, supplier coordination,
-            settlement and customer communications. Each card below is one agent — open it to see how
-            that agent helps with two real customer scenarios.
+            A coordinated team of specialised Microsoft Foundry agents supporting the people who run
+            Caldova's super, pension and investment platform — onboarding, benefits and eligibility,
+            investment solutions, financial crime, transfers and rollovers, payments and client
+            communications, with a team leader watching the whole floor. Agents check, calculate,
+            draft and recommend; humans approve. Open any card to see the agent work a real case.
         </p>
+        <div class="hero-meta" aria-label="Demo at a glance">
+            <div class="hero-stat"><span class="hero-stat-num">8</span><span class="hero-stat-label">Specialist agents</span></div>
+            <div class="hero-stat"><span class="hero-stat-num">5</span><span class="hero-stat-label">Live member cases</span></div>
+            <div class="hero-stat"><span class="hero-stat-num">100%</span><span class="hero-stat-label">Payments human-approved</span></div>
+            <div class="hero-stat"><span class="hero-stat-num">0</span><span class="hero-stat-label">Personal advice given</span></div>
+        </div>
+        <div class="scenarios-line">
+            <strong>Scenarios</strong>
+            @foreach (var scenario in ScenarioCatalog.All)
+            {
+                <a class="chip" href="@($"/scenarios/{scenario.Id}")">@scenario.Icon @scenario.ShortTitle</a>
+            }
+        </div>
     </div>
     <div class="hero-glow" aria-hidden="true"></div>
 </div>
 
-<div class="section-label">The claims office</div>
+<div class="section-label">The operations office</div>
 
 <div class="agent-grid">
     @foreach (var agent in AgentCatalog.All)
@@ -152,12 +166,14 @@
         margin-right: 0.4rem;
         font-size: 0.82rem;
     }
+    a.chip { text-decoration: none; margin-bottom: 0.4rem; transition: background 0.15s ease, border-color 0.15s ease; }
+    a.chip:hover { background: rgba(255, 179, 71, 0.16); border-color: rgba(255, 179, 71, 0.55); color: #fff; }
 
     .section-label {
         font-size: 0.7rem;
         text-transform: uppercase;
         letter-spacing: 0.14em;
-        color: var(--zava-muted, #97a3b6);
+        color: var(--cw-muted, #97a3b6);
         font-weight: 600;
         margin: 0 0 0.7rem 0.15rem;
     }

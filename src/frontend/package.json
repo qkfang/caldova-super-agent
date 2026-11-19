@@ -1,9 +1,9 @@
 {
-  "name": "zava-claims-agent-ui",
+  "name": "caldova-wealth-team-ui",
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Browser demo of an insurance claims office staffed by AI agents (Babylon.js + voxel style).",
+  "description": "Wealth Team in a Day — browser demo of the Caldova Wealth super & wealth client operations office staffed by AI agents (Babylon.js + voxel style).",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",

@@ -9,7 +9,7 @@ import {
   Scene,
   Vector3,
 } from "@babylonjs/core";
-import { ClaimSimulation } from "./claimSimulation";
+import { CaseSimulation } from "./caseSimulation";
 import { CameraDirector } from "./cameraDirector";
 import { HudLogger } from "./hud";
 import { buildNeighbourhood } from "./neighbourhoodScene";
@@ -71,7 +71,7 @@ function bootstrap(): void {
 
   const layout = buildOffice(officeScene);
   const hud = new HudLogger();
-  const sim = new ClaimSimulation(officeScene, layout, hud);
+  const sim = new CaseSimulation(officeScene, layout, hud);
   initCollapsiblePanels();
   hud.log("Office is open — simulation started", "good");
 
@@ -295,12 +295,12 @@ function bootstrap(): void {
     credits.open();
   });
 
-  // Spawn the first random customer immediately so the demo has something to show.
+  // Spawn the first random client immediately so the demo has something to show.
   setTimeout(() => sim.spawnCustomer(), 800);
 
   // ---------------- Simulation speed control ----------------
   // The user can scale how fast the simulation/animation advances using
-  // the x1 / x2 / x5 pills next to "Submit a claim". This multiplies the
+  // the x1 / x2 / x5 pills next to "Submit a request". This multiplies the
   // per-frame delta so all dt-driven movement, scenario timing, and
   // ambient animation speed up uniformly.
   let simSpeed = 1;

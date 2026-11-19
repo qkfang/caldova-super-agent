@@ -20,13 +20,13 @@ import { VoxelCharacter } from "./voxelCharacter";
  *   z = +25 ┌────────────────────────────────────────────────────────────────┐
  *           │ IT / Cloud Infra Room │   MEETING ROOMS (A + B)  │ Kitchen     │
  *           ├───────────────────────┴──────────────────────────┴─────────────┤
- *           │ Team Leader   │ Assessor │ Loss Adj. │ Fraud Inv │ Coffee Area │  back row
- *           │ (exec office) │  Dept    │   Dept    │   Dept    │ (Café)      │
+ *           │ Team Leader   │ Benefits │ Invest-   │ Financial │ Coffee Area │  back row
+ *           │ (exec office) │ & Elig.  │  ments    │  Crime    │ (Café)      │
  *           ├───────────────┼──────────┼───────────┼───────────┼─────────────┤
- *           │ Intake Dept   │ Supplier │ Settlement│ Cust Comm │ Play Area   │  front row
- *           │               │  Coord   │  Officer  │  Dept     │ (ping-pong) │
+ *           │ Onboarding    │ Transfers│ Payments  │ Client    │ Play Area   │  front row
+ *           │ & Requests    │ & Rolls  │           │ Comms     │ (ping-pong) │
  *           ├───────────────┴──────────┴───────────┴───────────┴─────────────┤
- *           │  Welcome counters  +  Reception  +  Customer Waiting Area      │
+ *           │  Welcome counters  +  Reception  +  Client Waiting Area        │
  *   z = -15 └────────────────────────────────────────────────────────────────┘
  *           x = -30                                                     x = +30
  *
@@ -39,33 +39,33 @@ import { VoxelCharacter } from "./voxelCharacter";
  * cubicles and the filing cabinets.
  */
 export interface OfficeLayout {
-  /** World position where customers spawn outside the door. */
+  /** World position where clients spawn outside the door. */
   spawnPoint: Vector3;
   /** Just inside the entrance — used as a routing anchor. */
   entrancePoint: Vector3;
-  /** Where customers queue/drop their claim at reception. */
+  /** Where clients queue/drop their request at reception. */
   receptionPoint: Vector3;
-  /** Where customers go after handing in their claim, then despawn. */
+  /** Where clients go after handing in their request, then despawn. */
   exitPoint: Vector3;
-  /** Reception desk where the Claims Intake Officer stands. */
-  intakeDeskPoint: Vector3;
-  /** Cubicle desk for the Claims Assessor. */
-  assessorDeskPoint: Vector3;
-  /** Cubicle desk for the Loss Adjuster. */
-  lossAdjusterDeskPoint: Vector3;
-  /** Cubicle desk for the Fraud Investigator. */
-  fraudDeskPoint: Vector3;
-  /** Cubicle desk for the Supplier Coordinator. */
-  supplierDeskPoint: Vector3;
-  /** Cubicle desk for the Settlement Officer. */
-  settlementDeskPoint: Vector3;
-  /** Cubicle desk for the Customer Communications Specialist. */
+  /** Cubicle desk for the Onboarding & Requests Officer. */
+  onboardingDeskPoint: Vector3;
+  /** Cubicle desk for the Benefits & Eligibility Assessor. */
+  benefitsDeskPoint: Vector3;
+  /** Cubicle desk for the Investment Analyst. */
+  investmentsDeskPoint: Vector3;
+  /** Cubicle desk for the Financial Crime Investigator. */
+  finCrimeDeskPoint: Vector3;
+  /** Cubicle desk for the Transfers & Rollovers Coordinator. */
+  transfersDeskPoint: Vector3;
+  /** Cubicle desk for the Payments Officer. */
+  paymentsDeskPoint: Vector3;
+  /** Cubicle desk for the Client Communications Specialist. */
   communicationsDeskPoint: Vector3;
-  /** Office desk for the Claims Team Leader. */
+  /** Office desk for the Client Operations Team Leader. */
   teamLeaderDeskPoint: Vector3;
-  /** Shared inbox tray on the intake desk where customers drop folders. */
+  /** Shared inbox tray on the reception desk where clients drop folders. */
   inboxPoint: Vector3;
-  /** Shelf where filed/closed claims rest (in the comms department). */
+  /** Shelf where closed case files rest (in the comms department). */
   archivePoint: Vector3;
 }
 
@@ -139,8 +139,8 @@ export function buildOffice(scene: Scene): OfficeLayout {
     lineZ.material = tileLine;
   }
 
-  // Lobby wood floor — wider "claims lobby" with welcome counters and
-  // customer waiting area
+  // Lobby wood floor — wider "client lobby" with welcome counters and
+  // client waiting area
   const lobbyFloor = MeshBuilder.CreateBox(
     "lobbyFloor",
     { width: 38, height: 0.06, depth: 8.5 },
@@ -223,7 +223,7 @@ export function buildOffice(scene: Scene): OfficeLayout {
   trimBack.position = new Vector3(0, 0.25, 24.85);
   trimBack.material = trimMat;
 
-  // ----- "CLAIMS DEPARTMENT" identity wall (back-mid, between team leader
+  // ----- "CLIENT OPERATIONS" identity wall (back-mid, between team leader
   // office and the filing cabinets) -----
   const identityPanel = MeshBuilder.CreateBox(
     "identityPanel",
@@ -238,8 +238,8 @@ export function buildOffice(scene: Scene): OfficeLayout {
     ctx.fillRect(0, 0, 1024, 440);
     ctx.fillStyle = "#ffffff";
     ctx.font = "bold 110px sans-serif";
-    ctx.fillText("CLAIMS", 50, 140);
-    ctx.fillText("DEPARTMENT", 50, 250);
+    ctx.fillText("CLIENT", 50, 140);
+    ctx.fillText("OPERATIONS", 50, 250);
     ctx.font = "28px sans-serif";
     ctx.fillStyle = "#cfd8ee";
     const values = ["Integrity", "Focus", "Collaboration", "Empathy", "Results"];
@@ -271,7 +271,7 @@ export function buildOffice(scene: Scene): OfficeLayout {
     ctx.font = "bold 56px sans-serif";
     ctx.fillText("OUR PROCESS", 30, 70);
     ctx.font = "bold 38px sans-serif";
-    const steps = ["1  Report", "2  Assess", "3  Investigate", "4  Resolve", "5  Close"];
+    const steps = ["1  Request", "2  Verify", "3  Assess", "4  Action", "5  Confirm"];
     for (let i = 0; i < steps.length; i++) {
       ctx.fillStyle = "#3a5fb0";
       ctx.fillRect(30, 110 + i * 55, 18, 38);
@@ -335,7 +335,7 @@ export function buildOffice(scene: Scene): OfficeLayout {
   }
 
   // ----- Front entrance (double doors) -----
-  // Doors slide horizontally apart when a character (staff or customer)
+  // Doors slide horizontally apart when a character (staff or client)
   // walks within proximity of the entrance, and slide closed again
   // when no-one is nearby. The base x positions below are the closed
   // pose; openOffset is added/subtracted to slide them into the
@@ -446,7 +446,7 @@ export function buildOffice(scene: Scene): OfficeLayout {
   // Reception monitor
   buildMonitor(scene, mat, new Vector3(-16.0, 1.07, -10.7), 0);
 
-  // Coffee table + sofas in lobby (Customer Waiting Area)
+  // Coffee table + sofas in lobby (Client Waiting Area)
   const sofaMat = mat("sofa", "#3a5fb0");
   const sofa1Seat = MeshBuilder.CreateBox(
     "sofa1Seat",
@@ -492,7 +492,7 @@ export function buildOffice(scene: Scene): OfficeLayout {
   cTable2Leg.position = new Vector3(3.5, 0.2, -12.0);
   cTable2Leg.material = mat("cTableLeg", "#7d4f33");
 
-  // "CUSTOMER WAITING AREA" sign on the front-low wall (right side)
+  // "CLIENT WAITING AREA" sign on the front-low wall (right side)
   const waitingSign = MeshBuilder.CreateBox(
     "waitingSign",
     { width: 4.2, height: 0.9, depth: 0.08 },
@@ -506,7 +506,7 @@ export function buildOffice(scene: Scene): OfficeLayout {
     ctx.font = "bold 56px sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText("CUSTOMER WAITING", 320, 56);
+    ctx.fillText("CLIENT WAITING", 320, 56);
     ctx.font = "bold 44px sans-serif";
     ctx.fillText("AREA", 320, 108);
   });
@@ -537,10 +537,10 @@ export function buildOffice(scene: Scene): OfficeLayout {
   // gets its own coloured zone, separated from neighbours by tall office
   // screen partitions and a labelled overhead sign.
   //
-  // Front row (z = 0): Intake | Supplier Coord | Settlement | Cust Comms
-  // Back  row (z = 10): Team Leader | Assessor | Loss Adjuster | Fraud Inv
+  // Front row (z = 0): Onboarding | Transfers | Payments | Comms
+  // Back  row (z = 10): Team Leader | Benefits | Investments | Financial Crime
   // Right side: Play Area | Coffee Area | Kitchen | IT/Cloud Room
-  // Front (z < -7): Reception desk + Customer Waiting Area + Welcome counters
+  // Front (z < -7): Reception desk + Client Waiting Area + Welcome counters
 
   // ----- Department cubicles (front and back rows) -----
   type CubicleSpec = {
@@ -555,18 +555,19 @@ export function buildOffice(scene: Scene): OfficeLayout {
   // partition wall — keeps the diorama feeling spacious rather than
   // cramped now that we have a dedicated meeting-rooms section.
   const cubicles: CubicleSpec[] = [
-    // Sign text is the key role only (no "Officer" / "Coordinator" /
-    // "Investigator" suffixes) so the label stays large and legible on
-    // the desk sign even from the orbit camera.
+    // Sign text is the department keyword only (no "Officer" /
+    // "Coordinator" / "Investigator" suffixes) so the label stays large
+    // and legible from the orbit camera. Accents are the canonical
+    // department colours (matching each staff member's shirt).
     // Front row (z = 0)
-    { label: "intake",         accent: "#3a5fb0", cx: -21, cz: 0, sign: "INTAKE" },
-    { label: "supplier",       accent: "#2e8a6e", cx: -11, cz: 0, sign: "SUPPLIER" },
-    { label: "settlement",     accent: "#a06a4c", cx:  -1, cz: 0, sign: "SETTLEMENT" },
-    { label: "communications", accent: "#b56fbf", cx:   9, cz: 0, sign: "COMMS" },
+    { label: "onboarding",     accent: "#0ea5e9", cx: -21, cz: 0, sign: "ONBOARDING" },
+    { label: "transfers",      accent: "#10b981", cx: -11, cz: 0, sign: "TRANSFERS" },
+    { label: "payments",       accent: "#a855f7", cx:  -1, cz: 0, sign: "PAYMENTS" },
+    { label: "communications", accent: "#ec4899", cx:   9, cz: 0, sign: "COMMS" },
     // Back row (z = 10) — Team Leader gets the executive corner office
-    { label: "assessor",     accent: "#6ec1ff", cx: -11, cz: 10, sign: "ASSESSOR" },
-    { label: "lossAdjuster", accent: "#ffb347", cx:  -1, cz: 10, sign: "LOSS ADJUSTER" },
-    { label: "fraud",        accent: "#e8504c", cx:   9, cz: 10, sign: "FRAUD" },
+    { label: "benefits",    accent: "#6366f1", cx: -11, cz: 10, sign: "BENEFITS" },
+    { label: "investments", accent: "#f59e0b", cx:  -1, cz: 10, sign: "INVESTMENTS" },
+    { label: "finCrime",    accent: "#ef4444", cx:   9, cz: 10, sign: "FINANCIAL CRIME" },
   ];
   for (const c of cubicles) {
     buildDepartmentZone(scene, mat, c.label, c.cx, c.cz, c.sign, c.accent);
@@ -602,6 +603,14 @@ export function buildOffice(scene: Scene): OfficeLayout {
       drawer.material = mat("drawerFront", "#26334d");
     }
   }
+  // Archive label rail along the top front edge of the cabinet bank —
+  // one section per file type, sitting under the plants on top.
+  buildArchiveLabels(scene, -0.5, 1.8, 23.33, 8.2, [
+    "Applications",
+    "Member Files",
+    "Nominations",
+    "Closed Cases",
+  ]);
   // Plants on top of cabinets
   for (let col = 0; col < 6; col += 2) {
     buildPlant(scene, mat, new Vector3(-4.0 + col * 1.4, 1.6, 23.7));
@@ -624,7 +633,7 @@ export function buildOffice(scene: Scene): OfficeLayout {
   coolerTop.material = mat("coolerTop", "#7fb6e3");
 
   // Printer station tucked alongside the right-hand walkway, between the
-  // Fraud Investigation booth and the cafe zone (out of the cubicles
+  // Financial Crime booth and the cafe zone (out of the cubicles
   // since the booths are now spaced further apart).
   const printer = MeshBuilder.CreateBox(
     "printer",
@@ -641,10 +650,10 @@ export function buildOffice(scene: Scene): OfficeLayout {
   printerTop.position = new Vector3(15.0, 0.85, 10.0);
   printerTop.material = mat("printerTop", "#22252e");
 
-  // ----- Customer-facing welcome counters in the lobby -----
-  buildLobbyCounter(scene, mat, "QUICK INTAKE", -7.5, -9.0, "#3a5fb0");
-  buildLobbyCounter(scene, mat, "CLAIMS HELP",  -3.5, -9.0, "#2e8a6e");
-  buildLobbyCounter(scene, mat, "POLICY DESK",   0.5, -9.0, "#a06a4c");
+  // ----- Client-facing welcome counters in the lobby -----
+  buildLobbyCounter(scene, mat, "NEW ACCOUNTS", -7.5, -9.0, "#0ea5e9");
+  buildLobbyCounter(scene, mat, "MEMBER HELP",  -3.5, -9.0, "#14b8a6");
+  buildLobbyCounter(scene, mat, "ADVISER DESK",  0.5, -9.0, "#6366f1");
 
   // ----- Right-side zones -----
   // Play area (front-right): ping-pong, arcade, beanbags
@@ -682,12 +691,12 @@ export function buildOffice(scene: Scene): OfficeLayout {
     entrancePoint: new Vector3(0, 0, -13.5),
     receptionPoint: new Vector3(-13.5, 0, -9.5),
     exitPoint: new Vector3(0, 0, -18),
-    intakeDeskPoint: new Vector3(-21, 0, -0.6),
-    assessorDeskPoint: new Vector3(-11, 0, 9.4),
-    lossAdjusterDeskPoint: new Vector3(-1, 0, 9.4),
-    fraudDeskPoint: new Vector3(9, 0, 9.4),
-    supplierDeskPoint: new Vector3(-11, 0, -0.6),
-    settlementDeskPoint: new Vector3(-1, 0, -0.6),
+    onboardingDeskPoint: new Vector3(-21, 0, -0.6),
+    benefitsDeskPoint: new Vector3(-11, 0, 9.4),
+    investmentsDeskPoint: new Vector3(-1, 0, 9.4),
+    finCrimeDeskPoint: new Vector3(9, 0, 9.4),
+    transfersDeskPoint: new Vector3(-11, 0, -0.6),
+    paymentsDeskPoint: new Vector3(-1, 0, -0.6),
     communicationsDeskPoint: new Vector3(9, 0, -0.6),
     teamLeaderDeskPoint: new Vector3(-21, 0, 9.5),
     inboxPoint: new Vector3(-14.0, 1.25, -10.4),
@@ -714,6 +723,50 @@ function drawSignTexture(
   m.specularColor = new Color3(0.05, 0.05, 0.05);
   m.emissiveColor = new Color3(0.18, 0.18, 0.18);
   mesh.material = m;
+}
+
+/**
+ * Label rail for the archive filing cabinets: a slim cream strip split into
+ * equal sections, one per file type, each with auto-fitted text.
+ */
+function buildArchiveLabels(
+  scene: Scene,
+  cx: number,
+  cy: number,
+  cz: number,
+  width: number,
+  labels: string[],
+): void {
+  const rail = MeshBuilder.CreateBox(
+    "archiveLabelRail",
+    { width, height: 0.4, depth: 0.05 },
+    scene,
+  );
+  rail.position = new Vector3(cx, cy, cz);
+  const texW = 2048;
+  const texH = 100;
+  drawSignTexture(scene, rail, texW, texH, (ctx) => {
+    ctx.fillStyle = "#f4ecdb";
+    ctx.fillRect(0, 0, texW, texH);
+    const sectionW = texW / labels.length;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    for (let i = 0; i < labels.length; i++) {
+      // Thin navy dividers between sections, like drawer label holders.
+      if (i > 0) {
+        ctx.fillStyle = "#2a3a5c";
+        ctx.fillRect(i * sectionW - 3, 0, 6, texH);
+      }
+      ctx.fillStyle = "#1c2230";
+      let fontPx = 58;
+      ctx.font = `bold ${fontPx}px sans-serif`;
+      while (ctx.measureText(labels[i]).width > sectionW * 0.66 && fontPx > 24) {
+        fontPx -= 2;
+        ctx.font = `bold ${fontPx}px sans-serif`;
+      }
+      ctx.fillText(labels[i], i * sectionW + sectionW / 2, texH / 2 + 2);
+    }
+  });
 }
 
 /**
@@ -816,8 +869,8 @@ function buildCubicle(
     ctx.fillStyle = "#3a5fb0";
     ctx.fillRect(0, 0, 1440, 320);
     ctx.fillStyle = "#ffffff";
-    // Auto-fit text so labels of varying length (e.g. "FRAUD" vs
-    // "LOSS ADJUSTER") never clip on either side of the sign. Start at a
+    // Auto-fit text so labels of varying length (e.g. "COMMS" vs
+    // "FINANCIAL CRIME") never clip on either side of the sign. Start at a
     // comfortable size and shrink only if the measured text would breach
     // the safe inner width.
     const safeWidth = 1280; // leave 80px padding on each side of 1440
@@ -1378,7 +1431,7 @@ function buildMeetingRoom(
 }
 
 /**
- * Customer-facing welcome counter: a coloured base + light top with a small
+ * Client-facing welcome counter: a coloured base + light top with a small
  * raised badge sign. Used to populate the lobby with multiple service points.
  */
 function buildLobbyCounter(
@@ -1428,9 +1481,15 @@ function buildLobbyCounter(
     ctx.fillStyle = accentHex;
     ctx.fillRect(0, 0, 512, 180);
     ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 56px sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
+    // Shrink-to-fit so longer labels (e.g. "NEW ACCOUNTS") keep a margin.
+    let fontPx = 56;
+    ctx.font = `bold ${fontPx}px sans-serif`;
+    while (ctx.measureText(signText).width > 460 && fontPx > 32) {
+      fontPx -= 2;
+      ctx.font = `bold ${fontPx}px sans-serif`;
+    }
     ctx.fillText(signText, 256, 95);
   });
 
@@ -2401,7 +2460,7 @@ function buildMagazines(
 /**
  * Decorate the grass land surrounding the office with voxel trees, flower
  * patches, a small fountain, benches, lampposts and a stone path that
- * leads from the customer spawn point to the office entrance. All meshes
+ * leads from the client spawn point to the office entrance. All meshes
  * are static and live entirely outside the office walls
  * (x∈[-30, 30], z∈[-15, 25]) so they never overlap interior furniture or
  * agent walking paths.
@@ -3138,7 +3197,7 @@ function buildOfficeAmbient(scene: Scene): void {
   // use the engine's wall-clock delta (capped) so cars move at a
   // sensible speed regardless of frame rate. This intentionally is
   // not scaled by the simulation speed slider — the cars are pure
-  // ambient scenery, not part of the claim simulation.
+  // ambient scenery, not part of the case simulation.
   scene.onBeforeRenderObservable.add(() => {
     const dt = Math.min(0.1, scene.getEngine().getDeltaTime() / 1000);
     ambient.update(dt);

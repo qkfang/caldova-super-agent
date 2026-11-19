@@ -1,0 +1,26 @@
+{
+  "id": "case-req-20261103-demo01-soa-extract",
+  "title": "REQ-20261103-DEMO01 — Statement of Advice extract, 28 Oct 2026: risk profile Growth (Priya Natarajan, Hannah Lewis, Yarra Private Wealth)",
+  "category": "Case Evidence",
+  "requestType": "New account & consolidation",
+  "caseNumber": "REQ-20261103-DEMO01",
+  "memberNumber": "CS-2049817",
+  "content": "Extract of the Statement of Advice (SoA) prepared by Hannah Lewis CFP® (adviser code ADV-10442) of Yarra Private Wealth, Collins St, Melbourne, for Priya Natarajan and dated 28 Oct 2026. Supplied with the application pack so Caldova can confirm that its instructions (investment, rollovers, fee, nomination) match the advice and that the product suits Priya under the target market determination (TMD). Caldova does not assess the quality of the advice itself.\n\nClient situation: age 34, product manager starting a new role at a Docklands fintech in early November 2026; de facto partner Arjun Mehta; rents an apartment in Southbank; no children. Super is split across two funds: Southern Cross Industry Super about $96,400 (with $520,000 Death & TPD cover) and Harbourline Retail Super about $41,800 (no insurance).\n\nGoals: one super account with lower total fees; long-term growth (more than 25 years until preservation age 60); keep adequate life and TPD insurance; make sure Arjun receives her super if she dies.\n\nRisk profile: Growth — comfortable with short-term falls in pursuit of higher long-term returns; investment timeframe 7+ years.\n\nRecommendations: (1) open a Caldova Super (Select) account; (2) invest in Caldova Managed Portfolio — Growth (80% growth / 20% defensive), consistent with the Growth risk profile; (3) roll over Harbourline Retail Super in full now — no insurance is lost; (4) roll over Southern Cross Industry Super only after replacement Death & TPD cover of at least $520,000 has been accepted by Caldova's group insurer, or after Priya confirms in writing that she accepts losing that cover — until then keep the Southern Cross account open; (5) make a binding death benefit nomination in favour of Arjun Mehta (100%); (6) ongoing advice service for $3,300 a year including GST, deducted monthly ($275) from her Caldova Super account.\n\nCosts disclosed for $138,200 in Growth: Caldova administration fee $414.60 + account-keeping fee $180 + investment fees (0.42%) $580.44 = $1,175.04 a year, plus the adviser fee. Alternatives considered: Balanced ($1,119.76 a year — lower expected return and below her risk profile) and Index Balanced ($843.36 a year — lowest cost, but a 60/40 mix below her risk profile).\n\nTMD fit: Caldova Super (Select) is designed for members who want the full investment menu, whether they join directly or through an adviser; the Growth model's target market is members with a high risk tolerance and a timeframe of 7+ years — Priya is within the target market for both.",
+  "severity": "medium",
+  "department": "Investment Solutions",
+  "tags": [
+    "priya-natarajan",
+    "REQ-20261103-DEMO01",
+    "CS-2049817",
+    "statement-of-advice",
+    "soa",
+    "risk-profile-growth",
+    "growth-model",
+    "tmd-fit",
+    "hannah-lewis",
+    "yarra-private-wealth",
+    "fee-comparison",
+    "replacement-cover"
+  ],
+  "lastUpdated": "2026-11-03T22:45:00Z"
+}

@@ -3,10 +3,10 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Channels;
 using Microsoft.Extensions.AI;
-using ZavaClaims.Agents;
-using ZavaClaims.App.Models;
+using CaldovaSuper.Agents;
+using CaldovaSuper.App.Models;
 
-namespace ZavaClaims.App.Services;
+namespace CaldovaSuper.App.Services;
 
 /// <summary>
 /// One participant in the Team Leader group chat.

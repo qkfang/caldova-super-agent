@@ -16,8 +16,8 @@ param replicaCount int = 1
 @description('Partition count')
 param partitionCount int = 1
 
-// Azure AI Search service backing the claims knowledge + policy requirement
-// indexes. Uses AAD-only auth (mirrors the quant-agent reference at
+// Azure AI Search service backing the Caldova wealth_knowledge index
+// (rules + member case files). Uses AAD-only auth (mirrors the quant-agent reference at
 // https://github.com/qkfang/quant-agent/blob/main/bicep/aisearch.bicep) so the
 // Foundry account/project and the backend Web App can call it via their
 // system-assigned managed identities.

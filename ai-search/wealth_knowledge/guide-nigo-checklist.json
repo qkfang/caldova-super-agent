@@ -1,0 +1,27 @@
+{
+  "id": "guide-nigo-checklist",
+  "title": "Onboarding guide — NIGO (not in good order) checklist for applications & member requests",
+  "category": "Operations Guide",
+  "requestType": "All",
+  "caseNumber": "",
+  "memberNumber": "",
+  "content": "Checklist used by Onboarding & Requests to decide whether an application or member request is in good order before the Member Case is routed. Each item is marked ✅ in good order or ⚠️ needs action, with the reason. A request that is not in good order (NIGO) is not rejected — Caldova tells the adviser or member exactly what is missing within 1 business day, and keeps everything that is in order moving.\n\n1 Identity — verified electronically (Document Verification Service: driver licence, passport, Medicare card) or by certified copies certified within the last 12 months; name, date of birth and address match.\n2 Tax file number — supplied and recorded masked (*** *** 123). Without a TFN Caldova cannot accept personal contributions, employer contributions attract extra no-TFN tax, and tax on benefits is withheld at the top rate.\n3 Signatures — member signature and date on every form; all signatories for joint, company or trust accounts.\n4 Adviser authority — adviser code, practice and licence details; Statement of Advice date for advised accounts; access level.\n5 Adviser fee consent — for any fee deducted from super: written, signed and dated by the member; account name and number; fee in dollars including GST and how often it is deducted; services; fee period (12 months); statement that consent can be withdrawn (SIS s99FA).\n6 Investment selection — valid for the tier (Essential: Caldova Managed Portfolios and cash only; Select adds managed funds and term deposits; Private adds direct ASX/international equities and private markets); percentages total 100% with 1% minimum cash; consistent with the SoA risk profile and the target market determination (TMD).\n7 Insurance — elections complete; for any rollover that will close an insured external account, a signed insurance-loss acknowledgement or evidence of replacement cover — otherwise hold that rollover (others can proceed).\n8 Rollovers in — fund name, USI, member number and full or partial amount for each external fund; for SMSFs: ABN, ESA and bank account (SVS before payment).\n9 Nominations — binding nominations signed and dated before TWO adult witnesses who are not named in the nomination, with both witness declarations; nominees are SIS dependants or the legal personal representative; shares total 100%. If a nomination is not valid as binding, record it as non-binding and ask for a new form — do not delay the account.\n10 Bank account — in the member's own name for withdrawals and pension payments.\n11 Supporting documents by request type — hardship: Services Australia letter dated within 21 days, statutory declaration, evidence of expenses; pension: condition-of-release evidence, reversionary details, payment instructions; death benefit: certified death certificate, claimant IDs and death benefit claim forms, nomination on file; rollover out: authenticated request with step-up verification.\n12 KYC/AML — PEP and sanctions screening complete; no unexplained third-party involvement.\n13 Contact details — verified email and mobile for MFA; flag any contact-detail change in the last 30 days to Financial Crime.\n\nMoney and timeframes: money received for an application that is NIGO is held for up to 30 days and returned to the payer if the application is still incomplete. Contributions under Payday Super must still be allocated or returned within 3 business days.\n\nCommon NIGO reasons: missing second witness on a binding nomination; missing insurance-loss acknowledgement; TFN not supplied; fee consent without a dollar amount or account number; out-of-date ID certification; hardship letter older than 21 days.",
+  "severity": "medium",
+  "department": "Onboarding & Requests",
+  "tags": [
+    "nigo",
+    "not-in-good-order",
+    "checklist",
+    "onboarding",
+    "application-completeness",
+    "identity-verification",
+    "tfn",
+    "adviser-fee-consent",
+    "investment-selection",
+    "insurance-loss-acknowledgement",
+    "bdbn-witnesses",
+    "kyc",
+    "30-day-holding"
+  ],
+  "lastUpdated": "2026-10-15T00:00:00Z"
+}

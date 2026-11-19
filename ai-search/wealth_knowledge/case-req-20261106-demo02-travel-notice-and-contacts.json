@@ -1,0 +1,25 @@
+{
+  "id": "case-req-20261106-demo02-travel-notice-and-contacts",
+  "title": "REQ-20261106-DEMO02 — Travel notice on file & verified pre-change contact details for call-back (Grace Williams)",
+  "category": "Case Evidence",
+  "requestType": "Rollover out to SMSF",
+  "caseNumber": "REQ-20261106-DEMO02",
+  "memberNumber": "CS-1058220",
+  "content": "Member record extract for Grace Williams (DOB 22/07/1963, age 63; Williamstown VIC 3016), Caldova Super (Select) CS-1058220, balance $612,400. Grace is a direct member — no adviser is linked to the account, so all contact is with Grace herself. Prepared for Financial Crime and Client Communications to decide how — and through which channel — Grace can be contacted safely.\n\nTravel notice (on file): lodged 12 Oct 2026 by secure message from Grace's usual online session (registered iPad, Melbourne IP, MFA to her verified mobile). It reads: travelling through Italy from 18 Oct 2026 (departing Melbourne Airport), returning 4 Dec 2026; 'I won't be making any changes to my account while I'm away — please email me if anything comes up.' Preferred contact while travelling: email.\n\nVerified contact details held BEFORE 2 Nov 2026 — the trusted channels for any call-back: mobile 0403 118 220 (verified, used for MFA for several years); email grace.williams@example.com (verified, used for all statements); residential address in Williamstown (unchanged).\n\nDetails changed on 2 Nov 2026 by an unverified phone caller — NOT trusted until Grace confirms them through a verified channel: mobile 0488 902 551; email grace.w.super@mailbox.example.\n\nWhy it matters: the travel notice and the pre-change details are the trusted reference points for this case. The 3 Nov login from a new device in Sydney and the 6 Nov full-balance rollover request are inconsistent with a member who told us she is in Italy and would make no changes. Caldova's controls require any verification call-back to use the details held before the change — never a number or email supplied by the person making the request — and require MFA codes to go to a verified number.\n\nHandling notes: Grace may be hard to reach because of time-zone differences (Italy is 10 hours behind Melbourne in November); email her previous verified address and call the previous verified mobile. Treat her as a likely victim of identity takeover: be clear, calm and reassuring, never imply she did anything wrong, and do not discuss any suspicious matter report.",
+  "severity": "high",
+  "department": "Client Communications",
+  "tags": [
+    "grace-williams",
+    "REQ-20261106-DEMO02",
+    "CS-1058220",
+    "travel-notice",
+    "italy",
+    "verified-contact-details",
+    "pre-change-number",
+    "call-back",
+    "0403-118-220",
+    "identity-takeover",
+    "vulnerable-member"
+  ],
+  "lastUpdated": "2026-11-05T23:45:00Z"
+}

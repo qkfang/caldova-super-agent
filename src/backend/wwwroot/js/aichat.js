@@ -106,8 +106,8 @@
             messagesEl.innerHTML =
                 '<div class="aichat-welcome">' +
                 '<i class="fa-solid fa-brain fa-2x mb-2"></i>' +
-                '<p class="mb-1 fw-semibold">Zava Claims AI Assistant</p>' +
-                '<p class="small text-muted">Ask about your claim, policy coverage, or how the claims office works.</p>' +
+                '<p class="mb-1 fw-semibold">Caldova Wealth AI Assistant</p>' +
+                '<p class="small text-muted">Ask about your account, a request in progress, or how super rules work.</p>' +
                 '</div>';
             refsEl.innerHTML = '<div class="text-muted small text-center mt-4">References will appear here after your first query.</div>';
             refsCount.textContent = '0';

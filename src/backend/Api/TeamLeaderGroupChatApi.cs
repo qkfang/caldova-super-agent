@@ -1,7 +1,7 @@
 using System.Text.Json;
-using ZavaClaims.App.Services;
+using CaldovaSuper.App.Services;
 
-namespace ZavaClaims.App.Api;
+namespace CaldovaSuper.App.Api;
 
 internal record GroupChatStartRequest(string ClaimNumber);
 

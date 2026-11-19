@@ -1,0 +1,27 @@
+{
+  "id": "case-req-20261106-demo02-account-activity-log",
+  "title": "REQ-20261106-DEMO02 — Account activity log 12 Oct – 6 Nov 2026: contact-detail change, new device and full-balance rollover request (Grace Williams, CS-1058220)",
+  "category": "Case Evidence",
+  "requestType": "Rollover out to SMSF",
+  "caseNumber": "REQ-20261106-DEMO02",
+  "memberNumber": "CS-1058220",
+  "content": "Account activity log extracted by Financial Crime for Caldova Super (Select) CS-1058220 — Grace Williams (DOB 22/07/1963, age 63), retired school principal from Williamstown. Balance $612,400. All times are Melbourne time (AEDT).\n\n• 12 Oct 2026 16:05 — Online login from Grace's registered iPad, Melbourne IP address; MFA code sent to her verified mobile 0403 118 220. Travel notice lodged by secure message: travelling in Italy from 18 Oct to 4 Dec 2026.\n• 18 Oct 2026 — Grace departs Melbourne Airport (per the travel notice). No account activity from 13 Oct to 1 Nov.\n• 2 Nov 2026 10:42 — Inbound call to the contact centre from a withheld number. The caller says she is Grace, has 'lost her phone overseas' and needs to update her details. The caller passes knowledge-based checks (date of birth, address, member number, previous email) using personal data likely exposed in a 2025 data breach. Mobile changed from 0403 118 220 to 0488 902 551; email changed from grace.williams@example.com to grace.w.super@mailbox.example. Call length 6 min 40 s. No call-back made.\n• 2 Nov 2026 10:51 — Change-of-details alert emailed to the previous address grace.williams@example.com — not opened (Grace is travelling). No SMS alert went to the previous mobile because the caller said it was lost — noted for quality review.\n• 3 Nov 2026 21:14 — Online access registered from a NEW device (Android phone, Chrome browser), IP address geolocated to Sydney NSW. MFA one-time code sent to the NEW mobile 0488 902 551 and entered correctly; password reset.\n• 3 Nov 2026 21:22 — Balance viewed ($612,400); 'Rollover out' page and SMSF rollover instructions viewed; rollover-out form downloaded.\n• Fri 6 Nov 2026 07:52 — Rollover request email received from grace.w.super@mailbox.example (the address changed on 2 Nov) asking to roll over the FULL balance ($612,400) to 'GW Family Superannuation Fund' (SMSF ABN 66 777 888 999, registered 28 Oct 2026). Attached: signed rollover-out form, SMSF details, bank account in the name 'G Williams Holdings Pty Ltd', and a driver-licence image as ID. Time since the contact details changed: about 93 hours (93 h 10 min) — under 96 hours.\n• 6 Nov 2026 09:20 — Email triaged by Onboarding & Requests; case REQ-20261106-DEMO02 opened (request type: Rollover out to SMSF) and referred to Benefits & Eligibility and Financial Crime.\n\nPattern: a third party changes the contact details, takes over online access with MFA routed to the new number, then emails a full-balance rollover request from the changed email address to move the money to a newly registered SMSF with a non-matching payee. Every step matches AUSTRAC and ATO account-takeover indicators, and the Sydney activity is inconsistent with the Italy travel notice on file.",
+  "severity": "high",
+  "department": "Financial Crime",
+  "tags": [
+    "grace-williams",
+    "REQ-20261106-DEMO02",
+    "CS-1058220",
+    "account-activity-log",
+    "account-takeover",
+    "identity-takeover",
+    "change-of-details",
+    "new-device",
+    "sydney-ip",
+    "mfa-new-mobile",
+    "96-hours",
+    "full-balance-rollover",
+    "travel-notice"
+  ],
+  "lastUpdated": "2026-11-05T23:40:00Z"
+}

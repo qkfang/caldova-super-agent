@@ -3,26 +3,32 @@ using Azure.AI.Projects.Agents;
 using Microsoft.Extensions.Logging;
 using OpenAI.Responses;
 
-namespace ZavaClaims.Agents;
+namespace CaldovaSuper.Agents;
 
 /// <summary>
-/// Shared base for every staff-character agent in the claims office.
+/// Shared base for every staff-character agent in the Caldova Wealth client
+/// operations office ("Wealth Team in a Day").
 ///
 /// Each agent represents one specialist role from <c>docs/foundry_agents.md</c>
-/// and is wired up with the same Foundry tools (Azure AI Search over the
-/// claims knowledge base and Bing grounding for external context). This is
-/// analogous to <c>QuantAgent</c> in
+/// and is wired up with the same Foundry tools: Azure AI Search over the
+/// <c>wealth_knowledge</c> index (PDS, trust deed, super rules and member case
+/// files) and Bing grounding for current public context such as ATO rates.
+/// Some roles additionally get an MCP tool surface served by the backend.
+/// Analogous to <c>QuantAgent</c> in
 /// https://github.com/qkfang/quant-agent/tree/main/src/quantlib/Agents/QuantAgent.cs.
 /// </summary>
-public class ClaimsAgent : BaseAgent
+public class CaldovaAgent : BaseAgent
 {
-    /// <summary>Display name of the staff character (e.g. "Iris").</summary>
+    /// <summary>Shared MCP server label for the backend's tool surface.</summary>
+    public const string DefaultMcpServerLabel = "caldova-ops-mcp";
+
+    /// <summary>Display name of the staff character (e.g. "Olivia").</summary>
     public string Name { get; }
 
-    /// <summary>Department / role (e.g. "Claims Intake Officer").</summary>
+    /// <summary>Staff role (e.g. "Onboarding &amp; Requests Officer").</summary>
     public string Role { get; }
 
-    /// <summary>Department this agent belongs to in the voxel claims office.</summary>
+    /// <summary>Department this agent belongs to in the voxel operations office.</summary>
     public string Department { get; }
 
     /// <summary>ANSI console colour used when streaming the agent's output.</summary>
@@ -35,7 +41,7 @@ public class ClaimsAgent : BaseAgent
     /// </summary>
     public IReadOnlyList<string> ConfiguredTools { get; }
 
-    public ClaimsAgent(
+    public CaldovaAgent(
         AIProjectClient aiProjectClient,
         string agentId,
         string name,
@@ -67,7 +73,7 @@ public class ClaimsAgent : BaseAgent
                 if (!string.IsNullOrWhiteSpace(mcpServerUri))
                 {
                     var mcpTool = ResponseTool.CreateMcpTool(
-                        serverLabel: mcpServerLabel ?? "zava-claims-mcp",
+                        serverLabel: mcpServerLabel ?? DefaultMcpServerLabel,
                         serverUri: new Uri(mcpServerUri),
                         toolCallApprovalPolicy: new McpToolCallApprovalPolicy(GlobalMcpToolCallApprovalPolicy.NeverRequireApproval));
                     agentDef.Tools.Add(mcpTool);
@@ -94,7 +100,7 @@ public class ClaimsAgent : BaseAgent
         if (!string.IsNullOrWhiteSpace(bingConnectionId))
             tools.Add("Bing Grounding (web)");
         if (!string.IsNullOrWhiteSpace(mcpServerUri))
-            tools.Add($"MCP server '{mcpServerLabel ?? "zava-claims-mcp"}' at {mcpServerUri}");
+            tools.Add($"MCP server '{mcpServerLabel ?? DefaultMcpServerLabel}' at {mcpServerUri}");
         if (extraTools != null && extraTools.Count > 0)
             tools.Add($"MCP tool surface ({extraTools.Count} tool{(extraTools.Count == 1 ? "" : "s")})");
         ConfiguredTools = tools;

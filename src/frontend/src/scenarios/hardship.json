@@ -1,50 +1,55 @@
 {
-  "id": "business",
-  "scenarioNumber": 3,
-  "caseId": "CLM-20260506-DEMO04",
-  "customerId": "business",
-  "incidentZone": "business",
-  "approveAtAssessor": true,
-  "settlement": "approved",
+  "id": "hardship",
+  "scenarioNumber": 4,
+  "caseId": "REQ-20261111-DEMO04",
+  "customerId": "hardship",
+  "incidentZone": "hardship",
+  "amount": 15000,
+  "paidAmount": 10000,
+  "approveAtBenefits": true,
+  "outcome": "partial",
   "narrations": {
-    "assessor": "Adam reviews Business — café smoke damage for Tom",
-    "settlement": "Seth reviews settlement for Tom",
-    "comms": "Cara confirms to Tom that the claim is APPROVED and walks him through the staged settlement plan — claim closed"
+    "benefits": "Ben assessing REQ-20261111-DEMO04: severe financial hardship — 26 weeks' income support, letter within 21 days, $1,000–$10,000 once in 12 months",
+    "benefitsResult": "Ben: criteria met ✓ — but $15,000 exceeds the $10,000 legal maximum; recommends a PARTIAL approval of $10,000 gross",
+    "payment": "Penny prepares the hardship payment for REQ-20261111-DEMO04 — $10,000 gross at under-60 tax rates",
+    "paymentResult": "Partial payment RELEASED — $10,000 gross: $7,932 to Tom on Fri 13 Nov 2026, $2,068 PAYG remitted to the ATO",
+    "comms": "Cara sends Tom a plain-English outcome letter with free help (National Debt Helpline 1800 007 007, Moneysmart) — case closed"
   },
-  "preAssessor": [],
-  "extras": [
+  "preBenefits": [],
+  "postBenefits": [
     {
-      "role": "Loss Adjuster",
-      "narration": "Lara schedules a site visit and estimates restoration costs.",
-      "duration": 3.0
-    },
-    {
-      "role": "Supplier Coordinator",
-      "narration": "Sam lines up smoke-restoration specialists and a temporary kitchen.",
+      "role": "Client Operations Team Leader",
+      "narration": "Theo personally reviews the vulnerable-member case and approves a partial release of $10,000 gross.",
       "duration": 2.5
     },
     {
-      "role": "Claims Team Leader",
-      "narration": "Theo reviews the high-value claim and signs off.",
+      "role": "Investment Analyst",
+      "narration": "Ivy plans the redemption — drawn from cash first, then Balanced model units — to keep selling to a minimum.",
       "duration": 2.5
     }
   ],
   "beats": [
-    { "at": "customer", "action": "arrive-at-zone",     "narration": "Tom assesses the smoke damage to his café after the electrical fire.", "duration": 2.0 },
-    { "at": "customer", "action": "walk-to-office",     "narration": "Tom leaves the high street and heads to the Zava Insurance Claims Office to lodge his claim." },
-    { "at": "customer", "action": "enter-office",       "narration": "Tom walks into the Zava Claims building and approaches reception." },
-    { "at": "customer", "action": "lodge-at-reception", "narration": "Tom lodges his Business — café smoke damage claim at the Zava Insurance reception." },
-    { "at": "Claims Intake Officer", "action": "intake-pickup", "narration": "Iris captures the property and business-interruption details." },
-    { "at": "Claims Intake Officer", "action": "intake-route",  "narration": "Iris routes the claim to the Claims Assessor." },
-    { "at": "Claims Assessor", "action": "assessor-pickup", "narration": "Adam reviews the commercial cover and exclusions." },
-    { "at": "Claims Assessor", "action": "assessor-process","narration": "Adam confirms property and business-interruption cover.", "duration": 2.5 },
-    { "at": "Loss Adjuster",   "action": "loss-adjuster-review","narration": "Lara schedules a site visit to estimate restoration costs.", "duration": 3.0 },
-    { "at": "Supplier Coordinator","action": "supplier-coordinate","narration": "Sam lines up smoke-restoration specialists and a temporary kitchen.", "duration": 2.5 },
-    { "at": "Claims Team Leader","action": "team-leader-review","narration": "Theo reviews the high-value claim and signs off.", "duration": 2.5 },
-    { "at": "Claims Assessor", "action": "assessor-handoff","narration": "Adam hands the claim to Settlement." },
-    { "at": "Settlement Officer","action": "settle","narration": "Seth issues an interim payment plus business-interruption support.", "duration": 2.5, "outcome": "approved" },
-    { "at": "Customer Communications Specialist","action": "comms-notify","narration": "Cara walks Tom through the final decision — claim APPROVED — including the interim payment and staged settlement plan.", "duration": 2.0 }
+    {"at": "customer", "action": "arrive-at-zone", "narration": "Tom's café on Lygon Street closed in mid-2025. After 31 weeks on JobSeeker he is behind on his mortgage and bills, and turns to his super.", "duration": 2.0},
+    {"at": "customer", "action": "walk-to-office", "narration": "Tom's severe financial hardship application heads to Caldova Client Operations."},
+    {"at": "customer", "action": "enter-office", "narration": "Tom's hardship application arrives at Caldova Client Operations."},
+    {"at": "customer", "action": "lodge-at-reception", "narration": "The application lands in the Onboarding inbox: release $15,000 on severe financial hardship grounds, with a Services Australia letter and overdue notices attached."},
+    {"at": "Onboarding & Requests Officer", "action": "onboarding-pickup", "narration": "Olivia's agent extracts the application and the Services Australia letter dated Mon 9 Nov 2026 — JobSeeker paid continuously since 6 April 2026."},
+    {"at": "Onboarding & Requests Officer", "action": "onboarding-route", "narration": "Olivia opens case REQ-20261111-DEMO04, flags Tom as a vulnerable member, and routes it to Benefits & Eligibility."},
+    {"at": "Benefits & Eligibility Assessor", "action": "benefits-pickup", "narration": "Ben checks the severe financial hardship criteria and payment limits in the SIS Regulations and the trust deed."},
+    {"at": "Benefits & Eligibility Assessor", "action": "benefits-process", "narration": "Ben: 31 weeks of income support (26 needed) ✓, still receiving ✓, letter within 21 days ✓, no release in the last 12 months ✓ — but $10,000 is the legal maximum, so he recommends a partial approval.", "duration": 2.5},
+    {"at": "Client Operations Team Leader", "action": "team-leader-review", "narration": "Theo personally reviews the vulnerable-member case and approves a partial release of $10,000 gross.", "duration": 2.5},
+    {"at": "Investment Analyst", "action": "investment-review", "narration": "Ivy plans the redemption — drawn from cash first, then Balanced model units — to keep selling to a minimum.", "duration": 2.5},
+    {"at": "Benefits & Eligibility Assessor", "action": "benefits-handoff", "narration": "Ben hands the approved partial release to Payments."},
+    {"at": "Payments Officer", "action": "payment", "narration": "Penny matches the payee name and BSB ✓ and splits the $10,000: tax-free $600, taxable $9,400, PAYG withheld $2,068 (22%) — $7,932 paid on Fri 13 Nov 2026.", "duration": 2.5, "outcome": "partial"},
+    {"at": "Client Communications Specialist", "action": "comms-notify", "narration": "Cara sends Tom a kind, plain-English letter: why $10,000 is the legal maximum, the tax, the impact on his retirement savings, and free help from the National Debt Helpline (1800 007 007) and Moneysmart.", "duration": 2.0}
   ],
+  "result": {
+    "status": "partially approved",
+    "headline": "Partially approved — $10,000 legal maximum",
+    "figure": "$7,932 net",
+    "icon": "🟡",
+    "summary": "Outcome: PARTIALLY APPROVED — $10,000 gross of the $15,000 requested; $7,932 paid after $2,068 PAYG withholding"
+  },
   "reset": {
     "office": {
       "snapStaffToDesks": true,
@@ -52,7 +57,7 @@
       "removeUnscriptedCustomers": true
     },
     "neighbourhood": {
-      "incidentZone": "business"
+      "incidentZone": "hardship"
     }
   }
 }

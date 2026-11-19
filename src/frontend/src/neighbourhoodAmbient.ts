@@ -1,5 +1,6 @@
 import {
   Color3,
+  DynamicTexture,
   Mesh,
   MeshBuilder,
   Scene,
@@ -22,7 +23,7 @@ interface Mover {
 }
 
 /**
- * A scripted incident animation tied to a customer scenario.
+ * A scripted life-event animation tied to a client scenario.
  *
  * The animation is restartable: `start()` snaps everything to its
  * baseline and replays the sequence. `update(dt)` advances the
@@ -46,7 +47,9 @@ export type VehicleType =
   | "jeep"
   | "mini"
   | "bicycle"
-  | "scooter";
+  | "scooter"
+  | "van"
+  | "tram";
 
 /**
  * Build a simple voxel sedan (chassis + cabin + windows + four wheels)
@@ -214,117 +217,6 @@ export function buildJeepMeshes(
 }
 
 /**
- * Build a chunky voxel fire truck: long red chassis, forward cab with
- * windscreen, blue roof light bar, side ladder and six wheels. Long
- * axis runs along local +Z (cab forward at +Z) so the same orientation
- * convention as {@link buildCarMeshes} / {@link buildJeepMeshes}
- * applies.
- */
-export function buildFireTruckMeshes(
-  scene: Scene,
-  parent: TransformNode,
-  bodyHex: string,
-  topHex: string,
-): void {
-  const bodyMat = new StandardMaterial(`${parent.name}_body_mat`, scene);
-  bodyMat.diffuseColor = Color3.FromHexString(bodyHex);
-  bodyMat.specularColor = new Color3(0.05, 0.05, 0.05);
-  const topMat = new StandardMaterial(`${parent.name}_top_mat`, scene);
-  topMat.diffuseColor = Color3.FromHexString(topHex);
-  topMat.specularColor = new Color3(0.05, 0.05, 0.05);
-  const winMat = new StandardMaterial(`${parent.name}_win_mat`, scene);
-  winMat.diffuseColor = Color3.FromHexString("#cfe7ff");
-  const darkMat = new StandardMaterial(`${parent.name}_dark_mat`, scene);
-  darkMat.diffuseColor = Color3.FromHexString("#1c2230");
-  const ladderMat = new StandardMaterial(`${parent.name}_ladder_mat`, scene);
-  ladderMat.diffuseColor = Color3.FromHexString("#b8b0a0");
-  const lightMat = new StandardMaterial(`${parent.name}_light_mat`, scene);
-  lightMat.diffuseColor = Color3.FromHexString("#3a8fd6");
-  lightMat.emissiveColor = Color3.FromHexString("#1a4a7a");
-
-  // Pump / tank body — long red rear section.
-  const body = MeshBuilder.CreateBox(
-    `${parent.name}_body`,
-    { width: 1.5, height: 1.1, depth: 2.6 },
-    scene,
-  );
-  body.parent = parent;
-  body.position = new Vector3(0, 0.75, -0.4);
-  body.material = bodyMat;
-
-  // Forward cab (slightly narrower, taller).
-  const cab = MeshBuilder.CreateBox(
-    `${parent.name}_cab`,
-    { width: 1.4, height: 1.0, depth: 1.2 },
-    scene,
-  );
-  cab.parent = parent;
-  cab.position = new Vector3(0, 1.0, 1.3);
-  cab.material = topMat;
-
-  // Wraparound windscreen on the cab.
-  const win = MeshBuilder.CreateBox(
-    `${parent.name}_win`,
-    { width: 1.42, height: 0.45, depth: 1.15 },
-    scene,
-  );
-  win.parent = parent;
-  win.position = new Vector3(0, 1.25, 1.35);
-  win.material = winMat;
-
-  // Roof-mounted light bar.
-  const light = MeshBuilder.CreateBox(
-    `${parent.name}_light`,
-    { width: 0.9, height: 0.22, depth: 0.5 },
-    scene,
-  );
-  light.parent = parent;
-  light.position = new Vector3(0, 1.6, 1.3);
-  light.material = lightMat;
-
-  // Ladder along the roof of the rear tank.
-  const ladder = MeshBuilder.CreateBox(
-    `${parent.name}_ladder`,
-    { width: 0.4, height: 0.12, depth: 2.4 },
-    scene,
-  );
-  ladder.parent = parent;
-  ladder.position = new Vector3(0, 1.4, -0.4);
-  ladder.material = ladderMat;
-
-  // Front grille / bumper.
-  const grille = MeshBuilder.CreateBox(
-    `${parent.name}_grille`,
-    { width: 1.45, height: 0.35, depth: 0.18 },
-    scene,
-  );
-  grille.parent = parent;
-  grille.position = new Vector3(0, 0.55, 1.95);
-  grille.material = darkMat;
-
-  // Six wheels — two front (under cab) and four rear (under tank).
-  const wheelMat = new StandardMaterial(`${parent.name}_wheel_mat`, scene);
-  wheelMat.diffuseColor = Color3.FromHexString("#1c2230");
-  for (const [dx, dz] of [
-    [0.7, 1.3],
-    [-0.7, 1.3],
-    [0.7, 0.0],
-    [-0.7, 0.0],
-    [0.7, -1.3],
-    [-0.7, -1.3],
-  ] as Array<[number, number]>) {
-    const w = MeshBuilder.CreateBox(
-      `${parent.name}_wheel_${dx}_${dz}`,
-      { width: 0.28, height: 0.55, depth: 0.55 },
-      scene,
-    );
-    w.parent = parent;
-    w.position = new Vector3(dx, 0.27, dz);
-    w.material = wheelMat;
-  }
-}
-
-/**
  * Build a chunky voxel panel van: long boxy cargo body, slightly
  * shorter forward cab with windscreen, four wheels, and a sliding
  * side door panel. Long axis runs along local +Z (cab at +Z front).
@@ -420,171 +312,70 @@ export function buildVanMeshes(
 }
 
 /**
- * Build a chunky voxel flatbed tow truck: forward cab with windscreen,
- * a long flat tow tray behind, vertical headboard with a small boom
- * arm and dangling hook, amber roof light bar, and four wheels. Long
- * axis runs along local +Z (cab forward at +Z, deck and hook trailing
- * toward -Z), matching {@link buildCarMeshes} / {@link buildVanMeshes}.
+ * Build a Melbourne-style voxel tram: a long green body with a gold window
+ * band, a roof pantograph, glowing destination boards at both ends and two
+ * bogies underneath. Long axis runs along local +Z (like the other
+ * vehicles); at ~6.4 units it's the longest vehicle in the neighbourhood.
  */
-export function buildTowTruckMeshes(
+export function buildTramMeshes(
   scene: Scene,
   parent: TransformNode,
   bodyHex: string,
   topHex: string,
 ): void {
-  const bodyMat = new StandardMaterial(`${parent.name}_body_mat`, scene);
-  bodyMat.diffuseColor = Color3.FromHexString(bodyHex);
-  bodyMat.specularColor = new Color3(0.05, 0.05, 0.05);
-  const topMat = new StandardMaterial(`${parent.name}_top_mat`, scene);
-  topMat.diffuseColor = Color3.FromHexString(topHex);
-  topMat.specularColor = new Color3(0.05, 0.05, 0.05);
-  const winMat = new StandardMaterial(`${parent.name}_win_mat`, scene);
-  winMat.diffuseColor = Color3.FromHexString("#cfe7ff");
-  const darkMat = new StandardMaterial(`${parent.name}_dark_mat`, scene);
-  darkMat.diffuseColor = Color3.FromHexString("#1c2230");
-  const amberMat = new StandardMaterial(`${parent.name}_amber_mat`, scene);
-  amberMat.diffuseColor = Color3.FromHexString("#ffb347");
-  amberMat.emissiveColor = Color3.FromHexString("#7a4a00");
-
-  // Chassis rail running the full length under the cab and tow tray.
-  const chassis = MeshBuilder.CreateBox(
-    `${parent.name}_chassis`,
-    { width: 1.3, height: 0.4, depth: 4.0 },
-    scene,
-  );
-  chassis.parent = parent;
-  chassis.position = new Vector3(0, 0.5, -0.3);
-  chassis.material = bodyMat;
-
-  // Forward cab.
-  const cab = MeshBuilder.CreateBox(
-    `${parent.name}_cab`,
-    { width: 1.35, height: 1.0, depth: 1.2 },
-    scene,
-  );
-  cab.parent = parent;
-  cab.position = new Vector3(0, 1.2, 1.2);
-  cab.material = topMat;
-
-  // Cab windscreen.
-  const win = MeshBuilder.CreateBox(
-    `${parent.name}_win`,
-    { width: 1.37, height: 0.45, depth: 1.15 },
-    scene,
-  );
-  win.parent = parent;
-  win.position = new Vector3(0, 1.45, 1.25);
-  win.material = winMat;
-
-  // Amber light bar on the cab roof.
-  const light = MeshBuilder.CreateBox(
-    `${parent.name}_light`,
-    { width: 0.7, height: 0.18, depth: 0.4 },
-    scene,
-  );
-  light.parent = parent;
-  light.position = new Vector3(0, 1.8, 1.2);
-  light.material = amberMat;
-
-  // Flat tow tray behind the cab.
-  const deck = MeshBuilder.CreateBox(
-    `${parent.name}_deck`,
-    { width: 1.3, height: 0.18, depth: 2.4 },
-    scene,
-  );
-  deck.parent = parent;
-  deck.position = new Vector3(0, 0.85, -0.8);
-  deck.material = bodyMat;
-
-  // Low side rails along the tow tray.
-  for (const dx of [0.62, -0.62]) {
-    const rail = MeshBuilder.CreateBox(
-      `${parent.name}_rail_${dx}`,
-      { width: 0.08, height: 0.22, depth: 2.4 },
+  const mat = (suffix: string, hex: string, glow = 0): StandardMaterial => {
+    const m = new StandardMaterial(`${parent.name}_${suffix}_mat`, scene);
+    m.diffuseColor = Color3.FromHexString(hex);
+    m.specularColor = new Color3(0.05, 0.05, 0.05);
+    if (glow > 0) m.emissiveColor = Color3.FromHexString(hex).scale(glow);
+    return m;
+  };
+  const box = (
+    suffix: string,
+    w: number,
+    h: number,
+    d: number,
+    pos: Vector3,
+    material: StandardMaterial,
+  ): Mesh => {
+    const b = MeshBuilder.CreateBox(
+      `${parent.name}_${suffix}`,
+      { width: w, height: h, depth: d },
       scene,
     );
-    rail.parent = parent;
-    rail.position = new Vector3(dx, 1.05, -0.8);
-    rail.material = topMat;
-  }
+    b.parent = parent;
+    b.position = pos;
+    b.material = material;
+    return b;
+  };
+  const bodyMat = mat("body", bodyHex);
+  const bandMat = mat("band", topHex);
+  const winMat = mat("win", "#cfe7ff");
+  const darkMat = mat("dark", "#1c2230");
+  const signMat = mat("sign", "#ffb347", 0.6);
 
-  // Headboard at the front of the tray (just behind the cab).
-  const head = MeshBuilder.CreateBox(
-    `${parent.name}_headboard`,
-    { width: 1.3, height: 0.6, depth: 0.18 },
-    scene,
-  );
-  head.parent = parent;
-  head.position = new Vector3(0, 1.25, 0.45);
-  head.material = topMat;
-
-  // Vertical boom post on top of the headboard.
-  const post = MeshBuilder.CreateBox(
-    `${parent.name}_post`,
-    { width: 0.2, height: 0.7, depth: 0.2 },
-    scene,
-  );
-  post.parent = parent;
-  post.position = new Vector3(0, 1.85, 0.45);
-  post.material = darkMat;
-
-  // Boom arm extending back from the post over the tray.
-  const boom = MeshBuilder.CreateBox(
-    `${parent.name}_boom`,
-    { width: 0.18, height: 0.18, depth: 1.6 },
-    scene,
-  );
-  boom.parent = parent;
-  boom.position = new Vector3(0, 2.1, -0.35);
-  boom.material = darkMat;
-
-  // Chain hanging off the rear end of the boom.
-  const chain = MeshBuilder.CreateBox(
-    `${parent.name}_chain`,
-    { width: 0.06, height: 0.55, depth: 0.06 },
-    scene,
-  );
-  chain.parent = parent;
-  chain.position = new Vector3(0, 1.78, -1.15);
-  chain.material = darkMat;
-
-  // Hook block at the bottom of the chain.
-  const hook = MeshBuilder.CreateBox(
-    `${parent.name}_hook`,
-    { width: 0.24, height: 0.22, depth: 0.24 },
-    scene,
-  );
-  hook.parent = parent;
-  hook.position = new Vector3(0, 1.45, -1.15);
-  hook.material = darkMat;
-
-  // Front grille / bumper.
-  const grille = MeshBuilder.CreateBox(
-    `${parent.name}_grille`,
-    { width: 1.32, height: 0.32, depth: 0.18 },
-    scene,
-  );
-  grille.parent = parent;
-  grille.position = new Vector3(0, 0.55, 1.85);
-  grille.material = darkMat;
-
-  // Four wheels.
-  const wheelMat = new StandardMaterial(`${parent.name}_wheel_mat`, scene);
-  wheelMat.diffuseColor = Color3.FromHexString("#1c2230");
-  for (const [dx, dz] of [
-    [0.6, 1.15],
-    [-0.6, 1.15],
-    [0.6, -1.45],
-    [-0.6, -1.45],
-  ] as Array<[number, number]>) {
-    const w = MeshBuilder.CreateBox(
-      `${parent.name}_wheel_${dx}_${dz}`,
-      { width: 0.25, height: 0.5, depth: 0.5 },
-      scene,
-    );
-    w.parent = parent;
-    w.position = new Vector3(dx, 0.25, dz);
-    w.material = wheelMat;
+  // Green lower body, gold window band and a green roof cap.
+  box("lower", 1.5, 0.75, 6.4, new Vector3(0, 0.62, 0), bodyMat);
+  box("band", 1.52, 0.7, 6.2, new Vector3(0, 1.34, 0), bandMat);
+  box("roof", 1.4, 0.18, 6.3, new Vector3(0, 1.78, 0), bodyMat);
+  // Window strip along both sides plus a windscreen at each end.
+  box("windows", 1.54, 0.42, 5.4, new Vector3(0, 1.36, 0), winMat);
+  box("screenF", 1.3, 0.45, 0.06, new Vector3(0, 1.36, 3.12), winMat);
+  box("screenB", 1.3, 0.45, 0.06, new Vector3(0, 1.36, -3.12), winMat);
+  // Destination boards above the windscreens.
+  box("destF", 1.0, 0.2, 0.06, new Vector3(0, 1.62, 3.13), signMat);
+  box("destB", 1.0, 0.2, 0.06, new Vector3(0, 1.62, -3.13), signMat);
+  // Bumpers.
+  box("bumpF", 1.3, 0.18, 0.12, new Vector3(0, 0.36, 3.24), darkMat);
+  box("bumpB", 1.3, 0.18, 0.12, new Vector3(0, 0.36, -3.24), darkMat);
+  // Pantograph: base plate, angled arm and the contact shoe on top.
+  box("pantoBase", 0.6, 0.1, 0.6, new Vector3(0, 1.92, 0), darkMat);
+  const arm = box("pantoArm", 0.08, 0.9, 0.08, new Vector3(0, 2.3, 0.2), darkMat);
+  arm.rotation.x = 0.5;
+  box("pantoShoe", 0.9, 0.06, 0.12, new Vector3(0, 2.72, 0.42), darkMat);
+  // Two bogies underneath.
+  for (const dz of [-2.1, 2.1]) {
+    box(`bogie_${dz}`, 1.2, 0.3, 1.2, new Vector3(0, 0.15, dz), darkMat);
   }
 }
 
@@ -917,6 +708,12 @@ function buildVehicleMeshes(
       return;
     case "scooter":
       buildScooterMeshes(scene, parent, bodyHex, topHex);
+      return;
+    case "van":
+      buildVanMeshes(scene, parent, bodyHex, topHex);
+      return;
+    case "tram":
+      buildTramMeshes(scene, parent, bodyHex, topHex);
       return;
     case "sedan":
     default:
@@ -1312,8 +1109,8 @@ function stepToward(
 /**
  * Ambient controller for the neighbourhood scene: cars driving in
  * loops, pedestrians walking sidewalks, pets wandering grassy areas,
- * and per-scenario incident animations (e.g. the burst-pipe water
- * spurt). Wired into the per-frame tick from `main.ts` whenever the
+ * and per-scenario life-event animations (e.g. the retirement
+ * confetti). Wired into the per-frame tick from `main.ts` whenever the
  * neighbourhood scene is the active rendered scene.
  */
 export class NeighbourhoodAmbient {
@@ -1326,7 +1123,8 @@ export class NeighbourhoodAmbient {
   /**
    * Spawn a vehicle that drives back and forth along the supplied
    * route. Defaults to a sedan; pass `type` for a jeep, mini cooper,
-   * bicycle, or scooter so a row of ambient traffic feels varied. The
+   * bicycle, scooter, delivery van or tram so ambient traffic feels
+   * varied. The
    * route is a simple list of XZ waypoints; the vehicle loops them
    * forever (A → B → ... → A → B → ...).
    */
@@ -1570,390 +1368,9 @@ export class NeighbourhoodAmbient {
   }
 
   /**
-   * Spawn a "busted pipeline" roadworks scene with a continuously
-   * looping animation. Adds a small excavated dirt patch, a pair of
-   * broken pipe stubs, four orange traffic cones around the perimeter,
-   * a dark wet ground patch, a vertical water jet that pulses in
-   * height, and a fan of recycling droplets that arc out and fall back
-   * to the source.
-   *
-   * Unlike the per-scenario incident animations, this is ambient —
-   * it never stops and never needs to be triggered by the scenario
-   * runner. It is purely scene dressing to make the neighbourhood
-   * feel alive.
-   *
-   * @param id     Unique id used as a suffix for mesh names.
-   * @param center Ground-level XZ position for the centre of the burst.
-   * @param opts   Optional rotation (radians, around Y) so the scene
-   *               can be aligned to a kerb or road direction.
-   */
-  addBustedPipeline(
-    id: string,
-    center: [number, number],
-    opts: { rotationY?: number } = {},
-  ): void {
-    const scene = this.scene;
-    const node = new TransformNode(`nh_pipeline_${id}`, scene);
-    node.parent = this.root;
-    node.position = new Vector3(center[0], 0, center[1]);
-    node.rotation.y = opts.rotationY ?? 0;
-
-    // Materials
-    const dirtMat = new StandardMaterial(`nh_pipeline_${id}_dirt`, scene);
-    dirtMat.diffuseColor = Color3.FromHexString("#5a4332");
-    dirtMat.specularColor = new Color3(0.04, 0.04, 0.04);
-
-    const moundMat = new StandardMaterial(`nh_pipeline_${id}_mound`, scene);
-    moundMat.diffuseColor = Color3.FromHexString("#6e5440");
-    moundMat.specularColor = new Color3(0.04, 0.04, 0.04);
-
-    const pipeMat = new StandardMaterial(`nh_pipeline_${id}_pipe`, scene);
-    pipeMat.diffuseColor = Color3.FromHexString("#8a8a8a");
-    pipeMat.specularColor = new Color3(0.1, 0.1, 0.1);
-
-    const pipeRimMat = new StandardMaterial(`nh_pipeline_${id}_pipe_rim`, scene);
-    pipeRimMat.diffuseColor = Color3.FromHexString("#3a3a3a");
-    pipeRimMat.specularColor = new Color3(0.05, 0.05, 0.05);
-
-    const coneMat = new StandardMaterial(`nh_pipeline_${id}_cone`, scene);
-    coneMat.diffuseColor = Color3.FromHexString("#ee6a2a");
-    coneMat.emissiveColor = Color3.FromHexString("#ee6a2a").scale(0.15);
-    coneMat.specularColor = new Color3(0.05, 0.05, 0.05);
-
-    const coneStripeMat = new StandardMaterial(
-      `nh_pipeline_${id}_cone_stripe`,
-      scene,
-    );
-    coneStripeMat.diffuseColor = Color3.FromHexString("#f4f4f4");
-    coneStripeMat.specularColor = new Color3(0.05, 0.05, 0.05);
-
-    const waterMat = new StandardMaterial(`nh_pipeline_${id}_water`, scene);
-    waterMat.diffuseColor = Color3.FromHexString("#6cb8e8");
-    waterMat.emissiveColor = Color3.FromHexString("#3aa0d8").scale(0.4);
-    waterMat.specularColor = new Color3(0.2, 0.2, 0.2);
-    waterMat.alpha = 0.85;
-
-    const wetMat = new StandardMaterial(`nh_pipeline_${id}_wet`, scene);
-    wetMat.diffuseColor = Color3.FromHexString("#3a6f8a");
-    wetMat.emissiveColor = Color3.FromHexString("#2a5a78").scale(0.25);
-    wetMat.specularColor = new Color3(0.3, 0.3, 0.3);
-    wetMat.alpha = 0.75;
-
-    // Excavated dirt patch (slightly recessed) — sits on top of the
-    // ground so it shows whether placed on grass or asphalt.
-    const dirt = MeshBuilder.CreateBox(
-      `nh_pipeline_${id}_dirt`,
-      { width: 2.2, height: 0.12, depth: 2.2 },
-      scene,
-    );
-    dirt.parent = node;
-    dirt.position = new Vector3(0, 0.06, 0);
-    dirt.material = dirtMat;
-
-    // Two small dirt mounds along the edge of the trench.
-    const moundA = MeshBuilder.CreateBox(
-      `nh_pipeline_${id}_mound_a`,
-      { width: 1.6, height: 0.35, depth: 0.4 },
-      scene,
-    );
-    moundA.parent = node;
-    moundA.position = new Vector3(0, 0.2, 1.2);
-    moundA.material = moundMat;
-
-    const moundB = MeshBuilder.CreateBox(
-      `nh_pipeline_${id}_mound_b`,
-      { width: 0.4, height: 0.3, depth: 1.4 },
-      scene,
-    );
-    moundB.parent = node;
-    moundB.position = new Vector3(-1.2, 0.18, 0);
-    moundB.material = moundMat;
-
-    // Wet ground patch around the burst (gently pulses).
-    const wet = MeshBuilder.CreateCylinder(
-      `nh_pipeline_${id}_wet`,
-      { diameter: 3.6, height: 0.04 },
-      scene,
-    );
-    wet.parent = node;
-    wet.position = new Vector3(0, 0.13, 0);
-    wet.material = wetMat;
-
-    // Two broken pipe stubs sticking up out of the trench. The first is
-    // upright; the second is tilted as if snapped.
-    const pipeA = MeshBuilder.CreateCylinder(
-      `nh_pipeline_${id}_pipe_a`,
-      { diameter: 0.45, height: 0.7 },
-      scene,
-    );
-    pipeA.parent = node;
-    pipeA.position = new Vector3(-0.45, 0.45, -0.1);
-    pipeA.material = pipeMat;
-
-    const pipeARim = MeshBuilder.CreateCylinder(
-      `nh_pipeline_${id}_pipe_a_rim`,
-      { diameter: 0.5, height: 0.08 },
-      scene,
-    );
-    pipeARim.parent = node;
-    pipeARim.position = new Vector3(-0.45, 0.78, -0.1);
-    pipeARim.material = pipeRimMat;
-
-    const pipeB = MeshBuilder.CreateCylinder(
-      `nh_pipeline_${id}_pipe_b`,
-      { diameter: 0.4, height: 0.55 },
-      scene,
-    );
-    pipeB.parent = node;
-    pipeB.position = new Vector3(0.4, 0.32, 0.15);
-    pipeB.rotation.z = -0.5;
-    pipeB.material = pipeMat;
-
-    // Four traffic cones around the perimeter (orange with white stripe).
-    const conePositions: Array<[number, number]> = [
-      [1.2, 1.2],
-      [-1.2, 1.2],
-      [1.2, -1.2],
-      [-1.2, -1.2],
-    ];
-    conePositions.forEach((p, i) => {
-      const base = MeshBuilder.CreateBox(
-        `nh_pipeline_${id}_cone_base_${i}`,
-        { width: 0.55, height: 0.06, depth: 0.55 },
-        scene,
-      );
-      base.parent = node;
-      base.position = new Vector3(p[0], 0.15, p[1]);
-      base.material = coneMat;
-
-      const cone = MeshBuilder.CreateCylinder(
-        `nh_pipeline_${id}_cone_${i}`,
-        { diameterTop: 0.05, diameterBottom: 0.45, height: 0.7 },
-        scene,
-      );
-      cone.parent = node;
-      cone.position = new Vector3(p[0], 0.5, p[1]);
-      cone.material = coneMat;
-
-      const stripe = MeshBuilder.CreateCylinder(
-        `nh_pipeline_${id}_cone_stripe_${i}`,
-        { diameterTop: 0.22, diameterBottom: 0.28, height: 0.1 },
-        scene,
-      );
-      stripe.parent = node;
-      stripe.position = new Vector3(p[0], 0.62, p[1]);
-      stripe.material = coneStripeMat;
-    });
-
-    // Water jet — a thick high-pressure column. The jet is built as
-    // four nested layers (outer mist → outer column → mid column →
-    // bright inner core) so the fountain reads as a chunky voxel
-    // gusher rather than a single flat box.
-    const jetSourceY = 0.78;
-    const jetCenter = new Vector3(-0.45, 0, -0.1);
-
-    // Outer translucent mist column — softens the silhouette and adds
-    // volume around the main spray.
-    const mistMat = new StandardMaterial(`nh_pipeline_${id}_mist_mat`, scene);
-    mistMat.diffuseColor = Color3.FromHexString("#bfe2f4");
-    mistMat.emissiveColor = Color3.FromHexString("#a8d4ec").scale(0.3);
-    mistMat.specularColor = new Color3(0.1, 0.1, 0.1);
-    mistMat.alpha = 0.45;
-
-    const jetMist = MeshBuilder.CreateBox(
-      `nh_pipeline_${id}_jet_mist`,
-      { width: 0.85, height: 1.0, depth: 0.85 },
-      scene,
-    );
-    jetMist.parent = node;
-    jetMist.position = new Vector3(jetCenter.x, jetSourceY + 0.5, jetCenter.z);
-    jetMist.material = mistMat;
-
-    const jetOuter = MeshBuilder.CreateBox(
-      `nh_pipeline_${id}_jet_outer`,
-      { width: 0.55, height: 1.0, depth: 0.55 },
-      scene,
-    );
-    jetOuter.parent = node;
-    jetOuter.position = jetMist.position.clone();
-    jetOuter.material = waterMat;
-
-    const jetMid = MeshBuilder.CreateBox(
-      `nh_pipeline_${id}_jet_mid`,
-      { width: 0.35, height: 1.0, depth: 0.35 },
-      scene,
-    );
-    jetMid.parent = node;
-    jetMid.position = jetMist.position.clone();
-    const midMat = new StandardMaterial(`nh_pipeline_${id}_mid_mat`, scene);
-    midMat.diffuseColor = Color3.FromHexString("#9dd5f0");
-    midMat.emissiveColor = Color3.FromHexString("#7ec5e8").scale(0.45);
-    midMat.alpha = 0.9;
-    jetMid.material = midMat;
-
-    // Inner brighter core for a layered fountain look.
-    const jetCore = MeshBuilder.CreateBox(
-      `nh_pipeline_${id}_jet_core`,
-      { width: 0.2, height: 1.0, depth: 0.2 },
-      scene,
-    );
-    jetCore.parent = node;
-    jetCore.position = jetMist.position.clone();
-    const coreMat = new StandardMaterial(`nh_pipeline_${id}_core_mat`, scene);
-    coreMat.diffuseColor = Color3.FromHexString("#f0faff");
-    coreMat.emissiveColor = Color3.FromHexString("#dceffa").scale(0.6);
-    coreMat.alpha = 0.95;
-    jetCore.material = coreMat;
-
-    // Spray "crown" sitting at the top of the column — a wider, lower
-    // box that flares out above the jet so the fountain reads as
-    // breaking apart at the top instead of a clean stick.
-    const crown = MeshBuilder.CreateBox(
-      `nh_pipeline_${id}_crown`,
-      { width: 1.4, height: 0.5, depth: 1.4 },
-      scene,
-    );
-    crown.parent = node;
-    crown.material = mistMat;
-    crown.position = new Vector3(jetCenter.x, jetSourceY + 1.6, jetCenter.z);
-
-    // Side gush from the tilted broken pipe (pipeB) — a shorter,
-    // angled spray so the second pipe also reads as actively leaking.
-    const sideGush = MeshBuilder.CreateBox(
-      `nh_pipeline_${id}_side_gush`,
-      { width: 0.28, height: 1.0, depth: 0.28 },
-      scene,
-    );
-    sideGush.parent = node;
-    sideGush.material = waterMat;
-    // Anchor at the broken end of pipeB and angle it outward.
-    const sideGushAnchor = new Vector3(0.55, 0.55, 0.2);
-    sideGush.position = sideGushAnchor.clone();
-    sideGush.rotation.z = -0.7;
-    sideGush.rotation.y = 0.3;
-
-    // Recycling droplets that arc out from the jet source and fall.
-    interface Drop {
-      mesh: Mesh;
-      vx: number;
-      vy: number;
-      vz: number;
-      life: number;
-      big: boolean;
-    }
-    const drops: Drop[] = [];
-    const dropCount = 32;
-    for (let i = 0; i < dropCount; i++) {
-      const big = i < 10; // first ten are chunky gobs
-      const size = big ? 0.22 : 0.13;
-      const d = MeshBuilder.CreateBox(
-        `nh_pipeline_${id}_drop_${i}`,
-        { width: size, height: size, depth: size },
-        scene,
-      );
-      d.parent = node;
-      d.material = big ? midMat : waterMat;
-      d.isVisible = false;
-      drops.push({ mesh: d, vx: 0, vy: 0, vz: 0, life: 0, big });
-    }
-
-    const dropSource = new Vector3(jetCenter.x, jetSourceY + 0.2, jetCenter.z);
-
-    const launchDrop = (d: Drop): void => {
-      const angle = Math.random() * Math.PI * 2;
-      // Big gobs spray faster and outward; fine droplets spread wider.
-      const speed = d.big
-        ? 2.6 + Math.random() * 1.8
-        : 2.0 + Math.random() * 2.0;
-      d.vx = Math.cos(angle) * speed;
-      d.vz = Math.sin(angle) * speed;
-      d.vy = d.big ? 4.8 + Math.random() * 1.8 : 3.6 + Math.random() * 2.2;
-      d.mesh.position = dropSource.clone();
-      d.mesh.isVisible = true;
-      d.life = 2.0 + Math.random() * 0.8;
-    };
-
-    // Stagger initial launches so droplets don't all fire at once.
-    let spawnTimer = 0;
-    const spawnInterval = 0.045; // much higher droplet rate
-    let phase = 0;
-
-    this.movers.push({
-      update: (dt) => {
-        phase += dt;
-
-        // Pulsing main jet — taller and more violent than before.
-        const baseH = 3.0;
-        const swell = Math.sin(phase * 1.3) * 0.6;
-        const wobble = Math.sin(phase * 13) * 0.3;
-        const h = Math.max(1.6, baseH + swell + wobble);
-        const setJetLayer = (m: Mesh, scaleY: number): void => {
-          m.scaling.y = scaleY;
-          m.position.y = jetSourceY + scaleY * 0.5;
-        };
-        setJetLayer(jetMist, h * 0.95);
-        setJetLayer(jetOuter, h);
-        setJetLayer(jetMid, h * 1.02);
-        setJetLayer(jetCore, h * 1.05);
-
-        // Mist column shimmies side to side a touch for life.
-        const sway = Math.sin(phase * 2.4) * 0.06;
-        jetMist.rotation.z = sway;
-        jetOuter.rotation.z = sway * 0.5;
-
-        // Crown sits at the top of the column and flares as pressure
-        // surges, then settles. Flickers in alpha for spray feel.
-        const crownPulse = 1 + Math.sin(phase * 6) * 0.18 + swell * 0.3;
-        crown.scaling.x = crownPulse;
-        crown.scaling.z = crownPulse;
-        crown.scaling.y = 0.6 + Math.sin(phase * 9) * 0.18;
-        crown.position.y = jetSourceY + h + 0.1;
-        mistMat.alpha = 0.4 + Math.sin(phase * 5) * 0.1;
-
-        // Side gush flickers in length to mimic intermittent pressure.
-        const sideH = 0.7 + Math.sin(phase * 7) * 0.25;
-        sideGush.scaling.y = sideH;
-
-        // Wet patch pulses more visibly with the burst.
-        const wetPulse = 1 + Math.sin(phase * 1.8) * 0.08 + swell * 0.1;
-        wet.scaling.x = wetPulse;
-        wet.scaling.z = wetPulse;
-
-        // Spawn lots of droplets per frame for a heavy spray.
-        spawnTimer += dt;
-        while (spawnTimer >= spawnInterval) {
-          spawnTimer -= spawnInterval;
-          // Launch up to 3 idle drops per tick for a thick burst.
-          let launched = 0;
-          for (const d of drops) {
-            if (!d.mesh.isVisible) {
-              launchDrop(d);
-              launched++;
-              if (launched >= 3) break;
-            }
-          }
-        }
-
-        // Ballistic droplet update with floor clamp + recycle.
-        for (const d of drops) {
-          if (!d.mesh.isVisible) continue;
-          d.vy -= 9.8 * dt;
-          d.mesh.position.x += d.vx * dt;
-          d.mesh.position.y += d.vy * dt;
-          d.mesh.position.z += d.vz * dt;
-          d.life -= dt;
-          if (d.mesh.position.y <= 0.18 || d.life <= 0) {
-            d.mesh.isVisible = false;
-          }
-        }
-      },
-    });
-  }
-
-  /**
    * Register a free-running ambient animation that ticks every frame.
    * Useful for permanent props that should always be alive (e.g. the
-   * café rooftop fire flicker and rising smoke wisps), as opposed to
+   * retirement balloons bobbing in the breeze), as opposed to
    * the scripted, scenario-bound incidents handled by {@link
    * registerIncident}.
    */
@@ -1999,295 +1416,113 @@ export class NeighbourhoodAmbient {
 }
 
 /* ------------------------------------------------------------------------ */
-/* Incident animation factories                                             */
+/* Life-event animation factories                                           */
 /* ------------------------------------------------------------------------ */
 
-/**
- * Burst-pipe animation: a vertical jet of water bursts up out of the
- * kitchen window for ~1.6s, drops settle around the driveway, and the
- * static puddle grows from a tight wet spot into the full pool.
- */
-export function makeBurstPipeIncident(
+/** A reusable pop of voxel confetti that pops up and flutters down. */
+interface ConfettiPop {
+  launch(origin: Vector3): void;
+  update(dtSec: number): void;
+  reset(): void;
+}
+
+function createConfettiPop(
   scene: Scene,
   root: TransformNode,
-  puddle: Mesh,
-  kitchenSource: Vector3,
-): IncidentAnimation {
-  const baseScale = puddle.scaling.clone();
-  // Tall water jet (hidden until the animation runs).
-  const jet = MeshBuilder.CreateBox(
-    "nh_pipe_jet",
-    { width: 0.35, height: 1.0, depth: 0.35 },
-    scene,
-  );
-  jet.parent = root;
-  jet.position = kitchenSource.clone();
-  const waterMat = new StandardMaterial("nh_pipe_jet_mat", scene);
-  waterMat.diffuseColor = Color3.FromHexString("#6cb8e8");
-  waterMat.emissiveColor = Color3.FromHexString("#3aa0d8").scale(0.4);
-  waterMat.alpha = 0.85;
-  jet.material = waterMat;
-  jet.isVisible = false;
-
-  // Six small splash droplets that arc outward from the source.
-  const drops: Array<{ mesh: Mesh; vx: number; vy: number; vz: number }> = [];
-  for (let i = 0; i < 8; i++) {
-    const d = MeshBuilder.CreateBox(
-      `nh_pipe_drop_${i}`,
-      { width: 0.18, height: 0.18, depth: 0.18 },
+  name: string,
+  colors: string[],
+  count = 28,
+): ConfettiPop {
+  const mats = colors.map((hex, i) => {
+    const m = new StandardMaterial(`${name}_mat_${i}`, scene);
+    m.diffuseColor = Color3.FromHexString(hex);
+    m.emissiveColor = Color3.FromHexString(hex).scale(0.35);
+    m.specularColor = new Color3(0, 0, 0);
+    return m;
+  });
+  const pieces: Array<{ mesh: Mesh; vel: Vector3; spin: Vector3; life: number }> = [];
+  for (let i = 0; i < count; i++) {
+    const mesh = MeshBuilder.CreateBox(
+      `${name}_${i}`,
+      { width: 0.18, height: 0.04, depth: 0.12 },
       scene,
     );
-    d.parent = root;
-    d.material = waterMat;
-    d.isVisible = false;
-    drops.push({ mesh: d, vx: 0, vy: 0, vz: 0 });
+    mesh.parent = root;
+    mesh.material = mats[i % mats.length];
+    mesh.isPickable = false;
+    mesh.isVisible = false;
+    pieces.push({ mesh, vel: Vector3.Zero(), spin: Vector3.Zero(), life: 0 });
   }
-
-  let elapsed = 0;
-  let running = false;
-  const duration = 4.0;
-
-  const reset = (): void => {
-    jet.isVisible = false;
-    jet.scaling = new Vector3(1, 0.01, 1);
-    puddle.scaling = baseScale.clone();
-    for (const d of drops) {
-      d.mesh.isVisible = false;
-      d.mesh.position = kitchenSource.clone();
-    }
-  };
-  reset();
-
   return {
-    durationSec: duration,
-    start: () => {
-      elapsed = 0;
-      running = true;
-      jet.isVisible = true;
-      jet.scaling = new Vector3(1, 0.01, 1);
-      // Launch droplets in a fan.
-      for (let i = 0; i < drops.length; i++) {
-        const d = drops[i];
-        const angle = (i / drops.length) * Math.PI * 2;
-        const speed = 2.4 + Math.random() * 1.2;
-        d.vx = Math.cos(angle) * speed;
-        d.vz = Math.sin(angle) * speed;
-        d.vy = 3.0 + Math.random() * 1.4;
-        d.mesh.position = kitchenSource.clone();
-        d.mesh.isVisible = true;
+    launch: (origin) => {
+      for (const p of pieces) {
+        const angle = Math.random() * Math.PI * 2;
+        const out = 0.8 + Math.random() * 2.0;
+        p.vel = new Vector3(
+          Math.cos(angle) * out,
+          4.0 + Math.random() * 2.5,
+          Math.sin(angle) * out,
+        );
+        p.spin = new Vector3(
+          Math.random() * 10 - 5,
+          Math.random() * 10 - 5,
+          Math.random() * 10 - 5,
+        );
+        p.life = 2.4 + Math.random() * 1.4;
+        p.mesh.position = origin.clone();
+        p.mesh.isVisible = true;
       }
-      puddle.scaling = new Vector3(0.15, 1, 0.15);
-    },
-    stop: () => {
-      running = false;
-      reset();
     },
     update: (dt) => {
-      if (!running) return;
-      elapsed += dt;
-      // Phase 1: jet bursts up rapidly (0–0.6s), pulses for 0.6–1.6s.
-      if (elapsed < 0.6) {
-        const t = elapsed / 0.6;
-        jet.scaling.y = 0.2 + t * 2.8;
-        jet.position.y = kitchenSource.y + jet.scaling.y * 0.5;
-      } else if (elapsed < 1.8) {
-        const wob = 2.6 + Math.sin(elapsed * 14) * 0.4;
-        jet.scaling.y = wob;
-        jet.position.y = kitchenSource.y + jet.scaling.y * 0.5;
-      } else {
-        // Wind down — jet shrinks back to nothing.
-        const t = Math.min(1, (elapsed - 1.8) / 0.6);
-        jet.scaling.y = (1 - t) * 2.6 + 0.01;
-        jet.position.y = kitchenSource.y + jet.scaling.y * 0.5;
-        if (t >= 1) jet.isVisible = false;
+      const drag = Math.exp(-1.4 * dt);
+      for (const p of pieces) {
+        if (!p.mesh.isVisible) continue;
+        // Light gravity with a capped fall speed so the pieces flutter down.
+        p.vel.y = Math.max(-1.4, p.vel.y - 7.0 * dt);
+        p.vel.x *= drag;
+        p.vel.z *= drag;
+        p.mesh.position.addInPlace(p.vel.scale(dt));
+        p.mesh.rotation.addInPlace(p.spin.scale(dt));
+        p.life -= dt;
+        if (p.life <= 0 || p.mesh.position.y <= 0.08) p.mesh.isVisible = false;
       }
-
-      // Droplet physics: simple ballistic with floor clamp.
-      for (const d of drops) {
-        if (!d.mesh.isVisible) continue;
-        d.vy -= 9.8 * dt;
-        d.mesh.position.x += d.vx * dt;
-        d.mesh.position.y += d.vy * dt;
-        d.mesh.position.z += d.vz * dt;
-        if (d.mesh.position.y <= 0.1) {
-          d.mesh.position.y = 0.1;
-          d.mesh.isVisible = false;
-        }
-      }
-
-      // Puddle grows over the whole 4s, easing toward full size.
-      const pt = Math.min(1, elapsed / duration);
-      const ease = 1 - Math.pow(1 - pt, 2);
-      puddle.scaling = new Vector3(
-        0.15 + ease * (baseScale.x - 0.15),
-        baseScale.y,
-        0.15 + ease * (baseScale.z - 0.15),
-      );
-
-      if (elapsed >= duration) {
-        running = false;
-        // Leave the puddle at its final natural state for everyone to see.
-        puddle.scaling = baseScale.clone();
-        jet.isVisible = false;
-      }
+    },
+    reset: () => {
+      for (const p of pieces) p.mesh.isVisible = false;
     },
   };
 }
 
 /**
- * Rear-end collision animation: the rear car rolls forward into the
- * lead car's bumper, both cars judder on impact, and a small dust puff
- * pops up at the contact point.
+ * New job (onboarding): two pops of confetti in Caldova's department
+ * colours over the Docklands forecourt — a fresh start worth celebrating.
  */
-export function makeRearEndIncident(
+export function makeCelebrationIncident(
   scene: Scene,
   root: TransformNode,
-  leadCarMeshes: TransformNode[],
-  rearCarMeshes: TransformNode[],
-  contact: Vector3,
+  origin: Vector3,
 ): IncidentAnimation {
-  const leadBase = leadCarMeshes.map((m) => m.position.clone());
-  const rearBase = rearCarMeshes.map((m) => m.position.clone());
-  // Rear car starts further back (further east, away from the lead car)
-  // than its resting pose so it can roll in and impact the bumper.
-  const rearOffset = 3.5;
-
-  const puff = MeshBuilder.CreateBox(
-    "nh_motor_puff",
-    { width: 0.6, height: 0.6, depth: 0.6 },
-    scene,
-  );
-  puff.parent = root;
-  puff.position = contact.clone();
-  const puffMat = new StandardMaterial("nh_motor_puff_mat", scene);
-  puffMat.diffuseColor = Color3.FromHexString("#cfc8b4");
-  puffMat.alpha = 0;
-  puff.material = puffMat;
-  puff.isVisible = false;
-
+  const colors = ["#0ea5e9", "#ffd166", "#ec4899", "#10b981", "#ffffff"];
+  const first = createConfettiPop(scene, root, "nh_newjob_confetti_a", colors);
+  const second = createConfettiPop(scene, root, "nh_newjob_confetti_b", colors);
   let elapsed = 0;
   let running = false;
-  const duration = 2.8;
-
-  const restore = (): void => {
-    leadCarMeshes.forEach((m, i) => (m.position = leadBase[i].clone()));
-    rearCarMeshes.forEach((m, i) => (m.position = rearBase[i].clone()));
-    puff.isVisible = false;
-    puffMat.alpha = 0;
-  };
-  restore();
-
-  return {
-    durationSec: duration,
-    start: () => {
-      elapsed = 0;
-      running = true;
-      // Snap rear car back to its pre-impact position.
-      rearCarMeshes.forEach((m, i) => {
-        m.position = rearBase[i].clone();
-        m.position.x += rearOffset;
-      });
-      leadCarMeshes.forEach((m, i) => (m.position = leadBase[i].clone()));
-      puff.position = contact.clone();
-      puff.scaling = new Vector3(0.3, 0.3, 0.3);
-      puffMat.alpha = 0;
-      puff.isVisible = false;
-    },
-    stop: () => {
-      running = false;
-      restore();
-    },
-    update: (dt) => {
-      if (!running) return;
-      elapsed += dt;
-      if (elapsed < 1.4) {
-        // Roll-in: rear car eases from rearOffset → 0 with a slight bob.
-        const t = elapsed / 1.4;
-        const eased = 1 - Math.pow(1 - t, 2);
-        const off = rearOffset * (1 - eased);
-        rearCarMeshes.forEach((m, i) => {
-          m.position = rearBase[i].clone();
-          m.position.x += off;
-        });
-      } else if (elapsed < 2.0) {
-        // Impact: shake both cars on the X axis briefly.
-        const t = (elapsed - 1.4) / 0.6;
-        const decay = 1 - t;
-        const j = Math.sin(elapsed * 38) * 0.12 * decay;
-        leadCarMeshes.forEach((m, i) => {
-          m.position = leadBase[i].clone();
-          m.position.x += j;
-          m.position.y += Math.abs(j) * 0.4;
-        });
-        rearCarMeshes.forEach((m, i) => {
-          m.position = rearBase[i].clone();
-          m.position.x += j * 0.6;
-        });
-        // Dust puff fades in then out.
-        puff.isVisible = true;
-        const pt = t;
-        puffMat.alpha = pt < 0.3 ? pt / 0.3 : 1 - (pt - 0.3) / 0.7;
-        puff.scaling = new Vector3(0.3 + pt * 0.9, 0.3 + pt * 0.7, 0.3 + pt * 0.9);
-        puff.position.y = contact.y + pt * 0.4;
-      } else {
-        // Settle.
-        leadCarMeshes.forEach((m, i) => (m.position = leadBase[i].clone()));
-        rearCarMeshes.forEach((m, i) => (m.position = rearBase[i].clone()));
-        puffMat.alpha = 0;
-        puff.isVisible = false;
-        if (elapsed >= duration) running = false;
-      }
-    },
-  };
-}
-
-/**
- * Café smoke pulse: existing smoke wisps swell, and a warm orange
- * flicker glows behind the café door for the duration of the beat.
- */
-export function makeSmokeIncident(
-  scene: Scene,
-  root: TransformNode,
-  smokeMeshes: Mesh[],
-  flickerAt: Vector3,
-): IncidentAnimation {
-  const baseScales = smokeMeshes.map((m) => m.scaling.clone());
-  const baseY = smokeMeshes.map((m) => m.position.y);
-
-  const flicker = MeshBuilder.CreateBox(
-    "nh_cafe_flicker",
-    { width: 1.2, height: 1.4, depth: 0.1 },
-    scene,
-  );
-  flicker.parent = root;
-  flicker.position = flickerAt.clone();
-  const fmat = new StandardMaterial("nh_cafe_flicker_mat", scene);
-  fmat.diffuseColor = Color3.FromHexString("#e07a2c");
-  fmat.emissiveColor = Color3.FromHexString("#e07a2c");
-  fmat.alpha = 0;
-  flicker.material = fmat;
-  flicker.isVisible = false;
-
-  let elapsed = 0;
-  let running = false;
+  let secondFired = false;
   const duration = 4.5;
 
   const reset = (): void => {
-    smokeMeshes.forEach((m, i) => {
-      m.scaling = baseScales[i].clone();
-      m.position.y = baseY[i];
-    });
-    fmat.alpha = 0;
-    flicker.isVisible = false;
+    first.reset();
+    second.reset();
   };
-  reset();
 
   return {
     durationSec: duration,
     start: () => {
       elapsed = 0;
       running = true;
-      flicker.isVisible = true;
+      secondFired = false;
+      reset();
+      first.launch(origin);
     },
     stop: () => {
       running = false;
@@ -2296,16 +1531,12 @@ export function makeSmokeIncident(
     update: (dt) => {
       if (!running) return;
       elapsed += dt;
-      const t = Math.min(1, elapsed / duration);
-      // Swell & rise, then settle back.
-      const pulse = Math.sin(t * Math.PI);
-      smokeMeshes.forEach((m, i) => {
-        const s = 1 + pulse * 0.6 + Math.sin(elapsed * 3 + i) * 0.05;
-        m.scaling = baseScales[i].scale(s);
-        m.position.y = baseY[i] + pulse * 0.6;
-      });
-      // Flicker alpha — flame-like jitter.
-      fmat.alpha = pulse * (0.55 + Math.sin(elapsed * 18) * 0.25);
+      if (!secondFired && elapsed >= 1.2) {
+        secondFired = true;
+        second.launch(origin.add(new Vector3(1.2, 0.6, 0.4)));
+      }
+      first.update(dt);
+      second.update(dt);
       if (elapsed >= duration) {
         running = false;
         reset();
@@ -2315,33 +1546,152 @@ export function makeSmokeIncident(
 }
 
 /**
- * Lost-luggage tumble: the lone suitcase starts on the trolley, slides
- * off, and settles at its "lost" resting position out on the tarmac.
+ * Identity-takeover attempt (protection): red rings pulse outward around
+ * the member like a radar ping while a phone alert badge bounces overhead —
+ * someone is trying to move her super while she is overseas.
  */
-export function makeLuggageIncident(
+export function makeIdentityAlertIncident(
+  scene: Scene,
   root: TransformNode,
-  suitcase: Mesh,
-  trolleyTop: Vector3,
-  restingPos: Vector3,
+  center: Vector3,
 ): IncidentAnimation {
-  const baseRotation = suitcase.rotation.clone();
+  const rings: Array<{ mesh: Mesh; mat: StandardMaterial }> = [];
+  for (let i = 0; i < 2; i++) {
+    const mesh = MeshBuilder.CreateTorus(
+      `nh_alert_ring_${i}`,
+      { diameter: 2.4, thickness: 0.14, tessellation: 40 },
+      scene,
+    );
+    mesh.parent = root;
+    mesh.position = new Vector3(center.x, 0.14, center.z);
+    const mat = new StandardMaterial(`nh_alert_ring_mat_${i}`, scene);
+    mat.diffuseColor = Color3.FromHexString("#ef4444");
+    mat.emissiveColor = Color3.FromHexString("#ef4444");
+    mat.specularColor = new Color3(0, 0, 0);
+    mat.alpha = 0;
+    mesh.material = mat;
+    mesh.isPickable = false;
+    mesh.isVisible = false;
+    rings.push({ mesh, mat });
+  }
+
+  // Bouncing alert badge: a red disc with a phone glyph, always facing
+  // the camera.
+  const badge = MeshBuilder.CreatePlane(
+    "nh_alert_badge",
+    { width: 1.1, height: 1.1 },
+    scene,
+  );
+  badge.parent = root;
+  badge.billboardMode = Mesh.BILLBOARDMODE_ALL;
+  badge.isPickable = false;
+  badge.isVisible = false;
+  const tex = new DynamicTexture("nh_alert_badge_tex", { width: 256, height: 256 }, scene, false);
+  tex.hasAlpha = true;
+  const ctx = tex.getContext() as unknown as CanvasRenderingContext2D;
+  ctx.clearRect(0, 0, 256, 256);
+  ctx.beginPath();
+  ctx.arc(128, 128, 112, 0, Math.PI * 2);
+  ctx.fillStyle = "#ef4444";
+  ctx.fill();
+  ctx.lineWidth = 12;
+  ctx.strokeStyle = "#ffffff";
+  ctx.stroke();
+  ctx.font = "120px 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("📱", 128, 136);
+  tex.update();
+  const badgeMat = new StandardMaterial("nh_alert_badge_mat", scene);
+  badgeMat.diffuseTexture = tex;
+  badgeMat.opacityTexture = tex;
+  badgeMat.emissiveColor = new Color3(1, 1, 1);
+  badgeMat.disableLighting = true;
+  badgeMat.backFaceCulling = false;
+  badge.material = badgeMat;
+  const badgeBaseY = center.y + 3.2;
+
   let elapsed = 0;
   let running = false;
-  const duration = 2.4;
+  const duration = 4.5;
 
-  const restore = (): void => {
-    suitcase.position = restingPos.clone();
-    suitcase.rotation = baseRotation.clone();
+  const hide = (): void => {
+    for (const r of rings) {
+      r.mesh.isVisible = false;
+      r.mat.alpha = 0;
+    }
+    badge.isVisible = false;
   };
-  restore();
+  hide();
 
   return {
     durationSec: duration,
     start: () => {
       elapsed = 0;
       running = true;
-      suitcase.position = trolleyTop.clone();
-      suitcase.rotation = baseRotation.clone();
+      for (const r of rings) r.mesh.isVisible = true;
+      badge.isVisible = true;
+      badge.position = new Vector3(center.x, badgeBaseY, center.z);
+    },
+    stop: () => {
+      running = false;
+      hide();
+    },
+    update: (dt) => {
+      if (!running) return;
+      elapsed += dt;
+      // Each ring expands and fades over 1.4 s, offset by half a cycle.
+      for (let i = 0; i < rings.length; i++) {
+        const phase = (elapsed / 1.4 + i * 0.5) % 1;
+        const s = 0.5 + phase * 1.7;
+        rings[i].mesh.scaling = new Vector3(s, 1, s);
+        rings[i].mat.alpha = (1 - phase) * 0.85;
+      }
+      badge.position.y = badgeBaseY + Math.abs(Math.sin(elapsed * 4.2)) * 0.55;
+      if (elapsed >= duration) {
+        running = false;
+        hide();
+      }
+    },
+  };
+}
+
+/**
+ * Retirement: the "Happy Retirement" banner unfurls with a little bounce
+ * and confetti pops over the front garden.
+ */
+export function makeRetirementIncident(
+  scene: Scene,
+  root: TransformNode,
+  banner: Mesh,
+  confettiOrigin: Vector3,
+): IncidentAnimation {
+  const baseScale = banner.scaling.clone();
+  const baseRotZ = banner.rotation.z;
+  const colors = ["#e8a33d", "#ffd166", "#3a8fd6", "#d9534f", "#ffffff"];
+  const first = createConfettiPop(scene, root, "nh_retire_confetti_a", colors);
+  const second = createConfettiPop(scene, root, "nh_retire_confetti_b", colors);
+  let elapsed = 0;
+  let running = false;
+  let secondFired = false;
+  const duration = 4.5;
+
+  const restore = (): void => {
+    banner.scaling = baseScale.clone();
+    banner.rotation.z = baseRotZ;
+    first.reset();
+    second.reset();
+  };
+
+  return {
+    durationSec: duration,
+    start: () => {
+      elapsed = 0;
+      running = true;
+      secondFired = false;
+      restore();
+      banner.scaling = new Vector3(baseScale.x, baseScale.y * 0.05, baseScale.z);
+      first.launch(confettiOrigin);
     },
     stop: () => {
       running = false;
@@ -2350,17 +1700,17 @@ export function makeLuggageIncident(
     update: (dt) => {
       if (!running) return;
       elapsed += dt;
-      const t = Math.min(1, elapsed / duration);
-      // Ballistic-ish slide off + tumble.
-      const eased = t * t;
-      suitcase.position.x = trolleyTop.x + (restingPos.x - trolleyTop.x) * eased;
-      suitcase.position.z = trolleyTop.z + (restingPos.z - trolleyTop.z) * eased;
-      // Drop and bounce: y traces a parabola from trolleyTop.y to restingPos.y.
-      const drop = trolleyTop.y - restingPos.y;
-      suitcase.position.y =
-        trolleyTop.y - drop * eased + Math.sin(t * Math.PI) * 0.5;
-      suitcase.rotation.y = baseRotation.y + t * Math.PI * 1.5;
-      suitcase.rotation.z = Math.sin(t * Math.PI * 2) * 0.4;
+      // Unfurl over 0.6 s with a small overshoot, then sway gently.
+      const t = Math.min(1, elapsed / 0.6);
+      const overshoot = Math.sin(t * Math.PI) * 0.2;
+      banner.scaling.y = baseScale.y * Math.max(0.05, t + overshoot);
+      banner.rotation.z = baseRotZ + Math.sin(elapsed * 3) * 0.03;
+      if (!secondFired && elapsed >= 1.5) {
+        secondFired = true;
+        second.launch(confettiOrigin.add(new Vector3(-1.4, 0.3, 0)));
+      }
+      first.update(dt);
+      second.update(dt);
       if (elapsed >= duration) {
         running = false;
         restore();
@@ -2370,9 +1720,112 @@ export function makeLuggageIncident(
 }
 
 /**
- * Calm life-insurance scene: a soft warm halo gently fades in and out
- * around the home, signalling that this scenario is handled with care
- * (no alarm or chaos).
+ * Financial hardship (café closed): a soft grey cloud gathers over the
+ * shuttered café while the shopfront pavement dims — a quiet, respectful
+ * cue rather than an alarm.
+ */
+export function makeHardshipCloudIncident(
+  scene: Scene,
+  root: TransformNode,
+  cloudCenter: Vector3,
+  groundCenter: Vector3,
+): IncidentAnimation {
+  const cloudMat = new StandardMaterial("nh_hardship_cloud_mat", scene);
+  cloudMat.diffuseColor = Color3.FromHexString("#9aa0a8");
+  cloudMat.emissiveColor = Color3.FromHexString("#5a6068");
+  cloudMat.specularColor = new Color3(0, 0, 0);
+  cloudMat.alpha = 0;
+  const puffs: Array<{ mesh: Mesh; base: Vector3 }> = [];
+  const puffDefs: Array<[number, number, number, number]> = [
+    // [dx, dy, dz, size]
+    [-0.9, 0, 0, 1.4],
+    [0.4, 0.3, 0.2, 1.7],
+    [1.5, -0.05, -0.1, 1.2],
+    [-0.1, 0.55, -0.3, 1.1],
+  ];
+  for (let i = 0; i < puffDefs.length; i++) {
+    const [dx, dy, dz, size] = puffDefs[i];
+    const mesh = MeshBuilder.CreateBox(
+      `nh_hardship_cloud_${i}`,
+      { width: size, height: size * 0.6, depth: size * 0.8 },
+      scene,
+    );
+    mesh.parent = root;
+    mesh.material = cloudMat;
+    mesh.isPickable = false;
+    mesh.isVisible = false;
+    const base = new Vector3(cloudCenter.x + dx, cloudCenter.y + dy, cloudCenter.z + dz);
+    mesh.position = base.clone();
+    puffs.push({ mesh, base });
+  }
+
+  const dim = MeshBuilder.CreateCylinder(
+    "nh_hardship_dim",
+    { diameter: 5.5, height: 0.03 },
+    scene,
+  );
+  dim.parent = root;
+  dim.position = new Vector3(groundCenter.x, 0.1, groundCenter.z);
+  const dimMat = new StandardMaterial("nh_hardship_dim_mat", scene);
+  dimMat.diffuseColor = Color3.FromHexString("#3a3f48");
+  dimMat.specularColor = new Color3(0, 0, 0);
+  dimMat.alpha = 0;
+  dim.material = dimMat;
+  dim.isPickable = false;
+  dim.isVisible = false;
+
+  let elapsed = 0;
+  let running = false;
+  const duration = 4.5;
+
+  const hide = (): void => {
+    cloudMat.alpha = 0;
+    dimMat.alpha = 0;
+    for (const p of puffs) {
+      p.mesh.isVisible = false;
+      p.mesh.position = p.base.clone();
+    }
+    dim.isVisible = false;
+  };
+  hide();
+
+  return {
+    durationSec: duration,
+    start: () => {
+      elapsed = 0;
+      running = true;
+      for (const p of puffs) p.mesh.isVisible = true;
+      dim.isVisible = true;
+    },
+    stop: () => {
+      running = false;
+      hide();
+    },
+    update: (dt) => {
+      if (!running) return;
+      elapsed += dt;
+      const t = Math.min(1, elapsed / duration);
+      // Fade in, hold, fade out — never a hard flash.
+      const fade = t < 0.2 ? t / 0.2 : t > 0.8 ? (1 - t) / 0.2 : 1;
+      cloudMat.alpha = 0.78 * fade;
+      for (let i = 0; i < puffs.length; i++) {
+        const p = puffs[i];
+        p.mesh.position.x = p.base.x + t * 0.8;
+        p.mesh.position.y = p.base.y + Math.sin(elapsed * 1.6 + i) * 0.08;
+      }
+      dimMat.alpha = (0.16 + 0.08 * Math.sin(elapsed * 2.2)) * fade;
+      if (elapsed >= duration) {
+        running = false;
+        hide();
+      }
+    },
+  };
+}
+
+/**
+ * Bereavement: a soft warm halo gently fades in and out around the
+ * family home, signalling that this case is handled with care (no alarm
+ * or chaos).
  */
 export function makeCalmGlowIncident(
   scene: Scene,

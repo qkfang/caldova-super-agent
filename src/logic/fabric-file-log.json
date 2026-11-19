@@ -6,14 +6,14 @@
             "Step1_Create_File": {
                 "type": "Http",
                 "inputs": {
-                    "uri": "https://onelake.dfs.fabric.microsoft.com/Zava_Claims_Demo/LH_Claims.Lakehouse/Files/@{triggerOutputs()?['headers']['filename']}?resource=file",
+                    "uri": "https://onelake.dfs.fabric.microsoft.com/Caldova_Wealth_Demo/LH_Operations.Lakehouse/Files/@{triggerOutputs()?['headers']['filename']}?resource=file",
                     "method": "PUT",
                     "headers": {
                         "Content-Length": "0"
                     },
                     "authentication": {
                         "type": "ManagedServiceIdentity",
-                        "identity": "/subscriptions/873a4995-e21b-47e2-953e-f2e88e2fa4f9/resourcegroups/rg-zava-claims/providers/Microsoft.ManagedIdentity/userAssignedIdentities/zava-claims-logic-uid",
+                        "identity": "/subscriptions/873a4995-e21b-47e2-953e-f2e88e2fa4f9/resourcegroups/rg-caldova-super/providers/Microsoft.ManagedIdentity/userAssignedIdentities/caldova-ops-logic-uid",
                         "audience": "https://storage.azure.com/"
                     }
                 },
@@ -27,7 +27,7 @@
             "Step2_Append_Content": {
                 "type": "Http",
                 "inputs": {
-                    "uri": "https://onelake.dfs.fabric.microsoft.com/Zava_Claims_Demo/LH_Claims.Lakehouse/Files/@{triggerOutputs()?['headers']['filename']}?action=append&position=0&flush=true",
+                    "uri": "https://onelake.dfs.fabric.microsoft.com/Caldova_Wealth_Demo/LH_Operations.Lakehouse/Files/@{triggerOutputs()?['headers']['filename']}?action=append&position=0&flush=true",
                     "method": "PATCH",
                     "headers": {
                         "Content-Type": "application/json"
@@ -35,7 +35,7 @@
                     "body": "@triggerBody()",
                     "authentication": {
                         "type": "ManagedServiceIdentity",
-                        "identity": "/subscriptions/873a4995-e21b-47e2-953e-f2e88e2fa4f9/resourcegroups/rg-zava-claims/providers/Microsoft.ManagedIdentity/userAssignedIdentities/zava-claims-logic-uid",
+                        "identity": "/subscriptions/873a4995-e21b-47e2-953e-f2e88e2fa4f9/resourcegroups/rg-caldova-super/providers/Microsoft.ManagedIdentity/userAssignedIdentities/caldova-ops-logic-uid",
                         "audience": "https://storage.azure.com/"
                     }
                 },

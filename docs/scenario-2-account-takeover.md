@@ -20,7 +20,8 @@ No one is accused. Humans make the block and suspicious matter report (SMR) deci
 |---|---|
 | Case number | `REQ-20261106-DEMO02` |
 | Request type | Rollover out to SMSF |
-| Received | Fri 6 Nov 2026 |
+| Received | Fri 6 Nov 2026, 07:52 |
+| Priority | Urgent |
 | Member | Grace Williams (DOB 22/07/1963, age 63), `CS-1058220` |
 | Product | Caldova Super (Select) |
 | Balance | $612,400 |
@@ -47,7 +48,7 @@ No one is accused. Humans make the block and suspicious matter report (SMR) deci
 | Sun 18 Oct 2026 | Grace leaves Melbourne Airport for Italy. Her travel notice is on file. |
 | Mon 2 Nov 2026, 10:42 | A caller impersonating Grace phones the contact centre. The caller passes knowledge-based checks using personal data that was likely exposed in a 2025 data breach, and says she "lost her phone overseas". The mobile is changed to 0488 902 551 and the email to grace.w.super@mailbox.example. A change-of-details alert goes to Grace's **old** email, which she doesn't read while travelling. |
 | Tue 3 Nov 2026, 21:14 | Online access is registered from a **new device**. The IP address is geolocated to **Sydney**. The MFA code goes to the **new** mobile. |
-| Fri 6 Nov 2026 | A request arrives to roll over the **full balance ($612,400)** to the "GW Family Superannuation Fund". The SMSF's ABN was registered on 28 Oct 2026, 9 days earlier. The bank account is in the name "G Williams Holdings Pty Ltd". A driver licence image is attached. |
+| Fri 6 Nov 2026, 07:52 | An email request arrives to roll over the **full balance ($612,400)** to the "GW Family Superannuation Fund", about 93 hours after the contact details were changed. The SMSF's ABN was registered on 28 Oct 2026, 9 days earlier. The bank account is in the name "G Williams Holdings Pty Ltd". A driver licence image is attached. |
 
 ---
 
@@ -58,6 +59,7 @@ No one is accused. Humans make the block and suspicious matter report (SMR) deci
 - The **Onboarding Agent** receives the rollover-out request. It extracts the SMSF name, ABN, electronic service address (ESA), bank BSB and account name, and the amount (the full balance).
 - On paper, every field is present.
 - Because this is a rollover to an SMSF, the case is tagged for **SMSF verification**.
+- It sets the priority to **Urgent**: a full-balance rollover to an SMSF.
 - It opens case `REQ-20261106-DEMO02` and routes it to Benefits & Eligibility.
 
 ---
@@ -85,7 +87,7 @@ No one is accused. Humans make the block and suspicious matter report (SMR) deci
 
 | Indicator | Detail |
 |---|---|
-| Contact details changed just before a full-balance rollover | The mobile and email were changed on 2 Nov at 10:42, less than 96 hours before a request to move all $612,400 |
+| Contact details changed just before a full-balance rollover | The mobile and email were changed on 2 Nov at 10:42. The request to move all $612,400 arrived on 6 Nov at 07:52, about 93 hours later (under 96 hours) |
 | New device, unexpected location | A new device logged in from a Sydney IP on 3 Nov at 21:14, while the travel notice says Grace is in Italy |
 | MFA sent to the changed number | The one-time code went to the number changed the day before |
 | Newly registered SMSF | ABN registered 28 Oct 2026, 9 days before the request. Creating an SMSF to receive stolen benefits is a known pattern |
