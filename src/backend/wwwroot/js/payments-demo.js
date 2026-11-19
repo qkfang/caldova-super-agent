@@ -159,25 +159,28 @@
         const inboundText = $('#payments-inbound-text');
         const confirmationTitle = $('#payments-confirmation-title');
         const confirmationEl = $('#payments-confirmation');
-        // Approval popup
-        const modalEl = $('#payments-approval-modal');
-        const modalTitle = $('#payments-modal-title');
-        const modalDeeplink = $('#payments-modal-deeplink');
-        const modalReasons = $('#payments-modal-reasons');
-        const modalCase = $('#payments-modal-case');
-        const modalApprovalId = $('#payments-modal-approval-id');
-        const modalMember = $('#payments-modal-member');
-        const modalType = $('#payments-modal-type');
-        const modalPayee = $('#payments-modal-payee');
-        const modalGross = $('#payments-modal-gross');
-        const modalTax = $('#payments-modal-tax');
-        const modalNet = $('#payments-modal-net');
-        const modalStatus = $('#payments-modal-status');
-        const modalAgent = $('#payments-modal-agent');
-        const modalAgentBody = $('#payments-modal-agent-body');
-        const modalApproveBtn = $('#payments-modal-approve-btn');
-        const modalRejectBtn = $('#payments-modal-reject-btn');
-        const modalReleaseBtn = $('#payments-modal-release-btn');
+        // Approval popup — lives outside the panel so `position: fixed`
+        // isn't trapped by the panel's backdrop-filter.
+        const modalEl = document.getElementById('payments-approval-modal');
+        if (!modalEl) return;
+        const $m = sel => modalEl.querySelector(sel);
+        const modalTitle = $m('#payments-modal-title');
+        const modalDeeplink = $m('#payments-modal-deeplink');
+        const modalReasons = $m('#payments-modal-reasons');
+        const modalCase = $m('#payments-modal-case');
+        const modalApprovalId = $m('#payments-modal-approval-id');
+        const modalMember = $m('#payments-modal-member');
+        const modalType = $m('#payments-modal-type');
+        const modalPayee = $m('#payments-modal-payee');
+        const modalGross = $m('#payments-modal-gross');
+        const modalTax = $m('#payments-modal-tax');
+        const modalNet = $m('#payments-modal-net');
+        const modalStatus = $m('#payments-modal-status');
+        const modalAgent = $m('#payments-modal-agent');
+        const modalAgentBody = $m('#payments-modal-agent-body');
+        const modalApproveBtn = $m('#payments-modal-approve-btn');
+        const modalRejectBtn = $m('#payments-modal-reject-btn');
+        const modalReleaseBtn = $m('#payments-modal-release-btn');
 
         let cases = [];
         let selected = null;
@@ -186,6 +189,7 @@
         let modalApproval = null;
         let pollTimer = null;
         let runSeq = 0;
+        let deeplinkApprovalId = null;
 
         // ── Step 1: pick a case ──────────────────────────────────────
 
@@ -452,7 +456,11 @@
             }
 
             if (data.flow === 'inbound') {
-                inboundText.textContent = [data.humanApprovalReason, data.releaseBlockedReason].filter(Boolean).join(' ');
+                const calc = data.calculation || {};
+                inboundText.textContent = [
+                    calc.netDisplay ? `${calc.netDisplay} on arrival.` : '',
+                    data.humanApprovalReason
+                ].filter(Boolean).join(' ');
             }
 
             confirmationTitle.textContent = data.confirmationTitle || 'Payment confirmation draft';
@@ -617,11 +625,13 @@
             if (s === 'pending') startPolling(); else stopPolling();
         }
 
-        // Keep the inline card and the popup in step whenever an approval changes.
+        // Keep the inline card, the popup and the deep-link banner in step
+        // whenever an approval changes.
         function handleApprovalUpdate(a) {
             if (!a || !a.approvalId) return;
             if (currentApproval && currentApproval.approvalId === a.approvalId) updateApprovalState(a);
             syncModal(a);
+            if (deeplinkApprovalId === a.approvalId) renderDeeplinkBanner(a);
         }
 
         async function postJson(url, body) {
@@ -839,6 +849,11 @@
 
         // ── Teams card deep link: ?approvalId=PAY-…[&decision=…] ─────
 
+        function renderDeeplinkBanner(a) {
+            show(deeplinkEl, 'payments-deeplink', '',
+                `Opened from the Microsoft Teams approval card — <strong>${escapeHtml(a.approvalId)}</strong> for case ${escapeHtml(a.caseNumber)} (${escapeHtml(STATUS_TEXT[a.status] || a.status)}).`);
+        }
+
         async function handleDeepLink() {
             const params = new URLSearchParams(window.location.search);
             const approvalId = params.get('approvalId');
@@ -851,8 +866,8 @@
                 let a = {};
                 try { a = await res.json(); } catch (_) { /* not JSON */ }
                 if (!res.ok) throw new Error((a && a.error) || ('HTTP ' + res.status));
-                show(deeplinkEl, 'payments-deeplink', '',
-                    `Opened from the Microsoft Teams approval card — <strong>${escapeHtml(a.approvalId)}</strong> for case ${escapeHtml(a.caseNumber)} (${escapeHtml(a.status)}).`);
+                deeplinkApprovalId = a.approvalId;
+                renderDeeplinkBanner(a);
                 openModal(a, { decision: (params.get('decision') || '').toLowerCase() });
                 return a.caseNumber;
             } catch (err) {

@@ -60,6 +60,12 @@
             'income-support-letter': 'Income support letter',
         };
         const kindLabel = kind => KIND_LABELS[kind] || String(kind || '').replace(/-/g, ' ');
+        // "a driver licence", "an SMSF registration", "an income support letter"
+        const kindWithArticle = kind => {
+            const label = kindLabel(kind);
+            const noun = /^[A-Z]{2}/.test(label) ? label : label.charAt(0).toLowerCase() + label.slice(1);
+            return (/^(SMSF|[aeiou])/i.test(noun) ? 'an ' : 'a ') + noun;
+        };
 
         function escapeHtml(s) {
             return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -332,7 +338,7 @@
                     : '<p class="muted" style="margin:0; font-size:0.84rem;">No concerns — every applicable check passed.</p>';
                 const checkItem = c => `<li>${statusIcon(c.status)}<div><div class="check-name">${escapeHtml(c.name)}</div><div class="check-detail">${escapeHtml(c.detail)}</div></div></li>`;
                 const naHtml = notApplicable.length
-                    ? `<details class="fc-doc-na"><summary>${notApplicable.length} check${notApplicable.length === 1 ? '' : 's'} not applicable to a ${escapeHtml(kindLabel(d.kind).toLowerCase())}</summary><ul class="fc-doc-checks">${notApplicable.map(checkItem).join('')}</ul></details>`
+                    ? `<details class="fc-doc-na"><summary>${notApplicable.length} check${notApplicable.length === 1 ? '' : 's'} not applicable to ${escapeHtml(kindWithArticle(d.kind))}</summary><ul class="fc-doc-checks">${notApplicable.map(checkItem).join('')}</ul></details>`
                     : '';
                 const cuBlock = d.cuMarkdown
                     ? `<details class="fc-doc-cu"><summary>Content Understanding output (markdown)</summary><pre>${escapeHtml(d.cuMarkdown)}</pre></details>`

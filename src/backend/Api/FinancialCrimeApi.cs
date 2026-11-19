@@ -652,7 +652,7 @@ public static class FinancialCrimeApi
                 $"Contact {first} only on {p.VerifiedContact} — never the number or email supplied after the change.",
                 true));
             actions.Add(new("Restore and support",
-                $"If {first} confirms the request wasn't theirs: reset credentials, restore the verified contact details and refer them to IDCARE, Australia's free identity and cyber support service.",
+                $"If {first} didn't make the request: reset the online credentials, restore the verified contact details and offer a referral to IDCARE, Australia's free identity and cyber support service.",
                 false));
             actions.Add(new("Stop the money at every step",
                 "Ask Transfers & Rollovers to cancel the request with the receiving fund and Payments to confirm no money leaves the account.",
@@ -741,7 +741,7 @@ public static class FinancialCrimeApi
     private static int? ParseAgentScore(string? text)
     {
         if (string.IsNullOrWhiteSpace(text)) return null;
-        var m = Regex.Match(text, @"\b(\d{1,3})\s*/\s*100\b");
+        var m = Regex.Match(text, @"\b(\d{1,3})\s*(?:/|out of)\s*100\b", RegexOptions.IgnoreCase);
         return m.Success && int.TryParse(m.Groups[1].Value, out var v) && v <= 100 ? v : null;
     }
 

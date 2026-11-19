@@ -523,7 +523,9 @@ public class TeamLeaderGroupChatService
         string.IsNullOrEmpty(s) ? string.Empty : (s.Length <= max ? s : s[..max] + "…");
 
     private static string Lower(string? s) =>
-        string.IsNullOrWhiteSpace(s) ? "request" : s.ToLowerInvariant().Replace("smsf", "SMSF");
+        string.IsNullOrWhiteSpace(s)
+            ? "request"
+            : s.ToLowerInvariant().Replace("smsf", "SMSF").Replace("death benefit claim", "death benefit");
 
     private record ManagerDecision(string? Action, string? Speaker, string? Prompt, string? Summary);
 

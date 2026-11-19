@@ -266,10 +266,20 @@ public static class TeamLeaderApi
     private static CaseFocus BuildFocus(CaseRecord c)
     {
         var p = ProfileFor(c);
+        IReadOnlyList<string> facts = IsSeeded(c)
+            ? TeamLeaderGroupChatService.KeyFacts(c)
+            :
+            [
+                $"{c.RequestType} for {c.ClientName} ({c.MemberNumber}), received {c.ReceivedDate}.",
+                c.RequestSummary,
+                $"Amount: {c.Amount}. Priority: {c.Priority} — {c.PriorityReason}",
+                ClientCommunicationsDrafter.HasAdviser(c)
+                    ? $"Adviser: {c.AdviserName}{(string.IsNullOrWhiteSpace(c.AdviserPractice) ? "" : " (" + c.AdviserPractice + ")")}."
+                    : "Direct member — no adviser on the account.",
+            ];
         return new CaseFocus(
             c.CaseNumber, c.ClientName, c.RequestType, p.Stage, p.Owner,
-            p.Summary, p.Decision, p.Recommendation,
-            TeamLeaderGroupChatService.KeyFacts(c));
+            p.Summary, p.Decision, p.Recommendation, facts);
     }
 
     private static bool IsSeeded(CaseRecord c) =>

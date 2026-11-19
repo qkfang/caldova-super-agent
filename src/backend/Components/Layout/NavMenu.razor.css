@@ -3,8 +3,8 @@
 .brand-row {
     min-height: 4.25rem;
     padding: 0.9rem 1rem;
-    background: rgba(0, 0, 0, 0.25);
-    border-bottom: 1px solid rgba(120, 150, 200, 0.18);
+    background: linear-gradient(180deg, rgba(45, 212, 191, 0.06), rgba(0, 0, 0, 0.18));
+    border-bottom: 1px solid rgba(130, 165, 210, 0.16);
     display: flex;
     align-items: center;
 }
@@ -22,14 +22,16 @@
 .brand-logo {
     width: 38px;
     height: 38px;
-    border-radius: 9px;
-    background: linear-gradient(135deg, #ffb347, #ff7a59);
-    color: #1c2230;
+    border-radius: 11px;
+    /* Caldova Wealth mark: gold "C" on a deep navy tile (matches favicon.svg). */
+    background: linear-gradient(180deg, #13294f 0%, #0b1d3a 100%);
+    color: #ffc35a;
     font-weight: 800;
     font-size: 20px;
     display: grid;
     place-items: center;
-    box-shadow: 0 4px 14px rgba(255, 122, 89, 0.35);
+    border: 1px solid rgba(255, 195, 90, 0.45);
+    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.3);
     flex-shrink: 0;
 }
 
@@ -37,15 +39,16 @@
 .brand-title {
     font-size: 1rem;
     font-weight: 700;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.02em;
     color: #fff;
 }
 .brand-subtitle {
-    font-size: 0.72rem;
+    font-size: 0.68rem;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: rgba(255, 255, 255, 0.62);
-    margin-top: 2px;
+    letter-spacing: 0.14em;
+    color: var(--cw-gold, #e3c47e);
+    opacity: 0.85;
+    margin-top: 3px;
 }
 
 .navbar-toggler {
@@ -91,7 +94,7 @@
 }
 
 .nav-section-label:focus-visible {
-    outline: 2px solid rgba(255, 179, 71, 0.45);
+    outline: 2px solid rgba(45, 212, 191, 0.5);
     outline-offset: -2px;
     border-radius: 4px;
 }
@@ -160,10 +163,10 @@
     }
 
 .nav-item ::deep a.active {
-    background: rgba(255, 179, 71, 0.14);
-    color: #ffd9a8;
-    border-color: rgba(255, 179, 71, 0.35);
-    box-shadow: inset 3px 0 0 #ffb347;
+    background: linear-gradient(90deg, rgba(45, 212, 191, 0.16), rgba(59, 130, 246, 0.06));
+    color: #c4f7ef;
+    border-color: rgba(45, 212, 191, 0.32);
+    box-shadow: inset 3px 0 0 #2dd4bf, 0 0 18px -6px rgba(45, 212, 191, 0.45);
 }
 
 .nav-item ::deep .nav-link:hover {
@@ -195,9 +198,9 @@
     width: 30px;
     height: 30px;
     border-radius: 8px;
-    background: rgba(110, 193, 255, 0.12);
-    border: 1px solid rgba(110, 193, 255, 0.32);
-    color: #6ec1ff;
+    background: rgba(45, 212, 191, 0.12);
+    border: 1px solid rgba(45, 212, 191, 0.34);
+    color: #2dd4bf;
     display: grid;
     place-items: center;
     font-size: 0.95rem;

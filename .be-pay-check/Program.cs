@@ -5,6 +5,34 @@ using CaldovaSuper.App.Api;
 using CaldovaSuper.App.Mcp;
 using CaldovaSuper.App.Services;
 
+if (args.Contains("serve"))
+{
+    var sb = WebApplication.CreateBuilder(args);
+    sb.WebHost.UseUrls("http://127.0.0.1:5197");
+    sb.Logging.SetMinimumLevel(LogLevel.Warning);
+    sb.Services.AddRazorComponents();
+    var opts = new CaldovaAgentOptions();
+    sb.Services.AddSingleton(opts);
+    sb.Services.AddSingleton<CaldovaAgentFactory>();
+    sb.Services.AddSingleton<CaseStore>();
+    sb.Services.AddSingleton<PaymentApprovalStore>();
+    sb.Services.AddSingleton<TeamsMcpTools>();
+    sb.Services.AddSingleton<PaymentsMcpTools>();
+    var web = sb.Build();
+    var wwwroot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "..", "..", "repo", "caldova-super-agent", "src", "backend", "wwwroot"));
+    if (!Directory.Exists(wwwroot)) wwwroot = @"D:\repo\caldova-super-agent\src\backend\wwwroot";
+    web.UseStaticFiles(new StaticFileOptions { FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(wwwroot) });
+    web.UseAntiforgery();
+    var cs = web.Services.GetRequiredService<CaseStore>();
+    cs.SeedDefaults();
+    web.MapMarkdownEndpoints();
+    web.MapAgentMetadataEndpoints(opts);
+    web.MapPaymentsEndpoints(cs, web.Services.GetRequiredService<CaldovaAgentFactory>(), web.Services.GetRequiredService<ILogger<CaseStore>>());
+    web.MapRazorComponents<CaldovaSuper.App.TestApp>();
+    await web.RunAsync();
+    return;
+}
+
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseUrls("http://127.0.0.1:0");
 builder.Logging.SetMinimumLevel(LogLevel.Warning);
@@ -99,3 +127,4 @@ var sseResp = await http.SendAsync(sse);
 var sseText = await sseResp.Content.ReadAsStringAsync();
 Console.WriteLine($"SSE: {(int)sseResp.StatusCode} {sseResp.Content.Headers.ContentType} starts='{sseText[..Math.Min(60, sseText.Length)].Replace("\n", "\\n")}' len={sseText.Length}");
 await app.StopAsync();
+

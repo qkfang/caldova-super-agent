@@ -49,15 +49,17 @@ html, body {
 
 .brand { display: flex; align-items: center; gap: 12px; }
 .brand .logo {
-  width: 40px; height: 40px; border-radius: 8px;
-  background: linear-gradient(135deg, var(--accent), #ff7a59);
-  color: #1c2230;
+  width: 40px; height: 40px; border-radius: 10px;
+  /* Caldova Wealth mark: gold "C" on a deep navy tile (matches favicon.svg). */
+  background: linear-gradient(180deg, #13294f 0%, #0b1d3a 100%);
+  color: #ffc35a;
   font-weight: 800; font-size: 22px;
   display: grid; place-items: center;
-  box-shadow: 0 4px 14px rgba(255, 122, 89, 0.35);
+  border: 1px solid rgba(255, 195, 90, 0.45);
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
 }
-.brand h1 { margin: 0; font-size: 18px; letter-spacing: 0.4px; }
-.brand p { margin: 0; font-size: 12px; color: var(--muted); }
+.brand h1 { margin: 0; font-size: 18px; letter-spacing: 0.4px; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55); }
+.brand p { margin: 0; font-size: 12px; color: rgba(238, 242, 247, 0.85); text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7); }
 
 .metrics {
   display: flex; gap: 10px;
@@ -903,7 +905,9 @@ body.left-nav-hidden #log-panel { display: none; }
 /* ---------- Client result banner (completed / partial / declined / blocked) ---------- */
 .customer-result {
   position: fixed;
-  top: 96px;
+  /* Sit just below the "Now playing" banner (top: 78px, ~60px tall) so the
+     two never overlap while a scenario wraps up. */
+  top: 150px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 55;

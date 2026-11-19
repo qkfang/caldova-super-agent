@@ -8,6 +8,11 @@
             <span class="eyebrow-dot"></span>
             Caldova Wealth · Client Operations · Melbourne
         </div>
+        <div class="trust-strip" aria-label="Platform assurances">
+            <span class="trust-pill">🔒 Encrypted</span>
+            <span class="trust-pill">🧾 Fully audited</span>
+            <span class="trust-pill">👤 Human-approved</span>
+        </div>
         <h1>An AI operations team your advisers and members can <span class="hl">trust</span>.</h1>
         <p class="lead">
             A coordinated team of specialised Microsoft Foundry agents supporting the people who run
@@ -30,6 +35,20 @@
             }
         </div>
     </div>
+    <svg class="hero-chart" viewBox="0 0 800 200" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+            <linearGradient id="hc-fill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#2dd4bf" stop-opacity="0.28" />
+                <stop offset="1" stop-color="#2dd4bf" stop-opacity="0" />
+            </linearGradient>
+            <linearGradient id="hc-line" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stop-color="#3b82f6" />
+                <stop offset="1" stop-color="#2dd4bf" />
+            </linearGradient>
+        </defs>
+        <path d="M0 160 C 60 150, 100 170, 160 140 S 260 120, 320 110 S 430 130, 490 90 S 600 70, 660 50 S 760 40, 800 20 L800 200 L0 200 Z" fill="url(#hc-fill)" />
+        <path d="M0 160 C 60 150, 100 170, 160 140 S 260 120, 320 110 S 430 130, 490 90 S 600 70, 660 50 S 760 40, 800 20" fill="none" stroke="url(#hc-line)" stroke-width="2" vector-effect="non-scaling-stroke" />
+    </svg>
     <div class="hero-glow" aria-hidden="true"></div>
 </div>
 
@@ -56,25 +75,43 @@
         position: relative;
         overflow: hidden;
         background:
-            linear-gradient(135deg, rgba(11, 29, 58, 0.92) 0%, rgba(26, 19, 48, 0.92) 100%),
-            radial-gradient(circle at 80% 20%, rgba(255, 179, 71, 0.18), transparent 55%);
+            radial-gradient(ellipse 50% 70% at 88% 0%, rgba(45, 212, 191, 0.20), transparent 70%),
+            radial-gradient(ellipse 45% 60% at 0% 100%, rgba(59, 130, 246, 0.16), transparent 70%),
+            linear-gradient(135deg, #07142a 0%, #0a1c36 55%, #08172d 100%);
         color: #fff;
-        padding: 2.6rem 2.2rem 2.2rem 2.2rem;
-        border: 1px solid rgba(120, 150, 200, 0.22);
-        border-radius: 16px;
-        margin-bottom: 1.75rem;
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+        padding: 2.8rem 2.4rem 3.4rem 2.4rem;
+        border: 1px solid rgba(130, 165, 210, 0.2);
+        border-radius: 20px;
+        margin-bottom: 1.9rem;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 24px 60px -24px rgba(0, 0, 0, 0.8);
+    }
+    .hero::before {
+        content: "";
+        position: absolute;
+        inset: 0 0 auto 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #2dd4bf 30%, #3b82f6 70%, transparent);
+        opacity: 0.85;
     }
     .hero-inner { position: relative; z-index: 1; }
+
+    .hero-chart {
+        position: absolute;
+        left: 0; right: 0; bottom: 0;
+        width: 100%;
+        height: 46%;
+        opacity: 0.55;
+        pointer-events: none;
+    }
 
     .hero-glow {
         position: absolute;
         right: -120px;
-        top: -120px;
-        width: 380px;
-        height: 380px;
+        top: -140px;
+        width: 420px;
+        height: 420px;
         border-radius: 50%;
-        background: radial-gradient(circle, rgba(255, 179, 71, 0.22) 0%, transparent 65%);
+        background: radial-gradient(circle, rgba(45, 212, 191, 0.2) 0%, transparent 65%);
         pointer-events: none;
     }
 
@@ -84,29 +121,41 @@
         gap: 0.5rem;
         font-size: 0.72rem;
         text-transform: uppercase;
-        letter-spacing: 0.14em;
-        color: #ffd9a8;
-        margin-bottom: 0.8rem;
+        letter-spacing: 0.16em;
+        color: #a7f3e4;
+        margin: 0 0.9rem 0.9rem 0;
         font-weight: 600;
     }
     .eyebrow-dot {
         width: 8px; height: 8px; border-radius: 50%;
-        background: #ffb347;
-        box-shadow: 0 0 0 4px rgba(255, 179, 71, 0.18);
+        background: #2dd4bf;
+        box-shadow: 0 0 0 4px rgba(45, 212, 191, 0.18), 0 0 14px rgba(45, 212, 191, 0.7);
+    }
+
+    .trust-strip { display: inline-flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.9rem; vertical-align: top; }
+    .trust-pill {
+        font-size: 0.68rem;
+        letter-spacing: 0.06em;
+        color: var(--cw-gold, #e3c47e);
+        background: rgba(227, 196, 126, 0.07);
+        border: 1px solid rgba(227, 196, 126, 0.28);
+        padding: 0.18rem 0.6rem;
+        border-radius: 999px;
+        font-weight: 600;
     }
 
     .hero h1 {
-        margin: 0 0 0.6rem 0;
-        font-size: 2.05rem;
-        line-height: 1.18;
-        font-weight: 700;
-        letter-spacing: -0.2px;
+        margin: 0 0 0.75rem 0;
+        font-size: 2.3rem;
+        line-height: 1.14;
+        font-weight: 650;
+        letter-spacing: -0.025em;
         color: #fff;
-        max-width: 38rem;
+        max-width: 40rem;
     }
     .hero h1 .hl {
-        color: #ffb347;
-        background: linear-gradient(135deg, #ffb347, #ff7a59);
+        color: #2dd4bf;
+        background: linear-gradient(135deg, #5eead4, #60a5fa);
         -webkit-background-clip: text;
         background-clip: text;
         -webkit-text-fill-color: transparent;
@@ -114,74 +163,86 @@
 
     .hero .lead {
         font-size: 1rem;
-        line-height: 1.55;
+        line-height: 1.6;
         max-width: 56rem;
-        color: rgba(238, 242, 247, 0.86);
+        color: rgba(226, 236, 250, 0.82);
         margin: 0;
     }
 
     .hero-meta {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.6rem;
-        margin: 1.25rem 0 1rem 0;
+        gap: 0.7rem;
+        margin: 1.4rem 0 1.1rem 0;
     }
     .hero-stat {
-        background: rgba(20, 28, 46, 0.55);
-        border: 1px solid rgba(120, 150, 200, 0.22);
-        border-radius: 10px;
-        padding: 0.55rem 0.9rem;
-        backdrop-filter: blur(6px);
-        min-width: 7.5rem;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+        border: 1px solid rgba(130, 165, 210, 0.22);
+        border-radius: 12px;
+        padding: 0.65rem 1rem;
+        backdrop-filter: blur(8px);
+        min-width: 8rem;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
     }
     .hero-stat-num {
         display: block;
-        font-size: 1.35rem;
-        font-weight: 700;
-        color: #ffb347;
+        font-size: 1.6rem;
+        font-weight: 650;
+        color: #fff;
         line-height: 1.1;
+        letter-spacing: -0.02em;
+        font-variant-numeric: tabular-nums;
     }
     .hero-stat-label {
         display: block;
-        font-size: 0.66rem;
+        font-size: 0.64rem;
         text-transform: uppercase;
-        letter-spacing: 0.1em;
-        color: rgba(238, 242, 247, 0.6);
-        margin-top: 2px;
+        letter-spacing: 0.12em;
+        color: rgba(167, 243, 228, 0.7);
+        margin-top: 3px;
     }
 
     .scenarios-line {
         margin-top: 0.6rem;
         font-size: 0.92rem;
-        color: rgba(238, 242, 247, 0.78);
+        color: rgba(226, 236, 250, 0.78);
     }
     .scenarios-line strong { color: #fff; margin-right: 0.4rem; }
     .chip {
         display: inline-block;
-        background: rgba(110, 193, 255, 0.10);
-        border: 1px solid rgba(110, 193, 255, 0.28);
-        color: #d6ecff;
-        padding: 0.22rem 0.7rem;
+        background: rgba(125, 211, 252, 0.08);
+        border: 1px solid rgba(125, 211, 252, 0.26);
+        color: #d6f1ff;
+        padding: 0.22rem 0.75rem;
         border-radius: 999px;
         margin-right: 0.4rem;
         font-size: 0.82rem;
     }
     a.chip { text-decoration: none; margin-bottom: 0.4rem; transition: background 0.15s ease, border-color 0.15s ease; }
-    a.chip:hover { background: rgba(255, 179, 71, 0.16); border-color: rgba(255, 179, 71, 0.55); color: #fff; }
+    a.chip:hover { background: rgba(45, 212, 191, 0.16); border-color: rgba(45, 212, 191, 0.55); color: #fff; }
 
     .section-label {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
         font-size: 0.7rem;
         text-transform: uppercase;
-        letter-spacing: 0.14em;
-        color: var(--cw-muted, #97a3b6);
+        letter-spacing: 0.16em;
+        color: var(--cw-muted, #93a3bb);
         font-weight: 600;
-        margin: 0 0 0.7rem 0.15rem;
+        margin: 0 0 0.8rem 0.15rem;
+    }
+    .section-label::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(90deg, rgba(130, 165, 210, 0.3), transparent);
     }
 
     .agent-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
-        gap: 1rem;
+        gap: 1.1rem;
     }
 
     .agent-card {
@@ -189,39 +250,41 @@
         display: flex;
         gap: 0.9rem;
         align-items: flex-start;
-        background: rgba(20, 28, 46, 0.78);
-        border: 1px solid rgba(120, 150, 200, 0.18);
-        border-radius: 14px;
-        padding: 1.05rem 1.1rem 1rem 1.1rem;
+        background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0) 40%),
+            rgba(14, 22, 38, 0.8);
+        border: 1px solid rgba(130, 165, 210, 0.16);
+        border-radius: 16px;
+        padding: 1.1rem 1.15rem 1.05rem 1.15rem;
         text-decoration: none;
         color: inherit;
         backdrop-filter: blur(8px);
-        transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease;
         overflow: hidden;
     }
     .agent-card::before {
         content: "";
         position: absolute;
-        left: 0; top: 0; bottom: 0;
-        width: 4px;
-        background: var(--accent, #ffb347);
-        opacity: 0.85;
+        left: 0; top: 0; right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--accent, #2dd4bf), transparent 75%);
+        opacity: 0.9;
     }
     .agent-card::after {
         content: "";
         position: absolute;
         right: -40px; top: -40px;
-        width: 140px; height: 140px;
+        width: 160px; height: 160px;
         border-radius: 50%;
-        background: radial-gradient(circle, color-mix(in srgb, var(--accent, #ffb347) 22%, transparent) 0%, transparent 70%);
+        background: radial-gradient(circle, color-mix(in srgb, var(--accent, #2dd4bf) 22%, transparent) 0%, transparent 70%);
         pointer-events: none;
         opacity: 0.55;
     }
     .agent-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 14px 32px rgba(0, 0, 0, 0.5);
-        border-color: color-mix(in srgb, var(--accent, #ffb347) 45%, rgba(120, 150, 200, 0.18));
-        background: rgba(24, 34, 56, 0.86);
+        transform: translateY(-4px);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 18px 40px -16px color-mix(in srgb, var(--accent, #2dd4bf) 45%, rgba(0, 0, 0, 0.8));
+        border-color: color-mix(in srgb, var(--accent, #2dd4bf) 50%, rgba(130, 165, 210, 0.16));
     }
     .agent-card:hover { text-decoration: none; }
 
@@ -229,11 +292,11 @@
         font-size: 1.6rem;
         line-height: 1;
         flex: 0 0 auto;
-        width: 44px;
-        height: 44px;
-        border-radius: 10px;
-        background: color-mix(in srgb, var(--accent, #ffb347) 18%, rgba(20, 28, 46, 0.6));
-        border: 1px solid color-mix(in srgb, var(--accent, #ffb347) 40%, transparent);
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
+        background: color-mix(in srgb, var(--accent, #2dd4bf) 16%, rgba(14, 22, 38, 0.6));
+        border: 1px solid color-mix(in srgb, var(--accent, #2dd4bf) 40%, transparent);
         display: grid;
         place-items: center;
         position: relative;
@@ -245,30 +308,31 @@
         font-size: 1.05rem;
         margin: 0.15rem 0 0.2rem 0;
         color: #fff;
-        font-weight: 700;
+        font-weight: 650;
+        letter-spacing: -0.01em;
     }
     .agent-card-dept {
-        font-size: 0.7rem;
+        font-size: 0.68rem;
         text-transform: uppercase;
-        letter-spacing: 0.1em;
-        color: var(--accent, #ffb347);
+        letter-spacing: 0.14em;
+        color: var(--accent, #2dd4bf);
         font-weight: 700;
     }
     .agent-card-persona {
         font-size: 0.8rem;
-        color: rgba(214, 228, 245, 0.72);
+        color: rgba(200, 216, 238, 0.7);
         margin-bottom: 0.4rem;
     }
     .agent-card p {
         margin: 0;
         font-size: 0.9rem;
-        color: rgba(238, 242, 247, 0.82);
-        line-height: 1.45;
+        color: rgba(226, 236, 250, 0.8);
+        line-height: 1.5;
     }
     .agent-card-cta {
-        margin-top: 0.65rem;
+        margin-top: 0.7rem;
         font-size: 0.78rem;
-        color: var(--accent, #ffb347);
+        color: var(--accent, #2dd4bf);
         font-weight: 600;
         letter-spacing: 0.3px;
         opacity: 0.85;
@@ -276,11 +340,11 @@
     }
     .agent-card:hover .agent-card-cta {
         opacity: 1;
-        transform: translateX(2px);
+        transform: translateX(3px);
     }
 
     @@media (max-width: 640px) {
-        .hero { padding: 1.75rem 1.25rem; }
-        .hero h1 { font-size: 1.55rem; }
+        .hero { padding: 1.75rem 1.25rem 2.6rem 1.25rem; }
+        .hero h1 { font-size: 1.6rem; }
     }
 </style>

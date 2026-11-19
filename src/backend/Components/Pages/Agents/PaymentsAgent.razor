@@ -403,58 +403,59 @@
             </div>
         </div>
 
-        <!-- Approval popup: the in-page stand-in for the Approve / Reject
-             actions on the Microsoft Teams card. Approving resumes the same
-             Payments Agent conversation so it can call payments_releasePayment. -->
-        <div id="payments-approval-modal" class="payments-modal" hidden role="dialog" aria-modal="true" aria-labelledby="payments-modal-title">
-            <div class="payments-modal-backdrop" data-modal-dismiss></div>
-            <div class="payments-modal-card" role="document">
-                <button type="button" class="payments-modal-close" data-modal-dismiss aria-label="Close">×</button>
-                <div class="payments-modal-header">
-                    <span class="payments-modal-badge">!</span>
-                    <div>
-                        <h3 id="payments-modal-title">Payment approval required</h3>
-                        <div class="payments-modal-sub">Caldova Wealth — Payment approval · Microsoft Teams</div>
-                    </div>
-                </div>
-                <div class="payments-modal-deeplink" id="payments-modal-deeplink" hidden></div>
-                <div class="payments-modal-why">Why approval is needed</div>
-                <ul class="payments-modal-reasons" id="payments-modal-reasons"></ul>
-                <div class="payments-modal-meta">
-                    <div><span class="k">Case</span><span id="payments-modal-case"></span></div>
-                    <div><span class="k">Approval id</span><code id="payments-modal-approval-id"></code></div>
-                    <div class="span-2"><span class="k">Member</span><span id="payments-modal-member"></span></div>
-                    <div class="span-2"><span class="k">Payment type</span><span id="payments-modal-type"></span></div>
-                    <div class="span-2"><span class="k">Payee</span><span id="payments-modal-payee"></span></div>
-                    <div><span class="k">Gross</span><span id="payments-modal-gross"></span></div>
-                    <div><span class="k">Tax withheld</span><span id="payments-modal-tax"></span></div>
-                    <div class="span-2 amount-row"><span class="k">Net payment</span><strong id="payments-modal-net"></strong></div>
-                </div>
-                <p class="payments-modal-explainer">
-                    Approving here stands in for the approver pressing <strong>Approve</strong> on the Teams card.
-                    It resumes the same Payments Agent conversation so Penny can call
-                    <code>payments_releasePayment</code> — the tool refuses to run until the approval is recorded.
-                </p>
-                <div class="payments-modal-status" id="payments-modal-status" hidden></div>
-                <div class="payments-modal-agent" id="payments-modal-agent" hidden>
-                    <div class="payments-modal-agent-label">Agent reply after approval</div>
-                    <div class="agent-md" id="payments-modal-agent-body"></div>
-                </div>
-                <div class="payments-modal-actions">
-                    <button type="button" id="payments-modal-reject-btn" class="payments-modal-reject">Reject</button>
-                    <button type="button" id="payments-modal-cancel-btn" class="payments-modal-cancel" data-modal-dismiss>Close</button>
-                    <button type="button" id="payments-modal-approve-btn" class="payments-modal-approve">Approve</button>
-                    <button type="button" id="payments-modal-release-btn" class="payments-modal-release" disabled>Release payment</button>
-                </div>
-            </div>
-        </div>
     </section>
     </div>
 </div>
 
+<!-- Approval popup: the in-page stand-in for the Approve / Reject
+     actions on the Microsoft Teams card. Approving resumes the same
+     Payments Agent conversation so it can call payments_releasePayment. -->
+<div id="payments-approval-modal" class="payments-modal" hidden role="dialog" aria-modal="true" aria-labelledby="payments-modal-title">
+    <div class="payments-modal-backdrop" data-modal-dismiss></div>
+    <div class="payments-modal-card" role="document">
+        <button type="button" class="payments-modal-close" data-modal-dismiss aria-label="Close">×</button>
+        <div class="payments-modal-header">
+            <span class="payments-modal-badge">!</span>
+            <div>
+                <h3 id="payments-modal-title">Payment approval required</h3>
+                <div class="payments-modal-sub">Caldova Wealth — Payment approval · Microsoft Teams</div>
+            </div>
+        </div>
+        <div class="payments-modal-deeplink" id="payments-modal-deeplink" hidden></div>
+        <div class="payments-modal-why">Why approval is needed</div>
+        <ul class="payments-modal-reasons" id="payments-modal-reasons"></ul>
+        <div class="payments-modal-meta">
+            <div><span class="k">Case</span><span id="payments-modal-case"></span></div>
+            <div><span class="k">Approval id</span><code id="payments-modal-approval-id"></code></div>
+            <div class="span-2"><span class="k">Member</span><span id="payments-modal-member"></span></div>
+            <div class="span-2"><span class="k">Payment type</span><span id="payments-modal-type"></span></div>
+            <div class="span-2"><span class="k">Payee</span><span id="payments-modal-payee"></span></div>
+            <div><span class="k">Gross</span><span id="payments-modal-gross"></span></div>
+            <div><span class="k">Tax withheld</span><span id="payments-modal-tax"></span></div>
+            <div class="span-2 amount-row"><span class="k">Net payment</span><strong id="payments-modal-net"></strong></div>
+        </div>
+        <p class="payments-modal-explainer">
+            Approving here stands in for the approver pressing <strong>Approve</strong> on the Teams card.
+            It resumes the same Payments Agent conversation so Penny can call
+            <code>payments_releasePayment</code> — the tool refuses to run until the approval is recorded.
+        </p>
+        <div class="payments-modal-status" id="payments-modal-status" hidden></div>
+        <div class="payments-modal-agent" id="payments-modal-agent" hidden>
+            <div class="payments-modal-agent-label">Agent reply after approval</div>
+            <div class="agent-md" id="payments-modal-agent-body"></div>
+        </div>
+        <div class="payments-modal-actions">
+            <button type="button" id="payments-modal-reject-btn" class="payments-modal-reject">Reject</button>
+            <button type="button" id="payments-modal-cancel-btn" class="payments-modal-cancel" data-modal-dismiss>Close</button>
+            <button type="button" id="payments-modal-approve-btn" class="payments-modal-approve">Approve</button>
+            <button type="button" id="payments-modal-release-btn" class="payments-modal-release" disabled>Release payment</button>
+        </div>
+    </div>
+</div>
+
 <style>
-    .payments-panel { --pay-accent: #a855f7; --pay-teams: #5b5fc7; }
-    .payments-panel [hidden] { display: none !important; }
+    .payments-panel, .payments-modal { --pay-accent: #a855f7; --pay-teams: #5b5fc7; }
+    .payments-panel [hidden], .payments-modal[hidden], .payments-modal [hidden] { display: none !important; }
     .payments-help { margin-bottom: 0.9rem; }
     .payments-help code, .payments-panel .muted code { background: rgba(168, 85, 247, 0.14); padding: 1px 6px; border-radius: 4px; font-size: 0.85rem; }
 
@@ -608,7 +609,7 @@
     .payments-status { margin-top: 0.6rem; font-size: 0.88rem; color: rgba(238, 242, 247, 0.88); }
     .payments-status.error { color: #fca5a5; }
     .payments-status.warn { color: #fcd34d; }
-    .payments-panel .spinner {
+    .payments-panel .spinner, .payments-modal .spinner {
         display: inline-block; width: 12px; height: 12px;
         border: 2px solid rgba(255, 255, 255, 0.3); border-top-color: #fff;
         border-radius: 50%; margin-right: 6px; vertical-align: middle;

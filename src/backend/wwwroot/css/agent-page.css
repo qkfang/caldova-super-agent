@@ -256,7 +256,7 @@
 .panel .muted { color: var(--cw-muted, #97a3b6); font-size: 0.92rem; }
 .panel ul { margin: 0; padding-left: 1.1rem; color: rgba(238, 242, 247, 0.86); }
 .panel ul li { margin-bottom: 0.3rem; line-height: 1.5; }
-.panel ul li::marker { color: var(--accent, #ffb347); }
+.panel ul li::marker { color: var(--accent, var(--cw-accent)); }
 .approval {
     color: rgba(238, 242, 247, 0.86);
     background: rgba(110, 193, 255, 0.08);
@@ -321,7 +321,7 @@
     position: absolute;
     left: 0; top: 0; bottom: 0;
     width: 3px;
-    background: var(--accent, #ffb347);
+    background: var(--accent, var(--cw-accent));
 }
 .scenario-step-head {
     display: flex;
@@ -337,7 +337,7 @@
     display: grid;
     place-items: center;
     background: rgba(255, 255, 255, 0.06);
-    border: 1px solid var(--accent, #ffb347);
+    border: 1px solid var(--accent, var(--cw-accent));
     color: #fff;
     font-weight: 700;
     font-size: 0.85rem;
@@ -387,7 +387,7 @@
     line-height: 1.5;
     font-size: 0.92rem;
 }
-.scenario-step-actions li::marker { color: var(--accent, #ffb347); }
+.scenario-step-actions li::marker { color: var(--accent, var(--cw-accent)); }
 
 .other-agents {
     display: flex;
@@ -408,8 +408,8 @@
     transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 .other-agent:hover {
-    background: rgba(255, 179, 71, 0.1);
-    border-color: rgba(255, 179, 71, 0.4);
+    background: rgba(45, 212, 191, 0.1);
+    border-color: rgba(45, 212, 191, 0.4);
     color: #fff;
     text-decoration: none;
 }
@@ -441,7 +441,7 @@
 .agent-tab:hover { color: #fff; }
 .agent-tab.active {
     color: #fff;
-    border-bottom-color: var(--accent, #ffb347);
+    border-bottom-color: var(--accent, var(--cw-accent));
 }
 .agent-tab-panel { display: none; }
 .agent-tab-panel.active { display: block; }
@@ -480,7 +480,7 @@
 .engage-tab-btn:hover { color: #fff; }
 .engage-tab-btn.active {
     color: #fff;
-    border-bottom-color: var(--accent, #ffb347);
+    border-bottom-color: var(--accent, var(--cw-accent));
 }
 .engage-tab-panel { display: none; }
 .engage-tab-panel.active { display: block; }
@@ -683,3 +683,65 @@
     font-size: 0.78rem;
 }
 .json-viewer .jv-controls button:hover { background: rgba(255, 255, 255, 0.06); color: #fff; }
+
+/* ── Wealth refresh ───────────────────────────────────────────────────
+   Calm, precise "private bank meets fintech" surfaces: hairline borders,
+   soft inner highlight, a luminous accent edge and tabular figures. */
+.agent-header,
+.panel {
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.035) 0%, rgba(255, 255, 255, 0) 38%),
+        var(--cw-panel);
+    border-color: var(--cw-panel-border);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        0 18px 40px -18px rgba(0, 0, 0, 0.7);
+}
+.agent-header { border-radius: 18px; padding: 1.6rem 1.8rem 1.7rem 1.8rem; }
+.agent-header::before { height: 3px; }
+.agent-header h1 { letter-spacing: -0.02em; font-weight: 650; }
+.agent-header .tagline { font-style: normal; color: var(--cw-muted); }
+.agent-header-icon {
+    border-radius: 16px;
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 10%, transparent),
+                0 10px 24px -8px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+.agent-header-dept { letter-spacing: 0.16em; }
+
+.panel { border-radius: 16px; }
+.panel h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    letter-spacing: 0.16em;
+}
+.panel h2::before {
+    content: "";
+    width: 14px;
+    height: 2px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--cw-accent), var(--cw-accent-warm));
+}
+
+.demo,
+.scenario-step,
+.engage-info-block {
+    background: rgba(8, 14, 26, 0.55);
+    border-color: var(--cw-panel-border);
+    border-radius: 12px;
+}
+
+.agent-tabs { gap: 0.15rem; border-bottom-color: var(--cw-panel-border); }
+.agent-tab.active,
+.engage-tab-btn.active {
+    box-shadow: 0 8px 14px -12px var(--accent, var(--cw-accent));
+}
+
+.engage-pre,
+.json-viewer { background: rgba(4, 8, 16, 0.82); border-color: var(--cw-panel-border); }
+
+.panel table td,
+.panel table th,
+.agent-md td { font-variant-numeric: tabular-nums; }
+
+.other-agent { background: rgba(255, 255, 255, 0.03); }

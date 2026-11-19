@@ -1,16 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Caldova Wealth">
   <defs>
-    <linearGradient id="cw-tile" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#ffb347"/>
-      <stop offset="100%" stop-color="#ff7a59"/>
+    <linearGradient id="cw-gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffd27a"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <linearGradient id="cw-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#13294f"/>
+      <stop offset="100%" stop-color="#0b1d3a"/>
     </linearGradient>
   </defs>
-  <!-- Rounded tile matching the HUD brand logo -->
-  <rect x="4" y="4" width="56" height="56" rx="13"
-        fill="url(#cw-tile)" stroke="#1c2230" stroke-width="2"/>
-  <!-- Caldova "C" mark -->
-  <path d="M41.9 22.1 A14 14 0 1 0 41.9 41.9"
-        fill="none" stroke="#1c2230" stroke-width="8" stroke-linecap="round"/>
-  <!-- Small rising dot: wealth that keeps growing -->
-  <circle cx="45" cy="32" r="3.2" fill="#1c2230"/>
+  <!-- Rounded tile -->
+  <rect x="3" y="3" width="58" height="58" rx="14" fill="url(#cw-bg)"/>
+  <!-- "C" for Caldova -->
+  <path d="M44 20.5 A16 16 0 1 0 44 43.5" fill="none" stroke="url(#cw-gold)" stroke-width="7" stroke-linecap="round"/>
+  <!-- Rising bars: growing wealth -->
+  <rect x="27" y="35" width="4.5" height="8" rx="1.2" fill="#2dd4bf"/>
+  <rect x="33.5" y="30" width="4.5" height="13" rx="1.2" fill="#2dd4bf"/>
+  <rect x="40" y="25" width="4.5" height="18" rx="1.2" fill="#2dd4bf" opacity="0.9"/>
 </svg>

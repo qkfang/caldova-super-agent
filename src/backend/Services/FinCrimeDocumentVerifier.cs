@@ -460,9 +460,9 @@ public class FinCrimeDocumentVerifier
         if (string.IsNullOrWhiteSpace(detected))
             c.Warn("Document type could not be determined.", "document type unclear");
         else if (Normalise(detected).Replace(" ", "-") == kind)
-            c.Pass($"Read as a {KindLabel(kind)} — matches the case file.");
+            c.Pass($"Read as {WithArticle(KindLabel(kind))} — matches the case file.");
         else
-            c.Warn($"Read as '{detected}', but the case file lists it as a {KindLabel(kind)}.", "document type doesn't match the case file");
+            c.Warn($"Read as '{detected}', but the case file lists it as {WithArticle(KindLabel(kind))}.", "document type doesn't match the case file");
 
         // 2. Name matches the case
         switch (kind)
@@ -827,6 +827,9 @@ public class FinCrimeDocumentVerifier
         "income-support-letter" => "income support letter",
         _ => kind.Replace('-', ' '),
     };
+
+    private static string WithArticle(string noun) =>
+        (Regex.IsMatch(noun, "^(SMSF|[aeiouAEIOU])") ? "an " : "a ") + noun;
 
     private static string? Get(IReadOnlyDictionary<string, string?> fields, string key) =>
         fields.TryGetValue(key, out var v) && !string.IsNullOrWhiteSpace(v) ? v : null;

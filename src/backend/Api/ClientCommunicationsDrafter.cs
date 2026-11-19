@@ -779,7 +779,7 @@ internal static class ClientCommunicationsDrafter
     {
         var first = FirstName(r.ClientName);
         var type = string.IsNullOrWhiteSpace(r.RequestType) ? "request" : r.RequestType;
-        var typeLower = type.ToLowerInvariant().Replace("smsf", "SMSF");
+        var typeLower = type.ToLowerInvariant().Replace("smsf", "SMSF").Replace("death benefit claim", "death benefit request");
         var kind = KindOf(type);
         var hasAdviser = HasAdviser(r);
         var adviserFirst = FirstName(r.AdviserName);
@@ -957,15 +957,21 @@ internal static class ClientCommunicationsDrafter
                     {Signature}
                     Adviser Desk: {CaldovaPhone}
                     """,
-                Tone: "Concise adviser language.",
+                Tone: kind == "death"
+                    ? "Respectful and brief — adviser language, shared only with the family's consent."
+                    : "Concise adviser language.",
                 Compliance:
                 [
                     Pass("No personal advice", "Status only."),
-                    Pass("Authority to share", "Adviser of record on the account."),
+                    kind == "death"
+                        ? Pass("Family consent", "Send only once the family confirms they're happy for the adviser to be updated.")
+                        : Pass("Authority to share", "Adviser of record on the account."),
                     Pass("Next steps", "Who has the case and when the adviser will hear back."),
                 ],
-                ApprovalRequired: false,
-                ApprovalReason: SpotCheckReason));
+                ApprovalRequired: kind == "death",
+                ApprovalReason: kind == "death"
+                    ? "Concerns a bereaved family and needs their consent — human approval required."
+                    : SpotCheckReason));
         }
 
         var smsBody = kind switch
