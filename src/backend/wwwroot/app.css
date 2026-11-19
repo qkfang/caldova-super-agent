@@ -240,7 +240,6 @@ body.left-nav-hidden .full-page-toggle .icon-collapse { display: inline-block; }
 body.left-nav-hidden .full-page-toggle { background: var(--cw-primary); border-color: var(--cw-primary); color: #fff; }
 
 /* Full-page mode: hide the site chrome and let the content use the width. */
-body.left-nav-hidden .utility-bar,
 body.left-nav-hidden .site-header,
 body.left-nav-hidden .site-footer { display: none; }
 body.left-nav-hidden .site-container { max-width: none; }

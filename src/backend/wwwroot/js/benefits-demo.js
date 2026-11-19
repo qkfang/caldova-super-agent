@@ -73,7 +73,8 @@
         let currentCase = null;
         let clauseIndex = {};
         let selectSeq = 0;
-        let pendingPreselect = new URLSearchParams(window.location.search).get('case');
+        const params = new URLSearchParams(window.location.search);
+        let pendingPreselect = params.get('caseNumber') || params.get('case');
 
         function showEmpty(message) {
             emptyEl.hidden = false;

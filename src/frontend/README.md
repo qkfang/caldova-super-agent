@@ -43,6 +43,30 @@ The "See how this team uses these agents" links point at the companion Blazor si
 `src/backend` (`/agents/{route id}`). Its base URL comes from `VITE_APP_BASE_URL` in `.env`
 (override with `.env.local`, or via `.github/workflows/21_deploy_frontend.yml`).
 
+## v2 — The Lakehouse storybook (`/v2`)
+
+Open <http://localhost:5173/v2/> for v2. It shows the same team as a storybook you read from the
+top of a futuristic voxel lakehouse to the bottom. Caldova is a wealth business for the agentic
+era with two sides, Wealth Management and Superannuation:
+
+- **Level 3 · The Idea** is business owner Maya Ashworth's office, with her idea floating
+  above the table as a voxel brain (one half for each side).
+- **Level 2 · The People** holds two small teams: Wealth Management on the left and
+  Superannuation on the right, with Theo leading both from the middle.
+- **Level 1 · The Agents** is one group of Microsoft Foundry agents, with a pod under every desk,
+  in three zones: dedicated to Wealth, shared by both sides, and dedicated to Super.
+- **The Engine Room** sits under the waterline. Microsoft IQ (Work IQ, Fabric IQ, Foundry IQ and
+  Web IQ) stands on a raised deck behind Microsoft Foundry, with the Azure services around it.
+
+Each chapter lifts the levels above it out of the way. Clicking anything follows its thread up or
+down the house. The finale pulls the house apart and traces one of the five scenarios from top
+to bottom. The story, the cast and every page are in [docs/storybook.md](../../docs/storybook.md).
+Pages have deep links (`/v2/?page=idea|people|agents|engine|finale`).
+
+v2 is a second Vite page (`v2/index.html`, listed in `vite.config.ts`). It reuses the v1 cast,
+assistants and scenario JSON. In production, `pm2 serve --spa` answers `/v2` with the v1
+`index.html`, so a one-line guard at the top of that file forwards it to `/v2/index.html`.
+
 ## What you see
 
 - **Neighbourhood** — a voxel Melbourne with five life-event zones, each a map-pin label:
@@ -161,10 +185,11 @@ Personas (names, roles, situations, request types and palettes) live in `persona
 
 ```
 src/frontend
-├── index.html                  # Page shell + HUD markup
+├── index.html                  # Page shell + HUD markup (and the /v2 forwarder for static hosting)
+├── v2/index.html               # v2 page shell: the Lakehouse storybook
 ├── package.json                # Vite + Babylon dependencies
 ├── tsconfig.json
-├── vite.config.ts
+├── vite.config.ts              # Two pages: / (v1) and /v2/ (v2)
 ├── public/                     # favicon.svg / favicon.png (Caldova "C")
 └── src
     ├── main.ts                 # Engine bootstrap, cameras, lights, render loop, HUD wiring
@@ -187,5 +212,21 @@ src/frontend
     ├── hud.ts                  # DOM HUD wired to the SimLogger contract
     ├── cameraDirector.ts       # Smooth camera focus for scripted beats
     ├── collapsiblePanels.ts    # Collapsible HUD side panels
-    └── scenarios/              # Scenario JSON (onboarding, protection, retirement, hardship, bereavement)
+    ├── scenarios/              # Scenario JSON (onboarding, protection, retirement, hardship, bereavement)
+    └── v2/                     # The Lakehouse storybook (docs/storybook.md)
+        ├── main.ts             # Bootstrap, camera, picking, selection threads, page wiring
+        ├── storyData.ts        # Storybook pages: text, camera shots, stack modes
+        ├── lakehouseData.ts    # The two sides, the business owner, the idea, agent sides, Microsoft IQ and Azure components
+        ├── storybook.ts        # Cover, page card, lift panel, inspector, trace panel, keyboard
+        ├── inspector.ts        # Card content for the owner, brain, people, agents and components
+        ├── levelStack.ts       # House / focus / exploded arrangements of the levels
+        ├── threads.ts          # Glowing threads between levels
+        ├── requestTrace.ts     # Finale: a scenario's request travelling through the house
+        ├── exterior.ts         # Floating island, lake, deck, jetty, trees, boats, clouds, drone
+        ├── shell.ts            # Shared floor slab, walls, lift core and level tag
+        ├── kit.ts              # Voxel kit: materials, textures, blocks, labels, batching
+        ├── layout.ts           # World layout: floor heights, footprints, desk/pod stations, wings and zones
+        ├── types.ts
+        ├── v2.css              # Storybook HUD styling
+        └── levels/             # ideaLevel (+ roof), peopleLevel, agentsLevel, engineLevel
 ```

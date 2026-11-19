@@ -60,21 +60,44 @@ export const ROOF: Rect = { x0: -21.5, x1: 9.5, z0: -11.5, z1: 8.5 };
 export const CORE: Rect = { x0: -20, x1: -17, z0: 3.5, z1: 7 };
 
 /**
- * Desk positions on Level 2. Each agent pod on Level 1 sits directly
- * underneath its human, so the thread between them runs straight down.
- * Front row: the Superannuation Team. Back row: Theo and the Wealth
- * Management Team (mirrors the v1 office in docs/theme_office.md).
+ * Desk positions on Level 2, on a grid of five columns and two rows. Each
+ * agent pod on Level 1 sits directly underneath its human, so the thread
+ * between them runs straight down.
+ *
+ *   Level 2   | Wealth Management Team | Theo |   Superannuation Team   |
+ *             |  Ivy   Cara / Felix    | lead | Olivia Ben / Rory Penny |
+ *   Level 1   | Wealth |      Shared by both     |   Dedicated · Super  |
+ *
+ * Cara and Felix sit with the Wealth Management Team (v1 canon), but their
+ * agents serve both sides, so they sit in the shared zone with Theo's.
  */
 export const STATIONS: Record<string, { x: number; z: number }> = {
-  "onboarding-1": { x: -13.5, z: -6 },
-  "benefits-1": { x: -4.5, z: -6 },
-  "transfers-1": { x: 4.5, z: -6 },
-  "payments-1": { x: 13.5, z: -6 },
-  "lead-1": { x: -13.5, z: 3.5 },
-  "investments-1": { x: -4.5, z: 3.5 },
-  "comms-1": { x: 4.5, z: 3.5 },
-  "fincrime-1": { x: 13.5, z: 3.5 },
+  "investments-1": { x: -15, z: -6 },
+  "comms-1": { x: -7.5, z: -6 },
+  "fincrime-1": { x: -7.5, z: 3.5 },
+  "lead-1": { x: 0, z: 3.5 },
+  "onboarding-1": { x: 7.5, z: -6 },
+  "benefits-1": { x: 15, z: -6 },
+  "transfers-1": { x: 7.5, z: 3.5 },
+  "payments-1": { x: 15, z: 3.5 },
 };
+
+/** The empty front-centre cell: the huddle table on Level 2, the Member Case on Level 1. */
+export const CENTRE_CELL = { x: 0, z: -6 };
+
+/** Level 2 wings, left to right. */
+export const WINGS = {
+  wealth: { x0: -19.6, x1: -3.75 },
+  lead: { x0: -3.75, x1: 3.75 },
+  super: { x0: 3.75, x1: 19.6 },
+} as const;
+
+/** Level 1 zones, left to right: one group of agents, dedicated to a side or shared by both. */
+export const ZONES = {
+  wealth: { x0: -19.6, x1: -11.25 },
+  shared: { x0: -11.25, x1: 3.75 },
+  super: { x0: 3.75, x1: 19.6 },
+} as const;
 
 /** The floating island and the lake carved into its front. */
 export const ISLAND = { x0: -46, x1: 46, z0: -34, z1: 30, bottom: -12 };

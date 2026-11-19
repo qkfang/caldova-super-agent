@@ -6,24 +6,17 @@
 <section class="home-hero" aria-labelledby="home-hero-title">
     <div class="home-hero-copy">
         <div class="hero-eyebrow">Caldova Wealth · Client Operations</div>
-        <h1 id="home-hero-title">An operations team your members and advisers can <span class="hl">trust</span>.</h1>
+        <h1 id="home-hero-title">Wealth Team <span class="hl">in a Day</span></h1>
         <p class="hero-lead">
-            Specialised Microsoft Foundry agents support the people who run Caldova's super, pension and investment
-            platform — onboarding, benefits and eligibility, investments, financial crime, transfers and rollovers,
-            payments and member communications, with a team leader overseeing the floor. Agents check, calculate,
-            draft and recommend; a qualified person approves.
+            Eight specialist AI agents work Caldova's member requests. Each one checks, drafts and
+            recommends — a person approves.
         </p>
-        <div class="hero-actions">
-            <a class="hero-btn hero-btn-solid" href="#agents">Meet the agents</a>
-            <a class="hero-btn hero-btn-ghost" href="@($"scenarios/{ScenarioCatalog.All[0].Id}")">Run a scenario <span aria-hidden="true">→</span></a>
-        </div>
-        <p class="hero-footnote">Demonstration environment. Members, cases and figures are illustrative and general in nature.</p>
     </div>
 
-    <aside class="hero-board" aria-label="Recent member cases">
+    <aside class="hero-board" aria-label="Member scenarios">
         <div class="hero-board-head">
             <span class="live-dot" aria-hidden="true"></span>
-            <span>Recent member cases</span>
+            <span>Member scenarios</span>
             <span class="hero-board-count">@ScenarioCatalog.All.Count cases</span>
         </div>
         <ul class="hero-board-list">
@@ -41,132 +34,32 @@
                 </li>
             }
         </ul>
-        <div class="hero-board-foot">
-            <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
-            Every payment is approved by a person before it's released
-        </div>
     </aside>
 </section>
 
-<nav class="quick-links" aria-label="Common tasks">
-    @foreach (var link in QuickLinks)
-    {
-        <a class="quick-link" href="@link.Href">
-            <span class="ql-icon"><i class="@link.Icon" aria-hidden="true"></i></span>
-            <span class="ql-label">@link.Label</span>
-        </a>
-    }
-</nav>
-
-<section id="agents" class="home-section">
+<section id="agents" class="home-section" aria-labelledby="agents-title">
     <div class="section-head">
-        <div class="section-eyebrow">The operations office</div>
-        <h2>Meet your specialist agents</h2>
-        <p>
-            Each department has its own AI agent — with a clear role, its own tools and a named colleague who
-            reviews its work. Open any agent to watch it work a real member case.
-        </p>
+        <h2 id="agents-title">AI agents</h2>
+        <p>Open an agent to run its live demo.</p>
     </div>
     <div class="agent-grid">
-        @foreach (var agent in AgentCatalog.All)
+        @foreach (var (agent, index) in AgentCatalog.All.Select((a, i) => (a, i + 1)))
         {
             <a class="agent-card" href="@($"agents/{agent.Id}")" style="--accent: @agent.Accent">
                 <div class="agent-card-top">
-                    <span class="agent-card-icon" aria-hidden="true">@agent.Icon</span>
+                    <span class="agent-card-icon" aria-hidden="true">@agent.Icon<span class="agent-card-num">@index</span></span>
                     <span class="agent-card-dept">@agent.Department</span>
                 </div>
                 <h3>@agent.Name</h3>
                 <div class="agent-card-persona">@agent.Persona</div>
                 <p>@agent.Tagline</p>
-                <span class="agent-card-cta">View agent <span aria-hidden="true">→</span></span>
+                <span class="agent-card-cta">Open demo <span aria-hidden="true">→</span></span>
             </a>
         }
     </div>
 </section>
 
-<section class="numbers-band" aria-labelledby="numbers-title">
-    <div class="numbers-intro">
-        <div class="section-eyebrow">By the numbers</div>
-        <h2 id="numbers-title">Built for oversight, not autopilot</h2>
-        <p>The agents do the legwork. People keep the judgement — especially when money moves or a member is vulnerable.</p>
-    </div>
-    <div class="numbers-grid">
-        <div class="number">
-            <span class="number-value">@AgentCatalog.All.Count</span>
-            <span class="number-label">Specialist agents, one for each department</span>
-        </div>
-        <div class="number">
-            <span class="number-value">@ScenarioCatalog.All.Count</span>
-            <span class="number-label">End-to-end member journeys to explore</span>
-        </div>
-        <div class="number">
-            <span class="number-value">100<small>%</small></span>
-            <span class="number-label">Of payments approved by a person</span>
-        </div>
-        <div class="number">
-            <span class="number-value">0</span>
-            <span class="number-label">Personal advice given by an agent</span>
-        </div>
-    </div>
-</section>
-
-<section id="journey" class="home-section">
-    <div class="section-head">
-        <div class="section-eyebrow">How it works</div>
-        <h2>How a member request moves through Caldova</h2>
-        <p>Request → verify → assess → action → confirm. Each stage is owned by a specialist agent and checked by a person.</p>
-    </div>
-    <ol class="journey-steps">
-        @foreach (var (agent, index) in AgentCatalog.All.Select((a, i) => (a, i + 1)))
-        {
-            <li style="--accent: @agent.Accent">
-                <a href="@($"agents/{agent.Id}")">
-                    <span class="journey-num">@index</span>
-                    <span class="journey-icon" aria-hidden="true">@agent.Icon</span>
-                    <span class="journey-dept">@agent.Department</span>
-                </a>
-            </li>
-        }
-    </ol>
-</section>
-
-<section class="home-section trust-section" aria-labelledby="trust-title">
-    <div class="section-head section-head-center">
-        <div class="section-eyebrow">Why members can rely on the office</div>
-        <h2 id="trust-title">Confidence built into every case</h2>
-    </div>
-    <div class="trust-grid">
-        <div class="trust-item">
-            <span class="trust-icon"><i class="fa-solid fa-user-check" aria-hidden="true"></i></span>
-            <h3>A person approves</h3>
-            <p>Payments, hardship releases and death benefits wait for a named approver in Microsoft Teams. No agent releases money on its own.</p>
-        </div>
-        <div class="trust-item">
-            <span class="trust-icon"><i class="fa-solid fa-file-shield" aria-hidden="true"></i></span>
-            <h3>Everything on the record</h3>
-            <p>Every tool call — with its inputs and results — is captured in the agent's output, so the audit trail shows what was checked and why.</p>
-        </div>
-        <div class="trust-item">
-            <span class="trust-icon"><i class="fa-solid fa-comments" aria-hidden="true"></i></span>
-            <h3>Plain English, general information</h3>
-            <p>Members and advisers get clear, timely updates. Agents give general information only — never personal financial advice.</p>
-        </div>
-    </div>
-</section>
-
 @code {
-    private sealed record QuickLink(string Label, string Href, string Icon);
-
-    private static readonly QuickLink[] QuickLinks =
-    {
-        new("Open a new account", "agents/onboarding", "fa-solid fa-user-plus"),
-        new("Assess a benefit claim", "agents/benefits-eligibility", "fa-solid fa-scale-balanced"),
-        new("Review a portfolio", "agents/investment-analyst", "fa-solid fa-chart-line"),
-        new("Check for fraud", "agents/financial-crime", "fa-solid fa-user-shield"),
-        new("Release a payment", "agents/payments", "fa-solid fa-money-check-dollar"),
-        new("Update a member", "agents/client-communications", "fa-solid fa-envelope-open-text"),
-    };
-
     // Outcomes end with a status emoji (e.g. "Account opened ✅"); the status pill carries that meaning instead.
     private static string CleanOutcome(string outcome) =>
         Regex.Replace(outcome, @"[\s\p{So}\p{Cs}\p{Mn}]+$", string.Empty);
@@ -187,7 +80,7 @@
         grid-template-columns: minmax(0, 1.3fr) minmax(320px, 1fr);
         gap: 2.75rem;
         align-items: center;
-        padding: 3.4rem 3.25rem 5.75rem 3.25rem;
+        padding: 2.75rem 3rem;
         border-radius: 24px;
         color: var(--cw-text);
         border: 1px solid var(--cw-line);
@@ -246,36 +139,6 @@
         font-size: 1.05rem;
         line-height: 1.65;
         color: var(--cw-text-2);
-    }
-
-    .hero-actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.75rem;
-        margin: 1.75rem 0 1.4rem 0;
-    }
-    .hero-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.45rem;
-        height: 48px;
-        padding: 0 1.6rem;
-        border-radius: 999px;
-        font-weight: 600;
-        font-size: 0.95rem;
-        text-decoration: none;
-        transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
-    }
-    .hero-btn:hover { text-decoration: none; }
-    .hero-btn-solid { background: var(--cw-primary); color: #fff; border: 1.5px solid var(--cw-primary); }
-    .hero-btn-solid:hover { background: var(--cw-primary-hover); border-color: var(--cw-primary-hover); color: #fff; }
-    .hero-btn-ghost { color: var(--cw-navy-800); background: #fff; border: 1.5px solid var(--cw-navy-800); }
-    .hero-btn-ghost:hover { color: #fff; background: var(--cw-navy-800); }
-
-    .hero-footnote {
-        margin: 0;
-        font-size: 0.76rem;
-        color: var(--cw-muted);
     }
 
     /* White "case board" card on the light hero. */
@@ -361,82 +224,20 @@
     .hb-status.is-done { color: var(--cw-success); background: #e6f4ee; }
     .hb-status.is-partial { color: var(--cw-warn); background: #fdf1e1; }
     .hb-status.is-blocked { color: var(--cw-danger); background: #fdeceb; }
-    .hero-board-foot {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.75rem 0.35rem 0.1rem 0.35rem;
-        border-top: 1px solid var(--cw-line);
-        font-size: 0.76rem;
-        color: var(--cw-muted);
-    }
-    .hero-board-foot i { color: var(--cw-gold-ink); }
-    /* ── Quick links (overlapping the hero, as on fund sites) ─────────── */
-    .quick-links {
-        position: relative;
-        z-index: 2;
-        display: grid;
-        grid-template-columns: repeat(6, minmax(0, 1fr));
-        margin: -3.6rem 2.25rem 0 2.25rem;
-        background: #fff;
-        border: 1px solid var(--cw-line);
-        border-radius: 18px;
-        box-shadow: var(--cw-shadow-lg);
-        overflow: hidden;
-    }
-    .quick-link {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.7rem;
-        padding: 1.45rem 0.75rem 1.3rem 0.75rem;
-        text-align: center;
-        color: var(--cw-ink);
-        font-weight: 600;
-        font-size: 0.92rem;
-        text-decoration: none;
-        border-right: 1px solid var(--cw-line);
-        transition: background 0.15s ease, color 0.15s ease;
-    }
-    .quick-link:last-child { border-right: 0; }
-    .quick-link:hover { background: #f8fafd; color: var(--cw-primary); text-decoration: none; }
-    .ql-icon {
-        width: 50px;
-        height: 50px;
-        display: grid;
-        place-items: center;
-        border-radius: 50%;
-        background: var(--cw-primary-soft);
-        color: var(--cw-primary);
-        font-size: 1.15rem;
-        transition: transform 0.15s ease;
-    }
-    .quick-link:hover .ql-icon { transform: translateY(-2px); }
 
     /* ── Sections ─────────────────────────────────────────────────────── */
-    .home-section { margin-top: 4.5rem; }
-    .section-head { max-width: 46rem; margin-bottom: 1.75rem; }
-    .section-head-center { margin-left: auto; margin-right: auto; text-align: center; }
-    .section-eyebrow {
-        font-size: 0.72rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.18em;
-        color: var(--cw-gold-ink);
-        margin-bottom: 0.6rem;
-    }
-    .section-head h2,
-    .numbers-intro h2 {
-        margin: 0 0 0.6rem 0;
-        font-size: clamp(1.7rem, 2.4vw, 2.2rem);
+    .home-section { margin-top: 2.75rem; }
+    .section-head { max-width: 46rem; margin-bottom: 1.25rem; }
+    .section-head h2 {
+        margin: 0 0 0.35rem 0;
+        font-size: clamp(1.5rem, 2.2vw, 1.9rem);
         line-height: 1.2;
     }
-    .section-head p,
-    .numbers-intro p {
+    .section-head p {
         margin: 0;
         color: var(--cw-muted);
-        font-size: 1.02rem;
-        line-height: 1.65;
+        font-size: 1rem;
+        line-height: 1.6;
     }
 
     /* ── Agent cards ──────────────────────────────────────────────────── */
@@ -467,6 +268,7 @@
     }
     .agent-card-top { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 1rem; }
     .agent-card-icon {
+        position: relative;
         width: 46px;
         height: 46px;
         display: grid;
@@ -476,6 +278,25 @@
         font-size: 1.35rem;
         background: color-mix(in srgb, var(--accent) 12%, #fff);
         border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+    }
+    /* Position in the request journey (onboarding → … → team leader). */
+    .agent-card-num {
+        position: absolute;
+        top: -7px;
+        left: -7px;
+        min-width: 20px;
+        height: 20px;
+        padding: 0 5px;
+        display: grid;
+        place-items: center;
+        border-radius: 999px;
+        background: var(--cw-navy-800);
+        color: #fff;
+        font-family: var(--cw-font-sans);
+        font-size: 0.68rem;
+        font-weight: 700;
+        line-height: 1;
+        box-shadow: 0 0 0 2px #fff;
     }
     .agent-card-dept {
         font-size: 0.7rem;
@@ -501,142 +322,11 @@
     .agent-card-cta span { display: inline-block; transition: transform 0.15s ease; }
     .agent-card:hover .agent-card-cta span { transform: translateX(3px); }
 
-    /* ── By the numbers ───────────────────────────────────────────────── */
-    .numbers-band {
-        margin-top: 4.5rem;
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
-        gap: 2.5rem;
-        align-items: center;
-        padding: 2.75rem 2.75rem;
-        background: #fff;
-        border: 1px solid var(--cw-line);
-        border-radius: 22px;
-        box-shadow: var(--cw-shadow-sm);
-    }
-    .numbers-grid {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 1.5rem;
-    }
-    .number {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-        padding-left: 1.25rem;
-        border-left: 2px solid color-mix(in srgb, var(--cw-gold) 55%, transparent);
-    }
-    .number-value {
-        font-family: var(--cw-font-serif);
-        font-size: clamp(2.4rem, 3.6vw, 3.4rem);
-        font-weight: 500;
-        line-height: 1;
-        color: var(--cw-navy-800);
-        letter-spacing: -0.02em;
-        font-variant-numeric: lining-nums;
-    }
-    .number-value small { font-size: 0.55em; margin-left: 0.05em; }
-    .number-label { font-size: 0.88rem; color: var(--cw-muted); line-height: 1.45; }
-
-    /* ── Journey ──────────────────────────────────────────────────────── */
-    .journey-steps {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-        display: grid;
-        grid-template-columns: repeat(8, minmax(0, 1fr));
-        gap: 0.5rem;
-        counter-reset: none;
-    }
-    .journey-steps li { position: relative; }
-    .journey-steps li:not(:last-child)::after {
-        content: "";
-        position: absolute;
-        top: 22px;
-        left: calc(50% + 26px);
-        right: calc(-50% + 22px);
-        height: 2px;
-        background: linear-gradient(90deg, var(--cw-line-strong), var(--cw-line));
-    }
-    .journey-steps a {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.55rem;
-        text-align: center;
-        color: var(--cw-ink);
-        text-decoration: none;
-        padding: 0 0.25rem;
-    }
-    .journey-steps a:hover { text-decoration: none; color: var(--cw-primary); }
-    .journey-num {
-        width: 44px;
-        height: 44px;
-        display: grid;
-        place-items: center;
-        border-radius: 50%;
-        background: var(--cw-navy-800);
-        color: #fff;
-        font-weight: 700;
-        font-size: 0.95rem;
-        box-shadow: 0 0 0 5px var(--cw-bg), 0 0 0 6px color-mix(in srgb, var(--accent) 45%, transparent);
-        transition: background 0.15s ease;
-    }
-    .journey-steps a:hover .journey-num { background: var(--cw-primary); }
-    .journey-icon { font-size: 1.25rem; line-height: 1; margin-top: 0.3rem; }
-    .journey-dept { font-size: 0.84rem; font-weight: 600; line-height: 1.3; }
-
-    /* ── Trust pillars ────────────────────────────────────────────────── */
-    .trust-grid {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 1.25rem;
-    }
-    .trust-item {
-        padding: 1.75rem 1.6rem;
-        background: #fff;
-        border: 1px solid var(--cw-line);
-        border-radius: 18px;
-        text-align: center;
-    }
-    .trust-icon {
-        width: 56px;
-        height: 56px;
-        margin: 0 auto 1rem auto;
-        display: grid;
-        place-items: center;
-        border-radius: 50%;
-        background: var(--cw-navy-800);
-        color: var(--cw-gold);
-        font-size: 1.3rem;
-    }
-    .trust-item h3 {
-        margin: 0 0 0.5rem 0;
-        font-family: var(--cw-font-serif);
-        font-size: 1.25rem;
-        font-weight: 600;
-    }
-    .trust-item p { margin: 0; color: var(--cw-muted); font-size: 0.94rem; line-height: 1.6; }
-
     /* ── Responsive ───────────────────────────────────────────────────── */
     @@media (max-width: 1100px) {
-        .home-hero { grid-template-columns: minmax(0, 1fr); padding: 2.5rem 2rem 5.5rem 2rem; }
-        .quick-links { grid-template-columns: repeat(3, minmax(0, 1fr)); margin-left: 1rem; margin-right: 1rem; }
-        .quick-link:nth-child(3n) { border-right: 0; }
-        .quick-link:nth-child(-n+3) { border-bottom: 1px solid var(--cw-line); }
-        .numbers-band { grid-template-columns: 1fr; }
-        .journey-steps { grid-template-columns: repeat(4, minmax(0, 1fr)); row-gap: 1.75rem; }
-        .journey-steps li::after { display: none; }
+        .home-hero { grid-template-columns: minmax(0, 1fr); padding: 2.25rem 2rem; }
     }
     @@media (max-width: 720px) {
-        .home-hero { padding: 2rem 1.25rem 5rem 1.25rem; border-radius: 18px; }
-        .quick-links { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-left: 0.5rem; margin-right: 0.5rem; }
-        .quick-link:nth-child(3n) { border-right: 1px solid var(--cw-line); }
-        .quick-link:nth-child(2n) { border-right: 0; }
-        .quick-link:nth-child(-n+4) { border-bottom: 1px solid var(--cw-line); }
-        .numbers-band { padding: 1.75rem 1.4rem; }
-        .numbers-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        .journey-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        .trust-grid { grid-template-columns: 1fr; }
+        .home-hero { padding: 1.75rem 1.25rem; border-radius: 18px; }
     }
 </style>

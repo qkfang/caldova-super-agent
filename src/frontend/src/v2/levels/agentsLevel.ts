@@ -1,23 +1,37 @@
 /**
- * Level 1 · The Agents — one Microsoft Foundry agent under each person.
+ * Level 1 · The Agents — one group of Microsoft Foundry agents that
+ * supports both teams.
  *
- * Every pod sits directly under its human's desk on Level 2 and holds the
- * agent's two specialised assistants (small voxel robots, named in
- * stepGate.ts). In the middle of the floor is the shared Member Case that
- * every agent reads from and writes to, wired to the pods by glowing traces
- * that carry data packets back and forth.
+ * The floor is split into three zones: agents dedicated to the Wealth
+ * Management side, agents shared by both sides, and agents dedicated to the
+ * Superannuation side. Every pod sits directly under its human's desk on
+ * Level 2 and holds the agent's two specialised assistants (small voxel
+ * robots, named in stepGate.ts); its frame glows in the colour of its side.
+ * At the front of the shared zone is the Member Case that every agent reads
+ * from and writes to, wired to the pods by glowing traces that carry data
+ * packets back and forth.
  */
 import { Color3, Mesh, MeshBuilder, StandardMaterial, Texture, TransformNode, Vector3 } from "@babylonjs/core";
 import { STAFF_PERSONAS } from "../../personaData";
 import { STAGE_CONFIG } from "../../stepGate";
 import { Batch, Kit } from "../kit";
-import { AGENTS, levelInfo } from "../lakehouseData";
-import { FLOOR_Y, SLABS, STATIONS, WALLS } from "../layout";
+import { AGENTS, SIDES, levelInfo, sideBadge, type SideId } from "../lakehouseData";
+import { CENTRE_CELL, FLOOR_Y, SLABS, STATIONS, WALLS, ZONES } from "../layout";
 import { buildShell } from "../shell";
 import type { Anchor, Highlights, LevelBuild } from "../types";
 
-const HUB = { x: 0, z: -1.25 };
+const HUB = { x: CENTRE_CELL.x, z: CENTRE_CELL.z + 0.2 };
+const HUB_R = 1.3;
 const BUS_Z = -1.25;
+const POD_W = 5.6;
+const POD_D = 4.6;
+
+/** Floor lettering for each zone, in a lighter tint of the side colour so it reads on the dark grid. */
+const ZONE_TEXT: Record<SideId, { text: string; color: string }> = {
+  wealth: { text: "DEDICATED · WEALTH", color: "#e9c877" },
+  shared: { text: "SHARED BY BOTH SIDES", color: "#b9c3ff" },
+  super: { text: "DEDICATED · SUPER", color: "#5eead4" },
+};
 
 interface Robot {
   node: TransformNode;
@@ -69,6 +83,11 @@ function buildRobot(kit: Kit, accent: string, tag: string): Robot {
   return { node, tip, phase: Math.random() * 6 };
 }
 
+/** Drops repeated points so no segment of a packet path has zero length. */
+function dedupe(points: Vector3[]): Vector3[] {
+  return points.filter((p, i) => i === 0 || Vector3.Distance(p, points[i - 1]) > 0.01);
+}
+
 export function buildAgentsLevel(kit: Kit): LevelBuild {
   const scene = kit.scene;
   const root = new TransformNode("v2_lvl_agents", scene);
@@ -91,7 +110,7 @@ export function buildAgentsLevel(kit: Kit): LevelBuild {
   gridMat.diffuseTexture = gridTex;
   gridMat.emissiveColor = new Color3(0.42, 0.48, 0.6);
   gridMat.specularColor = Color3.Black();
-  buildShell(kit, {
+  const { tag } = buildShell(kit, {
     root,
     level: info,
     floorY: y,
@@ -101,17 +120,44 @@ export function buildAgentsLevel(kit: Kit): LevelBuild {
     back: kit.mat("#1b2740"),
   });
 
+  /* ---------------- The three zones ---------------- */
+  const walls = WALLS.agents;
+  const z0 = walls.z0 + 0.4;
+  const z1 = walls.z1 - 0.4;
+  for (const side of ["wealth", "shared", "super"] as const) {
+    const zone = ZONES[side];
+    const cx = (zone.x0 + zone.x1) / 2;
+    const w = zone.x1 - zone.x0 - 0.3;
+    kit.block(root, cx, y + 0.004, (z0 + z1) / 2, w, 0.012, z1 - z0, kit.mat(SIDES[side].color, { unlit: true, alpha: 0.28 }));
+    kit.block(root, cx, y + 0.01, z0 + 0.1, w, 0.04, 0.16, kit.mat(SIDES[side].color, { unlit: true, glow: true }));
+    const text = ZONE_TEXT[side];
+    const decal = kit.label(root, {
+      lines: [{ text: text.text, size: 60, weight: 800, color: text.color }],
+      width: Math.min(w - 1, 10.5),
+      px: 1024,
+      pxHeight: 100,
+    });
+    decal.rotation.x = Math.PI / 2;
+    decal.position.set(cx, y + 0.07, -10.5);
+  }
+  // Dashed lines where the shared zone meets each side.
+  const dash = kit.mat("#c7d2fe", { unlit: true, glow: true });
+  for (const x of [ZONES.wealth.x1, ZONES.super.x0]) {
+    for (let z = z0 + 0.6; z < z1 - 0.4; z += 1.5) kit.block(root, x, y + 0.01, z + 0.4, 0.12, 0.04, 0.8, dash);
+  }
+
+  // The floor's sign, on the back wall behind the empty corner by the lift.
   const back = kit.label(root, {
     lines: [
-      { text: "MICROSOFT FOUNDRY AGENTS", size: 64, weight: 800, color: "#5ce1ff" },
-      { text: "One agent for every person · one shared Member Case", size: 34, weight: 500, color: "#c6d2e6" },
+      { text: "ONE GROUP OF AGENTS", size: 60, weight: 800, color: "#5ce1ff" },
+      { text: "Dedicated to one side, or shared by both", size: 30, weight: 500, color: "#c6d2e6" },
     ],
-    width: 13,
-    px: 1024,
+    width: 6.4,
+    px: 768,
+    bg: "rgba(10,20,40,0.7)",
   });
-  back.position.set(0, y + 3.9, WALLS.agents.z1 - 0.2);
+  back.position.set(-13.4, y + 3.0, walls.z1 - 0.32);
 
-  const frameMat = kit.mat("#6ec1ff", { unlit: true, glow: true });
   const traceMat = kit.mat("#2e7fbf", { emissive: 0.6 });
   const pods: Pod[] = [];
   const anchors = new Map<string, Anchor>();
@@ -121,25 +167,26 @@ export function buildAgentsLevel(kit: Kit): LevelBuild {
     const st = STATIONS[p.id];
     const agent = AGENTS[p.id];
     if (!st || !agent) continue;
+    const side = SIDES[agent.side];
     const cz = st.z + 0.2;
     const padMat = new StandardMaterial(`v2_pad_${p.id}`, scene);
     const padBase = Color3.FromHexString(p.color);
     padMat.diffuseColor = padBase.scale(0.6);
     padMat.emissiveColor = padBase.scale(0.35);
     padMat.specularColor = Color3.Black();
-    kit.block(root, st.x, y, cz, 6.2, 0.06, 5.0, padMat);
+    kit.block(root, st.x, y, cz, POD_W, 0.06, POD_D, padMat);
+    const frameMat = kit.mat(side.color, { unlit: true, glow: true });
     for (const [fw, fd, fx, fz] of [
-      [6.2, 0.14, 0, -2.5],
-      [6.2, 0.14, 0, 2.5],
-      [0.14, 5.0, -3.1, 0],
-      [0.14, 5.0, 3.1, 0],
+      [POD_W, 0.14, 0, -POD_D / 2],
+      [POD_W, 0.14, 0, POD_D / 2],
+      [0.14, POD_D, -POD_W / 2, 0],
+      [0.14, POD_D, POD_W / 2, 0],
     ] as const) {
       kit.block(root, st.x + fx, y + 0.02, cz + fz, fw, 0.08, fd, frameMat);
     }
-    // Trace from the Member Case bus to the pod's edge.
-    const edge = st.z < 0 ? cz + 2.5 : cz - 2.5;
-    const zMid = (BUS_Z + edge) / 2;
-    kit.block(root, st.x, y + 0.01, zMid, 0.14, 0.04, Math.abs(edge - BUS_Z), traceMat);
+    // Trace from the bus to the pod's edge.
+    const edge = st.z < 0 ? cz + POD_D / 2 : cz - POD_D / 2;
+    kit.block(root, st.x, y + 0.01, (BUS_Z + edge) / 2, 0.14, 0.04, Math.abs(edge - BUS_Z), traceMat);
 
     const node = new TransformNode(`v2_pod_${p.id}`, scene);
     node.parent = root;
@@ -159,25 +206,31 @@ export function buildAgentsLevel(kit: Kit): LevelBuild {
 
     const panel = kit.label(node, {
       lines: [
-        { text: p.agent_name, size: 46, weight: 800, color: p.color },
+        { text: p.agent_name, size: 50, weight: 800, color: p.color },
+        { text: sideBadge(agent.side).toUpperCase(), size: 30, weight: 800, color: ZONE_TEXT[agent.side].color },
         { text: agent.foundryId, size: 34, weight: 600, color: "#9fd4ff" },
-        { text: `${subAgents.length} assistants · works for ${p.name}`, size: 28, weight: 500, color: "#c6d2e6" },
+        {
+          text: `${subAgents.length} assistants${agent.voiceId ? " + voice" : ""} · works for ${p.name}`,
+          size: 30,
+          weight: 500,
+          color: "#c6d2e6",
+        },
       ],
-      width: 5.0,
+      width: 5.2,
       px: 640,
       bg: "rgba(10,20,40,0.82)",
-      accent: p.color,
+      accent: side.color,
       bar: "left",
       align: "left",
     });
     panel.billboardMode = Mesh.BILLBOARDMODE_Y;
-    panel.position.set(0, 4.05, 1.9);
+    panel.position.set(0, 3.95, 1.7);
 
-    const ring = MeshBuilder.CreateTorus(`v2_podRing_${p.id}`, { diameter: 7.4, thickness: 0.2, tessellation: 48 }, scene);
+    const ring = MeshBuilder.CreateTorus(`v2_podRing_${p.id}`, { diameter: 6.8, thickness: 0.2, tessellation: 48 }, scene);
     ring.position.set(st.x, y + 0.14, cz);
     kit.finish(ring, root, kit.mat("#ffe08a", { unlit: true, glow: true }), true);
     ring.setEnabled(false);
-    kit.hitbox(root, st.x, y, cz, 6.2, 3.8, 5.0, { type: "agent", id: p.id });
+    kit.hitbox(root, st.x, y, cz, POD_W, 3.8, POD_D, { type: "agent", id: p.id });
     pods.push({ id: p.id, node, robots, ring, pad: padMat, padBase, power: 1 });
   }
 
@@ -186,13 +239,14 @@ export function buildAgentsLevel(kit: Kit): LevelBuild {
   const busX0 = Math.min(...xs);
   const busX1 = Math.max(...xs);
   kit.block(root, (busX0 + busX1) / 2, y + 0.01, BUS_Z, busX1 - busX0 + 0.14, 0.04, 0.14, traceMat);
+  kit.block(root, HUB.x, y + 0.01, (BUS_Z + HUB.z + HUB_R) / 2, 0.14, 0.04, BUS_Z - HUB.z - HUB_R, traceMat);
 
   /* ---------------- Cara's voice agent and Theo's group chat ---------------- */
   const cara = STATIONS["comms-1"];
   const eqBars: Mesh[] = [];
   const eqMat = kit.mat("#ec4899", { unlit: true, glow: true });
   for (let i = 0; i < 5; i++) {
-    eqBars.push(kit.block(root, cara.x + 2.0 + i * 0.22, y + 0.1, cara.z + 2.2, 0.14, 1, 0.14, eqMat, { dynamic: true }));
+    eqBars.push(kit.block(root, cara.x + 1.8 + i * 0.2, y + 0.1, cara.z + 2.0, 0.13, 1, 0.13, eqMat, { dynamic: true }));
   }
   const voiceTag = kit.label(root, {
     lines: [{ text: "voice agent", size: 40, weight: 700, color: "#fbcfe8" }],
@@ -202,10 +256,10 @@ export function buildAgentsLevel(kit: Kit): LevelBuild {
     bg: "rgba(10,20,40,0.82)",
   });
   voiceTag.billboardMode = Mesh.BILLBOARDMODE_Y;
-  voiceTag.position.set(cara.x + 2.45, y + 2.2, cara.z + 2.2);
+  voiceTag.position.set(cara.x + 2.2, y + 2.2, cara.z + 2.0);
 
   const theo = STATIONS["lead-1"];
-  const chatRing = MeshBuilder.CreateTorus("v2_groupChat", { diameter: 5.6, thickness: 0.08, tessellation: 40 }, scene);
+  const chatRing = MeshBuilder.CreateTorus("v2_groupChat", { diameter: 5.4, thickness: 0.08, tessellation: 40 }, scene);
   chatRing.position.set(theo.x, y + 3.2, theo.z + 0.2);
   kit.finish(chatRing, root, kit.mat("#14b8a6", { unlit: true, glow: true }), true);
   const chatTag = kit.label(root, {
@@ -216,11 +270,11 @@ export function buildAgentsLevel(kit: Kit): LevelBuild {
     bg: "rgba(10,20,40,0.82)",
   });
   chatTag.billboardMode = Mesh.BILLBOARDMODE_Y;
-  chatTag.position.set(theo.x - 2.6, y + 3.4, theo.z + 0.2);
+  chatTag.position.set(theo.x - 2.5, y + 3.4, theo.z + 0.2);
 
   /* ---------------- The Member Case hub ---------------- */
   const steel = kit.mat("#1e2433", { specular: 0.3 });
-  kit.cyl(root, HUB.x, y, HUB.z, 2.6, 0.7, steel, { tess: 24 });
+  kit.cyl(root, HUB.x, y, HUB.z, HUB_R * 2, 0.7, steel, { tess: 24 });
   const hubRingFloor = MeshBuilder.CreateTorus("v2_hubFloorRing", { diameter: 2.4, thickness: 0.1, tessellation: 32 }, scene);
   hubRingFloor.position.set(HUB.x, y + 0.72, HUB.z);
   kit.finish(hubRingFloor, root, kit.mat("#ffc35a", { unlit: true, glow: true }));
@@ -255,12 +309,14 @@ export function buildAgentsLevel(kit: Kit): LevelBuild {
   for (const [i, p] of STAFF_PERSONAS.entries()) {
     const st = STATIONS[p.id];
     const cz = st.z + 0.2;
-    const edge = st.z < 0 ? cz + 2.5 : cz - 2.5;
-    const path = [
-      new Vector3(HUB.x + (st.x > 0 ? 1.3 : -1.3), y + 0.2, BUS_Z),
-      new Vector3(st.x, y + 0.2, BUS_Z),
-      new Vector3(st.x, y + 0.2, edge),
-    ];
+    const edge = st.z < 0 ? cz + POD_D / 2 : cz - POD_D / 2;
+    const py = y + 0.2;
+    const path = dedupe([
+      new Vector3(HUB.x, py, HUB.z + HUB_R),
+      new Vector3(HUB.x, py, BUS_Z),
+      new Vector3(st.x, py, BUS_Z),
+      new Vector3(st.x, py, edge),
+    ]);
     let length = 0;
     for (let k = 1; k < path.length; k++) length += Vector3.Distance(path[k - 1], path[k]);
     for (let j = 0; j < 2; j++) {
@@ -281,16 +337,18 @@ export function buildAgentsLevel(kit: Kit): LevelBuild {
     for (let k = 1; k < pk.path.length; k++) {
       const seg = Vector3.Distance(pk.path[k - 1], pk.path[k]);
       if (d <= seg || k === pk.path.length - 1) {
-        Vector3.LerpToRef(pk.path[k - 1], pk.path[k], Math.min(1, d / seg), out);
+        Vector3.LerpToRef(pk.path[k - 1], pk.path[k], seg > 0 ? Math.min(1, d / seg) : 1, out);
         return;
       }
       d -= seg;
     }
   };
+  const tmp = new Vector3();
 
   return {
     id: "agents",
     root,
+    tag,
     anchors,
     update(dt: number, t: number): void {
       if (introT >= 0) introT += dt;
@@ -315,7 +373,6 @@ export function buildAgentsLevel(kit: Kit): LevelBuild {
       caseCube.position.y = Math.sin(t * 1.8) * 0.12;
       hubRings[0].rotation.x = t * 1.1;
       hubRings[1].rotation.z = t * 0.9;
-      const tmp = new Vector3();
       for (const pk of packets) {
         const f = ((t * pk.speed) / (pk.length * 2) + pk.offset) % 1;
         pointOnPath(pk, f, tmp);

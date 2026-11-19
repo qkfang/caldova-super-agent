@@ -1,6 +1,5 @@
 /* Site chrome — Caldova Wealth.
-   Light utility bar + sticky white header (NavMenu) + light regulatory footer,
-   following the layout used by Australian super fund and wealth sites. */
+   Sticky white header (NavMenu) + a single-line light footer. */
 
 .site {
     min-height: 100vh;
@@ -10,54 +9,6 @@
 
 .site-main {
     flex: 1;
-}
-
-/* ── Utility bar ──────────────────────────────────────────────────────── */
-.utility-bar {
-    background: #eef0f3;
-    border-bottom: 1px solid var(--cw-line);
-    color: var(--cw-text-2);
-    font-size: 0.78rem;
-}
-
-.utility-inner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    min-height: 36px;
-}
-
-.utility-products {
-    display: flex;
-    align-items: center;
-    gap: 1.1rem;
-    flex-wrap: wrap;
-}
-
-.utility-products span:not(.utility-label) {
-    color: var(--cw-text);
-    font-weight: 500;
-}
-
-.utility-label {
-    font-size: 0.66rem;
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    font-weight: 700;
-    color: var(--cw-gold-ink);
-}
-
-.utility-trust {
-    display: flex;
-    align-items: center;
-    gap: 1.25rem;
-    white-space: nowrap;
-}
-
-.utility-trust i {
-    color: var(--cw-gold-ink);
-    margin-right: 0.3rem;
 }
 
 /* ── Header ───────────────────────────────────────────────────────────── */
@@ -75,140 +26,17 @@
     margin-top: 2rem;
     background: var(--cw-bg-2);
     border-top: 1px solid var(--cw-line);
-    color: var(--cw-text-2);
-    font-size: 0.9rem;
-}
-
-.footer-top {
-    display: grid;
-    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1fr);
-    gap: 2.5rem;
-    padding-top: 3.25rem;
-    padding-bottom: 2.5rem;
-}
-
-.footer-logo {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.7rem;
-    color: var(--cw-navy-800);
-    text-decoration: none;
-}
-
-.footer-logo:hover {
-    color: var(--cw-navy-800);
-    text-decoration: none;
-}
-
-.footer-wordmark {
-    font-family: var(--cw-font-serif);
-    font-size: 1.4rem;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-}
-
-.footer-wordmark span {
-    font-family: var(--cw-font-sans);
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--cw-gold-ink);
-    margin-left: 0.25rem;
-    vertical-align: middle;
-}
-
-.footer-brand p {
-    margin: 1rem 0 1.1rem 0;
-    max-width: 30rem;
-    line-height: 1.6;
-}
-
-.footer-commitments {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    gap: 0.45rem;
-}
-
-.footer-commitments i {
-    color: var(--cw-success);
-    margin-right: 0.45rem;
-}
-
-.footer-col h2 {
-    font-family: var(--cw-font-sans);
-    font-size: 0.72rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.16em;
-    color: var(--cw-gold-ink);
-    margin: 0.4rem 0 1rem 0;
-}
-
-.footer-col ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    gap: 0.55rem;
-}
-
-.footer-col a {
-    color: var(--cw-navy-800);
-    text-decoration: none;
-}
-
-.footer-col a:hover {
-    color: var(--cw-primary);
-    text-decoration: underline;
-}
-
-.footer-legal {
-    border-top: 1px solid var(--cw-line-strong);
-    padding-top: 1.4rem;
-    padding-bottom: 1.8rem;
-    font-size: 0.78rem;
-    line-height: 1.6;
     color: var(--cw-muted);
+    font-size: 0.8rem;
 }
 
-.footer-legal p {
-    margin: 0 0 0.5rem 0;
-    max-width: 70rem;
-}
-
-.footer-copy {
-    color: var(--cw-text-2);
-}
-
-@media (max-width: 900px) {
-    .utility-products .utility-label ~ span:nth-of-type(n+3) {
-        display: none;
-    }
-
-    .footer-top {
-        grid-template-columns: 1fr 1fr;
-    }
-
-    .footer-brand {
-        grid-column: 1 / -1;
-    }
-}
-
-@media (max-width: 640px) {
-    .utility-trust span:last-child {
-        display: none;
-    }
-
-    .utility-products {
-        display: none;
-    }
-
-    .utility-inner {
-        justify-content: flex-end;
-    }
+.footer-slim {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.4rem 1.5rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
 }
 
 /* ── Unhandled-error banner ───────────────────────────────────────────── */

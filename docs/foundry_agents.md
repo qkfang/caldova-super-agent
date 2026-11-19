@@ -270,11 +270,11 @@ Always required before:
 
 ### Document authenticity (Try it out)
 
-The **Try it out** tab on `/agents/financial-crime` checks each document attached to a case:
+The demo on `/agents/financial-crime` checks each document attached to a case:
 
 1. **Scan.** Each document goes through Azure Content Understanding with the shared authenticity schema.
 2. **Verdict.** A small deterministic rules layer gives it a verdict of *legit*, *suspicious* or *fake*.
-3. **Findings.** The tab lists every check performed and the reasons any check failed.
+3. **Findings.** The demo lists every check performed and the reasons any check failed.
 4. **Risk narrative.** The findings feed into Felix's risk narrative, so document red flags are cited by document number.
 
 The sample documents come in genuine and tampered pairs: a driver licence, a passport, a bank statement, a death certificate, and an SMSF/ESA letter. Every sample is visibly marked **"SPECIMEN — DEMO ONLY"**. See [`src/backend/README.md`](../src/backend/README.md) for the full flow and endpoint list.

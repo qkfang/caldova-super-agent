@@ -1,21 +1,23 @@
 /**
- * Level 2 · The People — the eight-person Caldova Client Operations team at
- * standing desks: the Superannuation Team on the front row, and Theo with
- * the Wealth Management Team on the back row. Every desk sits directly
- * above that person's agent pod on Level 1, so the thread between a person
- * and their agent runs straight down through the floor.
+ * Level 2 · The People — two small teams, one for each side of the
+ * business, at standing desks: the Wealth Management Team on the left, the
+ * Superannuation Team on the right, and Theo in the middle leading both.
+ * Every desk sits directly above that person's agent pod on Level 1, so the
+ * thread between a person and their agent runs straight down through the
+ * floor. Both teams meet at the huddle table at the front.
  */
 import { Color3, Mesh, MeshBuilder, TransformNode } from "@babylonjs/core";
 import { PALETTES } from "../../characterPalettes";
 import { STAFF_PERSONAS } from "../../personaData";
 import { VoxelCharacter } from "../../voxelCharacter";
 import { Batch, Kit } from "../kit";
-import { IDEA, levelInfo } from "../lakehouseData";
-import { CHARACTER_SCALE, FLOOR_Y, SLABS, STATIONS, WALLS } from "../layout";
+import { IDEA, SIDES, levelInfo } from "../lakehouseData";
+import { CENTRE_CELL, CHARACTER_SCALE, FLOOR_Y, SLABS, STATIONS, WALLS, WINGS } from "../layout";
 import { buildShell } from "../shell";
 import type { Anchor, Highlights, LevelBuild } from "../types";
 
 const CORAL = Color3.FromHexString("#ff8f6b");
+const LEAD = "#6b7fb0";
 
 interface Leg {
   x: number;
@@ -85,11 +87,17 @@ export function buildPeopleLevel(kit: Kit): LevelBuild {
   const leaf = kit.mat("#5ea347");
   const leafDark = kit.mat("#3f7f3a");
   const pot = kit.mat("#d8d2c6");
-  buildShell(kit, { root, level: info, floorY: y, slab: SLABS.people, walls: WALLS.people, floor: oak, back: cedar });
+  const { tag } = buildShell(kit, { root, level: info, floorY: y, slab: SLABS.people, walls: WALLS.people, floor: oak, back: cedar });
 
-  // Team rugs and floor lettering.
-  kit.block(root, 0, y, -6.1, 36.5, 0.05, 7.0, kit.mat("#d3efe9"));
-  kit.block(root, 0, y, 3.5, 36.5, 0.05, 7.0, kit.mat("#f4e9cc"));
+  /* ---------------- The two wings ---------------- */
+  const rugZ0 = -10.2;
+  const rugZ1 = 7.8;
+  const rug = (x0: number, x1: number, hex: string): void => {
+    kit.block(root, (x0 + x1) / 2, y, (rugZ0 + rugZ1) / 2, x1 - x0 - 0.3, 0.05, rugZ1 - rugZ0, kit.mat(hex));
+  };
+  rug(WINGS.wealth.x0, WINGS.wealth.x1, "#e6c47c");
+  rug(WINGS.lead.x0, WINGS.lead.x1, "#cdd5ef");
+  rug(WINGS.super.x0, WINGS.super.x1, "#86d1c3");
   const floorText = (text: string, x: number, z: number, width: number, color: string): void => {
     const decal = kit.label(root, {
       lines: [{ text, size: 60, weight: 800, color }],
@@ -100,17 +108,38 @@ export function buildPeopleLevel(kit: Kit): LevelBuild {
     decal.rotation.x = Math.PI / 2;
     decal.position.set(x, y + 0.07, z);
   };
-  floorText("SUPERANNUATION TEAM", 0, -8.9, 13, "#0f766e");
-  floorText("WEALTH MANAGEMENT TEAM", 4.5, 1.05, 12, "#8a6a1f");
-  floorText("LEADING BOTH TEAMS", -13.5, 1.05, 6.5, "#0f766e");
+  const wealthX = (WINGS.wealth.x0 + WINGS.wealth.x1) / 2;
+  const superX = (WINGS.super.x0 + WINGS.super.x1) / 2;
+  floorText("WEALTH MANAGEMENT TEAM", wealthX, -8.6, 12, "#7a5a12");
+  floorText("SUPERANNUATION TEAM", superX, -8.6, 11, "#0b5f58");
+  floorText("LEADING BOTH TEAMS", 0, 1.0, 6.4, "#3d4f86");
 
-  // The process board on the back wall.
+  // A sign for each side on the back wall: the side's name and its products.
+  const sideSign = (side: "wealth" | "super", x: number, ink: string): void => {
+    const s = SIDES[side];
+    const sign = kit.label(root, {
+      lines: [
+        { text: s.name.toUpperCase(), size: 60, weight: 800, color: ink },
+        { text: s.products.join(" · "), size: 32, weight: 600, color: "#3b4557" },
+      ],
+      width: 6.6,
+      px: 768,
+      bg: "rgba(255,251,242,0.94)",
+      accent: s.color,
+      bar: "top",
+    });
+    sign.position.set(x, y + 3.35, WALLS.people.z1 - 0.32);
+  };
+  sideSign("wealth", wealthX + 0.4, "#8a6a1f");
+  sideSign("super", superX - 0.4, "#0f766e");
+
+  // One process for both sides, on the back wall behind Theo.
   const process = kit.canvas("v2_processBoard", 1024, 300, (ctx, w, h) => {
     ctx.fillStyle = "#0f1a2e";
     ctx.fillRect(0, 0, w, h);
     ctx.fillStyle = "#ffc35a";
-    ctx.font = '800 44px "Segoe UI", sans-serif';
-    ctx.fillText("OUR PROCESS", 40, 66);
+    ctx.font = '800 40px "Segoe UI", sans-serif';
+    ctx.fillText("ONE PROCESS FOR BOTH SIDES", 40, 64);
     const colW = (w - 80) / IDEA.lifecycle.length;
     IDEA.lifecycle.forEach((step, i) => {
       const x = 40 + i * colW;
@@ -125,11 +154,11 @@ export function buildPeopleLevel(kit: Kit): LevelBuild {
       ctx.fillText(step, x + 18, 238);
     });
   });
-  const board = MeshBuilder.CreatePlane("v2_processBoardPlane", { width: 11, height: 3.2 }, scene);
-  board.position.set(1, y + 2.7, WALLS.people.z1 - 0.2);
+  const board = MeshBuilder.CreatePlane("v2_processBoardPlane", { width: 7.6, height: 2.2 }, scene);
+  board.position.set(0, y + 3.2, WALLS.people.z1 - 0.32);
   kit.finish(board, root, kit.screen(process));
 
-  /* ---------------- Desks and the team ---------------- */
+  /* ---------------- Desks and the two teams ---------------- */
   const deskTop = kit.mat("#f8f4ec");
   const laptop = kit.mat("#c7ccd6", { specular: 0.4 });
   const dark = kit.mat("#1f2937");
@@ -145,7 +174,7 @@ export function buildPeopleLevel(kit: Kit): LevelBuild {
     kit.block(root, st.x - 1.65, y, dz, 0.14, 1.5, 1.2, white);
     kit.block(root, st.x + 1.65, y, dz, 0.14, 1.5, 1.2, white);
     kit.block(root, st.x, y + 0.3, dz - 0.62, 3.3, 1.1, 0.06, accent);
-    const tag = kit.label(root, {
+    const nameTag = kit.label(root, {
       lines: [
         { text: p.name.toUpperCase(), size: 62, weight: 800 },
         { text: p.department, size: 32, weight: 600, color: "#e6ecf5" },
@@ -156,7 +185,7 @@ export function buildPeopleLevel(kit: Kit): LevelBuild {
       accent: p.color,
       bar: "top",
     });
-    tag.position.set(st.x, y + 0.86, dz - 0.67);
+    nameTag.position.set(st.x, y + 0.86, dz - 0.67);
     // Laptop: the lid faces the person, so the camera sees its back.
     const top = y + 1.62;
     kit.block(root, st.x - 0.3, top, dz + 0.1, 0.95, 0.05, 0.62, laptop);
@@ -214,14 +243,40 @@ export function buildPeopleLevel(kit: Kit): LevelBuild {
     anchors.set(`staff:${p.id}`, { node: ch.root, group: "people", dy: 2.5 });
   }
 
+  /* ---------------- The huddle table, where both teams meet ---------------- */
+  const hx = CENTRE_CELL.x;
+  const hz = CENTRE_CELL.z;
+  kit.cyl(root, hx, y, hz, 0.5, 1.4, steel, { tess: 10 });
+  kit.cyl(root, hx, y + 1.4, hz, 2.8, 0.12, white, { tess: 28 });
+  const huddleRing = MeshBuilder.CreateTorus("v2_huddleRing", { diameter: 2.5, thickness: 0.06, tessellation: 36 }, scene);
+  huddleRing.position.set(hx, y + 1.53, hz);
+  kit.finish(huddleRing, root, kit.mat(LEAD, { unlit: true, glow: true }));
+  kit.block(root, hx + 0.6, y + 1.52, hz - 0.3, 0.7, 0.04, 0.5, dark, { rotY: 0.3 });
+  for (const [sx, sz] of [[-1.9, -0.9], [1.9, -0.9], [-1.9, 1.0], [1.9, 1.0]] as const) {
+    kit.cyl(root, hx + sx, y, hz + sz, 0.12, 0.95, steel, { tess: 8 });
+    kit.cyl(root, hx + sx, y + 0.95, hz + sz, 0.75, 0.12, kit.mat(sx < 0 ? SIDES.wealth.color : SIDES.super.color), { tess: 12 });
+  }
+  const huddleCase = kit.block(root, hx, y + 2.0, hz, 0.5, 0.5, 0.5, kit.mat("#ffc35a", { emissive: 0.55, glow: true }), {
+    dynamic: true,
+  });
+  const huddleTag = kit.label(root, {
+    lines: [{ text: "both teams meet here", size: 40, weight: 700, color: "#dfe5f7" }],
+    width: 2.6,
+    px: 420,
+    pxHeight: 70,
+    bg: "rgba(10,18,34,0.8)",
+  });
+  huddleTag.billboardMode = Mesh.BILLBOARDMODE_Y;
+  huddleTag.position.set(hx, y + 3.1, hz);
+
   /* ---------------- Coffee bar, lounge corner and plants ---------------- */
   kit.block(root, 19.4, y, 1, 2.0, 1.5, 7.0, walnut);
   kit.block(root, 19.4, y + 1.5, 1, 2.3, 0.1, 7.3, white);
   kit.block(root, 19.7, y + 1.6, 3.4, 0.9, 1.1, 0.8, dark);
   kit.block(root, 19.24, y + 2.1, 3.4, 0.06, 0.2, 0.4, kit.mat("#ffc35a", { unlit: true, glow: true }));
-  for (const z of [-1.2, 1.0, 3.2]) {
-    kit.cyl(root, 17.7, y, z, 0.14, 1.0, steel, { tess: 8 });
-    kit.cyl(root, 17.7, y + 1.0, z, 0.75, 0.14, kit.mat("#ff8f6b"), { tess: 12 });
+  for (const z of [-1.4, 0.3]) {
+    kit.cyl(root, 17.9, y, z, 0.14, 1.0, steel, { tess: 8 });
+    kit.cyl(root, 17.9, y + 1.0, z, 0.75, 0.14, kit.mat("#ff8f6b"), { tess: 12 });
   }
   kit.block(root, -18.6, y, -2.4, 1.5, 0.8, 1.5, kit.mat("#ff8f6b"));
   kit.block(root, -18.8, y, -0.4, 1.5, 0.8, 1.5, kit.mat("#14b8a6"));
@@ -242,17 +297,19 @@ export function buildPeopleLevel(kit: Kit): LevelBuild {
   kit.useBatch(null);
   batch.flush();
 
+  // Theo leaves his desk, checks in at the huddle table, then looks over each wing in turn.
   const theo = characters.get("lead-1");
+  const lead = STATIONS["lead-1"];
   const walker = theo
     ? new Walker(theo, [
-        { x: -13.5, z: 4.25, pause: 9, face: Math.PI },
-        { x: -10.8, z: 4.25, pause: 0 },
-        { x: -10, z: 0.6, pause: 0 },
-        { x: -1, z: -2.2, pause: 0 },
-        { x: 8, z: -2.2, pause: 3.5, face: Math.PI },
-        { x: -1, z: -2.2, pause: 0 },
-        { x: -10, z: 0.6, pause: 0 },
-        { x: -10.8, z: 4.25, pause: 0 },
+        { x: lead.x, z: lead.z + 0.75, pause: 9, face: Math.PI },
+        { x: lead.x + 2.6, z: lead.z + 0.75, pause: 0 },
+        { x: lead.x + 2.6, z: 0.4, pause: 0 },
+        { x: hx, z: hz + 2.7, pause: 3.5, face: Math.PI },
+        { x: -4.4, z: -2.2, pause: 3, face: -Math.PI / 2 },
+        { x: 4.4, z: -2.2, pause: 3, face: Math.PI / 2 },
+        { x: lead.x + 2.6, z: 0.4, pause: 0 },
+        { x: lead.x + 2.6, z: lead.z + 0.75, pause: 0 },
       ])
     : null;
 
@@ -269,9 +326,12 @@ export function buildPeopleLevel(kit: Kit): LevelBuild {
   return {
     id: "people",
     root,
+    tag,
     anchors,
     update(dt: number, t: number): void {
       walker?.update(dt);
+      huddleCase.rotation.y = t * 0.9;
+      huddleCase.position.y = y + 2.25 + Math.sin(t * 1.7) * 0.1;
       ids.forEach((id, i) => {
         const ch = characters.get(id);
         if (!ch) return;

@@ -2,9 +2,9 @@
 
 A .NET 10 Blazor Server web app for the **Caldova Wealth** client operations
 office. Every Microsoft Foundry agent in [`src/agent/Agents`](../agent/Agents)
-gets its own page with an **Overview** tab (role, responsibilities, tools,
-human-approval rules) and a **Try it out** tab that runs the agent live
-against a real Member Case. The same app hosts the five scenario walkthroughs,
+gets its own page that opens straight into a live **Try it out** demo against
+a real Member Case (Client Communications adds a **Voice chat** tab and Team
+Leader a **Group Chat** tab). The same app hosts the five scenario pages,
 the in-process **MCP server** the Foundry agents call back into, and the
 Voice Live proxy for Cara.
 
@@ -24,9 +24,9 @@ tools.
 
 | Route | What it is |
 | --- | --- |
-| `/` | Operations office landing page — hero, scenario chips and one card per agent |
-| `/agents/{id}` | Agent page (Overview + Try it out) |
-| `/scenarios/{id}` | Scenario walkthrough — what each agent does, step by step |
+| `/` | Operations office landing page — scenario list and one card per agent |
+| `/agents/{id}` | Agent page — the live Try it out demo (`?caseNumber=REQ-…` pre-selects a case on Benefits, Investments, Transfers and Payments) |
+| `/scenarios/{id}` | Scenario steps, each with an **Open demo** link to that agent's page for the case |
 | `/account` | "Ask AI" member chatbot with related-agent references |
 | `/mcp` | MCP server (investments, transfers, payments and Teams tools) |
 

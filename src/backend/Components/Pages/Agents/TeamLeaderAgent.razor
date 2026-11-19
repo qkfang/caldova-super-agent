@@ -16,95 +16,20 @@
 </div>
 
 <div class="agent-tab-scope" style="--accent: #14b8a6">
-    <nav class="agent-tabs" role="tablist" aria-label="Team Leader agent details">
-        <button type="button" class="agent-tab active" data-tab="overview" role="tab" aria-selected="true" tabindex="0">Overview</button>
-        <button type="button" class="agent-tab" data-tab="try" role="tab" aria-selected="false" tabindex="-1">Try it out</button>
+    <nav class="agent-tabs" role="tablist" aria-label="Team Leader demos">
+        <button type="button" class="agent-tab active" data-tab="try" role="tab" aria-selected="true" tabindex="0">Try it out</button>
         <button type="button" class="agent-tab" data-tab="groupchat" role="tab" aria-selected="false" tabindex="-1">Group Chat</button>
     </nav>
 
-    <div class="agent-tab-panel active" data-panel="overview" role="tabpanel">
-    <section class="panel" style="--accent: #14b8a6">
-        <h2>What this agent does</h2>
-        <p>
-            Runs the client operations floor alongside Theo: workload, service levels and complaint
-            clocks, the queue of human approvals, quality, and the members who need extra care.
-            It watches every Member Case and every specialist agent's output, surfaces what needs a
-            leader's attention, and recommends — Theo decides.
-        </p>
-        <div class="two-col">
-            <div>
-                <h3>Responsibilities</h3>
-                <ul>
-                    <li>Keep a live view of every Member Case, its stage and its owner.</li>
-                    <li>Track the clocks — rollovers and Payday Super allocations (3 business days), complaints (30, 45 or 90 days) and SMRs (3 business days).</li>
-                    <li>Queue approvals with the working attached — financial-crime blocks, partial approvals, hardship releases, death benefits, large payments and pension commencements.</li>
-                    <li>Make sure vulnerable members — bereaved families, members in hardship, scam victims — get a human touch.</li>
-                    <li>Run QA sampling and surface coaching insights for the team.</li>
-                    <li>Chair the multi-agent group chat on any case.</li>
-                </ul>
-            </div>
-            <div>
-                <h3>Tools available</h3>
-                <ul>
-                    <li>Operations floor dashboard</li>
-                    <li>SLA &amp; IDR clock tracker</li>
-                    <li>Approval queue (Microsoft Teams)</li>
-                    <li>Escalation router</li>
-                    <li>QA sampler</li>
-                    <li>Group-chat orchestration</li>
-                </ul>
-                <h3>Human approval</h3>
-                <p class="approval">
-                    Theo makes every final call on declines and partial approvals, financial-crime blocks
-                    and SMRs, single payments of $250,000 or more, every death benefit, pension
-                    commencements of $1,000,000 or more, hardship releases and complaint responses.
-                </p>
-            </div>
-        </div>
-    </section>
-
-    <section class="panel" style="--accent: #14b8a6">
-        <h2>How this agent helps with the case</h2>
-        <div class="demo">
-            <p>
-                Theo's agent gives the human team leader one view of the whole floor: which Member
-                Cases are waiting on whom, which clocks are running — a suspicious matter report due in
-                three business days, a hardship payment promised for Friday, a pension due to start on
-                Monday — and which members need a gentler hand. The cases that genuinely need a
-                leader rise to the top; everything else stays out of the way.
-            </p>
-            <p>
-                Recommendations from the other agents — a block on a fake SMSF rollover, a $10,000
-                partial hardship release, a $1.25 million pension commencement, a death benefit paid
-                under a binding nomination — arrive in an approval queue with the working, the rule
-                and the authority limit attached. And when a case needs the whole team, Theo opens a
-                group chat and the specialists agree a plan in minutes.
-            </p>
-        </div>
-    </section>
-
-    </div>
-
-    <div class="agent-tab-panel" data-panel="try" role="tabpanel">
+    <div class="agent-tab-panel active" data-panel="try" role="tabpanel">
     <section class="panel leader-panel" style="--accent: #14b8a6">
-        <h2>Try It Out — Team Leader Demo</h2>
-        <p class="muted leader-help">
-            Pick a Member Case for Theo to focus on, then engage the Team Leader Agent: it reviews the
-            whole floor — counts by stage, SLA and complaint clocks, escalations, the approval queue,
-            vulnerable members and coaching insights — and recommends today's priorities. All steps run
-            live against the <code>/team-leader/*</code> endpoints in this app.
-        </p>
-
         <!-- Step 1 — pick a case -->
         <div class="leader-step" data-step="1">
             <div class="leader-step-head">
                 <span class="leader-step-num">1</span>
                 <h3>Pick a case</h3>
             </div>
-            <p class="muted">
-                The floor holds the five scenario cases plus any case opened live in the
-                <a href="/agents/onboarding">Onboarding</a> demo. The case you pick becomes Theo's focus.
-            </p>
+            <p class="muted">The case you pick becomes Theo's focus.</p>
             <div class="leader-case-row">
                 <select id="leader-case-select" aria-label="Member Case">
                     <option value="">— Select a case —</option>
@@ -137,10 +62,6 @@
                 <span class="leader-step-num">2</span>
                 <h3>Engage Team Leader Agent</h3>
             </div>
-            <p class="muted">
-                Theo's agent reviews the floor with your case in focus and produces a workload,
-                escalation, approval-queue and coaching briefing. It recommends; Theo decides.
-            </p>
             <button id="leader-process-btn" type="button" disabled>Review the floor with Theo</button>
             <div id="leader-process-status" class="leader-status" hidden></div>
 
@@ -221,12 +142,6 @@
                         <tbody id="leader-clocks-body"></tbody>
                     </table>
                 </div>
-                <p class="muted tl-note">
-                    Clock rules: SuperStream rollovers — 3 business days once all required information is
-                    received; Payday Super — allocate or return contributions within 3 business days;
-                    complaints (IDR, RG&nbsp;271) — 30 days standard, 45 days for super trustee complaints,
-                    90 days for death benefit distribution complaints; suspicious matter reports — 3 business days.
-                </p>
             </div>
 
             <div class="tl-section">
@@ -267,25 +182,13 @@
 
     <div class="agent-tab-panel" data-panel="groupchat" role="tabpanel">
     <section class="panel groupchat-panel" style="--accent: #14b8a6">
-        <h2>Group Chat — Theo and the whole operations team</h2>
-        <p class="muted groupchat-help">
-            Theo opens a group chat about one Member Case and runs a short stand-up with the seven
-            specialist agents — Olivia, Ben, Ivy, Felix, Rory, Penny and Cara. Theo chairs: at each
-            turn he decides who should speak next, and he closes with a plan once the team has
-            covered what the case needs. Modelled on the <code>GroupChatManager</code> pattern in
-            Microsoft Agent Framework (<code>Microsoft.Agents.AI.Workflows</code>). Without Foundry
-            configured, a scripted replay built from the case facts streams instead.
-        </p>
-
         <!-- Step 1 — pick a case for the group chat -->
         <div class="leader-step" data-step="1">
             <div class="leader-step-head">
                 <span class="leader-step-num">1</span>
                 <h3>Pick a case</h3>
             </div>
-            <p class="muted">
-                Choose one of the Member Cases on the floor. The whole team will discuss it together.
-            </p>
+            <p class="muted">Theo and the seven specialists discuss it together.</p>
             <div class="leader-case-row">
                 <select id="gc-case-select" aria-label="Member Case">
                     <option value="">— Select a case —</option>
@@ -315,10 +218,7 @@
                 <span class="leader-step-num">2</span>
                 <h3>Start the group chat</h3>
             </div>
-            <p class="muted">
-                Theo opens the room with the seven specialists, asks one question at a time, and
-                closes with a plan when the team has what it needs (with a hard cap of 20 turns).
-            </p>
+            <p class="muted">Theo asks one specialist at a time, then closes with a plan.</p>
 
             <div class="gc-roster" id="gc-roster" aria-label="Participants"></div>
 
@@ -341,8 +241,6 @@
 
 <style>
     .leader-panel { --leader-accent: #14b8a6; }
-    .leader-help { margin-bottom: 0.9rem; }
-    .leader-help code { background: rgba(20, 184, 166, 0.15); padding: 1px 6px; border-radius: 4px; font-size: 0.85rem; }
     .leader-panel a, .groupchat-panel a { color: color-mix(in srgb, var(--leader-accent) 60%, #0b1f3a); }
 
     .leader-step {
@@ -582,8 +480,6 @@
 
     /* ── Group Chat panel ─────────────────────────────────────────────── */
     .groupchat-panel { --leader-accent: #14b8a6; }
-    .groupchat-help { margin-bottom: 0.9rem; }
-    .groupchat-help code { background: rgba(20, 184, 166, 0.15); padding: 1px 6px; border-radius: 4px; font-size: 0.85rem; }
 
     .gc-roster {
         display: flex; flex-wrap: wrap; gap: 0.4rem;

@@ -1,15 +1,17 @@
 /**
  * Level 3 · The Idea — Maya Ashworth's office on the top floor, and the roof.
  *
- * The voxel brain floating above the round table is "the idea": the goals
- * and guardrails the whole house works to. Idea tiles orbit it, a vision
- * board on the back wall spells out the request lifecycle, and the terrace
- * and balcony give the lakehouse its casual feel.
+ * Maya is the business owner for both sides of Caldova. The voxel brain
+ * floating above the round table is "the idea": one hemisphere for Wealth
+ * Management, one for Superannuation, joined by what they share. Goal tiles
+ * orbit it, a vision board on the back wall spells out two small teams and
+ * one group of agents, and the terrace and balcony give the lakehouse its
+ * casual feel.
  */
 import { Color3, Mesh, MeshBuilder, TransformNode } from "@babylonjs/core";
 import { VoxelCharacter } from "../../voxelCharacter";
 import { Batch, Kit, rng } from "../kit";
-import { IDEA, OWNER, levelInfo } from "../lakehouseData";
+import { IDEA, OWNER, SIDES, levelInfo } from "../lakehouseData";
 import { CHARACTER_SCALE, FLOOR_Y, ROOF, ROOF_Y, SLABS, WALLS, faceAngle } from "../layout";
 import { buildShell } from "../shell";
 import type { Anchor, Highlights, LevelBuild } from "../types";
@@ -30,11 +32,11 @@ export function buildIdeaLevel(kit: Kit): LevelBuild {
   const walnut = kit.mat("#ffffff", { texture: "walnut" });
   const white = kit.mat("#f4f1ea");
   const steel = kit.mat("#2b3240", { specular: 0.25 });
-  const railGlass = kit.mat("#cfefff", { alpha: 0.22, specular: 0.6 });
+  const railGlass = kit.mat("#cfefff", { alpha: 0.22, specular: 0.25 });
   const leaf = kit.mat("#5ea347");
   const leafDark = kit.mat("#3f7f3a");
   const pot = kit.mat("#d8d2c6");
-  buildShell(kit, { root, level: info, floorY: y, slab: SLABS.idea, walls: WALLS.idea, floor: oak, back: cedar });
+  const { tag } = buildShell(kit, { root, level: info, floorY: y, slab: SLABS.idea, walls: WALLS.idea, floor: oak, back: cedar });
 
   // Terrace and balcony decking outside the glass, with a glass balustrade.
   kit.block(root, 14.5, y, -2, 12.9, 0.05, 21.9, cedar);
@@ -65,17 +67,17 @@ export function buildIdeaLevel(kit: Kit): LevelBuild {
   const projector = MeshBuilder.CreateTorus("v2_projector", { diameter: 3.4, thickness: 0.12, tessellation: 40 }, scene);
   projector.position.set(tableX, y + 1.24, tableZ);
   kit.finish(projector, root, kit.mat("#ffc35a", { unlit: true, glow: true }), true);
-  const beamMat = kit.mat("#ffd98a", { unlit: true, alpha: 0.16 });
+  const beamMat = kit.mat("#ffd98a", { unlit: true, alpha: 0.09 });
   kit.cyl(root, tableX, y + 1.2, tableZ, 3.2, 1.0, beamMat, { top: 2.2, tess: 32, dynamic: true });
 
   const brain = new TransformNode("v2_brain", scene);
   const brainBatch = new Batch(kit, brain, "brain");
   const prev = kit.useBatch(brainBatch);
-  const brainMats = [
-    kit.mat("#ff7ad9", { emissive: 0.75, glow: true }),
-    kit.mat("#b388ff", { emissive: 0.75, glow: true }),
-    kit.mat("#ffe0f7", { emissive: 0.85, glow: true }),
-  ];
+  // One idea, two sides: a Wealth Management hemisphere and a Superannuation hemisphere, joined by what they share.
+  const hemisphere = (hexes: string[]) => hexes.map((hex) => kit.mat(hex, { emissive: 0.42, glow: true }));
+  const wealthMats = hemisphere(["#f2b84b", "#d99a2b", "#ffe1a1"]);
+  const superMats = hemisphere(["#2dd4bf", "#14a796", "#a7f3e7"]);
+  const sharedMat = kit.mat(SIDES.shared.color, { emissive: 0.5, glow: true });
   const s = 0.3;
   for (let i = -6; i <= 6; i++) {
     for (let j = -4; j <= 4; j++) {
@@ -86,7 +88,8 @@ export function buildIdeaLevel(kit: Kit): LevelBuild {
         const q = (bx * bx) / (1.45 * 1.45) + (by * by) / (1.05 * 1.05) + (bz * bz) / (1.2 * 1.2);
         if (q > 1 || q < 0.6) continue;
         if (i === 0 && j > -2) continue; // the fissure between the hemispheres
-        const m = brainMats[Math.abs(i * 7 + j * 13 + k * 5) % 3];
+        const tone = Math.abs(i * 7 + j * 13 + k * 5) % 3;
+        const m = i === 0 ? sharedMat : i < 0 ? wealthMats[tone] : superMats[tone];
         kit.block(brain, bx, by - s / 2, bz, s * 0.9, s * 0.9, s * 0.9, m);
       }
     }
@@ -110,7 +113,7 @@ export function buildIdeaLevel(kit: Kit): LevelBuild {
   const tileMeshes = IDEA.goals.map((g, i) => {
     const m = kit.label(tiles, {
       lines: [{ text: g.tile, size: 54, weight: 800, color: "#ffd98a" }],
-      width: 2.5,
+      width: 3.1,
       px: 420,
       pxHeight: 96,
       bg: "rgba(20,16,40,0.82)",
@@ -176,32 +179,36 @@ export function buildIdeaLevel(kit: Kit): LevelBuild {
     ctx.lineWidth = 10;
     ctx.strokeRect(5, 5, w - 10, h - 10);
     ctx.fillStyle = "#0f1a2e";
-    ctx.font = '700 40px "Segoe UI", sans-serif';
-    ctx.fillText("THE IDEA", 48, 78);
-    ctx.font = '800 76px "Iowan Old Style", "Palatino Linotype", Georgia, serif';
-    ctx.fillText(IDEA.name, 48, 170);
-    const steps = IDEA.lifecycle;
-    const colW = (w - 96) / steps.length;
-    steps.forEach((step, i) => {
-      const x = 48 + i * colW;
-      ctx.fillStyle = ["#0ea5e9", "#ef4444", "#6366f1", "#a855f7", "#ec4899"][i];
-      ctx.fillRect(x, 230, colW - 24, 120);
-      ctx.fillStyle = "#ffffff";
-      ctx.font = '800 54px "Segoe UI", sans-serif';
-      ctx.fillText(String(i + 1), x + 20, 292);
-      ctx.font = '700 32px "Segoe UI", sans-serif';
-      ctx.fillText(step, x + 20, 334);
-      if (i < steps.length - 1) {
-        ctx.fillStyle = "#c9a14a";
-        ctx.fillText("›", x + colW - 22, 300);
-      }
+    ctx.font = '700 30px "Segoe UI", sans-serif';
+    ctx.fillText(`THE IDEA · ${IDEA.era.toUpperCase()}`, 48, 68);
+    ctx.font = '800 72px "Iowan Old Style", "Palatino Linotype", Georgia, serif';
+    ctx.fillText(IDEA.name, 48, 150);
+    // Two sides and the one group of agents between them.
+    const cols = [
+      { title: SIDES.wealth.name.toUpperCase(), sub: "a small expert team", color: SIDES.wealth.color },
+      { title: "ONE GROUP OF AGENTS", sub: "dedicated + shared", color: SIDES.shared.color },
+      { title: SIDES.super.name.toUpperCase(), sub: "a small expert team", color: SIDES.super.color },
+    ];
+    const colW = (w - 96 - 2 * 24) / 3;
+    cols.forEach((c, i) => {
+      const x = 48 + i * (colW + 24);
+      ctx.fillStyle = c.color;
+      ctx.fillRect(x, 196, colW, 132);
+      ctx.fillStyle = "rgba(255,255,255,0.9)";
+      ctx.fillRect(x + 8, 204, colW - 16, 116);
+      ctx.fillStyle = "#0f1a2e";
+      ctx.font = '800 30px "Segoe UI", sans-serif';
+      ctx.fillText(c.title, x + 22, 252, colW - 40);
+      ctx.fillStyle = "#53607a";
+      ctx.font = '600 26px "Segoe UI", sans-serif';
+      ctx.fillText(c.sub, x + 22, 296, colW - 40);
     });
     ctx.fillStyle = "#53607a";
     ctx.font = '600 28px "Segoe UI", sans-serif';
-    ctx.fillText("Agents recommend · people approve", 48, 405);
+    ctx.fillText("Grounded in Microsoft IQ on Azure · agents recommend, people approve", 48, 392, w - 96);
   });
   const boardPlane = MeshBuilder.CreatePlane("v2_visionBoardPlane", { width: 7.2, height: 3.1 }, scene);
-  boardPlane.position.set(-4.2, y + 2.75, WALLS.idea.z1 - 0.2);
+  boardPlane.position.set(-4.2, y + 2.75, WALLS.idea.z1 - 0.32);
   kit.finish(boardPlane, root, kit.screen(board));
 
   kit.block(root, -13, y, 6.35, 6.6, 3.8, 0.7, walnut);
@@ -299,6 +306,7 @@ export function buildIdeaLevel(kit: Kit): LevelBuild {
   return {
     id: "idea",
     root,
+    tag,
     anchors,
     update(dt: number, t: number): void {
       maya.update(dt);

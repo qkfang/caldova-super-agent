@@ -16,100 +16,19 @@
 </div>
 
 <div class="agent-tab-scope" style="--accent: #ec4899">
-    <nav class="agent-tabs" role="tablist" aria-label="Client Communications agent details">
-        <button type="button" class="agent-tab active" data-tab="overview" role="tab" aria-selected="true" tabindex="0">Overview</button>
-        <button type="button" class="agent-tab" data-tab="try" role="tab" aria-selected="false" tabindex="-1">Try it out</button>
+    <nav class="agent-tabs" role="tablist" aria-label="Client Communications demos">
+        <button type="button" class="agent-tab active" data-tab="try" role="tab" aria-selected="true" tabindex="0">Try it out</button>
         <button type="button" class="agent-tab" data-tab="voice" role="tab" aria-selected="false" tabindex="-1">Voice chat</button>
     </nav>
 
-    <div class="agent-tab-panel active" data-panel="overview" role="tabpanel">
-    <section class="panel" style="--accent: #ec4899">
-        <h2>What this agent does</h2>
-        <p>
-            Drafts member letters, adviser updates, SMS and call scripts that explain where a request
-            stands and what a decision means — clearly, kindly and accurately. Caldova is adviser-led,
-            so most cases have two audiences: the member and their financial adviser. Cara's agent
-            never invents facts, never gives personal financial advice, and never sends anything
-            sensitive without a human.
-        </p>
-        <div class="two-col">
-            <div>
-                <h3>Responsibilities</h3>
-                <ul>
-                    <li>Draft member letters and emails at every milestone — welcome, status, decision, payment.</li>
-                    <li>Draft adviser updates with the exact actions the adviser needs to take.</li>
-                    <li>Explain rules, caps and tax in plain English without losing accuracy.</li>
-                    <li>Match tone to the moment — bereavement, hardship, a fraud scare or a busy adviser.</li>
-                    <li>Check every message: no advice, next steps, timeframes, contact details and complaint rights.</li>
-                    <li>Take calls as Cara through Azure AI Foundry Voice Live.</li>
-                </ul>
-            </div>
-            <div>
-                <h3>Tools available</h3>
-                <ul>
-                    <li>Member letter &amp; email drafting</li>
-                    <li>Adviser update templates</li>
-                    <li>SMS &amp; call scripts</li>
-                    <li>Plain-English rewriter</li>
-                    <li>Tone matching (bereavement · hardship · fraud victim)</li>
-                    <li>Compliance checker (disclosures, IDR &amp; AFCA, free-help referrals)</li>
-                    <li>Voice Live (real-time speech)</li>
-                </ul>
-                <h3>Human approval</h3>
-                <p class="approval">
-                    Required for declines and partial approvals, complaint responses, hardship and
-                    bereavement communications, anything sent to a fraud victim, and any legal or
-                    regulatory wording.
-                </p>
-            </div>
-        </div>
-    </section>
-
-    <section class="panel" style="--accent: #ec4899">
-        <h2>How this agent helps with the case</h2>
-        <div class="demo">
-            <p>
-                When a Member Case reaches a milestone — an account opened, a rollover held, a pension
-                started, a hardship decision made, a death benefit paid — Cara's agent reads the case
-                file and drafts what the member and their adviser need to hear, in the right tone and
-                through the right channel: a welcome email for Priya and an action list for her
-                adviser; a calm reassurance letter for Grace, sent only to the details we trusted
-                before her account was tampered with; a "welcome to retirement" schedule for George;
-                a kind explanation of the $10,000 hardship cap for Tom; gentle condolence letters for
-                Robert and Lily.
-            </p>
-            <p>
-                Every draft carries a tone note and a compliance check — no advice, next steps,
-                timeframes, who to contact, and the right to complain to Caldova first and then to
-                AFCA — and anything sensitive goes to a human before it's sent. Members get clear,
-                consistent, kind communication; advisers get exactly the actions they need; and Cara
-                spends her day on the conversations that matter, not on rewriting templates.
-            </p>
-        </div>
-    </section>
-
-    </div>
-
-    <div class="agent-tab-panel" data-panel="try" role="tabpanel">
+    <div class="agent-tab-panel active" data-panel="try" role="tabpanel">
     <section class="panel comms-panel" style="--accent: #ec4899">
-        <h2>Try It Out — Client Communications Demo</h2>
-        <p class="muted comms-help">
-            Pick a Member Case and watch Cara read it, summarise how the member is likely feeling and
-            what happens next, then draft the member letter, the adviser update (when there's an
-            adviser) and an SMS — each with tone and compliance notes, ready for a human to review.
-            All steps run live against the <code>/communications/*</code> endpoints in this app.
-        </p>
-
         <!-- Step 1 — pick a case -->
         <div class="comms-step" data-step="1">
             <div class="comms-step-head">
                 <span class="comms-step-num">1</span>
                 <h3>Select a case</h3>
             </div>
-            <p class="muted">
-                The list holds the five scenario cases plus any case opened live in the
-                <a href="/agents/onboarding">Onboarding</a> demo.
-            </p>
             <div class="comms-pick-row">
                 <select id="comms-case-select" class="comms-select" disabled>
                     <option value="">Loading cases…</option>
@@ -136,11 +55,6 @@
                 <span class="comms-step-num">2</span>
                 <h3>Engage Client Communications Agent</h3>
             </div>
-            <p class="muted">
-                Cara reads the case file, works out how the member is likely feeling, and drafts for
-                both audiences — then checks every draft for tone and compliance and flags anything
-                a human must approve before it's sent.
-            </p>
             <button id="comms-process-btn" type="button" disabled>Draft communications with Cara</button>
             <div id="comms-process-status" class="comms-status" hidden></div>
 
@@ -244,10 +158,7 @@
                 <span class="comms-step-num">4</span>
                 <h3>Drafts for the member and the adviser</h3>
             </div>
-            <p class="muted">
-                Member letter or email, adviser update and SMS — each with a tone note and a
-                compliance check. Nothing is sent until a human has reviewed it.
-            </p>
+            <p class="muted">Nothing is sent until a person has reviewed it.</p>
 
             <div class="comms-audience">
                 <div class="comms-audience-head"><span aria-hidden="true">✉️</span> Member</div>
@@ -268,17 +179,9 @@
 
     <div class="agent-tab-panel" data-panel="voice" role="tabpanel">
     <section class="panel voice-panel" style="--accent: #ec4899">
-        <h2>Voice chat with Cara</h2>
         <p class="muted voice-help">
-            Talk to Cara directly from your browser using the
-            <strong>Azure AI Foundry Voice Live API</strong> — a real-time speech-to-speech
-            connection to Cara's voice agent (<code>client-communications-voice-agent</code>).
-            Press the mic, speak naturally, and Cara answers out loud; you can interrupt her at
-            any time. Pick a case first and Cara treats you as that (already verified) caller.
-            Audio streams as 24&nbsp;kHz PCM over a secure WebSocket proxy on this server and works
-            best in Chrome, Edge or Safari on <code>localhost</code> or over <code>https</code>.
-            When Voice Live isn't available, type a message or tap an opening line below and Cara
-            replies in text — and reads it aloud if <em>Speak replies</em> is on.
+            Pick a caller, then press the mic and talk to Cara — or type a message. Cara treats you as
+            that verified caller.
         </p>
 
         <div class="voice-context-row">
@@ -334,8 +237,6 @@
 
 <style>
     .comms-panel { --comms-accent: #ec4899; }
-    .comms-help { margin-bottom: 0.9rem; }
-    .comms-help code { background: rgba(236, 72, 153, 0.12); padding: 1px 6px; border-radius: 4px; font-size: 0.85rem; }
     .comms-panel a { color: color-mix(in srgb, var(--comms-accent) 60%, #0b1f3a); }
 
     .comms-step {
@@ -588,10 +489,6 @@
     /* Voice chat tab */
     .voice-panel { --voice-accent: #ec4899; }
     .voice-help { margin-bottom: 0.9rem; }
-    .voice-help code {
-        background: rgba(236, 72, 153, 0.12);
-        padding: 1px 6px; border-radius: 4px; font-size: 0.85rem;
-    }
 
     .voice-context-row {
         display: flex; flex-wrap: wrap; gap: 0.55rem; align-items: center;

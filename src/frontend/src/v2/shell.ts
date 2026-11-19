@@ -36,7 +36,7 @@ export function buildShell(kit: Kit, s: ShellSpec): { tag: Mesh } {
   const h = s.height ?? STOREY;
   const concrete = kit.mat("#ffffff", { texture: "concrete" });
   const steel = kit.mat("#2b3240", { specular: 0.25 });
-  const glass = kit.mat("#bfe6ff", { alpha: 0.2, specular: 0.6 });
+  const glass = kit.mat("#bfe6ff", { alpha: 0.2, specular: 0.25 });
   const led = kit.mat(level.accent, { unlit: true, glow: true });
 
   // Slab, floor finish and the glowing edge strip.

@@ -2,6 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <script>
+      // Static hosting (pm2 serve --spa) answers /v2 with this page; send it on to the v2 storybook.
+      if (/^\/v2\/?$/.test(location.pathname)) location.replace("/v2/index.html" + location.search + location.hash);
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>Wealth Team in a Day — Caldova Wealth</title>

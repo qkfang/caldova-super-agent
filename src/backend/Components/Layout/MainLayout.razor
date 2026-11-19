@@ -1,20 +1,6 @@
 @inherits LayoutComponentBase
 
 <div class="site">
-    <div class="utility-bar">
-        <div class="site-container utility-inner">
-            <div class="utility-products" aria-label="Products serviced by the office">
-                <span class="utility-label">Servicing</span>
-                <span>Caldova Super</span>
-                <span>Caldova Wrap</span>
-                <span>Caldova Managed Portfolios</span>
-            </div>
-            <div class="utility-trust">
-                <span><i class="fa-solid fa-lock" aria-hidden="true"></i> Secure staff portal</span>
-                <span><i class="fa-solid fa-user-check" aria-hidden="true"></i> Human-in-the-loop</span>
-            </div>
-        </div>
-    </div>
     <header class="site-header">
         <NavMenu />
     </header>
@@ -26,53 +12,9 @@
     </main>
 
     <footer class="site-footer">
-        <div class="site-container footer-top">
-            <div class="footer-brand">
-                <a class="footer-logo" href="">
-                    <svg viewBox="0 0 40 40" width="38" height="38" aria-hidden="true">
-                        <rect width="40" height="40" rx="10" fill="#0b2a4f" />
-                        <path d="M26.9 14.2A9 9 0 1 0 26.9 25.8" fill="none" stroke="#ffffff" stroke-width="3.4" stroke-linecap="round" />
-                        <circle cx="29.4" cy="20" r="2.3" fill="#c9a24a" />
-                    </svg>
-                    <span class="footer-wordmark">Caldova <span>Wealth</span></span>
-                </a>
-                <p>
-                    Superannuation, retirement income and investment platform services — supported by a
-                    coordinated team of specialised AI agents and the people who approve their work.
-                </p>
-                <ul class="footer-commitments">
-                    <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i> A person approves every payment</li>
-                    <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Every agent tool call is on the record</li>
-                    <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i> General information only — no personal advice</li>
-                </ul>
-            </div>
-            <nav class="footer-col" aria-label="AI agents">
-                <h2>AI agents</h2>
-                <ul>
-                    @foreach (var agent in AgentCatalog.All)
-                    {
-                        <li><a href="@($"agents/{agent.Id}")">@agent.Department</a></li>
-                    }
-                </ul>
-            </nav>
-            <nav class="footer-col" aria-label="Scenarios">
-                <h2>Member scenarios</h2>
-                <ul>
-                    @foreach (var scenario in ScenarioCatalog.All)
-                    {
-                        <li><a href="@($"scenarios/{scenario.Id}")">@scenario.ShortTitle</a></li>
-                    }
-                </ul>
-            </nav>
-        </div>
-        <div class="site-container footer-legal">
-            <p>
-                Caldova Wealth is a fictional organisation created for the Wealth Team in a Day demonstration.
-                Members, advisers, cases and figures are illustrative. Information on this site is general in nature
-                and doesn't take into account anyone's objectives, financial situation or needs. Past performance is
-                not a reliable indicator of future performance.
-            </p>
-            <p class="footer-copy">© @DateTime.Now.Year Caldova Wealth (demo) · AI agents built on Microsoft Foundry</p>
+        <div class="site-container footer-slim">
+            <span>Caldova Wealth is fictional — members, cases and figures are illustrative.</span>
+            <span>Wealth Team in a Day · AI agents built on Microsoft Foundry</span>
         </div>
     </footer>
 </div>

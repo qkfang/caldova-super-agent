@@ -261,6 +261,8 @@
 }
 .panel > p { color: var(--cw-text); line-height: 1.65; }
 .panel .muted { color: var(--cw-muted); font-size: 0.92rem; }
+/* Demo panels open straight into step 1 — no gap above it. */
+.panel > [data-step="1"] { margin-top: 0; }
 .panel ul { margin: 0; padding-left: 1.15rem; color: var(--cw-text); }
 .panel ul li { margin-bottom: 0.35rem; line-height: 1.55; }
 .panel ul li::marker { color: color-mix(in srgb, var(--accent, var(--cw-accent)) 60%, #0b1f3a); }
@@ -276,37 +278,6 @@
     padding: 0.75rem 1rem;
     font-size: 0.94rem;
 }
-.two-col {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.4rem;
-    margin-top: 0.5rem;
-}
-@media (max-width: 720px) { .two-col { grid-template-columns: 1fr; } }
-
-/* "Demo" — a single general description, no scenarios. */
-.demo {
-    position: relative;
-    border: 1px solid var(--cw-line);
-    border-radius: 14px;
-    padding: 1.1rem 1.25rem 1.2rem 1.4rem;
-    background: var(--cw-surface-2);
-    overflow: hidden;
-}
-.demo::before {
-    content: "";
-    position: absolute;
-    left: 0; top: 0; bottom: 0;
-    width: 3px;
-    background: var(--accent);
-}
-.demo p {
-    margin: 0 0 0.65rem 0;
-    color: #344054;
-    font-size: 0.95rem;
-    line-height: 1.6;
-}
-.demo p:last-child { margin-bottom: 0; }
 
 /* "Scenario" — scripted member-case journey with one step per AI agent. */
 .scenario-steps {
@@ -373,31 +344,31 @@
     font-size: 0.95rem;
     line-height: 1;
 }
+.scenario-step-link {
+    margin-left: auto;
+    flex-shrink: 0;
+    align-self: center;
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    border: 1.5px solid var(--cw-primary);
+    color: var(--cw-primary);
+    font-size: 0.84rem;
+    font-weight: 600;
+    white-space: nowrap;
+    text-decoration: none;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+.scenario-step-link:hover {
+    background: var(--cw-primary);
+    color: #fff;
+    text-decoration: none;
+}
 .scenario-step-summary {
-    margin: 0 0 0.55rem 0;
+    margin: 0 0 0 2.55rem;
     color: #344054;
     font-size: 0.92rem;
     line-height: 1.55;
 }
-.scenario-step-actions-label {
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: #5d6b7e;
-    font-weight: 600;
-    margin: 0.4rem 0 0.3rem 0;
-}
-.scenario-step-actions {
-    margin: 0;
-    padding-left: 1.1rem;
-    color: #344054;
-}
-.scenario-step-actions li {
-    margin-bottom: 0.3rem;
-    line-height: 1.5;
-    font-size: 0.92rem;
-}
-.scenario-step-actions li::marker { color: color-mix(in srgb, var(--accent, var(--cw-accent)) 60%, #0b1f3a); }
 
 .other-agents {
     display: flex;
@@ -425,7 +396,7 @@
 }
 .other-agent-icon { font-size: 1rem; }
 
-/* Tabs (used on the Onboarding agent page only). */
+/* Tabs (Client Communications and Team Leader pages, which have two demo views). */
 .agent-tabs {
     display: flex;
     gap: 0.5rem;

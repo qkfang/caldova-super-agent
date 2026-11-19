@@ -16,94 +16,13 @@
 </div>
 
 <div class="agent-tab-scope" style="--accent: #6366f1">
-    <nav class="agent-tabs" role="tablist" aria-label="Benefits and Eligibility agent details">
-        <button type="button" class="agent-tab active" data-tab="overview" role="tab" aria-selected="true" tabindex="0">Overview</button>
-        <button type="button" class="agent-tab" data-tab="try" role="tab" aria-selected="false" tabindex="-1">Try it out</button>
-    </nav>
-
-    <div class="agent-tab-panel active" data-panel="overview" role="tabpanel">
-    <section class="panel" style="--accent: #6366f1">
-        <h2>What this agent does</h2>
-        <p>
-            Assesses each Member Case against the Caldova Super &amp; Pension PDS, the trust deed and super
-            law — conditions of release, caps, pension standards, nominations and adviser fee consent — and
-            recommends approve, partially approve, decline or need more info for a person to confirm, citing
-            the clause behind every finding.
-        </p>
-        <div class="two-col">
-            <div>
-                <h3>Responsibilities</h3>
-                <ul>
-                    <li>Check conditions of release and preservation, including the severe financial hardship criteria.</li>
-                    <li>Apply the transfer balance cap and work out pro-rated minimum pension payments.</li>
-                    <li>Validate binding death benefit nominations, SIS dependants and tax-dependant status.</li>
-                    <li>Confirm adviser fee consent (s99FA), SMSF verification before rollovers and target market fit.</li>
-                    <li>Build the eligibility checklist and recommend an outcome, with every rule cited.</li>
-                </ul>
-            </div>
-            <div>
-                <h3>Tools available</h3>
-                <ul>
-                    <li>Azure AI Search over the PDS, trust deed and rule summaries (<code>wealth_knowledge</code>)</li>
-                    <li>Rule checklist builder</li>
-                    <li>Calculators — transfer balance cap, minimum drawdown (pro-rated), tax components &amp; PAYG withholding</li>
-                    <li>Member case file &amp; evidence lookup</li>
-                    <li>Decision note drafting</li>
-                </ul>
-                <h3>Human approval</h3>
-                <p class="approval">
-                    Required for every decline and partial approval, hardship releases, death benefits, pension
-                    commencements of $1,000,000 or more, unclear rule interpretations and anything with a possible
-                    financial-crime concern. The agent recommends; Ben and the Team Leader decide.
-                </p>
-            </div>
-        </div>
-    </section>
-
-    <section class="panel" style="--accent: #6366f1">
-        <h2>How this agent helps with every request</h2>
-        <div class="demo">
-            <p>
-                Once Onboarding has opened a Member Case, Ben's Benefits &amp; Eligibility Agent pulls the rules
-                that apply — the PDS, the trust deed, the SIS Act and Regulations and the ATO's tax rules — and
-                lines them up against the request and the evidence on file.
-            </p>
-            <p>
-                It works through each rule like a checklist: Is there a condition of release? Is the amount
-                within the cap? Is the nomination properly witnessed and still in force? It shows its working
-                for every figure — a pro-rated minimum pension, the transfer balance cap space left, the tax
-                withheld from a payment — and cites the clause behind each finding.
-            </p>
-            <p>
-                The agent then recommends approve, partially approve, decline or need more info, with a
-                plain-English explanation the member or adviser can follow. Ben — and the Team Leader where the
-                rules require it — makes the decision, so every outcome is owned by a person while the agent does
-                the careful reading.
-            </p>
-        </div>
-    </section>
-
-    </div>
-
-    <div class="agent-tab-panel" data-panel="try" role="tabpanel">
     <section class="panel assessment-panel" style="--accent: #6366f1">
-        <h2>Try it out — Benefits &amp; Eligibility demo</h2>
-        <p class="muted assessment-help">
-            Pick a Member Case, review it alongside the rule documents that apply, then engage Ben's
-            Benefits &amp; Eligibility Agent. Every step runs live against the <code>/benefits/*</code>
-            endpoints in this app.
-        </p>
-
         <!-- Step 1 — pick a case -->
         <div class="assessment-step" data-step="1">
             <div class="assessment-step-head">
                 <span class="assessment-step-num">1</span>
                 <h3>Pick a Member Case</h3>
             </div>
-            <p class="muted">
-                The five scenario cases are ready to go; cases opened on the
-                <a href="/agents/onboarding">Onboarding</a> Try it out tab appear here too.
-            </p>
             <div class="assessment-picker">
                 <label for="assessment-case-select" class="assessment-picker-label">Case number</label>
                 <select id="assessment-case-select" class="assessment-select">
@@ -112,8 +31,7 @@
                 <button type="button" id="assessment-refresh-btn" class="assessment-refresh" title="Refresh the case list">↻</button>
             </div>
             <div id="assessment-empty" class="assessment-empty" hidden>
-                No cases are in memory yet. Open one from the
-                <a href="/agents/onboarding">Onboarding</a> Try it out tab, then come back.
+                No cases yet. Open one in the <a href="/agents/onboarding">Onboarding</a> demo first.
             </div>
         </div>
 
@@ -123,7 +41,6 @@
                 <span class="assessment-step-num">2</span>
                 <h3>Review the case and the rules being applied</h3>
             </div>
-            <p class="muted">Captured by Olivia at onboarding. Ben's agent applies the rule documents below — every finding cites a clause id.</p>
             <div class="assessment-case-card" id="assessment-case-card"></div>
 
             <div class="assessment-rules-head">
@@ -139,10 +56,6 @@
                 <span class="assessment-step-num">3</span>
                 <h3>Engage the Benefits &amp; Eligibility Agent</h3>
             </div>
-            <p class="muted">
-                The agent applies the PDS, trust deed and super law to the case, works through each rule check
-                with its working, and recommends an outcome for a person to confirm.
-            </p>
             <button id="assessment-process-btn" type="button">Assess with Benefits &amp; Eligibility Agent</button>
             <div id="assessment-process-status" class="assessment-status" hidden></div>
 
@@ -207,10 +120,7 @@
                 <span class="assessment-step-num">4</span>
                 <h3>Eligibility checklist &amp; recommendation</h3>
             </div>
-            <p class="muted">
-                Each rule check with its finding and the clause it relies on. Select a clause reference to see
-                the rule text in step 2.
-            </p>
+            <p class="muted">Select a clause reference to see the rule text in step 2.</p>
             <div class="assessment-checklist-card">
                 <div class="assessment-checklist-head">
                     <span class="assessment-result-pill" id="assessment-checklist-pill"></span>
@@ -232,13 +142,10 @@
             </div>
         </div>
     </section>
-    </div>
 </div>
 
 <style>
     .assessment-panel { --assessment-accent: #6366f1; }
-    .assessment-help { margin-bottom: 0.9rem; }
-    .assessment-help code { background: rgba(165, 180, 252, 0.14); padding: 1px 6px; border-radius: 4px; font-size: 0.85rem; }
     .assessment-panel a { color: #2c51e5; }
 
     .assessment-step {

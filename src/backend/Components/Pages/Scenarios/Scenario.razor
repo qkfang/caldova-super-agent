@@ -5,6 +5,15 @@
 
     private ScenarioDefinition? Def =>
         string.IsNullOrEmpty(ScenarioId) ? null : ScenarioCatalog.FindById(ScenarioId);
+
+    // Agent pages that support it pre-select the case from ?caseNumber=.
+    private static string DemoHref(ScenarioStep step, ScenarioDefinition def)
+    {
+        var agent = AgentCatalog.All.FirstOrDefault(a => a.Name == step.AgentName);
+        return agent is null
+            ? "/"
+            : $"/agents/{agent.Id}?caseNumber={Uri.EscapeDataString(def.CaseNumber)}";
+    }
 }
 
 @if (Def is null)
@@ -42,31 +51,7 @@ else
 
     <div class="agent-tab-panel standalone">
         <section class="panel" style="--accent: @Def.Accent">
-            <h2>About this scenario</h2>
-            <p>@Def.Flavor</p>
-            <div class="two-col">
-                <div>
-                    <h3>Life event</h3>
-                    <p>@Def.LifeEvent</p>
-                </div>
-                <div>
-                    <h3>AI agents featured</h3>
-                    <ul>
-                        @foreach (var agent in Def.AgentsFeatured)
-                        {
-                            <li>@agent</li>
-                        }
-                    </ul>
-                </div>
-            </div>
-        </section>
-
-        <section class="panel" style="--accent: @Def.Accent">
-            <h2>Case journey — what each agent does</h2>
-            <p class="muted">
-                The case moves through these stages: Request → Verify → Assess → Action → Confirm.
-                Each step lists exactly what the responsible AI agent does — and where a human approves.
-            </p>
+            <h2>Case journey</h2>
             <ol class="scenario-steps">
                 @foreach (var step in Def.Steps)
                 {
@@ -80,23 +65,12 @@ else
                                     <span>@step.AgentName</span>
                                 </div>
                             </div>
+                            <a class="scenario-step-link" href="@DemoHref(step, Def)">Open demo <span aria-hidden="true">→</span></a>
                         </div>
                         <p class="scenario-step-summary">@step.Summary</p>
-                        <div class="scenario-step-actions-label">Agent actions</div>
-                        <ul class="scenario-step-actions">
-                            @foreach (var action in step.Actions)
-                            {
-                                <li>@action</li>
-                            }
-                        </ul>
                     </li>
                 }
             </ol>
-        </section>
-
-        <section class="panel" style="--accent: @Def.Accent">
-            <h2>Demo highlight</h2>
-            <p>@Def.DemoHighlight</p>
         </section>
     </div>
 }

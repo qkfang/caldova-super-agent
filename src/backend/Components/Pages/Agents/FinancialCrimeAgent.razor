@@ -16,133 +16,13 @@
 </div>
 
 <div class="agent-tab-scope" style="--accent: #ef4444">
-    <nav class="agent-tabs" role="tablist" aria-label="Financial Crime agent details">
-        <button type="button" class="agent-tab active" data-tab="overview" role="tab" aria-selected="true" tabindex="0">Overview</button>
-        <button type="button" class="agent-tab" data-tab="try" role="tab" aria-selected="false" tabindex="-1">Try it out</button>
-    </nav>
-
-    <div class="agent-tab-panel active" data-panel="overview" role="tabpanel">
-    <section class="panel" style="--accent: #ef4444">
-        <h2>What this agent does</h2>
-        <p>
-            Felix's agent protects members' super and investments from fraud, scams and identity
-            takeover, and supports Caldova's AML/CTF obligations. It checks documents for tampering,
-            builds the account-activity timeline, tests rollovers to self-managed super funds against
-            the ATO's verification results, screens new clients and claimants, and explains every risk
-            indicator in plain English — so a human investigator can decide quickly and fairly.
-        </p>
-        <div class="two-col">
-            <div>
-                <h3>Responsibilities</h3>
-                <ul>
-                    <li>Check identity documents, bank statements, SMSF details, death certificates and hardship letters for authenticity.</li>
-                    <li>Build the account-activity timeline — contact-detail changes, new devices, MFA events, money-out requests and travel notices.</li>
-                    <li>Test rollovers to SMSFs against the ATO SMSF verification service (SVS) and known red flags.</li>
-                    <li>Screen new clients and claimants (KYC, politically exposed persons and sanctions).</li>
-                    <li>Produce an explainable risk score with the evidence behind every indicator.</li>
-                    <li>Recommend proportionate controls — holds, account locks, call-backs on trusted numbers, IDCARE referral and SMR consideration.</li>
-                </ul>
-            </div>
-            <div>
-                <h3>Tools available</h3>
-                <ul>
-                    <li>Azure Content Understanding — document authenticity (custom field schema + checks layer)</li>
-                    <li>Account-activity timeline</li>
-                    <li>ATO SMSF verification service (SVS) result reader</li>
-                    <li>PEP and sanctions screening</li>
-                    <li>AUSTRAC / ATO red-flag guide via Azure AI Search (<code>wealth_knowledge</code>)</li>
-                    <li>Explainable risk scoring</li>
-                </ul>
-                <h3>Human approval</h3>
-                <p class="approval">
-                    Always required before blocking or holding a request on financial-crime grounds,
-                    locking an account or online access, lodging a suspicious matter report (SMR) with
-                    AUSTRAC, or contacting a member about suspected fraud.
-                </p>
-            </div>
-        </div>
-    </section>
-
-    <section class="panel" style="--accent: #ef4444">
-        <h2>How Felix's agent works</h2>
-        <div class="two-col">
-            <div>
-                <h3>Guardrails</h3>
-                <ul>
-                    <li><strong>Never accuses.</strong> Neutral, evidence-based language — "indicator", "inconsistency", "needs verification". In an identity takeover the member is the victim.</li>
-                    <li><strong>No tipping off.</strong> SMRs, and the suspicion behind them, stay confidential.</li>
-                    <li><strong>Trusted contacts only.</strong> Call-backs use the details on file before any change — never details supplied with the request.</li>
-                    <li><strong>Privacy first.</strong> TFNs and bank account numbers stay masked (for example <code>*** *** 418</code>, <code>****7781</code>).</li>
-                    <li><strong>Proportionate.</strong> Most requests are low risk and continue without extra friction — bereaved families and members in hardship aren't asked for more than is needed.</li>
-                </ul>
-            </div>
-            <div>
-                <h3>Red flags it looks for</h3>
-                <ul>
-                    <li>Contact or payment details changed shortly before a withdrawal or rollover.</li>
-                    <li>A new SMSF set up to receive someone's benefits.</li>
-                    <li>Altered or fake identity and hardship documents.</li>
-                    <li>A hardship request followed by a rollover to an SMSF.</li>
-                    <li>Illegal early-release promoters and pushy "free super health check" switching offers.</li>
-                    <li>Elder financial abuse — impersonation, or pressure to roll over to an SMSF someone else controls.</li>
-                </ul>
-                <h3>Controls it recommends</h3>
-                <ul>
-                    <li>Call back on the verified number on file.</li>
-                    <li>Hold money-out requests after a recent change of details.</li>
-                    <li>Dual approval for new payees; pay only to nominated or linked accounts.</li>
-                    <li>SVS and ESA checks before any rollover to an SMSF.</li>
-                    <li>Step-up (SMS code) verification for payments and changes.</li>
-                    <li>An SMR to AUSTRAC within 3 business days of forming a suspicion — a human decision.</li>
-                </ul>
-            </div>
-        </div>
-    </section>
-
-    <section class="panel" style="--accent: #ef4444">
-        <h2>How this agent helps with a case</h2>
-        <div class="demo">
-            <p>
-                When a request arrives to roll Grace Williams's whole balance — $612,400 — into a
-                nine-day-old SMSF, Felix's agent lines up the evidence in seconds: her mobile and email
-                were changed by phone about 93 hours earlier, a new device logged in from Sydney while
-                her travel notice says Italy, the one-time code went to the new number, the ATO's SMSF
-                verification fails, the payee account is in a company's name and the licence image has
-                been altered. It scores the risk at 92/100 and recommends holding the rollover, locking
-                online access and calling Grace on the number Caldova already trusted.
-            </p>
-            <p>
-                Felix and the Team Leader make the call, and Grace's money never leaves her account. Most
-                cases come back low risk — Priya's KYC screening is clear, the documents for Robert's
-                late mother's death benefit are genuine, and Tom's hardship documents check out — so they
-                move on without extra friction.
-            </p>
-        </div>
-    </section>
-
-    </div>
-
-    <div class="agent-tab-panel" data-panel="try" role="tabpanel">
     <section class="panel fc-panel" style="--accent: #ef4444">
-        <h2>Try it out — Financial crime review</h2>
-        <p class="muted fc-help">
-            Pick a Member Case, review its account activity, scan the documents on the case, then
-            engage Felix's agent for an explainable risk score and recommended controls. The demo runs
-            live against the <code>/fincrime/*</code> endpoints in this app — without Foundry or
-            Content Understanding configured, a deterministic assessment built from the case data keeps
-            every step working.
-        </p>
-
         <!-- Step 1 — pick a case -->
         <div class="fc-step" data-step="1">
             <div class="fc-step-head">
                 <span class="fc-step-num">1</span>
                 <h3>Pick a case to review</h3>
             </div>
-            <p class="muted">
-                The list shows the five scenario cases plus any opened live in the
-                <a href="/agents/onboarding">Onboarding</a> Try it out tab.
-            </p>
             <div class="fc-case-row">
                 <select id="fc-case-select" class="fc-select" aria-label="Member Case">
                     <option value="">— Loading cases… —</option>
@@ -150,8 +30,7 @@
                 <button type="button" id="fc-refresh-btn" class="fc-secondary" title="Reload cases" aria-label="Reload cases">↻</button>
             </div>
             <div class="fc-empty" id="fc-empty" hidden>
-                No cases found in memory. Open one from the
-                <a href="/agents/onboarding">Onboarding</a> Try it out tab first.
+                No cases yet. Open one in the <a href="/agents/onboarding">Onboarding</a> demo first.
             </div>
         </div>
 
@@ -161,10 +40,6 @@
                 <span class="fc-step-num">2</span>
                 <h3>Review the case and its account activity</h3>
             </div>
-            <p class="muted">
-                The request, the people on the case, the account-activity timeline and the screening
-                results Felix's agent will weigh.
-            </p>
             <div class="fc-case-grid" id="fc-case-details"></div>
 
             <div class="fc-review-grid">
@@ -190,11 +65,8 @@
                 <h3>Scan the documents on the case</h3>
             </div>
             <p class="muted">
-                Each selected document goes through Azure Content Understanding and a deterministic
-                checks layer — name and date of birth against the record on file, dates, tamper
-                indicators, security features, MRZ check digits, DVS, account age, SMSF registration and
-                SVS — and is scored <em>legit</em>, <em>suspicious</em> or <em>fake</em>. Untick a document
-                to leave it out, or add a specimen from the popover.
+                Each document is checked with Azure Content Understanding and scored <em>legit</em>,
+                <em>suspicious</em> or <em>fake</em>. Untick one to leave it out, or add a specimen.
             </p>
             <div class="fc-docs-row">
                 <div id="fc-case-docs" class="fc-doc-grid">
@@ -218,11 +90,6 @@
                 <span class="fc-step-num">4</span>
                 <h3>Engage the Financial Crime Agent</h3>
             </div>
-            <p class="muted">
-                Felix's agent receives the case, the account-activity timeline, the screening results and
-                the document findings, then produces an explainable risk score and recommended controls
-                for the human investigator.
-            </p>
             <button id="fc-process-btn" class="fc-primary" type="button">Run financial crime review</button>
             <div id="fc-process-status" class="fc-status" hidden></div>
 
@@ -319,12 +186,10 @@
             </div>
         </div>
     </section>
-    </div>
 </div>
 
 <style>
     .fc-panel { --fc-accent: #ef4444; }
-    .fc-help { margin-bottom: 0.9rem; }
     .fc-panel code { background: rgba(239, 68, 68, 0.12); padding: 1px 6px; border-radius: 4px; font-size: 0.85rem; }
 
     .fc-step {

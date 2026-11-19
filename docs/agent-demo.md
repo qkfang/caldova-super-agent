@@ -27,7 +27,7 @@ After each run, open **Reference** to show the citations from `wealth_knowledge`
 
 ## Case Cheat Sheet
 
-The table includes the backend's scenario pages (`/scenarios/{id}`), which give a guided walkthrough of each scenario.
+The table includes the backend's scenario pages (`/scenarios/{id}`). Each lists the case's steps, and every step's **Open demo** link opens that agent's demo for the case.
 
 | # | Case | Member | Onboarding sample | Scenario page | Best for showing |
 |---|---|---|---|---|---|
@@ -46,7 +46,7 @@ This path follows **George's retirement** (scenario 3) from the neighbourhood to
 | Time | Where | Click | What to show | What to say |
 |---|---|---|---|---|
 | 0:00–1:00 | **3D office** (frontend) | Toggle **Neighbourhood** and point out the five life-event zones. In the scenario picker, run **3: Retirement (George)**, then toggle **Operations Office** | George's request travels from "Oakleigh — Retirement" to the lobby, then moves desk to desk: ONBOARDING → BENEFITS → INVESTMENTS → TRANSFERS → PAYMENTS → COMMS. **Completed** ticks up in the top bar | "Life happens out in the neighbourhood; requests are handled in here, by people with an AI agent at every desk." |
-| 1:00–2:00 | **Onboarding Agent** | Try it out → pick `pension-george` (Marcus Tan's email and pension application) → **Engage agent** | The auto-filled Member Case form, the NIGO checklist with nothing missing, the priority, and a case opened and routed | "Olivia's agent reads the adviser's email and form, so Olivia checks the work instead of keying it in." |
+| 1:00–2:00 | **Onboarding Agent** | Pick `pension-george` (Marcus Tan's email and pension application) → **Engage agent** | The auto-filled Member Case form, the NIGO checklist with nothing missing, the priority, and a case opened and routed | "Olivia's agent reads the adviser's email and form, so Olivia checks the work instead of keying it in." |
 | 2:00–3:00 | **Benefits & Eligibility** | Pick `REQ-20261109-DEMO03` → review → **Engage** | Age 65 condition of release ✓. TBC $2.1m with $850,000 left ✓. Minimum $62,500, pro-rated to $38,870 ✓. $78,000 requested ✓. Reversionary ✓. Recommendation: approve. Then open the **Reference** tab | "Every line cites the rule it relies on. There are no invented numbers." |
 | 3:00–4:30 | **Investment Analyst** | `REQ-20261109-DEMO03` → **Engage** → then ask in chat: "How long does the cash bucket last?" | A $156,000 cash bucket plus $1,094,000 in Balanced. The comparison table, Mermaid chart and Excel workbook. In **Agent Prompt & Tools**, the `analyzeFactSheet`, `compareModels` and `generateClientWorkbook` calls. The answer: 24 months of payments | "Ivy doesn't give advice. She gives Marcus the numbers, in dollars." |
 | 4:30–6:00 | **Payments** | `REQ-20261109-DEMO03` → confirm the inputs → **Engage** → approve the card in **Teams** → return to the page | The authority-limit check finds the $1,250,000 commencement is $1m or more. The adaptive card appears in Teams. After approval, the release goes through, with $6,500 a month, tax-free | "The agent can't release money on its own. Theo approves in Teams, where he already works." |
@@ -124,7 +124,7 @@ The Onboarding demo creates a fresh `REQ-…` number. For the rest of the golden
 
 | | |
 |---|---|
-| **Try it out** | 1. Select a case. 2. **Engage agent**. 3. Read Cara's case summary. 4. Review the drafts (member letter, adviser update, SMS). Then open **Voice chat with Cara** |
+| **Try it out** | 1. Select a case. 2. **Engage agent**. 3. Read Cara's case summary. 4. Review the drafts (member letter, adviser update, SMS). Then open the **Voice chat** tab |
 | **Pick** | `REQ-20261113-DEMO05` (Robert) for tone. `REQ-20261109-DEMO03` (George) for the voice question. `REQ-20261111-DEMO04` (Tom) for the hardship letter with free help: the National Debt Helpline (1800 007 007) and Moneysmart |
 | **Look for** | A different tone for each audience. The compliance points: no advice, and IDR and AFCA rights. Voice answers grounded in the case |
 | **Foundry on show** | A declarative agent plus Voice Live (`client-communications-voice-agent`) |

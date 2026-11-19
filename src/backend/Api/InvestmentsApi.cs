@@ -46,9 +46,6 @@ public static class InvestmentsApi
         ("model-sustainable-growth.json", "Sustainable Growth", "CMP-SUS", 0.49m, 80m, "Active, multi-asset with ESG screens"),
     };
 
-    /// <summary>The six sample fact sheet files, in menu order.</summary>
-    internal static IReadOnlyList<string> FactSheetFiles { get; } = ModelMenu.Select(m => m.File).ToList();
-
     public static void MapInvestmentsEndpoints(
         this WebApplication app,
         CaseStore store,

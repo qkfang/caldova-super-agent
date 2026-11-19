@@ -1,7 +1,7 @@
 /**
  * Shared types for the v2 "Lakehouse" storybook (`/v2`, see docs/storybook.md).
  */
-import type { TransformNode } from "@babylonjs/core";
+import type { Mesh, TransformNode } from "@babylonjs/core";
 import type { InfraId, LevelId } from "./lakehouseData";
 
 /** A level of the house, plus the roof that lifts off the top floor. */
@@ -56,6 +56,8 @@ export const NO_HIGHLIGHTS: Highlights = {
 export interface LevelBuild {
   id: LevelId;
   root: TransformNode;
+  /** The floating level tag beside the building. */
+  tag: Mesh;
   /** Keys: `owner`, `brain`, `staff:<id>`, `agent:<id>`, `infra:<id>`. */
   anchors: Map<string, Anchor>;
   update(dt: number, t: number): void;

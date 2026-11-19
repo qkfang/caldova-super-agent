@@ -333,8 +333,7 @@ public static class OnboardingApi
     /// <summary>
     /// Hand-offs for a newly opened case, by request type, following the
     /// canonical scenario flows. Primary routes are the specialists who pick
-    /// the case up next; the others are told about it in parallel. Also used
-    /// by the Onboarding page's Overview tab.
+    /// the case up next; the others are told about it in parallel.
     /// </summary>
     public static IReadOnlyList<OnboardingRoute> RoutesFor(string? requestType) =>
         CanonicalRequestType(requestType) switch

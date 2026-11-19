@@ -16,153 +16,7 @@
 </div>
 
 <div class="agent-tab-scope" style="--accent: #a855f7">
-    <nav class="agent-tabs" role="tablist" aria-label="Payments agent details">
-        <button type="button" class="agent-tab active" data-tab="overview" role="tab" aria-selected="true" tabindex="0">Overview</button>
-        <button type="button" class="agent-tab" data-tab="try" role="tab" aria-selected="false" tabindex="-1">Try it out</button>
-    </nav>
-
-    <div class="agent-tab-panel active" data-panel="overview" role="tabpanel">
-    <section class="panel" style="--accent: #a855f7">
-        <h2>What this agent does</h2>
-        <p>
-            Releases money correctly — financial hardship lump sums, pension commencements and regular
-            pension payments, death benefits and outbound rollovers — and invests incoming money on
-            arrival. Penny's agent validates the payee, confirms the eligibility decision on the Member
-            Case, splits the tax-free and taxable components, calculates PAYG withholding and the net
-            payment, checks authority limits and raises a Microsoft Teams approval. Nothing is paid until
-            a human approves.
-        </p>
-        <div class="two-col">
-            <div>
-                <h3>Responsibilities</h3>
-                <ul>
-                    <li>Validate the payee and bank details against the member or the nominated beneficiaries on file.</li>
-                    <li>Confirm the eligibility decision and approved amount from Benefits &amp; Eligibility.</li>
-                    <li>Split tax-free and taxable components; calculate PAYG withholding and the net payment.</li>
-                    <li>Check authority limits and raise a Microsoft Teams approval card.</li>
-                    <li>Release only after approval — and confirm no funds leave a blocked account.</li>
-                    <li>Invest incoming rollovers on arrival, keeping 1% in the Caldova Cash Account.</li>
-                    <li>Draft the payment confirmation for Client Communications to send.</li>
-                </ul>
-            </div>
-            <div>
-                <h3>Tools available</h3>
-                <ul class="payments-tool-list">
-                    <li><code>payments_validatePayee</code> — payee and bank details match the member or beneficiary</li>
-                    <li><code>payments_checkCaseApproval</code> — eligibility decision and approved amount</li>
-                    <li><code>payments_calculateBenefit</code> — components, PAYG withholding and net payment</li>
-                    <li><code>payments_checkAuthorityLimit</code> — when the Team Leader must approve</li>
-                    <li><code>payments_requestApproval</code> — raises the approval and posts the Teams card</li>
-                    <li><code>payments_getApprovalStatus</code> — pending, approved, rejected, released or blocked</li>
-                    <li><code>payments_releasePayment</code> — gated release; refuses unless approved</li>
-                    <li><code>teams_sendApprovalCard</code> — Microsoft Teams Adaptive Card <span class="muted">(called by payments_requestApproval)</span></li>
-                    <li>Azure AI Search — tax, hardship, pension and death benefit rules <span class="muted">(cited by title)</span></li>
-                </ul>
-            </div>
-        </div>
-        <h3 class="payments-overview-h3">Human approval</h3>
-        <div class="approval">
-            <p>The Team Leader (Theo) must approve before money moves when there is:</p>
-            <ul class="payments-rule-list">
-                <li>any single payment of <strong>$250,000 or more</strong>;</li>
-                <li><strong>any death benefit</strong>;</li>
-                <li><strong>any financial hardship release</strong> (a vulnerable member);</li>
-                <li>a <strong>pension commencement of $1,000,000 or more</strong>;</li>
-                <li>any <strong>blocked case</strong> or a <strong>payee that doesn't match</strong> the member or a nominated beneficiary.</li>
-            </ul>
-            <p>Every other release still needs Penny's sign-off — the agent never releases money on its own.</p>
-        </div>
-    </section>
-
-    <section class="panel" style="--accent: #a855f7">
-        <h2>Automated payment flow with human approval in Microsoft Teams</h2>
-        <div class="demo">
-            <p>
-                The Payments Agent is wired to a dedicated MCP tool surface served by this app
-                (<code>caldova-ops-mcp</code>), so each step of the payment workflow is a discrete,
-                auditable tool call: <code>payments_validatePayee</code>,
-                <code>payments_checkCaseApproval</code>, <code>payments_calculateBenefit</code>,
-                <code>payments_checkAuthorityLimit</code>, <code>payments_requestApproval</code>,
-                <code>payments_getApprovalStatus</code> and <code>payments_releasePayment</code>.
-                Every call — with its inputs and results — appears in the agent's raw output, so the
-                audit trail shows exactly what was checked and why.
-            </p>
-            <p>
-                When the cross-checks are complete, the agent calls <code>payments_requestApproval</code>,
-                which mints an approval id and invokes <code>teams_sendApprovalCard</code> to post the
-                <strong>"Caldova Wealth — Payment approval"</strong> Adaptive Card to the approvals channel.
-                The card shows the case number, member, payment type, gross amount, tax withheld, net
-                payment, the payee with masked bank details and why approval is needed, with
-                <strong>Approve</strong> and <strong>Reject</strong> actions. The agent then stops and waits.
-            </p>
-            <p>
-                Once the approver says yes — in Teams, or on this page in the demo — the same agent
-                conversation resumes and calls <code>payments_releasePayment</code>. That tool refuses to run
-                while the approval is pending, rejected or blocked, so money can't leave without a human
-                decision.
-            </p>
-            <ol class="payments-flow">
-                <li><span>1</span>Validate payee</li>
-                <li><span>2</span>Confirm case approval</li>
-                <li><span>3</span>Components &amp; PAYG withholding</li>
-                <li><span>4</span>Authority check</li>
-                <li><span>5</span>Teams approval card</li>
-                <li><span>6</span>Release after approval</li>
-                <li><span>7</span>Payment confirmation</li>
-            </ol>
-        </div>
-    </section>
-
-    <section class="panel" style="--accent: #a855f7">
-        <h2>How Penny's agent helps on each case</h2>
-        <div class="payments-cases-table-wrap">
-            <table class="payments-cases-table">
-                <thead>
-                    <tr><th>Case</th><th>What the Payments Agent does</th><th>Human approval</th></tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><strong>Tom Bradley</strong><br /><span class="muted">Financial hardship</span></td>
-                        <td>$10,000 gross (partial — $15,000 was requested): $600 tax-free, $9,400 taxable, $2,068 withheld at 22% — <strong>$7,932</strong> paid on Fri 13/11/2026, $2,068 remitted to the ATO.</td>
-                        <td>Team Leader — hardship release</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Robert &amp; Lily Chen</strong><br /><span class="muted">Death benefit</span></td>
-                        <td>$243,100 each under Mei's binding nomination: $92,378 tax-free, $150,722 taxable, $25,622.74 withheld at 17% — <strong>$217,477.26</strong> paid to each.</td>
-                        <td>Team Leader — every death benefit</td>
-                    </tr>
-                    <tr>
-                        <td><strong>George Papadopoulos</strong><br /><span class="muted">Retirement pension</span></td>
-                        <td>$1,250,000 into pension CP-3077881 on 16/11/2026; <strong>$6,500 a month</strong> from 15/12/2026 to the joint account, no tax withheld (age 66).</td>
-                        <td>Team Leader — commencement of $1,000,000 or more</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Grace Williams</strong><br /><span class="muted">Rollover blocked</span></td>
-                        <td>No payment released: the payee "G Williams Holdings Pty Ltd" doesn't match and Financial Crime has blocked the case — <strong>$612,400 stays invested</strong>.</td>
-                        <td>Block approved by the Team Leader; release disabled</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Priya Natarajan</strong><br /><span class="muted">New account</span></td>
-                        <td>Invest on arrival: the Harbourline rollover (about $41,800) goes into the Growth model, keeping 1% in cash; $275 a month adviser fee under her signed consent.</td>
-                        <td>None — no money leaves Caldova</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </section>
-    </div>
-
-    <div class="agent-tab-panel" data-panel="try" role="tabpanel">
     <section class="panel payments-panel" style="--accent: #a855f7">
-        <h2>Try it out — Payments demo</h2>
-        <p class="muted payments-help">
-            Walk through how Penny's Payments Agent picks up a Member Case, confirms the payment inputs,
-            works out the tax-free and taxable components, PAYG withholding and the net payment,
-            cross-checks the payee, the eligibility decision and authority limits, and raises a
-            Microsoft Teams approval — money is released only after a human approves. Every step runs
-            live against the <code>/payments/*</code> endpoints in this app.
-        </p>
-
         <div id="payments-deeplink" class="payments-deeplink" hidden></div>
 
         <!-- Step 1 — pick a case -->
@@ -171,10 +25,6 @@
                 <span class="payments-step-num">1</span>
                 <h3>Pick a case</h3>
             </div>
-            <p class="muted">
-                Choose a Member Case. The five scenario cases are pre-loaded; cases opened in the
-                <a href="/agents/onboarding">Onboarding</a> demo appear here too.
-            </p>
             <div class="payments-case-picker">
                 <select id="payments-case-select" class="payments-select" aria-label="Member Case">
                     <option value="">— Loading cases —</option>
@@ -205,10 +55,7 @@
                 <span class="payments-step-num">2</span>
                 <h3>Confirm payment inputs</h3>
             </div>
-            <p class="muted">
-                Defaults come from the case and the Benefits &amp; Eligibility decision. Edit any value —
-                the calculation, cross-checks and approval follow your inputs. Bank details stay masked.
-            </p>
+            <p class="muted">Defaults come from the case and the eligibility decision — edit any value.</p>
             <div id="payments-inputs-hint" class="payments-hint" hidden></div>
             <form id="payments-inputs-form" class="payments-form" autocomplete="off">
                 <fieldset>
@@ -257,11 +104,6 @@
                 <span class="payments-step-num">3</span>
                 <h3>Engage the Payments Agent</h3>
             </div>
-            <p class="muted">
-                Penny's agent runs the payments_* MCP tools — validate the payee, check the case approval,
-                calculate the benefit, check the authority limit and request approval — streams its
-                narrative and posts the Microsoft Teams approval card. Release unlocks only after approval.
-            </p>
             <button id="payments-process-btn" type="button">Process with Payments Agent</button>
             <div id="payments-process-status" class="payments-status" hidden></div>
 
@@ -404,7 +246,6 @@
         </div>
 
     </section>
-    </div>
 </div>
 
 <!-- Approval popup: the in-page stand-in for the Approve / Reject
@@ -435,9 +276,7 @@
             <div class="span-2 amount-row"><span class="k">Net payment</span><strong id="payments-modal-net"></strong></div>
         </div>
         <p class="payments-modal-explainer">
-            Approving here stands in for the approver pressing <strong>Approve</strong> on the Teams card.
-            It resumes the same Payments Agent conversation so Penny can call
-            <code>payments_releasePayment</code> — the tool refuses to run until the approval is recorded.
+            Stands in for <strong>Approve</strong> on the Teams card. Release stays locked until the approval is recorded.
         </p>
         <div class="payments-modal-status" id="payments-modal-status" hidden></div>
         <div class="payments-modal-agent" id="payments-modal-agent" hidden>
@@ -456,41 +295,7 @@
 <style>
     .payments-panel, .payments-modal { --pay-accent: #a855f7; --pay-teams: #5b5fc7; }
     .payments-panel [hidden], .payments-modal[hidden], .payments-modal [hidden] { display: none !important; }
-    .payments-help { margin-bottom: 0.9rem; }
-    .payments-help code, .payments-panel .muted code { background: rgba(168, 85, 247, 0.14); padding: 1px 6px; border-radius: 4px; font-size: 0.85rem; }
-
-    /* ── Overview ─────────────────────────────────────────────── */
-    .payments-tool-list code, .payments-flow code { font-size: 0.82rem; background: rgba(168, 85, 247, 0.14); padding: 1px 5px; border-radius: 4px; }
-    .payments-overview-h3 { margin-top: 1.1rem !important; }
-    .approval p { margin: 0.2rem 0; }
-    .payments-rule-list { margin: 0.35rem 0 0.45rem 0 !important; }
-    .payments-flow {
-        list-style: none; margin: 0.9rem 0 0 0; padding: 0;
-        display: flex; flex-wrap: wrap; gap: 0.45rem;
-    }
-    .payments-flow li {
-        display: inline-flex; align-items: center; gap: 0.45rem;
-        background: #f6f7f9;
-        border: 1px solid color-mix(in srgb, #a855f7 35%, rgba(16, 38, 72, 0.124));
-        border-radius: 999px;
-        padding: 0.3rem 0.75rem 0.3rem 0.35rem;
-        font-size: 0.82rem; color: #1d2939;
-    }
-    .payments-flow li span {
-        display: inline-grid; place-items: center;
-        width: 1.35rem; height: 1.35rem; border-radius: 50%;
-        background: color-mix(in srgb, #a855f7 25%, #f6f7f9);
-        color: #8229e5; font-size: 0.7rem; font-weight: 700;
-    }
-    .payments-cases-table-wrap { overflow-x: auto; }
-    .payments-cases-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; color: #344054; }
-    .payments-cases-table th {
-        text-align: left; font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.1em;
-        color: var(--cw-muted, #5d6b7e); padding: 0.4rem 0.6rem; border-bottom: 1px solid rgba(16, 38, 72, 0.136);
-    }
-    .payments-cases-table td { padding: 0.6rem; border-bottom: 1px dashed rgba(16, 38, 72, 0.099); vertical-align: top; line-height: 1.45; }
-    .payments-cases-table td:first-child { min-width: 9.5rem; }
-    .payments-cases-table td:last-child { min-width: 11rem; color: #8229e5; }
+    .payments-panel .muted code { background: rgba(168, 85, 247, 0.14); padding: 1px 6px; border-radius: 4px; font-size: 0.85rem; }
 
     /* ── Steps ────────────────────────────────────────────────── */
     .payments-step {
@@ -811,7 +616,6 @@
     .payments-modal-meta code { background: #f6f7f9; padding: 1px 6px; border-radius: 4px; font-size: 0.78rem; }
     .payments-modal-meta .amount-row strong { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 1.15rem; color: #0b1f3a; }
     .payments-modal-explainer { margin: 0 0 0.7rem 0; font-size: 0.82rem; color: #344054; line-height: 1.45; }
-    .payments-modal-explainer code { background: rgba(168, 85, 247, 0.16); padding: 1px 6px; border-radius: 4px; font-size: 0.78rem; }
     .payments-modal-status { margin-bottom: 0.6rem; font-size: 0.88rem; color: #344054; }
     .payments-modal-status.error { color: #c11818; }
     .payments-modal-agent {

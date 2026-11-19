@@ -16,140 +16,13 @@
 </div>
 
 <div class="agent-tab-scope" style="--accent: #10b981">
-    <nav class="agent-tabs" role="tablist" aria-label="Transfers and Rollovers agent details">
-        <button type="button" class="agent-tab active" data-tab="overview" role="tab" aria-selected="true" tabindex="0">Overview</button>
-        <button type="button" class="agent-tab" data-tab="try" role="tab" aria-selected="false" tabindex="-1">Try it out</button>
-    </nav>
-
-    <div class="agent-tab-panel active" data-panel="overview" role="tabpanel">
-    <section class="panel" style="--accent: #10b981">
-        <h2>What this agent does</h2>
-        <p>
-            Moves money between Caldova and the outside world — SuperStream rollovers in and out, rollovers to
-            self-managed super funds, in-specie transfers from other platforms and internal transfers into
-            Caldova Pension. It identifies every counterparty, warns before insurance cover is lost, verifies
-            SMSFs with the ATO before anything leaves, prepares the transfer request and tracks the
-            three-business-day service level.
-        </p>
-        <div class="two-col">
-            <div>
-                <h3>Responsibilities</h3>
-                <ul>
-                    <li>Identify each counterparty by USI or ABN from the fund directory.</li>
-                    <li>Warn when a rollover would end insurance cover — and hold it until the member or adviser confirms.</li>
-                    <li>Run the SMSF verification before any rollover to an SMSF (registered SMSF, TFN linked, bank details and ESA match).</li>
-                    <li>Generate the rollover / transfer request PDF and report transfer balance credits to the ATO.</li>
-                    <li>Track the 3-business-day rollover service level and chase overdue counterparties.</li>
-                </ul>
-            </div>
-            <div>
-                <h3>Tools available</h3>
-                <ul>
-                    <li><strong>lookupFunds</strong> — counterparty directory: USI, ABN, channel, turnaround, insurance held (MCP)</li>
-                    <li><strong>verifySmsf</strong> — SMSF verification before any rollover out to an SMSF (MCP)</li>
-                    <li><strong>generateTransferRequestPdf</strong> — branded rollover / transfer request PDF (MCP)</li>
-                    <li>Azure AI Search — SuperStream rollovers, insurance-loss warnings &amp; SMSF verification <span class="muted">(cited by title)</span></li>
-                    <li>Bing grounding — current public context</li>
-                </ul>
-                <h3>Human approval</h3>
-                <p class="approval">
-                    Required to release a hold over an insurance-loss warning, for any rollover to an SMSF, to hold a
-                    rollover beyond the 3-business-day standard, and for transfers above authority limits. Rory's agent
-                    never releases money itself — Payments does, after approval.
-                </p>
-            </div>
-        </div>
-    </section>
-
-    <section class="panel" style="--accent: #10b981">
-        <h2>Counterparty directory</h2>
-        <p class="muted">The fictional funds, SMSFs, regulator, platform and insurer the agent can look up with <code>lookupFunds</code>.</p>
-        <div class="tr-table-wrap">
-            <table class="tr-table">
-                <thead>
-                    <tr><th>Counterparty</th><th>USI / ABN</th><th>Type</th><th class="num">Typical turnaround</th><th>Notes</th></tr>
-                </thead>
-                <tbody>
-                    @foreach (var fund in FundDirectory.All)
-                    {
-                        <tr>
-                            <td><strong>@fund.Name</strong></td>
-                            <td class="mono">
-                                @(fund.Usi ?? "—")
-                                @if (fund.Abn is not null)
-                                {
-                                    <br /><span class="muted">ABN @fund.Abn</span>
-                                }
-                            </td>
-                            <td>@fund.Type</td>
-                            <td class="num">@TurnaroundText(fund)</td>
-                            <td class="tr-notes-cell">@fund.Notes</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    </section>
-
-    <section class="panel" style="--accent: #10b981">
-        <h2>How Rory's agent helps on each case</h2>
-        <div class="tr-table-wrap">
-            <table class="tr-table">
-                <thead>
-                    <tr><th>Case</th><th>What the Transfers &amp; Rollovers Agent does</th><th>Human approval</th></tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><strong>Priya Natarajan</strong><br /><span class="muted">New account &amp; consolidation</span></td>
-                        <td>Requests the Harbourline Retail Super rollover (about $41,800) now; <strong>holds</strong> Southern Cross Industry Super (about $96,400) because it would end <strong>$520,000</strong> of Death &amp; TPD cover.</td>
-                        <td>Adviser and member confirm the insurance decision in writing</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Grace Williams</strong><br /><span class="muted">Rollover out to SMSF</span></td>
-                        <td>SMSF verification <strong>fails</strong> — TFN not linked, bank details and ESA don't match. The rollover is held, referred to Financial Crime, and nothing is sent to the receiving fund.</td>
-                        <td>Team Leader approves the block</td>
-                    </tr>
-                    <tr>
-                        <td><strong>George Papadopoulos</strong><br /><span class="muted">Pension commencement</span></td>
-                        <td>Schedules the internal transfer of <strong>$1,250,000</strong> from CS-1077881 to pension CP-3077881 on 16 Nov 2026 and reports the transfer balance credit to the ATO.</td>
-                        <td>Team Leader — commencement of $1,000,000 or more</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Tom Bradley</strong><br /><span class="muted">Financial hardship</span></td>
-                        <td>No external transfer — the hardship release is a payment to Tom's own bank account.</td>
-                        <td>None for transfers</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Robert Chen</strong> (for Mei Chen)<br /><span class="muted">Death benefit</span></td>
-                        <td>No rollover possible — death benefits to adult children who weren't dependants are paid as cash lump sums.</td>
-                        <td>None for transfers</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </section>
-    </div>
-
-    <div class="agent-tab-panel" data-panel="try" role="tabpanel">
     <section class="panel tr-panel" style="--accent: #10b981">
-        <h2>Try it out — Transfers &amp; Rollovers demo</h2>
-        <p class="muted tr-help">
-            Pick a Member Case and engage Rory's agent. It looks up the counterparties, checks for insurance that
-            would be lost, verifies any SMSF, tracks the service level and prepares the rollover / transfer
-            request PDF — dispatched, held or scheduled. Every step runs live against the
-            <code>/transfers/*</code> endpoints in this app.
-        </p>
-
         <!-- Step 1 — pick a case -->
         <div class="tr-step" data-step="1">
             <div class="tr-step-head">
                 <span class="tr-step-num">1</span>
                 <h3>Pick a case</h3>
             </div>
-            <p class="muted">
-                The five scenario cases are pre-loaded; cases opened in the
-                <a href="/agents/onboarding">Onboarding</a> demo appear here too.
-            </p>
             <div class="tr-pick">
                 <label for="tr-case-select">Case</label>
                 <select id="tr-case-select">
@@ -169,11 +42,6 @@
                 <span class="tr-step-num">2</span>
                 <h3>Engage the Transfers &amp; Rollovers Agent</h3>
             </div>
-            <p class="muted">
-                The agent looks up each counterparty (<code>lookupFunds</code>), verifies any SMSF
-                (<code>verifySmsf</code>) and prepares the request PDF (<code>generateTransferRequestPdf</code>).
-                Without a Foundry connection the same directory, checks and PDF run in-process.
-            </p>
             <button id="tr-process-btn" type="button" disabled>Engage Transfers &amp; Rollovers Agent</button>
             <div id="tr-process-status" class="tr-status" hidden></div>
 
@@ -308,13 +176,11 @@
             </div>
         </div>
     </section>
-    </div>
 </div>
 
 <style>
     .tr-panel { --tr-accent: #10b981; }
-    .tr-help { margin-bottom: 0.9rem; }
-    .tr-help code, .tr-step code {
+    .tr-step code {
         background: rgba(16, 185, 129, 0.12); padding: 1px 6px; border-radius: 4px; font-size: 0.84rem;
     }
 
@@ -427,7 +293,6 @@
     .tr-table td.num { text-align: right; white-space: nowrap; }
     .tr-table .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.8rem; }
     .tr-table .muted { color: var(--cw-muted, #5d6b7e); font-size: 0.76rem; }
-    .tr-notes-cell { font-size: 0.8rem; color: #475467; }
 
     .tr-pill {
         display: inline-block;
@@ -554,12 +419,3 @@
         margin-right: 0.5rem;
     }
 </style>
-
-@code {
-    private static string TurnaroundText(FundDirectoryEntry fund) => fund.TypicalTurnaroundDays switch
-    {
-        0 => "Same day",
-        1 => "1 business day",
-        var d => $"{d} business days"
-    };
-}

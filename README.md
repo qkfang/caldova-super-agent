@@ -13,7 +13,7 @@ Inside **Caldova Client Operations**, each department has its own AI agent that 
 - client communications
 - team leadership
 
-See [AGENTS.md](AGENTS.md) for the demo overview, and the [docs/](docs/) folder for the industry background, characters, process, scenarios and visual themes.
+See [AGENTS.md](AGENTS.md) for the demo overview, and the [docs/](docs/) folder for the industry background, characters, process, scenarios, visual themes and the v2 [storybook](docs/storybook.md).
 
 ---
 
@@ -119,7 +119,7 @@ The backend also uses `APP_MCP_URL`, the public base URL where Foundry reaches t
 dotnet run --project src/backend/cs-backend.csproj
 ```
 
-**Frontend** (voxel operations office and neighbourhood, at <http://localhost:5173>):
+**Frontend** (voxel operations office and neighbourhood, at <http://localhost:5173>; the v2 Lakehouse storybook is at <http://localhost:5173/v2/>):
 
 ```powershell
 cd src/frontend
@@ -144,10 +144,7 @@ To deploy to Azure (resource group `rg-caldova-super`), see `bicep/` and the Git
 
 ### Backend: agent operations console
 
-The backend home page lists the eight agents in Caldova Client Operations. Each card opens an agent page with two tabs:
-
-- **Overview** describes the role.
-- **Try it out** runs the live agent against the demo cases. Every run shows the agent's narrative, the references it cited, its prompt and tools, its input and its raw output.
+The backend home page lists the eight agents in Caldova Client Operations. Each card opens the agent's live **Try it out** demo against the demo cases. Every run shows the agent's narrative, the references it cited, its prompt and tools, its input and its raw output.
 
 ![Backend agent operations console](docs/res/app-backend.png)
 
@@ -156,6 +153,19 @@ The backend home page lists the eight agents in Caldova Client Operations. Each 
 The frontend renders Caldova Client Operations as a voxel, isometric office next to a Melbourne neighbourhood. Life events send requests into the office: a new job, an overseas trip, a retirement, a closed café and a family loss. Each request moves between departments while the live activity feed shows what each agent is doing.
 
 ![Frontend voxel operations office](docs/res/app-frontend.png)
+
+### Frontend v2: the Lakehouse storybook
+
+At `/v2`, the same team is shown as a storybook you read from the top of a lakehouse to the bottom. Caldova is a wealth business for the agentic era, with two sides: Wealth Management and Superannuation.
+
+- **Level 3** is business owner Maya Ashworth's office and her idea, "the brain", with one half for each side.
+- **Level 2** holds two small teams: the Wealth Management Team and the Superannuation Team, with Theo leading both.
+- **Level 1** has one group of Microsoft Foundry agents that supports both teams. Some agents are dedicated to a side and some are shared by both.
+- **The engine room**, under the waterline, holds Microsoft IQ (Work IQ, Fabric IQ, Foundry IQ and Web IQ) on a raised deck, with the Azure services around it.
+
+Each chapter opens up one level. The finale pulls the house apart to trace a member request from top to bottom. See [docs/storybook.md](docs/storybook.md).
+
+![Frontend v2: the Lakehouse storybook](docs/res/storybook/v2-finale.jpg)
 
 ---
 

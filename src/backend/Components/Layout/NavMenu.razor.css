@@ -163,14 +163,6 @@
     color: var(--cw-gold-ink);
 }
 
-.pnav-menu-note {
-    font-size: 0.8rem;
-    font-weight: 500;
-    text-transform: none;
-    letter-spacing: 0;
-    color: var(--cw-muted);
-}
-
 .pnav-menu-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;

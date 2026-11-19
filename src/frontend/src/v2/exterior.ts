@@ -16,6 +16,8 @@ import { FLOOR_Y, ISLAND, LAKE, PIT, ROOF_Y } from "./layout";
 
 export interface Exterior {
   update(dt: number, t: number): void;
+  /** Fade the deck and jetty out (they hide the front of the engine room) or back in. */
+  setDeckVisible(visible: boolean): void;
 }
 
 interface Swimmer {
@@ -45,7 +47,7 @@ export function buildExterior(kit: Kit): Exterior {
   const cedar = kit.mat("#ffffff", { texture: "cedar" });
   const darkTimber = kit.mat("#4a3426");
   const steel = kit.mat("#2b3240", { specular: 0.25 });
-  const railGlass = kit.mat("#cfefff", { alpha: 0.22, specular: 0.6 });
+  const railGlass = kit.mat("#cfefff", { alpha: 0.22, specular: 0.25 });
   const white = kit.mat("#f4f1ea");
   const bark = kit.mat("#6b4a2f");
   const warmGlow = kit.mat("#ffd27a", { unlit: true, glow: true });
@@ -136,6 +138,11 @@ export function buildExterior(kit: Kit): Exterior {
   }
 
   /* ---------------- Deck and jetty ---------------- */
+  // The deck has its own group so it can fade away when the story looks into the engine room.
+  const deck = new TransformNode("v2_deck", scene);
+  deck.parent = root;
+  const deckBatch = new Batch(kit, deck, "deck");
+  kit.useBatch(deckBatch);
   const deckTop = FLOOR_Y.agents;
   kit.block(root, -6, deckTop - 0.4, -16.2, 24, 0.4, 6.6, cedar);
   for (const x of [-17.6, -12, -6, 0, 5.6]) {
@@ -167,7 +174,7 @@ export function buildExterior(kit: Kit): Exterior {
   const fireX = -11;
   const fireZ = -16.2;
   kit.cyl(root, fireX, deckTop, fireZ, 1.9, 0.5, kit.mat("#6b7280"), { tess: 10 });
-  const embers = kit.cyl(root, fireX, deckTop, fireZ, 1.3, 0.56, kit.mat("#ff7a1a", { unlit: true, glow: true }), {
+  const embers = kit.cyl(deck, fireX, deckTop, fireZ, 1.3, 0.56, kit.mat("#ff7a1a", { unlit: true, glow: true }), {
     tess: 10,
     dynamic: true,
   });
@@ -198,6 +205,7 @@ export function buildExterior(kit: Kit): Exterior {
     const y = deckTop + 3.5 - Math.sin(Math.PI * f) * 0.9;
     kit.block(root, x, y, -19.2, 0.22, 0.22, 0.22, warmGlow);
   }
+  kit.useBatch(batch);
 
   // A rowboat and a kayak on the water.
   const boat = new TransformNode("v2_boat", scene);
@@ -296,6 +304,10 @@ export function buildExterior(kit: Kit): Exterior {
 
   kit.useBatch(null);
   batch.flush();
+  deckBatch.flush();
+  const deckMeshes = deck.getChildMeshes(false);
+  let deckAlpha = 1;
+  let deckTarget = 1;
 
   /* ---------------- Things that move ---------------- */
   const fishMats = ["#ff9f43", "#f6e58d", "#c7d2fe", "#ff7f50"].map((hex) => kit.mat(hex));
@@ -324,13 +336,14 @@ export function buildExterior(kit: Kit): Exterior {
     node.parent = root;
     const n = 3 + Math.floor(r() * 3);
     for (let j = 0; j < n; j++) {
-      const w = 4 + r() * 6;
-      kit.block(node, (j - n / 2) * 3 + r() * 1.5, r() * 1.2, (r() - 0.5) * 3, w, 1.6 + r() * 1.6, 3 + r() * 3, cloudMat, {
+      const w = 3 + r() * 4;
+      kit.block(node, (j - n / 2) * 2.4 + r() * 1.2, r() * 1, (r() - 0.5) * 2.4, w, 1.2 + r() * 1.2, 2.4 + r() * 2.4, cloudMat, {
         dynamic: true,
       });
     }
+    // Drift well below and beyond the island so the clouds frame it without covering it.
     const side = i % 2 === 0 ? 1 : -1;
-    node.position.set(-110 + r() * 220, -26 + r() * 11, side * (40 + r() * 45));
+    node.position.set(-110 + r() * 220, -34 + r() * 12, side * (60 + r() * 45));
     clouds.push(node);
   }
 
@@ -351,7 +364,17 @@ export function buildExterior(kit: Kit): Exterior {
   const embersMat = embers.material as StandardMaterial;
 
   return {
+    setDeckVisible(visible: boolean): void {
+      deckTarget = visible ? 1 : 0;
+      if (visible) deck.setEnabled(true);
+    },
     update(dt: number, t: number): void {
+      if (deckAlpha !== deckTarget) {
+        deckAlpha += (deckTarget - deckAlpha) * (1 - Math.exp(-dt * 5));
+        if (Math.abs(deckTarget - deckAlpha) < 0.01) deckAlpha = deckTarget;
+        for (const m of deckMeshes) m.visibility = deckAlpha;
+        deck.setEnabled(deckAlpha > 0.01);
+      }
       rippleTex.uOffset = (rippleTex.uOffset + dt * 0.012) % 1;
       rippleTex.vOffset = (rippleTex.vOffset + dt * 0.006) % 1;
       for (const f of swimmers) {

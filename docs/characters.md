@@ -324,6 +324,29 @@ Each person's AI agents share their first name and are numbered. In the running 
 
 ---
 
+# Business Owner
+
+## Maya Ashworth — Managing Director (Business Owner)
+
+**Role:** The business owner for both sides of Caldova Wealth: Wealth Management (Caldova Wrap and the managed portfolios) and Superannuation (Caldova Super and Caldova Pension). Maya appears on Level 3 of the v2 Lakehouse storybook ([storybook.md](storybook.md)), next to her idea, "the brain". Her name follows the same rule as the staff: **M**aya, **M**anaging director.
+
+**What she does:**
+
+- Sets the goals both sides work to: clearer, faster and more consistent requests
+- Holds the guardrails: when a person must approve, and what agents may never do
+- Decides where to invest in the two teams, the agents and the platform
+- Answers for the results that members, clients and advisers feel
+
+**Personality:** Curious, practical and people-first.
+
+**Typical line:**
+
+> "If a member has to chase us, we've already let them down."
+
+Maya isn't part of the day-to-day operations team and has no AI agent of her own. Her idea is the demo's product message for the agentic era: run each side with a small expert team, supported by one group of AI agents that are dedicated to a side where the work is specialised and shared where it isn't, with people approving every decision that matters.
+
+---
+
 # Client Characters
 
 The five clients are fictional, and each one anchors a scenario. Two fictional advisers appear alongside them:

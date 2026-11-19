@@ -1,4 +1,5 @@
-// Drives the two-tab view ("Overview" / "Try it out") on each agent page.
+// Drives the tab strip on agent pages with more than one demo view
+// (Client Communications: Try it out / Voice chat; Team Leader: Try it out / Group Chat).
 // Uses event delegation on document so it survives Blazor enhancedload swaps.
 (function () {
     function activate(scope, tabName) {

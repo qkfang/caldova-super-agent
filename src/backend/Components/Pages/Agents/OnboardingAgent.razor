@@ -1,5 +1,4 @@
 @page "/agents/onboarding"
-@using CaldovaSuper.App.Api
 
 <PageTitle>Onboarding Agent — Wealth Team in a Day</PageTitle>
 
@@ -17,118 +16,13 @@
 </div>
 
 <div class="agent-tab-scope" style="--accent: #0ea5e9">
-    <nav class="agent-tabs" role="tablist" aria-label="Onboarding agent details">
-        <button type="button" class="agent-tab active" data-tab="overview" role="tab" aria-selected="true" tabindex="0">Overview</button>
-        <button type="button" class="agent-tab" data-tab="try" role="tab" aria-selected="false" tabindex="-1">Try it out</button>
-    </nav>
-
-    <div class="agent-tab-panel active" data-panel="overview" role="tabpanel">
-    <section class="panel" style="--accent: #0ea5e9">
-        <h2>What this agent does</h2>
-        <p>
-            Watches the new-business and member-requests inboxes, reads adviser emails and the forms
-            attached to them, captures every field onto a structured Member Case, runs the NIGO
-            (not in good order) checklist and routes the case to the right specialist — so nothing is
-            missing when the rest of the team picks it up.
-        </p>
-        <div class="two-col">
-            <div>
-                <h3>Responsibilities</h3>
-                <ul>
-                    <li>Monitor the new-business and member-requests inboxes for applications and requests.</li>
-                    <li>Extract client, adviser, product, amount, nomination and rollover details from forms.</li>
-                    <li>Run the NIGO checklist — identity, TFN, signatures, witnesses, fee consent, investment selections and insurance acknowledgements.</li>
-                    <li>Set the priority and flag vulnerable members (hardship, bereavement) or possible scams.</li>
-                    <li>Open the Member Case (<code>REQ-…</code>) and route it to the right specialist.</li>
-                </ul>
-            </div>
-            <div>
-                <h3>Tools available</h3>
-                <ul>
-                    <li>Adviser-email &amp; form watcher</li>
-                    <li>Document extraction — applications, nominations, fee consents, Services Australia letters, death certificates</li>
-                    <li>NIGO checklist</li>
-                    <li>DVS / ID check status</li>
-                    <li>Member &amp; adviser lookup</li>
-                    <li>Case creation (<code>REQ-YYYYMMDD-XXXXXX</code>)</li>
-                    <li>Routing to specialist teams</li>
-                </ul>
-                <h3>Human approval</h3>
-                <p class="approval">
-                    Olivia confirms every Member Case before it opens. The agent hands over to a person
-                    straight away when a member may be vulnerable, details are inconsistent, contact details
-                    changed shortly before money moves out, or documents look altered. It never decides
-                    eligibility, approves payments or makes a fraud finding.
-                </p>
-            </div>
-        </div>
-    </section>
-
-    <section class="panel" style="--accent: #0ea5e9">
-        <h2>How this agent helps with every request</h2>
-        <div class="demo">
-            <p>
-                When an adviser emails an application pack — or a member writes in about a withdrawal, a
-                rollover, a pension or the death of someone they love — Olivia's Onboarding Agent reads the
-                email and every attached form, captures each field onto a structured Member Case and masks
-                sensitive numbers such as the TFN.
-            </p>
-            <p>
-                It then runs the NIGO checks that usually cost days of back-and-forth: a nomination with only
-                one witness, an insurance acknowledgement that isn't ticked, a Services Australia letter that's
-                out of date. Anything outstanding is listed in plain English for the adviser or member, the case
-                gets a Standard, High or Urgent priority, and signs of a vulnerable member or a possible scam go
-                to a person straight away.
-            </p>
-            <p>
-                Once Olivia confirms, the case opens with its <code>REQ-</code> number and goes to the right
-                specialists — Benefits &amp; Eligibility, Financial Crime, Transfers &amp; Rollovers or the Team
-                Leader — so money never sits in a holding account waiting for someone to notice a missing signature.
-            </p>
-        </div>
-    </section>
-
-    <section class="panel" style="--accent: #0ea5e9">
-        <h2>Where each request goes next</h2>
-        <div class="intake-route-table" role="table" aria-label="Routing by request type">
-            @foreach (var requestType in RequestTypeOptions)
-            {
-                <div class="intake-route-row" role="row">
-                    <div class="intake-route-type" role="rowheader">@requestType</div>
-                    <div class="other-agents" role="cell">
-                        @foreach (var route in OnboardingApi.RoutesFor(requestType))
-                        {
-                            var agent = AgentCatalog.FindById(route.AgentId);
-                            <a class="other-agent @(route.Primary ? "primary" : null)" href="@($"/agents/{route.AgentId}")" title="@route.Reason">
-                                <span class="other-agent-icon" aria-hidden="true">@agent?.Icon</span>
-                                @(agent?.Department ?? route.AgentId)
-                            </a>
-                        }
-                    </div>
-                </div>
-            }
-        </div>
-        <p class="muted intake-route-note">Highlighted teams pick the case up next; the others are told in parallel.</p>
-    </section>
-
-    </div>
-
-    <div class="agent-tab-panel" data-panel="try" role="tabpanel">
     <section class="panel intake-panel" style="--accent: #0ea5e9">
-        <h2>Try it out — Onboarding demo</h2>
-        <p class="muted intake-help">
-            Walk through how Olivia's Onboarding Agent reads an inbound request, fills in the Member Case,
-            runs the NIGO checklist, sets the priority and opens a new case. Every step runs live against
-            the <code>/onboarding/*</code> endpoints in this app.
-        </p>
-
         <!-- Step 1 — pick a sample inbound request -->
         <div class="intake-step" data-step="1">
             <div class="intake-step-head">
                 <span class="intake-step-num">1</span>
                 <h3>Pick a sample inbound request</h3>
             </div>
-            <p class="muted">Each sample is an adviser or member email with its attached form — one for each of the five scenarios.</p>
             <div class="intake-samples" id="intake-samples"></div>
             <div class="intake-preview" id="intake-preview" hidden>
                 <div class="intake-preview-grid">
@@ -155,10 +49,6 @@
                 <span class="intake-step-num">2</span>
                 <h3>Engage the Onboarding Agent</h3>
             </div>
-            <p class="muted">
-                The agent reads the email and the attached form, captures the Member Case fields, runs the
-                NIGO checklist and makes a priority call.
-            </p>
             <button id="intake-process-btn" type="button" disabled>Process with Onboarding Agent</button>
             <div id="intake-process-status" class="intake-status" hidden></div>
 
@@ -222,10 +112,7 @@
                 <span class="intake-step-num">3</span>
                 <h3>Review the Member Case</h3>
             </div>
-            <p class="muted">
-                The agent has filled in the Member Case, the NIGO checklist and the priority. Everything is
-                editable — Olivia checks it against the form and confirms before the case opens.
-            </p>
+            <p class="muted">Everything is editable — Olivia checks it before the case opens.</p>
             <div class="intake-form-wrap" id="intake-form-wrap" hidden>
                 <form id="intake-form" class="intake-form" autocomplete="off">
                     <div class="intake-subhead">Member Case</div>
@@ -257,7 +144,7 @@
                             <span class="intake-subhead">NIGO checklist</span>
                             <span class="intake-nigo-summary" id="intake-nigo-summary"></span>
                         </div>
-                        <p class="muted intake-nigo-help">✅ in good order · ⚠️ needs action. Change a status or note if Olivia's own check of the form differs.</p>
+                        <p class="muted intake-nigo-help">✅ in good order · ⚠️ needs action</p>
                         <ul class="intake-nigo-list" id="intake-nigo-list"></ul>
                     </div>
 
@@ -302,41 +189,21 @@
                 <div class="intake-subhead">Routed to</div>
                 <div class="intake-routes" id="intake-routes"></div>
                 <div class="intake-outstanding" id="intake-outstanding" hidden></div>
-                <p class="muted">
-                    Held in memory for the rest of the demo — every agent page can pick this case up by its
-                    case number.
-                </p>
+                <p class="muted">Every agent page can now pick up this case.</p>
                 <button type="button" id="intake-reset-btn" class="intake-reset">Run another sample</button>
             </div>
         </div>
     </section>
-    </div>
 </div>
 
 <style>
     .intake-panel { --intake-accent: #0ea5e9; }
-    .intake-help { margin-bottom: 0.9rem; }
-    .intake-help code { background: rgba(110, 193, 255, 0.12); padding: 1px 6px; border-radius: 4px; font-size: 0.85rem; }
 
-    .intake-route-table { display: grid; gap: 0.45rem; }
-    .intake-route-row {
-        display: grid;
-        grid-template-columns: minmax(180px, 230px) 1fr;
-        gap: 0.8rem;
-        align-items: center;
-        padding: 0.5rem 0.7rem;
-        border-radius: 10px;
-        background: #f9fafb;
-        border: 1px solid rgba(16, 38, 72, 0.099);
-    }
-    @@media (max-width: 720px) { .intake-route-row { grid-template-columns: 1fr; } }
-    .intake-route-type { color: #0b1f3a; font-weight: 600; font-size: 0.9rem; }
     .other-agent.primary {
         border-color: color-mix(in srgb, #0ea5e9 60%, transparent);
         background: color-mix(in srgb, #0ea5e9 14%, rgba(16, 38, 72, 0.028));
         color: #0b1f3a;
     }
-    .intake-route-note { margin: 0.7rem 0 0 0; }
 
     .intake-step {
         border: 1px solid rgba(16, 38, 72, 0.112);

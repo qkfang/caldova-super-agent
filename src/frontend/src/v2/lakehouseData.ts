@@ -1,17 +1,19 @@
 /**
  * Content for the v2 "Lakehouse" storybook (`/v2`, see docs/storybook.md).
  *
- * The lakehouse is read from the top down:
- *   Level 3 · The Idea         Maya Ashworth, the business owner, and her idea ("the brain")
- *   Level 2 · The People       the eight-person Caldova Client Operations team
- *   Level 1 · The Agents       one Microsoft Foundry agent under each person
- *   Lower level · Engine Room  the Azure infrastructure and network underneath
+ * Caldova Wealth is a wealth management business built for the agentic era.
+ * It has two sides, Wealth Management and Superannuation, and the house is
+ * read from the top down:
+ *   Level 3 · The Idea         Maya Ashworth, the business owner for both sides, and her idea
+ *   Level 2 · The People       two small teams, one per side, with Theo leading both
+ *   Level 1 · The Agents       one group of agents: dedicated to a side, or shared by both
+ *   Lower level · Engine Room  Microsoft IQ and the Azure services underneath
  *
- * Staff, sub-agents and scenarios come from the v1 canon (personaData.ts,
- * stepGate.ts and scenarios/*.json). This file only adds what v2 needs on
- * top: the owner, the idea, the Foundry agent ids, and the engine room.
+ * Staff, assistants and scenarios come from the v1 canon (personaData.ts,
+ * stepGate.ts and scenarios/*.json). This file adds what v2 needs on top.
  */
 import type { VoxelCharacterPalette } from "../characterPalettes";
+import type { ScenarioId, StaffTeam } from "../personaData";
 
 export type LevelId = "idea" | "people" | "agents" | "engine";
 
@@ -27,9 +29,9 @@ export interface LevelInfo {
 /** Top to bottom. */
 export const LEVELS: readonly LevelInfo[] = [
   { id: "idea", floor: "3", name: "The Idea", caption: "The business owner's office", accent: "#ffc35a" },
-  { id: "people", floor: "2", name: "The People", caption: "Caldova Client Operations", accent: "#ff8f6b" },
-  { id: "agents", floor: "1", name: "The Agents", caption: "Microsoft Foundry agents", accent: "#5ce1ff" },
-  { id: "engine", floor: "B", name: "The Engine Room", caption: "Infrastructure and network", accent: "#a78bfa" },
+  { id: "people", floor: "2", name: "The People", caption: "Two small teams", accent: "#ff8f6b" },
+  { id: "agents", floor: "1", name: "The Agents", caption: "One group of agents", accent: "#5ce1ff" },
+  { id: "engine", floor: "B", name: "The Engine Room", caption: "Azure and Microsoft IQ", accent: "#a78bfa" },
 ];
 
 export function levelInfo(id: LevelId): LevelInfo {
@@ -37,6 +39,70 @@ export function levelInfo(id: LevelId): LevelInfo {
   if (!l) throw new Error(`Unknown level: ${id}`);
   return l;
 }
+
+/* ------------------------------------------------------------------------ */
+/* The two sides of the business                                             */
+/* ------------------------------------------------------------------------ */
+
+export type SideId = "wealth" | "super" | "shared";
+
+export interface SideInfo {
+  id: SideId;
+  name: string;
+  team: StaffTeam;
+  color: string;
+  products: string[];
+  blurb: string;
+}
+
+/** Colours match the v1 team accents (STAFF_TEAMS in personaData.ts). */
+export const SIDES: Record<SideId, SideInfo> = {
+  wealth: {
+    id: "wealth",
+    name: "Wealth Management",
+    team: "Wealth Management Team",
+    color: "#c9a14a",
+    products: ["Caldova Wrap", "Caldova Managed Portfolios"],
+    blurb: "An investor-directed portfolio service and model portfolios for clients who invest through an adviser.",
+  },
+  super: {
+    id: "super",
+    name: "Superannuation",
+    team: "Superannuation Team",
+    color: "#14b8a6",
+    products: ["Caldova Super", "Caldova Pension"],
+    blurb: "Retirement savings and retirement income in the Caldova Superannuation Master Fund, direct or through an adviser.",
+  },
+  shared: {
+    id: "shared",
+    name: "Both sides",
+    team: "Client Operations Leadership",
+    color: "#8b9cf7",
+    products: ["Caldova Cash Account"],
+    blurb: "What both sides share: leadership, risk, client communications and the cash account inside every account.",
+  },
+};
+
+/** The side a person works on, from their v1 team (personaData.ts). */
+export function teamSide(team: StaffTeam): SideId {
+  if (team === "Superannuation Team") return "super";
+  if (team === "Wealth Management Team") return "wealth";
+  return "shared";
+}
+
+/** Badge text for an agent's side. */
+export function sideBadge(side: SideId): string {
+  return side === "shared" ? "Shared · both sides" : `Dedicated · ${side === "super" ? "Super" : "Wealth"}`;
+}
+
+/** The side each v1 scenario belongs to: all five are Superannuation member requests. */
+export const SCENARIO_SIDE: Record<ScenarioId, SideId> = {
+  onboarding: "super",
+  protection: "super",
+  retirement: "super",
+  hardship: "super",
+  bereavement: "super",
+};
 
 /* ------------------------------------------------------------------------ */
 /* Level 3 — the business owner and the idea                                 */
@@ -47,17 +113,17 @@ export const OWNER = {
   name: "Maya Ashworth",
   firstName: "Maya",
   role: "Managing Director, Caldova Wealth",
-  badge: "Business owner",
+  badge: "Business owner for both sides",
   color: "#ffc35a",
   personality: "Curious, practical and people-first.",
   typical_line: "If a member has to chase us, we’ve already let them down.",
   summary:
-    "Maya is the business owner. She is accountable for Caldova Client Operations: she sets the goals, decides where to invest, and holds the line on one rule — people approve every decision that matters.",
+    "Maya is the business owner for both sides of Caldova: Wealth Management and Superannuation. She sets the goals, decides where to invest, and holds the line on one rule: people approve every decision that matters.",
   owns: [
-    "The goals the whole house works to",
+    "The goals both sides work to",
     "The guardrails: when a person must approve, and what agents may never do",
-    "Investment in the team and the platform",
-    "The results members and advisers feel",
+    "Investment in the two teams, the agents and the platform",
+    "The results members, clients and advisers feel",
   ],
   // Smart-casual for the lakehouse: cream knit, slate trousers, Caldova-gold scarf.
   palette: {
@@ -72,16 +138,17 @@ export const OWNER = {
   } satisfies VoxelCharacterPalette,
 };
 
-/** The idea that lives in "the brain" above Maya's table. */
+/** The idea that lives in "the brain" above Maya's table: one hemisphere for each side. */
 export const IDEA = {
   name: "Wealth Team in a Day",
+  era: "A wealth business for the agentic era",
   statement:
-    "Give every person in Client Operations a specialised AI agent for their stage of the request lifecycle, so requests become clearer, faster and more consistent, with people approving every decision that matters.",
+    "Run both sides of Caldova with small expert teams supported by one group of AI agents: dedicated where the work is specialised, shared where it isn’t, and all grounded in the same IQ layer on Azure. Requests become clearer, faster and more consistent, and people approve every decision that matters.",
   goals: [
     {
       tile: "CLEARER",
       title: "Clearer",
-      text: "Members and advisers always know where their request is and what happens next.",
+      text: "Members, clients and advisers always know where their request is and what happens next.",
     },
     {
       tile: "FASTER",
@@ -91,7 +158,7 @@ export const IDEA = {
     {
       tile: "CONSISTENT",
       title: "More consistent",
-      text: "Every request follows one lifecycle, and every check cites the rule it relied on.",
+      text: "Both sides follow one lifecycle, and every check cites the rule it relied on.",
     },
     {
       tile: "PEOPLE APPROVE",
@@ -114,13 +181,15 @@ export const IDEA = {
 };
 
 /* ------------------------------------------------------------------------ */
-/* Level 1 — one Foundry agent per person                                    */
+/* Level 1 — one group of agents for both teams                              */
 /* ------------------------------------------------------------------------ */
 
 export type InfraId =
+  | "workiq"
+  | "fabriciq"
+  | "foundryiq"
+  | "webiq"
   | "foundry"
-  | "search"
-  | "bing"
   | "mcp"
   | "teams"
   | "content"
@@ -137,6 +206,10 @@ export interface AgentInfo {
   foundryId: string;
   /** Cara also has a separate voice agent. */
   voiceId?: string;
+  /** Which side of the business the agent is dedicated to, or "shared" by both. */
+  side: SideId;
+  /** Why it is dedicated or shared. */
+  sideNote: string;
   /** Engine-room components this agent calls while it works. */
   uses: InfraId[];
   /** The component that makes this agent different, used by the request trace. */
@@ -144,56 +217,73 @@ export interface AgentInfo {
   signatureLine: string;
 }
 
-/** Every agent shares these through the CaldovaAgent base class. */
-const SHARED: InfraId[] = ["foundry", "search", "bing"];
+/** Every agent runs on Foundry and inherits the same IQ layer through the CaldovaAgent base class. */
+const SHARED: InfraId[] = ["foundry", "workiq", "fabriciq", "foundryiq", "webiq"];
 
 /** Keyed by staff id (personaData.ts). */
 export const AGENTS: Record<string, AgentInfo> = {
   "onboarding-1": {
     foundryId: "onboarding-agent",
+    side: "super",
+    sideNote: "Every super request starts here: new accounts, pensions, withdrawals, rollovers and death notifications.",
     uses: SHARED,
-    signature: "search",
+    signature: "foundryiq",
     signatureLine: "Runs the NIGO checklist against the guides in the wealth_knowledge index.",
   },
   "benefits-1": {
     foundryId: "benefits-eligibility-agent",
+    side: "super",
+    sideNote: "Applies super law, the trust deed and the PDS.",
     uses: SHARED,
-    signature: "search",
+    signature: "foundryiq",
     signatureLine: "Cites a rule from the wealth_knowledge index for every check.",
-  },
-  "investments-1": {
-    foundryId: "investment-analyst-agent",
-    uses: [...SHARED, "mcp"],
-    signature: "mcp",
-    signatureLine: "Uses MCP tools to analyse fact sheets, compare models and build the client workbook.",
-  },
-  "fincrime-1": {
-    foundryId: "financial-crime-agent",
-    uses: [...SHARED, "content"],
-    signature: "content",
-    signatureLine: "Uses Azure Content Understanding to check documents for signs of tampering.",
   },
   "transfers-1": {
     foundryId: "transfers-rollovers-agent",
+    side: "super",
+    sideNote: "Moves super between Caldova, other funds, SMSFs and the ATO.",
     uses: [...SHARED, "mcp"],
     signature: "mcp",
     signatureLine: "Uses MCP tools to look up funds, verify SMSFs and generate the transfer request PDF.",
   },
   "payments-1": {
     foundryId: "payments-agent",
+    side: "super",
+    sideNote: "Pays super benefits and pensions, with tax components and PAYG withholding.",
     uses: [...SHARED, "mcp", "teams"],
     signature: "teams",
     signatureLine: "Uses MCP tools to calculate benefits and check limits, then waits for a Microsoft Teams approval.",
   },
+  "investments-1": {
+    foundryId: "investment-analyst-agent",
+    side: "wealth",
+    sideNote:
+      "Owned by the Wealth Management side for its model portfolios and Statements of Advice. The Super team calls it in when a member’s portfolio or pension income needs an investment view.",
+    uses: [...SHARED, "mcp"],
+    signature: "mcp",
+    signatureLine: "Uses MCP tools to analyse fact sheets, compare models and build the client workbook.",
+  },
+  "fincrime-1": {
+    foundryId: "financial-crime-agent",
+    side: "shared",
+    sideNote: "Protects members and clients on both sides from fraud, scams and identity takeover.",
+    uses: [...SHARED, "content"],
+    signature: "content",
+    signatureLine: "Uses Azure Content Understanding to check documents for signs of tampering.",
+  },
   "comms-1": {
     foundryId: "client-communications-agent",
     voiceId: "client-communications-voice-agent",
+    side: "shared",
+    sideNote: "Writes to super members and wealth clients alike, and to their advisers.",
     uses: [...SHARED, "voice"],
     signature: "voice",
     signatureLine: "Has a voice agent on Azure Voice Live, so members can talk to Cara about their case.",
   },
   "lead-1": {
     foundryId: "team-leader-agent",
+    side: "shared",
+    sideNote: "Watches both teams’ queues and coordinates both sides’ agents on one case.",
     uses: SHARED,
     signature: "foundry",
     signatureLine: "Runs the group chat that coordinates the other seven agents on one case.",
@@ -201,7 +291,7 @@ export const AGENTS: Record<string, AgentInfo> = {
 };
 
 /* ------------------------------------------------------------------------ */
-/* Lower level — the engine room                                             */
+/* Lower level — Microsoft IQ and the Azure services                         */
 /* ------------------------------------------------------------------------ */
 
 export interface InfraInfo {
@@ -211,6 +301,8 @@ export interface InfraInfo {
   sign: string;
   /** One-line subtitle under the sign. */
   tag: string;
+  /** "iq": the Microsoft IQ layer on the raised deck; "azure": the services around it. */
+  tier: TierId;
   kind: string;
   color: string;
   /** "all" when every agent depends on it. */
@@ -218,15 +310,90 @@ export interface InfraInfo {
   summary: string;
   details: string[];
   security: string;
+  /** What this demo actually runs today (shown on the IQ cards). */
+  demo?: string;
 }
 
+export type TierId = "iq" | "azure";
+
+/** The two tiers of the engine room. */
+export const TIERS: Record<TierId, { name: string; tagline: string; color: string }> = {
+  iq: { name: "Microsoft IQ", tagline: "the context layer every agent shares", color: "#e879f9" },
+  azure: { name: "Azure services", tagline: "the platform underneath", color: "#60a5fa" },
+};
+
 export const INFRA: InfraInfo[] = [
+  {
+    id: "workiq",
+    name: "Work IQ",
+    sign: "WORK IQ",
+    tag: "how people work",
+    tier: "iq",
+    kind: "Microsoft IQ · work context",
+    color: "#fb7185",
+    scope: "all",
+    summary:
+      "Context on how people work: the documents, conversations, meetings, collaboration and past decisions in Microsoft 365.",
+    details: ["Adviser emails, member calls and the team’s conversations about a case", "Part of Microsoft IQ"],
+    security: "Permission-trimmed: an agent only sees the Microsoft 365 content its user is allowed to see.",
+    demo: "Not wired up in this demo. Adviser emails arrive as case documents, and approvals go to Microsoft Teams through an MCP tool.",
+  },
+  {
+    id: "fabriciq",
+    name: "Fabric IQ",
+    sign: "FABRIC IQ",
+    tag: "the state of the business",
+    tier: "iq",
+    kind: "Microsoft IQ · business data",
+    color: "#4ade80",
+    scope: "all",
+    summary:
+      "The state of the business through governed data, business entities, relationships and rules: members, clients, accounts, balances, holdings and transactions across both sides.",
+    details: ["A business model of entities and relationships that agents can reason over", "Built on Microsoft Fabric", "Part of Microsoft IQ"],
+    security: "Governed data: people and agents work under the same rules and permissions.",
+    demo: "Not wired up in this demo. The backend’s Member Case store and the seeded case files stand in for it.",
+  },
+  {
+    id: "foundryiq",
+    name: "Foundry IQ · wealth_knowledge",
+    sign: "FOUNDRY IQ",
+    tag: "policies and documents",
+    tier: "iq",
+    kind: "Microsoft IQ · knowledge",
+    color: "#c4b5fd",
+    scope: "all",
+    summary:
+      "Curated institutional knowledge: PDS and trust-deed extracts, super rules, the fee schedule, the model portfolio menu and the case files in the wealth_knowledge index, returned with citations.",
+    details: [
+      "Foundry IQ is the new name for Azure AI Search",
+      "Semantic search enabled",
+      "Built and loaded with ai-search/setup-index.ps1 and ingest-documents.ps1",
+    ],
+    security:
+      "Foundry’s managed identities read the index with Search Index Data Reader; the web apps hold Search Index Data Contributor.",
+    demo: "Live in this demo: every agent grounds on, and cites, the wealth_knowledge index.",
+  },
+  {
+    id: "webiq",
+    name: "Web IQ",
+    sign: "WEB IQ",
+    tag: "the web, right now",
+    tier: "iq",
+    kind: "Microsoft IQ · web context",
+    color: "#38bdf8",
+    scope: "all",
+    summary: "Timely, citation-ready context from the public web, so agents can check up-to-date reference information.",
+    details: ["Part of Microsoft IQ"],
+    security: "In this demo, web grounding goes through the Foundry project connection, so the apps hold no web-search keys.",
+    demo: "Stands in for Web IQ in this demo: web context comes from the Grounding with Bing Search connection in the Foundry project.",
+  },
   {
     id: "foundry",
     name: "Microsoft Foundry",
     sign: "MICROSOFT FOUNDRY",
     tag: "9 agents · gpt-5.4",
-    kind: "Agent platform and model",
+    tier: "azure",
+    kind: "Azure · agent platform and model",
     color: "#a78bfa",
     scope: "all",
     summary:
@@ -240,42 +407,12 @@ export const INFRA: InfraInfo[] = [
       "The backend calls the project endpoint with its managed identity, which holds the Azure AI User, Azure AI Developer and Cognitive Services OpenAI User roles.",
   },
   {
-    id: "search",
-    name: "Azure AI Search · wealth_knowledge",
-    sign: "AZURE AI SEARCH",
-    tag: "wealth_knowledge index",
-    kind: "Grounding and knowledge",
-    color: "#38bdf8",
-    scope: "all",
-    summary:
-      "Grounds every answer in, and cites, the wealth_knowledge index: PDS and trust-deed extracts, super rules, the fee schedule, the model portfolio menu and the case files.",
-    details: [
-      "Semantic search enabled",
-      "Built and loaded with ai-search/setup-index.ps1 and ingest-documents.ps1",
-      "It is the digital version of the v1 office’s document archive",
-    ],
-    security:
-      "Foundry’s managed identities read the index with Search Index Data Reader; the web apps hold Search Index Data Contributor.",
-  },
-  {
-    id: "bing",
-    name: "Grounding with Bing Search",
-    sign: "BING GROUNDING",
-    tag: "web grounding",
-    kind: "Grounding on the public web",
-    color: "#2dd4bf",
-    scope: "all",
-    summary:
-      "Public web grounding for up-to-date reference information, wired into every agent through the shared base class.",
-    details: ["Connected to the Foundry project as a Bing grounding connection"],
-    security: "Reached through the Foundry project connection, so the apps hold no Bing keys.",
-  },
-  {
     id: "mcp",
     name: "MCP server · caldova-ops-mcp",
     sign: "MCP TOOLS",
     tag: "caldova-ops-mcp at /mcp",
-    kind: "Tools that act on systems",
+    tier: "azure",
+    kind: "Azure · tools that act on systems",
     color: "#f472b6",
     scope: "some",
     summary:
@@ -293,7 +430,8 @@ export const INFRA: InfraInfo[] = [
     name: "Microsoft Teams approvals",
     sign: "TEAMS APPROVALS",
     tag: "human approvals",
-    kind: "Human in the loop",
+    tier: "azure",
+    kind: "Microsoft 365 · human in the loop",
     color: "#818cf8",
     scope: "some",
     summary:
@@ -310,12 +448,13 @@ export const INFRA: InfraInfo[] = [
     name: "Azure Content Understanding",
     sign: "CONTENT UNDERSTANDING",
     tag: "document checks",
-    kind: "Document analysis",
+    tier: "azure",
+    kind: "Azure · document analysis",
     color: "#fb923c",
     scope: "some",
     summary:
       "Checks ID documents, bank statements, SMSF letters and death certificates, and returns a legit, suspicious or fake verdict with the reasons.",
-    details: ["Used by Felix’s Financial Crime Agent"],
+    details: ["Used by Felix’s Financial Crime Agent, for both sides"],
     security: "Signs in with DefaultAzureCredential, or an API key when one is configured.",
   },
   {
@@ -323,10 +462,11 @@ export const INFRA: InfraInfo[] = [
     name: "Azure Voice Live",
     sign: "VOICE LIVE",
     tag: "Cara’s voice agent",
-    kind: "Real-time voice",
+    tier: "azure",
+    kind: "Azure · real-time voice",
     color: "#ec4899",
     scope: "some",
-    summary: "Lets members and advisers talk to Cara’s voice agent about a case, in plain English.",
+    summary: "Lets members, clients and advisers talk to Cara’s voice agent about a case, in plain English.",
     details: ["Runs client-communications-voice-agent", "The backend proxies the Voice Live WebSocket"],
     security: "The backend’s managed identity signs each Voice Live connection.",
   },
@@ -335,7 +475,8 @@ export const INFRA: InfraInfo[] = [
     name: "Azure App Service",
     sign: "APP SERVICE",
     tag: "frontend + backend",
-    kind: "Hosting",
+    tier: "azure",
+    kind: "Azure · hosting",
     color: "#60a5fa",
     scope: "platform",
     summary:
@@ -349,14 +490,15 @@ export const INFRA: InfraInfo[] = [
     name: "Microsoft Entra ID",
     sign: "ENTRA ID",
     tag: "managed identities",
-    kind: "Identity and access",
+    tier: "azure",
+    kind: "Azure · identity and access",
     color: "#facc15",
     scope: "platform",
     summary:
       "No keys in code: the web apps and Foundry sign in with managed identities and DefaultAzureCredential, and role assignments limit what each one can do.",
     details: [
       "Azure AI User, Azure AI Developer and Cognitive Services OpenAI User on Foundry",
-      "Search Index Data Reader, Search Index Data Contributor and Search Service Contributor on AI Search",
+      "Search Index Data Reader, Search Index Data Contributor and Search Service Contributor on Foundry IQ (Azure AI Search)",
     ],
     security: "Every call carries an Entra ID token scoped by these roles.",
   },
@@ -365,7 +507,8 @@ export const INFRA: InfraInfo[] = [
     name: "Azure Key Vault",
     sign: "KEY VAULT",
     tag: "secrets and keys",
-    kind: "Secrets",
+    tier: "azure",
+    kind: "Azure · secrets",
     color: "#94a3b8",
     scope: "platform",
     summary: "Provisioned with the platform as the place for secrets and keys, so they never live in code or config.",
@@ -377,7 +520,8 @@ export const INFRA: InfraInfo[] = [
     name: "Azure Storage",
     sign: "STORAGE",
     tag: "StorageV2",
-    kind: "Files",
+    tier: "azure",
+    kind: "Azure · files",
     color: "#34d399",
     scope: "platform",
     summary: "A general-purpose StorageV2 account deployed with the platform, ready for document uploads and generated files.",
@@ -389,7 +533,8 @@ export const INFRA: InfraInfo[] = [
     name: "Application Insights · Log Analytics",
     sign: "APP INSIGHTS",
     tag: "telemetry",
-    kind: "Observability",
+    tier: "azure",
+    kind: "Azure · observability",
     color: "#f59e0b",
     scope: "platform",
     summary: "Both web apps send telemetry to Application Insights, backed by a Log Analytics workspace.",
@@ -401,11 +546,12 @@ export const INFRA: InfraInfo[] = [
     name: "Network and wiring",
     sign: "NETWORK",
     tag: "HTTPS · WebSocket",
-    kind: "How it all connects",
+    tier: "azure",
+    kind: "Azure · how it all connects",
     color: "#22d3ee",
     scope: "platform",
     summary:
-      "Every hop is HTTPS: the browser to App Service, the backend to the Foundry project endpoint, Foundry to AI Search, Bing and the backend’s /mcp tools, plus a WebSocket for Voice Live.",
+      "Every hop is HTTPS: the browser to App Service, the backend to the Foundry project endpoint, Foundry to Foundry IQ, the web and the backend’s /mcp tools, plus a WebSocket for Voice Live.",
     details: [
       "The demo uses public endpoints secured with Entra ID tokens and role assignments",
       "For production, add private endpoints and virtual network integration",

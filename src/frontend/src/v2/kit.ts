@@ -437,7 +437,10 @@ export class Batch {
     const out: Mesh[] = [];
     let i = 0;
     for (const [mat, list] of this.groups) {
+      // Opaque decor blocks clicks, so nothing hidden behind a floor or wall can be picked.
+      const blocker = mat.alpha >= 1;
       if (list.length === 1) {
+        list[0].isPickable = blocker;
         this.kit.track(list[0]);
         out.push(list[0]);
         continue;
@@ -447,7 +450,7 @@ export class Batch {
       merged.name = `${this.name}_m${i++}`;
       merged.material = mat;
       merged.parent = this.parent;
-      merged.isPickable = false;
+      merged.isPickable = blocker;
       this.kit.track(merged);
       out.push(merged);
     }
