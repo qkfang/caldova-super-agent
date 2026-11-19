@@ -14,9 +14,9 @@ import { CameraDirector } from "./cameraDirector";
 import { HudLogger } from "./hud";
 import { buildNeighbourhood } from "./neighbourhoodScene";
 import { buildOffice } from "./officeScene";
+import { AgentLayer } from "./agentLayer";
 import { ProfileCard } from "./profileCard";
 import { ScenarioPicker } from "./scenarioPicker";
-import { CreditsModal } from "./creditsModal";
 import { ScenarioRunner } from "./scenarioRunner";
 import { initCollapsiblePanels } from "./collapsiblePanels";
 import type { CharacterPickMetadata } from "./voxelCharacter";
@@ -49,8 +49,8 @@ function bootstrap(): void {
     "officeCam",
     -Math.PI / 4,
     Math.PI / 3.4,
-    58,
-    new Vector3(-2, 1.2, 4),
+    80,
+    new Vector3(0, 1.2, 6),
     officeScene,
   );
   officeCamera.attachControl(canvas, true);
@@ -72,6 +72,7 @@ function bootstrap(): void {
   const layout = buildOffice(officeScene);
   const hud = new HudLogger();
   const sim = new CaseSimulation(officeScene, layout, hud);
+  const agentLayer = new AgentLayer(officeScene, sim, layout.glassMaterials);
   initCollapsiblePanels();
   hud.log("Office is open — simulation started", "good");
 
@@ -156,12 +157,43 @@ function bootstrap(): void {
       });
     });
 
-  // ---------------- Profile card ----------------
-  const profileCard = new ProfileCard(sim);
+  // ---------------- Selection: focus (single click) vs popup (double click) ----------------
+  // A single click on a person focuses them: their card is highlighted in the
+  // AI Agents panel and the office shows its second level — the AI agents
+  // working under the hood for them are spotlit. Clicking the same person
+  // again (or pressing Escape) clears it. A double click also opens the popup.
+  let focusedId: string | null = null;
+  const focusCharacter = (id: string | null): void => {
+    focusedId = id;
+    const staffId = id && sim.getStaff(id) ? id : null;
+    agentLayer.spotlight(staffId);
+    hud.focusAgent(staffId);
+    sim.setHighlightedCharacter(id);
+  };
+  const profileCard = new ProfileCard(sim, (staffId) => {
+    if (staffId) focusCharacter(staffId);
+  });
+  const handleSelect = (id: string, double: boolean): void => {
+    if (double) {
+      focusCharacter(id);
+      profileCard.open(id);
+    } else {
+      focusCharacter(focusedId === id ? null : id);
+    }
+  };
+  hud.onAgentCard = handleSelect;
+  // Capture phase so the popup's own Escape handler hasn't closed it yet.
+  window.addEventListener(
+    "keydown",
+    (ev) => {
+      if (ev.key === "Escape" && !profileCard.isOpen()) focusCharacter(null);
+    },
+    true,
+  );
 
-  // Set up pointer-pick handlers on both scenes. A click on a character's
-  // tagged hitbox opens / refreshes the profile card. Hover toggles the
-  // canvas pointer cursor and highlights the character.
+  // Set up pointer-pick handlers on both scenes. Hover toggles the canvas
+  // pointer cursor and highlights the character.
+  const lastClick = { id: null as string | null, t: 0 };
   const wirePicking = (scene: Scene): void => {
     let hoveredId: string | null = null;
     scene.onPointerObservable.add((info) => {
@@ -193,7 +225,11 @@ function bootstrap(): void {
           | CharacterPickMetadata
           | undefined;
         if (meta?.kind === "character") {
-          profileCard.open(meta.id);
+          const now = performance.now();
+          const double = lastClick.id === meta.id && now - lastClick.t < 400;
+          lastClick.id = meta.id;
+          lastClick.t = double ? 0 : now;
+          handleSelect(meta.id, double);
         }
       }
     });
@@ -286,13 +322,6 @@ function bootstrap(): void {
       return;
     }
     picker.open();
-  });
-
-  // ---------------- Credits modal ----------------
-  const credits = new CreditsModal();
-  document.getElementById("credits-link")?.addEventListener("click", (e) => {
-    e.preventDefault();
-    credits.open();
   });
 
   // Spawn the first random client immediately so the demo has something to show.

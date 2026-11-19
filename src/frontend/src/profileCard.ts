@@ -20,7 +20,10 @@ export class ProfileCard {
   private refreshHandle: number | null = null;
   private lastHtml = "";
 
-  constructor(private readonly sim: CaseSimulation) {
+  constructor(
+    private readonly sim: CaseSimulation,
+    private readonly onSelect?: (staffId: string | null) => void,
+  ) {
     const overlay = document.createElement("div");
     overlay.id = "profile-overlay";
     overlay.className = "profile-overlay hidden";
@@ -56,6 +59,9 @@ export class ProfileCard {
     this.currentId = characterId;
     this.lastHtml = "";
     this.render(profile);
+    // Spotlight the agents behind a human; the spotlight stays on after the
+    // popup closes, until another character is selected.
+    this.onSelect?.(profile.kind === "staff" ? characterId : null);
     this.overlay.classList.remove("hidden");
     this.el.focus();
     if (this.refreshHandle === null) {

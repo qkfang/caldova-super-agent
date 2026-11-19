@@ -206,12 +206,12 @@ function moveToward(
 /* planner below produces a list of XZ waypoints that:                 */
 /*   1. Exit the source cubicle through its south opening.             */
 /*   2. Travel along the front aisle (z ≈ -3.6, south of front-row    */
-/*      cubicles) and/or the central aisle (z ≈ 5, between front- and */
+/*      cubicles) and/or the central aisle (z ≈ 6.6, between front- and */
 /*      back-row cubicles).                                            */
 /*   3. Cross between rows only via the gaps between front-row         */
 /*      cubicles. Front-row backs at z=2.6 are 6m wide and centred on  */
-/*      cx ∈ {-21,-11,-1,9}, leaving safe x-gaps centred at            */
-/*      ROW_GAP_X = {-16, -6, 4} (between cubicles) and {-26, 14}     */
+/*      cx ∈ {-24,-12,0,12}, leaving safe x-gaps centred at            */
+/*      ROW_GAP_X = {-18, -6, 6} (between cubicles) and {-30, 18}     */
 /*      (around the leftmost / rightmost cubicle ends).                */
 /*   4. Enter the target cubicle through its south opening.            */
 /* ------------------------------------------------------------------ */
@@ -227,30 +227,32 @@ interface CubicleZone {
  * regular cubicle, so it's modelled identically here).
  */
 const CUBICLE_ZONES: CubicleZone[] = [
-  { cx: -21, cz: 0 }, // Onboarding (Superannuation wing)
-  { cx: -11, cz: 0 }, // Benefits (Superannuation wing)
-  { cx: -1, cz: 0 }, // Transfers (Superannuation wing)
-  { cx: 9, cz: 0 }, // Payments (Superannuation wing)
-  { cx: -11, cz: 10 }, // Investments (Wealth Management wing)
-  { cx: -1, cz: 10 }, // Comms (Wealth Management wing)
-  { cx: 9, cz: 10 }, // Financial Crime (Wealth Management wing)
-  { cx: -21, cz: 10 }, // Head of Client Operations (Team Leader)
+  { cx: -24, cz: 0 }, // Onboarding (Superannuation wing)
+  { cx: -12, cz: 0 }, // Benefits (Superannuation wing)
+  { cx: 0, cz: 0 }, // Transfers (Superannuation wing)
+  { cx: 12, cz: 0 }, // Payments (Superannuation wing)
+  { cx: -12, cz: 13 }, // Investments (Wealth Management wing)
+  { cx: 0, cz: 13 }, // Comms (Wealth Management wing)
+  { cx: 12, cz: 13 }, // Financial Crime (Wealth Management wing)
+  { cx: -24, cz: 13 }, // Head of Client Operations (Team Leader)
 ];
 
 /** Front aisle Z (south of front-row cubicles, north of lobby furniture). */
 const FRONT_AISLE_Z = -3.6;
 /** Central aisle Z (between front- and back-row cubicles). */
-const CENTRAL_AISLE_Z = 5.0;
+const CENTRAL_AISLE_Z = 6.6;
+/** Z of the back row of pods (the front row is at z = 0). */
+const BACK_ROW_Z = 13;
 /** Just south of any cubicle's south opening (clear of side-wall ends). */
 const CUBICLE_APPROACH_OFFSET = 2.6;
 
 /**
  * X-coordinates of the gaps between front-row cubicles. Front-row back
- * partitions are 6m wide and centred at cx ∈ {-21,-11,-1,9}, so a path
+ * partitions are 6m wide and centred at cx ∈ {-24,-12,0,12}, so a path
  * crossing z=2.6 must do so at one of these gap centres (or at the far
  * left/right ends) to avoid clipping a partition.
  */
-const ROW_GAP_X = [-26, -16, -6, 4, 14];
+const ROW_GAP_X = [-30, -18, -6, 6, 18];
 
 /** Find the cubicle that contains point `p`, or null if it's in the open. */
 function findCubicleAt(p: { x: number; z: number }): CubicleZone | null {
@@ -268,9 +270,9 @@ function findCubicleAt(p: { x: number; z: number }): CubicleZone | null {
 
 /** Aisle Z appropriate for reaching/leaving a cubicle of row `cz`. */
 function aisleZForRow(cz: number): number {
-  // Back row (cz=10): use the central aisle just south of its opening.
+  // Back row: use the central aisle just south of its opening.
   // Front row (cz=0): use the front aisle just south of its opening.
-  return cz === 10 ? CENTRAL_AISLE_Z : FRONT_AISLE_Z;
+  return cz === BACK_ROW_Z ? CENTRAL_AISLE_Z : FRONT_AISLE_Z;
 }
 
 /** Pick the gap-X nearest the average of `xs` for crossing front-row backs. */

@@ -46,10 +46,26 @@ export class HudLogger implements SimLogger {
     this.metricEls[name].textContent = String(value);
   }
 
+  /** Called when a staff card in the AI Agents panel is clicked (single) or double-clicked. */
+  onAgentCard: ((id: string, double: boolean) => void) | null = null;
+  private focusedId: string | null = null;
+
+  /** Highlight (and scroll to) a staff card in the AI Agents panel, or clear with null. */
+  focusAgent(id: string | null): void {
+    if (this.focusedId) this.agentEls.get(this.focusedId)?.classList.remove("focused");
+    this.focusedId = id;
+    if (!id) return;
+    const li = this.agentEls.get(id);
+    li?.classList.add("focused");
+    li?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }
+
   registerAgent(info: { id: string; name: string; role: AgentRole; team: StaffTeam; color: string; palette: VoxelCharacterPalette }): void {
     const li = document.createElement("li");
     li.className = "agent-card idle";
     li.dataset.id = info.id;
+    li.addEventListener("click", () => this.onAgentCard?.(info.id, false));
+    li.addEventListener("dblclick", () => this.onAgentCard?.(info.id, true));
     const figure = renderCharacterFigureSvg(info.palette, info.color);
     li.innerHTML = `
       <div class="figure">${figure}</div>

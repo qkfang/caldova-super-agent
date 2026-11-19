@@ -152,6 +152,12 @@ aside h2 {
 }
 
 #agents-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 2px; }
+.agent-card { cursor: pointer; }
+.agent-card.focused {
+  border-color: var(--accent);
+  background: rgba(255, 179, 71, 0.14);
+  box-shadow: 0 0 0 1px var(--accent);
+}
 .agent-team {
   display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
   margin-top: 4px; padding: 2px 4px 2px 8px;
@@ -295,72 +301,6 @@ aside h2 {
 .sim-speed button.active {
   background: var(--accent);
   color: #1c2230;
-}
-
-/* Credits link in the footer hint */
-.credits-link {
-  margin-left: 6px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-  color: var(--muted);
-  text-decoration: none;
-  padding: 4px 10px;
-  border: 1px solid var(--panel-border);
-  border-radius: 999px;
-  transition: color 120ms ease, border-color 120ms ease;
-}
-.credits-link:hover,
-.credits-link:focus {
-  color: var(--accent);
-  border-color: var(--accent);
-  outline: none;
-}
-
-/* Credits modal body */
-.credits-card .credits-body {
-  padding: 16px 22px 22px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-.credits-card .credits-lead {
-  margin: 0;
-  font-size: 13px;
-  color: var(--text);
-}
-.credits-card .credit-entry {
-  padding: 12px 14px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--panel-border);
-  border-radius: 10px;
-}
-.credits-card .credit-entry h3 {
-  margin: 0 0 2px;
-  font-size: 14px;
-  letter-spacing: 0.3px;
-  color: var(--text);
-}
-.credits-card .credit-role {
-  margin: 0 0 6px;
-  font-size: 11px;
-  color: var(--accent);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-weight: 700;
-}
-.credits-card .credit-entry p {
-  margin: 0;
-  font-size: 12px;
-  line-height: 1.55;
-  color: var(--muted);
-}
-.credits-card .credits-footer-note {
-  margin: 4px 0 0;
-  font-size: 11px;
-  color: var(--muted);
-  font-style: italic;
 }
 
 /* Scene toggle (Office / Neighbourhood) */
@@ -519,7 +459,7 @@ body.left-nav-hidden #log-panel { display: none; }
   inset: 0;
   z-index: 55;
   display: flex; align-items: center; justify-content: center;
-  background: rgba(10, 15, 28, 0.55);
+  background: rgba(10, 15, 28, 0.3);
   padding: 20px;
 }
 .profile-overlay.hidden { display: none; }

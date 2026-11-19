@@ -115,7 +115,7 @@ The lobby is where requests enter the office.
 ## Top Bar & Scene Toggle
 
 - **Top-bar metrics:** Received · In flight · Completed · Declined
-- **Scene toggle:** "Operations Office" | "Neighbourhood". The neighbourhood is described in [theme_neighhood.md](theme_neighhood.md).
+- **Scene toggle:** "Office" | "Neighbourhood". The neighbourhood is described in [theme_neighhood.md](theme_neighhood.md).
 
 ---
 

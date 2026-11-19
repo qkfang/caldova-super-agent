@@ -63,16 +63,24 @@ The "See how this team uses these agents" links point at the companion Blazor si
   4 Action · 5 Confirm), the archive cabinets (*Advice (SOA)*, *Member Files*, *Nominations*,
   *Closed Cases*), the *Client Meeting Suites*, the *Investment Committee* room, the *Member
   Lounge*, *Client Café* and *Staff Kitchen* complete the floor.
+- **Two layers** — the office is one level by default. **Single-click a person** (or their
+  card in the left panel) to focus them: their card is highlighted and the floor turns to
+  glass, revealing the **AI agent layer** (`src/agentLayer.ts`) underneath. Each staff member
+  has an agent bay directly below their desk with their sub-agents (small robots) at work,
+  linked up by a data beam; the selected person's agents are spotlit (a cone of light down to
+  the bay, a pulsing ring, name tags, other agents dimmed). Click the same person again or
+  press Esc to go back to one level.
 - **Park setting** — the office sits in a green park: a stone forecourt with a water
   feature, gravel paths, a pond with a jetty, a gazebo, a picnic area, flower beds and
   trees (`src/parkSurroundings.ts`).
 - **HUD**:
   - Top bar shows live counts (**Received · In flight · Completed · Declined**) and the
-    **Operations Office | Neighbourhood** scene toggle.
+    **Office | Neighbourhood** scene toggle.
   - Left panel lists each staff member with their role and current activity.
   - Right panel streams the activity log in real time.
   - **Submit a request** opens the scenario picker; x1 / x2 / x5 sets the simulation speed.
-  - Click any character to open a centered popup. For staff it shows the human on the left and
+  - **Double-click** any character (or a card in the left panel) to open a centered popup. For
+    staff it shows the human on the left and
     the AI agent under the hood on the right (its sub-agents and a link to the agent's page in
     the backend); clients show their person and case.
 
@@ -179,6 +187,5 @@ src/frontend
     ├── hud.ts                  # DOM HUD wired to the SimLogger contract
     ├── cameraDirector.ts       # Smooth camera focus for scripted beats
     ├── collapsiblePanels.ts    # Collapsible HUD side panels
-    ├── creditsModal.ts         # Credits pop-up
     └── scenarios/              # Scenario JSON (onboarding, protection, retirement, hardship, bereavement)
 ```

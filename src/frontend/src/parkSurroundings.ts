@@ -10,6 +10,9 @@ import {
 } from "@babylonjs/core";
 import { NeighbourhoodAmbient } from "./neighbourhoodAmbient";
 
+/** Footprint of the cut-away under the office (just outside its walls) and its depth. */
+export const OFFICE_PIT = { x0: -36.2, x1: 36.2, z0: -15.2, z1: 32.2, depth: 7 };
+
 /**
  * The parkland around the Caldova Wealth office.
  *
@@ -19,7 +22,7 @@ import { NeighbourhoodAmbient } from "./neighbourhoodAmbient";
  * and plenty of trees. Trees stay low and thin near the front so they never
  * hide the office floor from the default camera.
  *
- * Coordinates: the office footprint is x∈[-30, 30], z∈[-15, 25]. Clients
+ * Coordinates: the office footprint is x∈[-36, 36], z∈[-15, 32]. Clients
  * arrive from (0, -18), so the entrance path runs down the x = 0 axis.
  */
 export function buildPark(scene: Scene): void {
@@ -62,9 +65,22 @@ export function buildPark(scene: Scene): void {
   ): Mesh => box(name, x1 - x0, top, z1 - z0, (x0 + x1) / 2, top / 2, (z0 + z1) / 2, hex);
 
   // ----- Lawn -----
-  const ground = MeshBuilder.CreateBox("ground", { width: 340, depth: 340, height: 0.4 }, scene);
-  ground.position.y = -0.2;
-  ground.material = colour("#6aa84f");
+  // The lawn is cut away under the office so the AI agent layer can sit
+  // below the human floor (see agentLayer.ts).
+  const lawn = (name: string, x0: number, x1: number, z0: number, z1: number): void => {
+    const m = MeshBuilder.CreateBox(
+      name,
+      { width: x1 - x0, depth: z1 - z0, height: 0.4 },
+      scene,
+    );
+    m.position.set((x0 + x1) / 2, -0.2, (z0 + z1) / 2);
+    m.material = colour("#6aa84f");
+  };
+  const P = OFFICE_PIT;
+  lawn("ground_left", -170, P.x0, -170, 170);
+  lawn("ground_right", P.x1, 170, -170, 170);
+  lawn("ground_front", P.x0, P.x1, -170, P.z0);
+  lawn("ground_back", P.x0, P.x1, P.z1, 170);
   // Slightly lighter mown stripes across the near lawn.
   for (let i = -8; i <= 8; i++) {
     if (i % 2) continue;
@@ -79,17 +95,17 @@ export function buildPark(scene: Scene): void {
     slab(name, x0, x1, z0, z1, 0.05, PATH);
   };
   // Entrance path from the front door out to the park loop.
-  path("entrance", -1.8, 1.8, -34, -15);
+  path("entrance", -1.8, 1.8, -34, -15.45);
   // Loop around the building.
-  path("loop_front", -40, 40, -36, -33);
-  path("loop_back", -40, 40, 29, 32);
-  path("loop_left", -42, -39, -36, 32);
-  path("loop_right", 39, 42, -36, 32);
+  path("loop_front", -48, 48, -36, -33);
+  path("loop_back", -48, 48, 36, 39);
+  path("loop_left", -48, -45, -36, 39);
+  path("loop_right", 45, 48, -36, 39);
   // Spur out to the pond and the gazebo.
-  path("spur_pond", 42, 58, 8, 11);
-  path("spur_gazebo", -58, -42, -22, -19);
+  path("spur_pond", 48, 62, 12, 15);
+  path("spur_gazebo", -64, -48, -23.5, -20.5);
   // Stone apron in front of the doors and the forecourt plaza.
-  slab("apron", -4.5, 4.5, -23, -15, 0.06, "#e9e4d6");
+  slab("apron", -4.5, 4.5, -23, -15.2, 0.06, "#e9e4d6");
   slab("plaza", -26, -10, -30, -17, 0.06, "#e4dfd0");
 
   // ----- Props -----
@@ -186,47 +202,47 @@ export function buildPark(scene: Scene): void {
     lamppost(-3.4, z);
     lamppost(3.4, z);
   }
-  for (const x of [-34, -20, 20, 34]) lamppost(x, -37.5);
-  for (const z of [-20, 0, 20]) {
-    lamppost(-43.5, z);
-    lamppost(43.5, z);
+  for (const x of [-40, -26, 26, 40]) lamppost(x, -37.5);
+  for (const z of [-20, 2, 24]) {
+    lamppost(-49.5, z);
+    lamppost(49.5, z);
   }
 
   // Flower beds beside the path and the plaza.
   flowerBed(-12, -38.8, 8, 1.6, ["#e8504c", "#ffd166", "#f4a3c7", "#f0f0f0"]);
   flowerBed(12, -38.8, 8, 1.6, ["#b56fbf", "#ffd166", "#f0f0f0", "#e8504c"]);
-  flowerBed(-31.5, -26, 1.6, 8, ["#ffd166", "#f4a3c7", "#f0f0f0"]);
-  flowerBed(-36, 12, 1.6, 8, ["#e8504c", "#f0f0f0", "#b56fbf"]);
-  flowerBed(36, -4, 1.6, 8, ["#f4a3c7", "#ffd166", "#e8504c"]);
-  flowerBed(-12, 34, 8, 1.6, ["#ffd166", "#b56fbf", "#f0f0f0"]);
-  flowerBed(12, 34, 8, 1.6, ["#e8504c", "#f4a3c7", "#ffd166"]);
+  flowerBed(-32, -26, 1.6, 8, ["#ffd166", "#f4a3c7", "#f0f0f0"]);
+  flowerBed(-42, 14, 1.6, 8, ["#e8504c", "#f0f0f0", "#b56fbf"]);
+  flowerBed(42, -4, 1.6, 8, ["#f4a3c7", "#ffd166", "#e8504c"]);
+  flowerBed(-12, 42, 8, 1.6, ["#ffd166", "#b56fbf", "#f0f0f0"]);
+  flowerBed(12, 42, 8, 1.6, ["#e8504c", "#f4a3c7", "#ffd166"]);
 
   // Benches along the loop paths.
   for (const [x, z] of [
     [-24, -38],
     [24, -38],
-    [-37, -4],
-    [-37, 16],
-    [37, -10],
-    [-24, 28],
-    [24, 28],
+    [-43, -4],
+    [-43, 18],
+    [43, -10],
+    [-24, 41],
+    [24, 41],
   ] as const) {
     bench(x, z);
   }
 
   // ----- Pond with a jetty and ducks (right side) -----
   {
-    const cx = 62;
-    const cz = 20;
+    const cx = 70;
+    const cz = 24;
     box("pond_bank", 24, 0.12, 20, cx, 0.06, cz, "#c8b88a");
     box("pond_a", 22, 0.16, 16, cx, 0.1, cz, "#5fa8d6");
     box("pond_b", 18, 0.17, 19, cx + 1, 0.1, cz, "#5fa8d6");
     box("pond_deep", 12, 0.18, 10, cx, 0.1, cz, "#4a93c4");
     // Jetty reaching out from the spur path.
-    box("jetty", 8, 0.2, 1.8, cx - 12, 0.3, 9.5, "#8a6240");
+    box("jetty", 8, 0.2, 1.8, cx - 12, 0.3, cz - 10.5, "#8a6240");
     for (let i = 0; i < 4; i++) {
-      box(`jetty_post_${i}`, 0.2, 0.6, 0.2, cx - 15 + i * 2.2, 0.2, 8.5, "#5a3d2b");
-      box(`jetty_post_b_${i}`, 0.2, 0.6, 0.2, cx - 15 + i * 2.2, 0.2, 10.5, "#5a3d2b");
+      box(`jetty_post_${i}`, 0.2, 0.6, 0.2, cx - 15 + i * 2.2, 0.2, cz - 11.5, "#5a3d2b");
+      box(`jetty_post_b_${i}`, 0.2, 0.6, 0.2, cx - 15 + i * 2.2, 0.2, cz - 9.5, "#5a3d2b");
     }
     // Reeds and lily pads.
     for (const [rx, rz] of [[-10, -8], [-9, 6], [10, -9], [12, 7], [0, -9.8]] as const) {
@@ -240,8 +256,8 @@ export function buildPark(scene: Scene): void {
 
   // ----- Gazebo (left side, at the end of its spur) -----
   {
-    const gx = -52;
-    const gz = -20.5;
+    const gx = -60;
+    const gz = -22;
     box("gazebo_floor", 6.4, 0.3, 6.4, gx, 0.15, gz, "#d9d3c1");
     for (const [dx, dz] of [[-2.6, -2.6], [2.6, -2.6], [-2.6, 2.6], [2.6, 2.6]] as const) {
       box(`gazebo_post_${dx}_${dz}`, 0.3, 3.0, 0.3, gx + dx, 1.8, gz + dz, "#f4f0e6");
@@ -254,8 +270,8 @@ export function buildPark(scene: Scene): void {
 
   // ----- Picnic area (back left) -----
   {
-    const px = -52;
-    const pz = 18;
+    const px = -64;
+    const pz = 22;
     box("picnic_rug", 5, 0.04, 4, px, 0.04, pz, "#c0392b");
     box("picnic_rug_b", 4.4, 0.05, 3.4, px, 0.045, pz, "#f4f0e6");
     box("picnic_basket", 0.8, 0.5, 0.6, px + 0.4, 0.3, pz, "#a06a4c");
@@ -279,12 +295,12 @@ export function buildPark(scene: Scene): void {
     return seed / 2147483647;
   };
   const clear = (x: number, z: number): boolean => {
-    if (x > -36 && x < 36 && z > -40 && z < 36) return false; // office + loop paths
-    if (x > 42 && x < 90 && z > 2 && z < 40) return false; // pond
-    if (x < -44 && x > -60 && z > -26 && z < -14) return false; // gazebo
-    if (x < -44 && x > -66 && z > 12 && z < 24) return false; // picnic
-    if (x > 42 && x < 60 && z > 6 && z < 13) return false; // pond spur
-    if (x < -42 && x > -60 && z > -23 && z < -18) return false; // gazebo spur
+    if (x > -52 && x < 52 && z > -40 && z < 43) return false; // office + loop paths
+    if (x > 52 && x < 98 && z > 10 && z < 40) return false; // pond
+    if (x < -52 && x > -69 && z > -29 && z < -15) return false; // gazebo
+    if (x < -52 && x > -72 && z > 14 && z < 30) return false; // picnic
+    if (x > 52 && x < 64 && z > 10 && z < 17) return false; // pond spur
+    if (x < -52 && x > -66 && z > -26 && z < -18) return false; // gazebo spur
     return true;
   };
   const palettes: Array<[string, string]> = [
@@ -311,24 +327,24 @@ export function buildPark(scene: Scene): void {
   // A few hand-placed specimen trees framing the entrance.
   tree(-6, -37, 1.1);
   tree(6, -37, 1.1);
-  tree(-31, -20, 1.0);
-  tree(31, -20, 1.0);
+  tree(-40, -20, 1.0);
+  tree(40, -20, 1.0);
 
-  rock(-48, -8, 1.2);
-  rock(46, -12, 1.0);
-  rock(-46, 30, 1.1);
-  rock(36, 38, 0.9);
+  rock(-53, -8, 1.2);
+  rock(53, -12, 1.0);
+  rock(-53, 32, 1.1);
+  rock(42, 46, 0.9);
 
   // ----- Strollers and joggers on the paths -----
   const root = new TransformNode("park_ambient_root", scene);
   const ambient = new NeighbourhoodAmbient(scene, root);
   const walkers: Array<[string, "cityCommuter" | "cityStudent" | "cityJogger", [number, number][], number]> = [
-    ["front_a", "cityCommuter", [[-36, -34.5], [-12, -34.5], [-12, -34.5], [-36, -34.5]], 1.1],
-    ["front_b", "cityStudent", [[36, -34.5], [14, -34.5], [14, -34.5], [36, -34.5]], 1.0],
+    ["front_a", "cityCommuter", [[-44, -34.5], [-12, -34.5], [-12, -34.5], [-44, -34.5]], 1.1],
+    ["front_b", "cityStudent", [[44, -34.5], [14, -34.5], [14, -34.5], [44, -34.5]], 1.0],
     ["entrance_a", "cityCommuter", [[-0.8, -33], [-0.8, -22], [-0.8, -22], [-0.8, -33]], 1.2],
-    ["jogger_a", "cityJogger", [[-40.5, -34.5], [40.5, -34.5], [40.5, 30.5], [-40.5, 30.5]], 2.4],
-    ["left_a", "cityStudent", [[-40.5, -14], [-40.5, 22], [-40.5, 22], [-40.5, -14]], 1.0],
-    ["right_a", "cityCommuter", [[40.5, 22], [40.5, -14], [40.5, -14], [40.5, 22]], 1.1],
+    ["jogger_a", "cityJogger", [[-46.5, -34.5], [46.5, -34.5], [46.5, 37.5], [-46.5, 37.5]], 2.4],
+    ["left_a", "cityStudent", [[-46.5, -14], [-46.5, 26], [-46.5, 26], [-46.5, -14]], 1.0],
+    ["right_a", "cityCommuter", [[46.5, 26], [46.5, -14], [46.5, -14], [46.5, 26]], 1.1],
   ];
   for (const [id, palette, route, speed] of walkers) {
     ambient.addPedestrian(`park_${id}`, palette, route, speed);
