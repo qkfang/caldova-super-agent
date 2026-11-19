@@ -100,10 +100,11 @@ export const PALETTES: Record<string, VoxelCharacterPalette> = {
     shoes: "#1a1a1a", accent: "#1c2230", hairStyle: "short", glasses: true,
     shirtLogo: true,
   },
-  // Ivy — Investment Analyst (investments amber cubicle)
+  // Ivy — Investment Analyst (investments amber cubicle); Wealth Management
+  // Team look: tailored navy trousers with a gold-trimmed amber blouse.
   investmentAnalyst: {
-    skin: "#d9a37e", hair: "#2d1a10", shirt: "#f59e0b", pants: "#3a2f24",
-    shoes: "#1a1a1a", accent: "#3a2a20", hairStyle: "bun",
+    skin: "#d9a37e", hair: "#2d1a10", shirt: "#f59e0b", pants: "#1f2d4a",
+    shoes: "#1a1a1a", accent: "#c9a14a", hairStyle: "bun",
   },
   // Felix — Financial Crime Investigator (financial-crime red cubicle)
   finCrimeInvestigator: {
@@ -120,15 +121,17 @@ export const PALETTES: Record<string, VoxelCharacterPalette> = {
     skin: "#f5d2b3", hair: "#6a3a1e", shirt: "#a855f7", pants: "#2a2440",
     shoes: "#1a1a1a", accent: "#ffd166", hairStyle: "long", lowerBody: "skirt",
   },
-  // Cara — Client Communications Specialist (comms pink cubicle)
+  // Cara — Client Communications Specialist (comms pink cubicle); Wealth
+  // Management Team look: pink blouse with a navy skirt and gold accent.
   commsSpecialist: {
-    skin: "#8d5a3b", hair: "#1a1410", shirt: "#ec4899", pants: "#3a3a44",
-    shoes: "#1a1a1a", accent: "#ffffff", hairStyle: "afro",
+    skin: "#8d5a3b", hair: "#1a1410", shirt: "#ec4899", pants: "#1f2d4a",
+    shoes: "#1a1a1a", accent: "#c9a14a", hairStyle: "afro", lowerBody: "skirt",
   },
-  // Theo — Client Operations Team Leader (beige suit, teal tie, beard)
+  // Theo — Client Operations Team Leader: navy suit, gold tie, beard.
   teamLeader: {
-    skin: "#e8b48a", hair: "#5a4a35", shirt: "#cdb497", pants: "#2a2f3a",
-    shoes: "#1a1a1a", accent: "#14b8a6", hairStyle: "short", facial: "beard",
+    skin: "#e8b48a", hair: "#5a4a35", shirt: "#26324f", pants: "#1c2438",
+    shoes: "#1a1a1a", accent: "#c9a14a", hairStyle: "short", facial: "beard",
+    shirtLogo: true,
   },
 
   // ----- Ambient lobby cast (visual-only background staff) -----

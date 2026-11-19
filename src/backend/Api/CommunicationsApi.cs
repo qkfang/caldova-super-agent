@@ -291,7 +291,7 @@ public static class CommunicationsApi
                 break;
             case "rollover-grace":
                 sb.AppendLine("Fraud victim: lead with reassurance that her money is safe; contact only via the pre-change verified details " +
-                              "(grace.williams@example.com, 0403 118 220); include IDCARE (1800 595 160); NEVER mention an SMR, AUSTRAC or any report.");
+                              "(grace.williams@example.com, 0491 570 157); include IDCARE (1800 595 160); NEVER mention an SMR, AUSTRAC or any report.");
                 break;
             case "death-benefit-robert":
                 sb.AppendLine("Bereavement: condolences first, plain-English explanation of the 17% withholding, one named contact, " +
@@ -414,7 +414,7 @@ public static class CommunicationsApi
             case "rollover-grace" when generalOrStatus || intent is "security" or "family":
                 return "Grace, I'm so glad you called, and I'm sorry you've had this worry while you're away. Your super is safe — the request to move your $612,400 " +
                        "was stopped, and no money has left your account. We've put your previous contact details back and locked your online access, and a specialist " +
-                       "will call you on 0403 118 220 to set you up again — that's the only number we'll use. IDCARE can also help you, free, on 1800 595 160.";
+                       "will call you on 0491 570 157 to set you up again — that's the only number we'll use. IDCARE can also help you, free, on 1800 595 160.";
             case "pension-george" when generalOrStatus || intent == "pension":
                 return "Hi George, congratulations again on your retirement. Your Caldova Pension started on the 16th of November, and you'll receive $6,500 a month " +
                        "from the 15th of December — tax-free, so nothing is taken out. This year's minimum is $38,870, and your payments are comfortably above it. " +

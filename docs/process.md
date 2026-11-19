@@ -118,7 +118,7 @@ The examples below use the five demo scenarios. See [characters.md](characters.m
 
 ## Example AI agent behaviour
 
-> "Felix, I've rated REQ-20261106-DEMO02 as high risk. Grace's mobile and email were changed by phone on 2 Nov at 10:42, about 93 hours before the 6 Nov 07:52 request to roll over her full $612,400 to an SMSF registered 9 days earlier. A new device logged in from Sydney while her travel notice says she is in Italy. The SMSF verification shows her TFN isn't linked, and the licence image appears tampered. I recommend holding the rollover, locking online access and calling Grace on 0403 118 220, the number on file before the change. An SMR decision is due within 3 business days."
+> "Felix, I've rated REQ-20261106-DEMO02 as high risk. Grace's mobile and email were changed by phone on 2 Nov at 10:42, about 93 hours before the 6 Nov 07:52 request to roll over her full $612,400 to an SMSF registered 9 days earlier. A new device logged in from Sydney while her travel notice says she is in Italy. The SMSF verification shows her TFN isn't linked, and the licence image appears tampered. I recommend holding the rollover, locking online access and calling Grace on 0491 570 157, the number on file before the change. An SMR decision is due within 3 business days."
 
 ---
 

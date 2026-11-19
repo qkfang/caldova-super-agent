@@ -1,4 +1,5 @@
 import { AgentRole, SimLogger } from "./caseSimulation";
+import { STAFF_TEAMS, type StaffTeam } from "./personaData";
 import type { VoxelCharacterPalette } from "./voxelCharacter";
 import { renderCharacterFigureSvg } from "./characterFigure";
 
@@ -11,6 +12,7 @@ export class HudLogger implements SimLogger {
   private readonly logList: HTMLOListElement;
   private readonly agentList: HTMLUListElement;
   private readonly agentEls = new Map<string, HTMLLIElement>();
+  private readonly teamHeadings = new Map<string, HTMLLIElement>();
 
   constructor() {
     this.metricEls = {
@@ -21,6 +23,17 @@ export class HudLogger implements SimLogger {
     };
     this.logList = HudLogger.must("log-list") as HTMLOListElement;
     this.agentList = HudLogger.must("agents-list") as HTMLUListElement;
+    // One heading per team so the AI Agents panel mirrors the office wings.
+    for (const team of STAFF_TEAMS) {
+      const heading = document.createElement("li");
+      heading.className = "agent-team";
+      heading.style.setProperty("--team-color", team.color);
+      heading.innerHTML = `<span class="team-name"></span><span class="team-blurb"></span>`;
+      (heading.querySelector(".team-name") as HTMLElement).textContent = team.name;
+      (heading.querySelector(".team-blurb") as HTMLElement).textContent = team.blurb;
+      this.agentList.appendChild(heading);
+      this.teamHeadings.set(team.name, heading);
+    }
   }
 
   private static must(id: string): HTMLElement {
@@ -33,7 +46,7 @@ export class HudLogger implements SimLogger {
     this.metricEls[name].textContent = String(value);
   }
 
-  registerAgent(info: { id: string; name: string; role: AgentRole; color: string; palette: VoxelCharacterPalette }): void {
+  registerAgent(info: { id: string; name: string; role: AgentRole; team: StaffTeam; color: string; palette: VoxelCharacterPalette }): void {
     const li = document.createElement("li");
     li.className = "agent-card idle";
     li.dataset.id = info.id;
@@ -48,7 +61,13 @@ export class HudLogger implements SimLogger {
     `;
     (li.querySelector(".name") as HTMLElement).textContent = info.name;
     (li.querySelector(".role") as HTMLElement).textContent = info.role;
-    this.agentList.appendChild(li);
+    // Slot the card under its team heading (just before the next team's heading).
+    const teamIdx = STAFF_TEAMS.findIndex((t) => t.name === info.team);
+    const nextHeading =
+      teamIdx >= 0 && teamIdx + 1 < STAFF_TEAMS.length
+        ? this.teamHeadings.get(STAFF_TEAMS[teamIdx + 1].name) ?? null
+        : null;
+    this.agentList.insertBefore(li, nextHeading);
     this.agentEls.set(info.id, li);
   }
 

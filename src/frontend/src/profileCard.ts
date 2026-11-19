@@ -2,52 +2,47 @@ import type { CaseSimulation, CharacterProfile } from "./caseSimulation";
 import { renderCharacterFigureSvg } from "./characterFigure";
 
 /**
- * Floating profile card shown when a character is clicked.
+ * Centered profile popup shown when a character is clicked.
  *
- * The card auto-refreshes once per second by re-querying the simulation
- * so live status (current task, case number) stays current. Closes on
- * Escape, click-outside, or the close button.
+ * For staff it shows the human on the left and the AI agent working behind
+ * them ("under the hood") on the right, with a link to the agent's page in
+ * the backend. For clients it shows the person and their case.
+ *
+ * The popup re-queries the simulation once per second so live status (current
+ * task, case number) stays current, but only re-renders when something
+ * changed so links stay clickable. Closes on Escape, a click on the dimmed
+ * backdrop, or the close button.
  */
 export class ProfileCard {
+  private readonly overlay: HTMLDivElement;
   private readonly el: HTMLDivElement;
   private currentId: string | null = null;
   private refreshHandle: number | null = null;
+  private lastHtml = "";
 
   constructor(private readonly sim: CaseSimulation) {
+    const overlay = document.createElement("div");
+    overlay.id = "profile-overlay";
+    overlay.className = "profile-overlay hidden";
     const el = document.createElement("div");
     el.id = "profile-card";
-    el.className = "profile-card hidden";
+    el.className = "profile-card";
     el.setAttribute("role", "dialog");
-    el.setAttribute("aria-modal", "false");
+    el.setAttribute("aria-modal", "true");
     el.tabIndex = -1;
-    document.body.appendChild(el);
+    overlay.appendChild(el);
+    document.body.appendChild(overlay);
+    this.overlay = overlay;
     this.el = el;
 
-    // Click-outside-to-close: register on body but ignore clicks on the card
-    // itself or on the canvas (canvas clicks are how we open the card).
-    document.addEventListener("pointerdown", (ev) => {
-      if (!this.isOpen()) return;
-      const target = ev.target as Node | null;
-      if (target && this.el.contains(target)) return;
-      // Don't close when clicking the canvas — that's how a new selection works.
-      if (
-        target instanceof HTMLElement &&
-        target.id === "renderCanvas"
-      ) {
-        return;
-      }
-      this.close();
+    overlay.addEventListener("pointerdown", (ev) => {
+      if (ev.target === overlay) this.close();
     });
 
     document.addEventListener("keydown", (ev) => {
       if (ev.key === "Escape" && this.isOpen()) {
         this.close();
       }
-    });
-
-    // Keep the popup anchored to the activity panel as the viewport changes.
-    window.addEventListener("resize", () => {
-      if (this.isOpen()) this.reposition();
     });
   }
 
@@ -59,9 +54,9 @@ export class ProfileCard {
     const profile = this.sim.getCharacterProfile(characterId);
     if (!profile) return;
     this.currentId = characterId;
+    this.lastHtml = "";
     this.render(profile);
-    this.el.classList.remove("hidden");
-    this.reposition();
+    this.overlay.classList.remove("hidden");
     this.el.focus();
     if (this.refreshHandle === null) {
       this.refreshHandle = window.setInterval(() => this.refresh(), 1000);
@@ -71,7 +66,7 @@ export class ProfileCard {
   close(): void {
     if (!this.isOpen()) return;
     this.currentId = null;
-    this.el.classList.add("hidden");
+    this.overlay.classList.add("hidden");
     if (this.refreshHandle !== null) {
       window.clearInterval(this.refreshHandle);
       this.refreshHandle = null;
@@ -87,42 +82,6 @@ export class ProfileCard {
       return;
     }
     this.render(profile);
-    this.reposition();
-  }
-
-  /**
-   * Anchor the popup to the right-side Activity (log) panel: the popup's top
-   * lines up with the Activity panel's top, and its right edge sits just to
-   * the left of the Activity panel's left edge so the two panels never
-   * overlap. Falls back to a sensible top-right position when the Activity
-   * panel is hidden.
-   */
-  private reposition(): void {
-    const logPanel = document.getElementById("log-panel");
-    const style = this.el.style;
-    const gap = 12;
-
-    // Always reset the left/bottom anchors — we drive top/right from JS.
-    style.left = "auto";
-    style.bottom = "auto";
-
-    const visible =
-      logPanel !== null &&
-      logPanel.offsetParent !== null &&
-      !logPanel.classList.contains("hidden");
-
-    if (visible && logPanel) {
-      const rect = logPanel.getBoundingClientRect();
-      style.top = `${Math.max(8, rect.top)}px`;
-      style.right = `${Math.max(8, window.innerWidth - rect.left + gap)}px`;
-      // Cap the popup height so it never exceeds the activity panel height.
-      const available = Math.max(200, rect.height);
-      style.maxHeight = `${available}px`;
-    } else {
-      style.top = "84px";
-      style.right = "16px";
-      style.maxHeight = "calc(100vh - 160px)";
-    }
   }
 
   private render(p: CharacterProfile): void {
@@ -141,7 +100,11 @@ export class ProfileCard {
 
     const headerColor = p.color;
     const titleLine =
-      p.kind === "staff" ? p.role : `Client — ${p.scenarioName}`;
+      p.kind === "staff"
+        ? p.team
+          ? `${p.role} · ${p.team}`
+          : p.role
+        : `Client — ${p.scenarioName}`;
 
     const responsibilities = p.responsibilities
       .map((r) => `<li>${escape(r)}</li>`)
@@ -188,48 +151,84 @@ export class ProfileCard {
       ? `<h3>Recent cases</h3><ul class="profile-cases">${casesList}</ul>`
       : "";
 
-    const agentLinkBlock =
-      p.kind === "staff" && p.agentUrl
-        ? `<a class="profile-agent-link" href="${escape(p.agentUrl)}" target="_blank" rel="noopener noreferrer" title="Open ${escape(p.role)} walkthrough in a new tab">
-            See how this team uses these agents <span aria-hidden="true">↗</span>
+    const closeBtn = `<button class="close" aria-label="Close profile">×</button>`;
+
+    let html: string;
+    if (p.kind === "staff" && p.agent) {
+      const subAgents = p.agent.subAgents
+        .map(
+          (a) =>
+            `<li><strong>${escape(a.name)}</strong><span>${escape(a.description)}</span></li>`,
+        )
+        .join("");
+      const firstName = p.name;
+      const agentLink = p.agentUrl
+        ? `<a class="profile-agent-link" href="${escape(p.agentUrl)}" target="_blank" rel="noopener noreferrer">
+            Open ${escape(p.agent.name)} in the backend <span aria-hidden="true">↗</span>
           </a>`
         : "";
-
-    this.el.innerHTML = `
-      <header style="border-color:${headerColor}">
-        <div class="figure">${renderCharacterFigureSvg(p.palette, headerColor)}</div>
-        <div>
-          <div class="profile-name">${escape(p.name)}</div>
-          <div class="profile-role">${escape(titleLine)}</div>
+      html = `
+        ${closeBtn}
+        <div class="profile-columns">
+          <section class="profile-human" style="--accent:${headerColor}">
+            <div class="profile-badge">The human</div>
+            <div class="profile-portrait">${renderCharacterFigureSvg(p.palette, headerColor)}</div>
+            <div class="profile-name">${escape(p.name)}</div>
+            <div class="profile-role">${escape(titleLine)}</div>
+            ${currentBlock}
+            <p class="profile-situation">${escape(p.situation)}</p>
+            <p class="profile-personality">${escape(p.personality)}</p>
+            ${p.typicalLine ? `<blockquote>“${escape(p.typicalLine)}”</blockquote>` : ""}
+            ${responsibilities ? `<h3>Responsibilities</h3><ul>${responsibilities}</ul>` : ""}
+            ${casesHeading}
+          </section>
+          <div class="profile-link-rail" aria-hidden="true"><span>works with</span></div>
+          <section class="profile-agent" style="--accent:${headerColor}">
+            <div class="profile-badge ai">The AI agent under the hood</div>
+            <div class="profile-portrait agent">
+              ${renderCharacterFigureSvg(p.palette, headerColor)}
+              <span class="ai-tag">AI</span>
+            </div>
+            <div class="profile-name">${escape(p.agent.name)}</div>
+            <div class="profile-role">Supports ${escape(firstName)}</div>
+            <p class="profile-situation">${escape(p.agent.tagline)}</p>
+            <h3>Sub-agents at work</h3>
+            <ul class="profile-subagents">${subAgents}</ul>
+            <p class="profile-oversight">The agent drafts, checks and recommends. ${escape(firstName)} makes the decision.</p>
+            ${agentLink}
+          </section>
         </div>
-        <button class="close" aria-label="Close profile">×</button>
-      </header>
-      <section>
-        ${currentBlock}
-        ${handlerBlock}
-        ${caseBlock}
-        ${
-          p.situation
-            ? `<p class="profile-situation">${escape(p.situation)}</p>`
-            : ""
-        }
-        <p class="profile-personality">${escape(p.personality)}</p>
-        ${
-          p.typicalLine
-            ? `<blockquote>“${escape(p.typicalLine)}”</blockquote>`
-            : ""
-        }
-        ${
-          responsibilities
-            ? `<h3>Responsibilities</h3><ul>${responsibilities}</ul>`
-            : ""
-        }
-        ${casesHeading}
-        ${agentLinkBlock}
-      </section>
-    `;
+      `;
+    } else {
+      html = `
+        ${closeBtn}
+        <div class="profile-columns single">
+          <section class="profile-human" style="--accent:${headerColor}">
+            <div class="profile-badge">${p.kind === "customer" ? "The client" : "The human"}</div>
+            <div class="profile-portrait">${renderCharacterFigureSvg(p.palette, headerColor)}</div>
+            <div class="profile-name">${escape(p.name)}</div>
+            <div class="profile-role">${escape(titleLine)}</div>
+            ${currentBlock}
+            ${handlerBlock}
+            ${caseBlock}
+            ${p.situation ? `<p class="profile-situation">${escape(p.situation)}</p>` : ""}
+            <p class="profile-personality">${escape(p.personality)}</p>
+            ${p.typicalLine ? `<blockquote>“${escape(p.typicalLine)}”</blockquote>` : ""}
+            ${responsibilities ? `<h3>${p.kind === "customer" ? "What they need" : "Responsibilities"}</h3><ul>${responsibilities}</ul>` : ""}
+            ${casesHeading}
+          </section>
+        </div>
+      `;
+    }
 
-    const closeBtn = this.el.querySelector(".close") as HTMLButtonElement | null;
-    closeBtn?.addEventListener("click", () => this.close(), { once: true });
+    // Skip identical re-renders so links and scroll position stay put.
+    if (html === this.lastHtml) return;
+    this.lastHtml = html;
+    const scroll = this.el.scrollTop;
+    this.el.innerHTML = html;
+    this.el.scrollTop = scroll;
+
+    const closeEl = this.el.querySelector(".close") as HTMLButtonElement | null;
+    closeEl?.addEventListener("click", () => this.close(), { once: true });
   }
 }

@@ -284,7 +284,7 @@ public static class FundCatalog
             Notes: new[]
             {
                 "Nothing has been sent to the receiving fund — no rollover message and no money.",
-                "The request is cancelled on the case and referred to Financial Crime: hold, lock online access, call back on the pre-change verified number (0403 118 220) only.",
+                "The request is cancelled on the case and referred to Financial Crime: hold, lock online access, call back on the pre-change verified number (0491 570 157) only.",
                 "Grace's mobile and email were changed by phone on 2 Nov 2026 at 10:42 — about 93 hours before the request arrived (6 Nov 2026, 07:52).",
                 "The SMSF's ABN was registered on 28 Oct 2026, 9 days before the request; the bank account is in the name \"G Williams Holdings Pty Ltd\".",
             },
@@ -292,7 +292,7 @@ public static class FundCatalog
             {
                 new TransferUpdate("Member — Grace Williams", "Phone call, then letter",
                     "Hi Grace — we received a request to move your super to another fund and we've paused it to keep your account safe. Your balance hasn't moved. We'll call you on the number we've had on file for you, or you can call us on the number on our website, so we can confirm what you'd like to do.",
-                    "Draft for Client Communications — contact Grace only on her pre-change verified details (0403 118 220 · grace.williams@example.com), never the changed ones."),
+                    "Draft for Client Communications — contact Grace only on her pre-change verified details (0491 570 157 · grace.williams@example.com), never the changed ones."),
             },
             HumanApprovalRequired: true,
             HumanApprovalReason: "Yes — holding a rollover on financial-crime grounds and any rollover to an SMSF need human approval. The Team Leader approves the block; an SMR to AUSTRAC is a human decision.");

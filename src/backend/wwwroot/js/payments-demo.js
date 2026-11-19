@@ -8,7 +8,8 @@
 // approval (approval popup + in-page Approve / Reject as the Teams fallback)
 // → release, which stays disabled until a human approval is recorded.
 // Opening /agents/payments?approvalId=PAY-…[&decision=approve|reject] (the
-// links on the Teams card) jumps straight to the approval popup.
+// links on the Teams card) jumps straight to the approval popup;
+// ?caseNumber=REQ-… opens the Try it out tab on that case.
 (function () {
     const STATUS_TEXT = {
         pending: 'Sent · Pending',
@@ -51,6 +52,11 @@
         if (!s) return null;
         const n = parseFloat(s);
         return Number.isFinite(n) ? n : null;
+    }
+
+    function shorten(text, max) {
+        const s = String(text ?? '');
+        return s.length > max ? s.slice(0, max - 1) + '…' : s;
     }
 
     function timeOf(iso) {
@@ -190,6 +196,7 @@
         let pollTimer = null;
         let runSeq = 0;
         let deeplinkApprovalId = null;
+        let confirmationBaseTitle = 'Payment confirmation draft';
 
         // ── Step 1: pick a case ──────────────────────────────────────
 
@@ -411,7 +418,7 @@
                 const statusText = !data.agentConfigured
                     ? 'Processed — Foundry agent not configured, so the Payments desk ran the payments_* tools deterministically.'
                     : data.agentError
-                        ? `Payments Agent unavailable (${data.agentError}) — deterministic result shown.`
+                        ? `Payments Agent unavailable (${shorten(data.agentError, 140)}) — deterministic result shown.`
                         : 'Payments Agent processed the case.';
                 show(processStatus, 'payments-status', data.agentError ? 'warn' : '', escapeHtml(statusText));
 
@@ -430,6 +437,8 @@
         }
 
         function renderResult(data) {
+            confirmationBaseTitle = data.confirmationTitle || 'Payment confirmation draft';
+            confirmationTitle.textContent = confirmationBaseTitle;
             renderCalc(data.calculation || {}, data.contextRows || []);
             renderChecks(data.crossChecks || []);
             renderApprovalSummary(data);
@@ -463,7 +472,6 @@
                 ].filter(Boolean).join(' ');
             }
 
-            confirmationTitle.textContent = data.confirmationTitle || 'Payment confirmation draft';
             renderMarkdown(confirmationEl, data.paymentConfirmation || '');
 
             resultEl.hidden = false;
@@ -622,6 +630,10 @@
             if (s === 'released' && currentApproval.confirmationDraft) {
                 renderMarkdown(confirmationEl, currentApproval.confirmationDraft);
             }
+            confirmationTitle.textContent = confirmationBaseTitle + (
+                s === 'rejected' ? ' — not sent (payment rejected)'
+                    : s === 'cancelled' ? ' — superseded'
+                        : '');
             if (s === 'pending') startPolling(); else stopPolling();
         }
 
@@ -803,7 +815,7 @@
                 } else {
                     parts.push(`Approval recorded${approval.decidedBy ? ' by ' + approval.decidedBy : ''}.`);
                 }
-                if (data.agentError) parts.push(`Agent resume failed (${data.agentError}) — release the payment below.`);
+                if (data.agentError) parts.push(`Agent resume failed (${shorten(data.agentError, 140)}) — release the payment below.`);
                 else if (!data.agentConfigured) parts.push('Foundry agent not configured — release the payment below.');
                 else if (!data.agentResumeAttempted) parts.push('No agent conversation to resume — release the payment below.');
                 show(modalStatus, 'payments-modal-status', '', escapeHtml(parts.join(' ')));
@@ -857,10 +869,11 @@
         async function handleDeepLink() {
             const params = new URLSearchParams(window.location.search);
             const approvalId = params.get('approvalId');
-            if (!approvalId) return params.get('caseNumber');
-
+            const caseParam = params.get('caseNumber');
             const tryTab = document.querySelector('.agent-tab-scope .agent-tab[data-tab="try"]');
-            if (tryTab && !tryTab.classList.contains('active')) tryTab.click();
+            if ((approvalId || caseParam) && tryTab && !tryTab.classList.contains('active')) tryTab.click();
+            if (!approvalId) return caseParam;
+
             try {
                 const res = await fetch(`/payments/approvals/${encodeURIComponent(approvalId)}`);
                 let a = {};

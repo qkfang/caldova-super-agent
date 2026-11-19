@@ -132,9 +132,9 @@ Each request follows a simple, readable path on screen:
 3. **The request sets off**, on foot, by tram or along a laneway, or via the adviser's office.
 4. **It travels** along Melbourne streets towards Caldova Wealth — Client Operations.
 5. **It arrives** at one of the lobby counters, and the story is handed to the AI-assisted operations team:
-   - **NEW ACCOUNTS** for applications
+   - **SUPER SERVICES** for super applications, withdrawals, hardship, account security and bereavement
+   - **WEALTH SERVICES** for advice, investment and portfolio requests
    - **ADVISER DESK** for adviser-submitted requests
-   - **MEMBER HELP** for withdrawals, hardship, account security and bereavement
 
 This journey should feel like a tiny living diorama, with several requests in motion at once, each carrying its own story towards the same destination.
 

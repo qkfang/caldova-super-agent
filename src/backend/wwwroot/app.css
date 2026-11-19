@@ -1,130 +1,176 @@
 /* ============================================================
    Wealth Team in a Day — global theme (Caldova Wealth)
-   Deep-ink midnight base, luminous teal/azure accents and a quiet
-   champagne-gold highlight. Designed to feel precise, secure and
-   institutional — a modern wealth & super fund platform.
+   Modelled on Australian super fund and wealth manager sites
+   (UniSuper, ART, AustralianSuper, Morgan Stanley, J.P. Morgan):
+   light ivory pages, white cards, deep navy brand ink, one
+   confident action blue, serif display headlines and a quiet
+   gold highlight.
    ============================================================ */
 
 :root {
+    /* Brand */
+    --cw-navy-950: #041427;
+    --cw-navy-900: #071d38;
+    --cw-navy-800: #0b2a4f;
+    --cw-navy-700: #123866;
+    --cw-primary: #1660d0;        /* action blue — CTAs and links */
+    --cw-primary-hover: #0f4fb4;
+    --cw-primary-soft: #e9f0fc;
+    --cw-gold: #c9a24a;           /* premium highlight on navy */
+    --cw-gold-ink: #8a6a1e;       /* gold for text on light surfaces */
+    --cw-success: #0f7b55;
+    --cw-danger: #b42318;
+    --cw-warn: #b45309;
+
     /* Surfaces */
-    --cw-bg: #060b16;
-    --cw-bg-2: #0a1222;
-    --cw-panel: rgba(14, 22, 38, 0.80);
-    --cw-panel-solid: #101a2e;
-    --cw-panel-border: rgba(130, 165, 210, 0.15);
-    --cw-panel-border-strong: rgba(130, 165, 210, 0.30);
+    --cw-bg: #f6f5f1;             /* warm ivory page background */
+    --cw-bg-2: #efede6;
+    --cw-surface: #ffffff;
+    --cw-surface-2: #f6f7f9;
+    --cw-line: #e3e6eb;
+    --cw-line-strong: #cfd5de;
 
     /* Text */
-    --cw-text: #e9eff8;
-    --cw-text-strong: #ffffff;
-    --cw-muted: #93a3bb;
-    --cw-muted-2: #66758d;
+    --cw-ink: #0b1f3a;            /* headings */
+    --cw-text: #2b3646;           /* body */
+    --cw-text-2: #475467;
+    --cw-muted: #5d6b7e;
+    --cw-muted-2: #8a94a3;
 
-    /* Accents */
-    --cw-accent: #2dd4bf;        /* confident teal — primary action */
-    --cw-accent-warm: #3b82f6;   /* azure — gradient pair for the brand */
-    --cw-accent-2: #7dd3fc;      /* sky — links / info */
-    --cw-gold: #e3c47e;          /* champagne — premium highlight */
-    --cw-good: #4ade80;
-    --cw-bad: #ff7a7a;
-    --cw-warn: #fbbf24;
+    /* Aliases kept for page-level styles written against the old tokens */
+    --cw-text-strong: var(--cw-ink);
+    --cw-panel: var(--cw-surface);
+    --cw-panel-solid: var(--cw-surface);
+    --cw-panel-border: var(--cw-line);
+    --cw-panel-border-strong: var(--cw-line-strong);
+    --cw-accent: var(--cw-primary);
+    --cw-accent-warm: var(--cw-navy-700);
+    --cw-accent-2: var(--cw-primary);
+    --cw-good: var(--cw-success);
+    --cw-bad: var(--cw-danger);
 
-    /* Sidebar */
-    --cw-sidebar-from: #050c1b;
-    --cw-sidebar-to: #08162c;
+    /* Type */
+    --cw-font-sans: "Inter", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    --cw-font-serif: "Source Serif 4", "Source Serif Pro", Georgia, "Times New Roman", serif;
+    --cw-font-mono: ui-monospace, "Cascadia Mono", SFMono-Regular, Menlo, Consolas, monospace;
+
+    /* Shape & elevation */
+    --cw-radius: 16px;
+    --cw-shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.05);
+    --cw-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 12px 32px -18px rgba(16, 24, 40, 0.18);
+    --cw-shadow-lg: 0 2px 4px rgba(16, 24, 40, 0.04), 0 24px 48px -20px rgba(11, 31, 58, 0.28);
+
+    /* Bootstrap hand-off */
+    --bs-body-font-family: var(--cw-font-sans);
+    --bs-body-color: var(--cw-text);
+    --bs-body-bg: var(--cw-bg);
+    --bs-border-color: var(--cw-line);
 }
 
 html, body {
-    font-family: "Inter", "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    font-family: var(--cw-font-sans);
     background: var(--cw-bg);
     color: var(--cw-text);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    font-feature-settings: "cv11", "tnum";
 }
 
-/* Fine "secured grid" texture with a teal aurora top-left and azure glow
-   bottom-right — depth without noise. */
 body {
-    background-color: var(--cw-bg);
-    background-image:
-        linear-gradient(rgba(125, 211, 252, 0.035) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(125, 211, 252, 0.035) 1px, transparent 1px),
-        radial-gradient(ellipse 60% 45% at 15% -10%, rgba(45, 212, 191, 0.13), transparent 70%),
-        radial-gradient(ellipse 55% 45% at 95% 110%, rgba(59, 130, 246, 0.13), transparent 70%);
-    background-size: 44px 44px, 44px 44px, 100% 100%, 100% 100%;
-    background-attachment: fixed;
+    font-size: 1rem;
+    line-height: 1.55;
+    font-feature-settings: "cv11";
 }
 
 a, .btn-link {
-    color: var(--cw-accent-2);
+    color: var(--cw-primary);
     text-decoration: none;
 }
 
 a:hover, .btn-link:hover {
-    color: var(--cw-text-strong);
+    color: var(--cw-primary-hover);
     text-decoration: underline;
+    text-underline-offset: 3px;
 }
 
 .btn-primary {
-    color: #03141a;
-    background: linear-gradient(135deg, #2dd4bf, #38bdf8);
-    border-color: transparent;
+    color: #fff;
+    background: var(--cw-primary);
+    border-color: var(--cw-primary);
+    border-radius: 999px;
     font-weight: 600;
-    letter-spacing: 0.2px;
-    box-shadow: 0 8px 20px -8px rgba(45, 212, 191, 0.6);
+    padding-inline: 1.25rem;
 }
 
 .btn-primary:hover, .btn-primary:focus {
-    background: linear-gradient(135deg, #5eead4, #7dd3fc);
-    border-color: transparent;
-    color: #03141a;
+    background: var(--cw-primary-hover);
+    border-color: var(--cw-primary-hover);
+    color: #fff;
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus,
-.form-control:focus, .form-check-input:focus {
-    box-shadow: 0 0 0 0.1rem rgba(255, 255, 255, 0.08), 0 0 0 0.25rem rgba(45, 212, 191, 0.45);
+.btn:focus-visible, .btn:active:focus, .btn-link.nav-link:focus,
+.form-control:focus, .form-select:focus, .form-check-input:focus {
+    border-color: var(--cw-primary);
+    box-shadow: 0 0 0 0.22rem rgba(22, 96, 208, 0.22);
+}
+
+:focus-visible {
+    outline: 2px solid var(--cw-primary);
+    outline-offset: 2px;
 }
 
 .content {
-    padding-top: 1.1rem;
-    padding-bottom: 2rem;
+    padding-top: 1.75rem;
+    padding-bottom: 3.5rem;
 }
 
 h1, h2, h3, h4, h5, h6 {
-    color: var(--cw-text-strong);
+    color: var(--cw-ink);
     letter-spacing: -0.01em;
+}
+
+h1, h2 {
+    font-family: var(--cw-font-serif);
+    font-weight: 600;
+    letter-spacing: -0.015em;
 }
 
 h1:focus {
     outline: none;
 }
 
-/* Inline code chips inside copy. */
-code {
-    background: rgba(45, 212, 191, 0.09);
-    color: #b6f3ea;
-    border: 1px solid rgba(45, 212, 191, 0.2);
-    border-radius: 5px;
-    padding: 0.05em 0.4em;
-    font-size: 0.9em;
+/* Shared page width used by the header, content and footer. */
+.site-container {
+    width: 100%;
+    max-width: 1320px;
+    margin-inline: auto;
+    padding-inline: clamp(1rem, 3vw, 2.25rem);
 }
 
-/* Custom scrollbar so dark panels feel finished. */
+/* Inline code chips inside copy. */
+code {
+    background: #eef2f8;
+    color: #1b3a63;
+    border: 1px solid #dde4ee;
+    border-radius: 5px;
+    padding: 0.05em 0.4em;
+    font-size: 0.86em;
+    font-family: var(--cw-font-mono);
+}
+
+/* Quiet scrollbars to match the light surfaces. */
 * {
-    scrollbar-color: rgba(120, 150, 200, 0.35) transparent;
+    scrollbar-color: rgba(16, 38, 72, 0.22) transparent;
     scrollbar-width: thin;
 }
 *::-webkit-scrollbar { width: 10px; height: 10px; }
 *::-webkit-scrollbar-track { background: transparent; }
 *::-webkit-scrollbar-thumb {
-    background: rgba(120, 150, 200, 0.28);
+    background: rgba(16, 38, 72, 0.18);
     border-radius: 999px;
     border: 2px solid transparent;
     background-clip: padding-box;
 }
-*::-webkit-scrollbar-thumb:hover { background: rgba(120, 150, 200, 0.45); background-clip: padding-box; }
-
+*::-webkit-scrollbar-thumb:hover { background: rgba(16, 38, 72, 0.32); background-clip: padding-box; }
 .valid.modified:not([type=checkbox]) {
     outline: 1px solid #26b050;
 }
@@ -161,46 +207,43 @@ code {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   Full-page toggle — hides the left nav for a wider working area.
+   Full-page toggle — hides the site header and footer for a wider, presenter-
+   friendly working area. Floats bottom-right like a fund site's chat button.
    ───────────────────────────────────────────────────────────────────────────── */
 .full-page-toggle {
     position: fixed;
-    top: 16px;
-    right: 16px;
-    z-index: 9999;
-    width: 44px;
-    height: 44px;
-    border-radius: 10px;
-    background: var(--cw-panel, rgba(20, 28, 46, 0.82));
-    border: 1px solid var(--cw-panel-border, rgba(120, 150, 200, 0.18));
-    color: var(--cw-accent, #2dd4bf);
+    bottom: 20px;
+    right: 20px;
+    z-index: 900;
+    width: 46px;
+    height: 46px;
+    border-radius: 999px;
+    background: #fff;
+    border: 1px solid var(--cw-line-strong);
+    color: var(--cw-navy-800);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    backdrop-filter: blur(8px);
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
-    transition: background 0.15s ease, color 0.15s ease,
-        border-color 0.15s ease, transform 0.15s ease;
+    box-shadow: var(--cw-shadow-lg);
+    transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
 }
 .full-page-toggle:hover {
+    background: var(--cw-primary);
+    border-color: var(--cw-primary);
     color: #fff;
-    background: rgba(45, 212, 191, 0.18);
-    border-color: var(--cw-accent, #2dd4bf);
     transform: translateY(-1px);
 }
 .full-page-toggle .icon-collapse { display: none; }
 body.left-nav-hidden .full-page-toggle .icon-expand { display: none; }
 body.left-nav-hidden .full-page-toggle .icon-collapse { display: inline-block; }
-body.left-nav-hidden .full-page-toggle {
-    color: #03141a;
-    background: var(--cw-accent, #2dd4bf);
-    border-color: var(--cw-accent, #2dd4bf);
-}
+body.left-nav-hidden .full-page-toggle { background: var(--cw-primary); border-color: var(--cw-primary); color: #fff; }
 
-/* When full-page mode is active, hide the sidebar and let main fill the row. */
-body.left-nav-hidden .page > .sidebar { display: none; }
-
+/* Full-page mode: hide the site chrome and let the content use the width. */
+body.left-nav-hidden .utility-bar,
+body.left-nav-hidden .site-header,
+body.left-nav-hidden .site-footer { display: none; }
+body.left-nav-hidden .site-container { max-width: none; }
 /* ─────────────────────────────────────────────────────────────────────────────
    Account page "Ask AI" chatbot (ported from forex-trading-agent)
    ───────────────────────────────────────────────────────────────────────────── */

@@ -797,7 +797,7 @@ The `team-leader-agent` shows the floor for the five demo cases:
 
 Each department in the voxel office can become a clickable room that links to its agent page (`/agents/{route id}`).
 
-## Lobby: NEW ACCOUNTS · MEMBER HELP · ADVISER DESK
+## Lobby: SUPER SERVICES · WEALTH SERVICES · ADVISER DESK
 
 Starts a new request ("Submit a request").
 
@@ -833,11 +833,11 @@ Shows the message drafts and the voice chat with Cara.
 
 Shows the floor dashboard, service-level and IDR clocks, and approvals.
 
-## Meeting Room
+## Client Meeting Suites (Advice Suite · Case Conference)
 
 Shows the multi-agent group chat on one case.
 
-## Archive: Applications · Member Files · Nominations · Closed Cases
+## Archive: Advice (SOA) · Member Files · Nominations · Closed Cases
 
 Represents the records and rules the agents cite from the `wealth_knowledge` index.
 

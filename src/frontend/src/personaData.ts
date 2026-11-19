@@ -23,11 +23,24 @@ export type StaffRole =
   | "Client Communications Specialist"
   | "Client Operations Team Leader";
 
+/**
+ * The two product teams that make up Caldova Client Operations, plus the
+ * leadership that runs both. The office floor is organised by these teams:
+ * the Superannuation wing sits at the front of the floor and the Wealth
+ * Management wing behind it.
+ */
+export type StaffTeam =
+  | "Superannuation Team"
+  | "Wealth Management Team"
+  | "Client Operations Leadership";
+
 export interface StaffPersona {
   /** Stable id used for click hitboxes and HUD agent cards. */
   id: string;
   name: string;
   role: StaffRole;
+  /** Team the staff member belongs to (drives HUD grouping and office wing). */
+  team: StaffTeam;
   /** Department name shown in the UI (e.g. "Benefits & Eligibility"). */
   department: string;
   /** Human-readable role/duties summary (one line). */
@@ -50,6 +63,10 @@ export interface StaffPersona {
    * used to deep-link the profile card to `/agents/{app_agent_id}`.
    */
   app_agent_id: string;
+  /** Name of the AI agent working behind this staff member (as in the backend catalogue). */
+  agent_name: string;
+  /** One-line summary of what the agent does for them. */
+  agent_tagline: string;
 }
 
 // Order matches docs/scenario-N-*.md and scenarioNumbers.ts:
@@ -91,18 +108,19 @@ export const STAFF_PERSONAS: StaffPersona[] = [
     id: "onboarding-1",
     name: "Olivia",
     role: "Onboarding & Requests Officer",
+    team: "Superannuation Team",
     department: "Onboarding & Requests",
     role_short:
-      "The front door for every application and member request — new accounts, pensions, withdrawals, rollovers and death notifications.",
+      "The front door of the Superannuation Team — every new account, pension, withdrawal, rollover and death notification starts with Olivia, whether it comes from a member or an adviser.",
     palette: "onboardingOfficer",
     color: "#0ea5e9",
     personality: "Calm, meticulous and welcoming.",
     responsibilities: [
-      "Reads adviser emails, application forms and member requests",
+      "Reads adviser submissions, application forms and member requests",
       "Extracts every field and runs the NIGO (not in good order) checklist",
-      "Checks ID verification, TFN, signatures, fee consent, nominations and investment choices",
+      "Checks ID verification, TFN, signatures, adviser fee consent, nominations and investment choices",
       "Opens the Member Case and sets its priority",
-      "Routes the case to the right specialist team",
+      "Routes the case to the Superannuation or Wealth Management specialists",
     ],
     typical_line:
       "I’ll get this set up properly first time — let me check nothing’s missing.",
@@ -115,14 +133,17 @@ export const STAFF_PERSONAS: StaffPersona[] = [
     ],
     active_in_pipeline: true,
     app_agent_id: "onboarding",
+    agent_name: "Onboarding Agent",
+    agent_tagline: "Every application and request, set up right first time.",
   },
   {
     id: "benefits-1",
     name: "Ben",
     role: "Benefits & Eligibility Assessor",
+    team: "Superannuation Team",
     department: "Benefits & Eligibility",
     role_short:
-      "Applies the trust deed, PDS and super law to every request, and recommends approve, partial or decline.",
+      "The Superannuation Team’s technical specialist — applies the trust deed, PDS and super law to every request, and recommends approve, partial or decline.",
     palette: "benefitsAssessor",
     color: "#6366f1",
     personality: "Analytical, fair and precise.",
@@ -144,14 +165,17 @@ export const STAFF_PERSONAS: StaffPersona[] = [
     ],
     active_in_pipeline: true,
     app_agent_id: "benefits-eligibility",
+    agent_name: "Benefits & Eligibility Agent",
+    agent_tagline: "Applies the trust deed, PDS and super law — and cites every rule.",
   },
   {
     id: "investments-1",
     name: "Ivy",
     role: "Investment Analyst",
+    team: "Wealth Management Team",
     department: "Investment Solutions",
     role_short:
-      "Owns the model-portfolio menu and makes sure every portfolio still fits the client’s plan.",
+      "The Wealth Management Team’s portfolio specialist — owns the model-portfolio menu and makes sure every portfolio still fits the client’s Statement of Advice.",
     palette: "investmentAnalyst",
     color: "#f59e0b",
     personality: "Curious, data-driven and plain-speaking.",
@@ -173,14 +197,17 @@ export const STAFF_PERSONAS: StaffPersona[] = [
     ],
     active_in_pipeline: false,
     app_agent_id: "investment-analyst",
+    agent_name: "Investment Analyst Agent",
+    agent_tagline: "Keeps portfolios on plan — and shows the fees in dollars.",
   },
   {
     id: "fincrime-1",
     name: "Felix",
     role: "Financial Crime Investigator",
+    team: "Wealth Management Team",
     department: "Financial Crime",
     role_short:
-      "Protects members from fraud, scams and identity takeover, and runs AML/CTF checks.",
+      "The risk and compliance partner for both teams — protects members and clients from fraud, scams and identity takeover, and runs AML/CTF checks.",
     palette: "finCrimeInvestigator",
     color: "#ef4444",
     personality: "Observant, sceptical and discreet — never accusatory.",
@@ -202,14 +229,17 @@ export const STAFF_PERSONAS: StaffPersona[] = [
     ],
     active_in_pipeline: false,
     app_agent_id: "financial-crime",
+    agent_name: "Financial Crime Agent",
+    agent_tagline: "Protects members from fraud, scams and identity takeover.",
   },
   {
     id: "transfers-1",
     name: "Rory",
     role: "Transfers & Rollovers Coordinator",
+    team: "Superannuation Team",
     department: "Transfers & Rollovers",
     role_short:
-      "Moves money between Caldova and the outside world — SuperStream rollovers, SMSFs, in-specie transfers and the ATO.",
+      "The Superannuation Team’s rollover specialist — moves money between Caldova and the outside world: SuperStream rollovers, SMSFs, in-specie transfers and the ATO.",
     palette: "transfersCoord",
     color: "#10b981",
     personality: "Organised, persistent and counterparty-savvy.",
@@ -231,14 +261,17 @@ export const STAFF_PERSONAS: StaffPersona[] = [
     ],
     active_in_pipeline: false,
     app_agent_id: "transfers-rollovers",
+    agent_name: "Transfers & Rollovers Agent",
+    agent_tagline: "Moves money between funds safely — and on time.",
   },
   {
     id: "payments-1",
     name: "Penny",
     role: "Payments Officer",
+    team: "Superannuation Team",
     department: "Payments",
     role_short:
-      "Releases money correctly — lump sums, pension payments, death benefits, hardship payments and rollovers out.",
+      "The Superannuation Team’s pensions and payments officer — releases money correctly: lump sums, pension payments, death benefits, hardship payments and rollovers out.",
     palette: "paymentsOfficer",
     color: "#a855f7",
     personality: "Precise, transparent and unflappable.",
@@ -260,14 +293,17 @@ export const STAFF_PERSONAS: StaffPersona[] = [
     ],
     active_in_pipeline: true,
     app_agent_id: "payments",
+    agent_name: "Payments Agent",
+    agent_tagline: "Gets the tax right, then waits for the human approval.",
   },
   {
     id: "comms-1",
     name: "Cara",
     role: "Client Communications Specialist",
+    team: "Wealth Management Team",
     department: "Client Communications",
     role_short:
-      "Talks to members and advisers — clear updates, letters and calls in plain English.",
+      "The client and adviser relationship voice of the Wealth Management Team — clear updates, letters and calls in plain English, for super members and wealth clients alike.",
     palette: "commsSpecialist",
     color: "#ec4899",
     personality: "Warm, clear and empathetic.",
@@ -288,14 +324,17 @@ export const STAFF_PERSONAS: StaffPersona[] = [
     ],
     active_in_pipeline: true,
     app_agent_id: "client-communications",
+    agent_name: "Client Communications Agent",
+    agent_tagline: "Plain-English updates for members and their advisers.",
   },
   {
     id: "lead-1",
     name: "Theo",
     role: "Client Operations Team Leader",
+    team: "Client Operations Leadership",
     department: "Team Leader Office",
     role_short:
-      "Runs the floor — workload, SLAs, IDR clocks, approvals, quality and vulnerable members.",
+      "Leads both the Superannuation and Wealth Management teams from the corner office — workload, SLAs, IDR clocks, approvals, quality and vulnerable members.",
     palette: "teamLeader",
     color: "#14b8a6",
     personality: "Decisive, supportive and commercially aware.",
@@ -317,6 +356,8 @@ export const STAFF_PERSONAS: StaffPersona[] = [
     ],
     active_in_pipeline: false,
     app_agent_id: "team-leader",
+    agent_name: "Team Leader Agent",
+    agent_tagline: "Watches the whole floor — SLAs, IDR clocks and approvals.",
   },
 ];
 
@@ -451,6 +492,13 @@ export const CUSTOMER_PERSONAS: CustomerPersona[] = [
 /* ------------------------------------------------------------------------ */
 /* Helpers                                                                  */
 /* ------------------------------------------------------------------------ */
+
+/** Teams in display order, with the accent used for their office wing and HUD heading. */
+export const STAFF_TEAMS: ReadonlyArray<{ name: StaffTeam; blurb: string; color: string }> = [
+  { name: "Superannuation Team", blurb: "Member accounts, rollovers, pensions", color: "#14b8a6" },
+  { name: "Wealth Management Team", blurb: "Advice, investments, risk, clients", color: "#c9a14a" },
+  { name: "Client Operations Leadership", blurb: "Oversight of both teams", color: "#6b7fb0" },
+];
 
 export function findCustomerPersona(id: ScenarioId): CustomerPersona {
   const p = CUSTOMER_PERSONAS.find((x) => x.id === id);

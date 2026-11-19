@@ -112,7 +112,7 @@ public static class RequestSampleCatalog
                 "Section A — Member details\n" +
                 "Name: Priya Natarajan            Date of birth: 14/02/1992\n" +
                 "Address: Southbank VIC 3006\n" +
-                "Email: priya.natarajan@example.com    Mobile: 0412 555 018\n" +
+                "Email: priya.natarajan@example.com    Mobile: 0491 570 156\n" +
                 "Tax file number: *** *** 418 (supplied)\n" +
                 "Identity verification: Victorian driver licence — verified " +
                 "electronically (DVS) by adviser on 28/10/2026\n" +
@@ -143,7 +143,7 @@ public static class RequestSampleCatalog
             ExpectedFields: new RequestExtractedFields(
                 ClientName: "Priya Natarajan",
                 ClientEmail: "priya.natarajan@example.com",
-                ClientPhone: "0412 555 018",
+                ClientPhone: "0491 570 156",
                 MemberNumber: "CS-2049817 (new)",
                 Product: "Caldova Super — Select",
                 RequestType: RequestTypes.NewAccount,
@@ -190,7 +190,7 @@ public static class RequestSampleCatalog
                 "fund, GW Family Superannuation Fund. Please process this as urgently as " +
                 "possible as I have an investment opportunity that closes next week.\n\n" +
                 "I am overseas at the moment so please do not call my old number — I can " +
-                "only be contacted on my new mobile 0488 902 551 or this email.\n\n" +
+                "only be contacted on my new mobile 0491 570 158 or this email.\n\n" +
                 "The completed rollover form, my SMSF details and a copy of my drivers " +
                 "licence are attached.\n\n" +
                 "Thank you\n" +
@@ -203,7 +203,7 @@ public static class RequestSampleCatalog
                 "CALDOVA SUPER — REQUEST TO ROLL OVER TO A SELF-MANAGED SUPER FUND\n" +
                 "=================================================================\n\n" +
                 "Member: Grace Williams        DOB: 22/07/1963        Member no.: CS-1058220\n" +
-                "Contact details (updated 02/11/2026): mobile 0488 902 551, " +
+                "Contact details (updated 02/11/2026): mobile 0491 570 158, " +
                 "email grace.w.super@mailbox.example\n" +
                 "Amount: Whole balance (approx. $612,400)\n\n" +
                 "Receiving SMSF\n" +
@@ -219,7 +219,7 @@ public static class RequestSampleCatalog
             ExpectedFields: new RequestExtractedFields(
                 ClientName: "Grace Williams",
                 ClientEmail: "grace.williams@example.com",
-                ClientPhone: "0403 118 220",
+                ClientPhone: "0491 570 157",
                 MemberNumber: "CS-1058220",
                 Product: "Caldova Super — Select",
                 RequestType: RequestTypes.RolloverOutSmsf,
@@ -234,7 +234,7 @@ public static class RequestSampleCatalog
                     "notice (Italy, from 18/10/2026) is on file. Verified contacts shown are " +
                     "the pre-change details.",
                 Amount: "AUD 612,400 (whole balance)",
-                PreferredContact: "Phone — verified pre-change number 0403 118 220 only"),
+                PreferredContact: "Phone — verified pre-change number 0491 570 157 only"),
             ExpectedNigo: new[]
             {
                 new NigoCheck("contact-change", "Recent change of details", "action", "Mobile and email changed by phone on 02/11/2026; this request came from the NEW email. Only call back on the pre-change verified number."),
@@ -285,7 +285,7 @@ public static class RequestSampleCatalog
                 "CALDOVA PENSION — ACCOUNT-BASED PENSION APPLICATION\n" +
                 "==================================================\n\n" +
                 "Member: George Papadopoulos     DOB: 03/04/1960 (age 66)     Member no.: CS-1077881\n" +
-                "Address: Oakleigh VIC 3166     Email: georgep@example.com     Mobile: 0419 331 077\n" +
+                "Address: Oakleigh VIC 3166     Email: georgep@example.com     Mobile: 0491 570 159\n" +
                 "Condition of release: Age 65 or over (unrestricted non-preserved benefits)\n" +
                 "Existing retirement-phase income streams: None\n\n" +
                 "Amount to commence pension: $1,250,000 (transfer from accumulation CS-1077881)\n" +
@@ -300,7 +300,7 @@ public static class RequestSampleCatalog
             ExpectedFields: new RequestExtractedFields(
                 ClientName: "George Papadopoulos",
                 ClientEmail: "georgep@example.com",
-                ClientPhone: "0419 331 077",
+                ClientPhone: "0491 570 159",
                 MemberNumber: "CS-1077881 → new pension CP-3077881",
                 Product: "Caldova Super — Select → Caldova Pension",
                 RequestType: RequestTypes.PensionCommencement,
@@ -351,7 +351,7 @@ public static class RequestSampleCatalog
                 "I've missed something.\n\n" +
                 "Thanks,\n" +
                 "Tom Bradley\n" +
-                "0422 304 120\n\n" +
+                "0491 570 110\n\n" +
                 "Attachments: Hardship-Application-Bradley.pdf; " +
                 "Centrelink-Confirmation-09Nov2026.pdf; Overdue-notices.pdf",
             FormFileName: "Hardship-Application-Bradley.pdf",
@@ -359,7 +359,7 @@ public static class RequestSampleCatalog
                 "CALDOVA SUPER — APPLICATION FOR EARLY RELEASE: SEVERE FINANCIAL HARDSHIP\n" +
                 "=========================================================================\n\n" +
                 "Member: Tom Bradley       DOB: 19/08/1979 (age 47)       Member no.: CS-1030412\n" +
-                "Address: Coburg VIC 3058       Email: tom.bradley@example.com       Mobile: 0422 304 120\n" +
+                "Address: Coburg VIC 3058       Email: tom.bradley@example.com       Mobile: 0491 570 110\n" +
                 "Product: Caldova Super — Essential (direct member, no adviser)\n\n" +
                 "Amount requested (gross): $15,000\n" +
                 "Reason: Unable to meet reasonable and immediate family living expenses — " +
@@ -373,7 +373,7 @@ public static class RequestSampleCatalog
             ExpectedFields: new RequestExtractedFields(
                 ClientName: "Tom Bradley",
                 ClientEmail: "tom.bradley@example.com",
-                ClientPhone: "0422 304 120",
+                ClientPhone: "0491 570 110",
                 MemberNumber: "CS-1030412",
                 Product: "Caldova Super — Essential",
                 RequestType: RequestTypes.FinancialHardship,
@@ -425,7 +425,7 @@ public static class RequestSampleCatalog
                 "Kind regards,\n" +
                 "Robert Chen\n" +
                 "Box Hill VIC\n" +
-                "0433 190 420\n\n" +
+                "0491 570 006\n\n" +
                 "Attachments: Death-Certificate-Mei-Chen-certified.pdf; " +
                 "Death-Benefit-Claim-Form.pdf; ID-Robert-Chen.pdf; ID-Lily-Chen.pdf",
             FormFileName: "Death-Benefit-Claim-Form.pdf",
@@ -436,7 +436,7 @@ public static class RequestSampleCatalog
                 "Account: Caldova Pension CP-3019042 (account-based pension), approx. balance $486,200\n" +
                 "Adviser on the account: Marcus Tan, Bayside Financial Partners (ADV-20871)\n\n" +
                 "Claimant 1: Robert Chen — son — DOB 30/01/1974 — Box Hill VIC 3128 — " +
-                "robert.chen@example.com — 0433 190 420\n" +
+                "robert.chen@example.com — 0491 570 006\n" +
                 "Claimant 2: Lily Chen — daughter — DOB 11/05/1977 — Doncaster VIC 3108 — " +
                 "lily.chen@example.com\n" +
                 "Relationship to the deceased: adult children; neither was financially " +
@@ -452,7 +452,7 @@ public static class RequestSampleCatalog
             ExpectedFields: new RequestExtractedFields(
                 ClientName: "Robert Chen",
                 ClientEmail: "robert.chen@example.com",
-                ClientPhone: "0433 190 420",
+                ClientPhone: "0491 570 006",
                 MemberNumber: "CP-3019042 (Mei Chen, deceased)",
                 Product: "Caldova Pension",
                 RequestType: RequestTypes.DeathBenefit,

@@ -248,7 +248,7 @@ internal static class ClientCommunicationsDrafter
             WhatsNext:
             [
                 "Send the reassurance email only to grace.williams@example.com (pre-change verified email) — after human approval.",
-                "A specialist calls Grace on 0403 118 220 at a time that suits her in Italy to set up new online access; the payment and rollover block stays until she re-verifies.",
+                "A specialist calls Grace on 0491 570 157 at a time that suits her in Italy to set up new online access; the payment and rollover block stays until she re-verifies.",
                 "Offer IDCARE's free identity support (1800 595 160).",
                 "Internal only: the SMR decision sits with the AML/CTF compliance officer (due within 3 business days). Never mention it to Grace or anyone outside the team.",
             ]);
@@ -270,12 +270,12 @@ internal static class ClientCommunicationsDrafter
 
                 **What we've done**
                 - Stopped and cancelled the request — no money has moved.
-                - Restored your previous contact details (this email address and 0403 118 220) and removed the ones that were added.
+                - Restored your previous contact details (this email address and 0491 570 157) and removed the ones that were added.
                 - Locked online access to your account and reset your login.
                 - Added extra protection: we won't process any withdrawal or rollover until we've confirmed your identity with you directly.
 
                 **What happens next**
-                - One of our specialists will call you on 0403 118 220, at a time that suits you in Italy, to set up your new online access.
+                - One of our specialists will call you on 0491 570 157, at a time that suits you in Italy, to set up your new online access.
                 - You don't need to do anything else with your account right now.
 
                 **Free support**
@@ -285,7 +285,7 @@ internal static class ClientCommunicationsDrafter
                 We will never ask for your password or a one-time code by phone, email or SMS, and this email contains no links. If anyone contacts you about moving your super, please call us first.
 
                 **Questions?**
-                Call us on {CaldovaPhone} ({ServiceHours}). If you're calling from overseas, just reply to this email and we'll call you back on 0403 118 220.
+                Call us on {CaldovaPhone} ({ServiceHours}). If you're calling from overseas, just reply to this email and we'll call you back on 0491 570 157.
 
                 {SuperComplaints("reply to this email")}
 
@@ -302,7 +302,7 @@ internal static class ClientCommunicationsDrafter
                 Pass("Reassurance", "States the balance ($612,400) is intact and no money moved."),
                 Pass("IDCARE referral", "Free identity support — 1800 595 160, www.idcare.org."),
                 Pass("No links or code requests", "Reminds Grace we never ask for passwords or one-time codes."),
-                Pass("Next steps, contact & complaint rights", "Call-back on 0403 118 220; Caldova IDR (45 days) then AFCA."),
+                Pass("Next steps, contact & complaint rights", "Call-back on 0491 570 157; Caldova IDR (45 days) then AFCA."),
             ],
             ApprovalRequired: true,
             ApprovalReason: "Communication to a fraud victim — must be approved by a human before it is sent.");
@@ -312,7 +312,7 @@ internal static class ClientCommunicationsDrafter
             Audience: "sms",
             AudienceLabel: "SMS",
             Channel: "SMS (pre-change verified mobile only)",
-            Recipient: $"{r.ClientName} · 0403 118 220 — never 0488 902 551",
+            Recipient: $"{r.ClientName} · 0491 570 157 — never 0491 570 158",
             Subject: null,
             Body: $"Caldova: Hi Grace, as discussed, your super is safe and no money has moved. Details are in your usual email. We never ask for codes or passwords. {CaldovaPhone}",
             Tone: "Brief and reassuring; no links.",
@@ -331,7 +331,7 @@ internal static class ClientCommunicationsDrafter
             Summary: summary,
             VulnerabilityFlags:
             [
-                "Scam / identity-takeover victim — contact only on the pre-change verified details (grace.williams@example.com, 0403 118 220).",
+                "Scam / identity-takeover victim — contact only on the pre-change verified details (grace.williams@example.com, 0491 570 157).",
                 "Member is travelling overseas (Italy) — call at a time that suits her; be calm and unhurried.",
                 "Never mention any report to authorities (SMR) — tipping-off risk.",
             ],

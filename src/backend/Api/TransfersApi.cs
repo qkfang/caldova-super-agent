@@ -89,7 +89,7 @@ public static class TransfersApi
             var lookupJson = TransfersMcpTools.Serialize(TransfersMcpTools.LookupFundsResult(plan.CounterpartyQuery));
             var svsJson = plan.Svs is null ? null : TransfersMcpTools.Serialize(plan.Svs);
             var pdfJson = TransfersMcpTools.Serialize(TransfersMcpTools.DownloadPayload(pdf, baseUrl));
-            var prompt = BuildPrompt(record, plan, mcpEnabled, lookupJson, svsJson, pdfJson);
+            var prompt = BuildPrompt(record, plan, mcpEnabled, lookupJson, svsJson, pdfJson, pdf, pdfUrl);
 
             string? createError = null;
 
@@ -206,7 +206,8 @@ public static class TransfersApi
     // ─────────────────────────────────────────────────────────────────────
 
     private static string BuildPrompt(
-        CaseRecord c, TransferPlan plan, bool mcpEnabled, string lookupJson, string? svsJson, string pdfJson)
+        CaseRecord c, TransferPlan plan, bool mcpEnabled, string lookupJson, string? svsJson, string pdfJson,
+        TransferRequestPdfRecord pdf, string pdfRelativeUrl)
     {
         var sb = new StringBuilder();
         sb.AppendLine("MEMBER CASE FOR TRANSFERS & ROLLOVERS");
@@ -257,8 +258,8 @@ public static class TransfersApi
             sb.AppendLine($"{step++}. Call generateTransferRequestPdf for this case with the transfers you settle on (use [] if none) and include the returned downloadUrl in section 3.");
             sb.AppendLine($"{step}. Write your report in the required output format.");
             sb.AppendLine();
-            sb.AppendLine("The service has already generated a request PDF for the case file — you may reference it as well:");
-            sb.AppendLine(pdfJson);
+            sb.AppendLine($"The service has already generated a request PDF for this app's case file ({pdf.FileName}, link {pdfRelativeUrl}).");
+            sb.AppendLine("Use the downloadUrl returned by your own generateTransferRequestPdf call in section 3.");
         }
         else
         {

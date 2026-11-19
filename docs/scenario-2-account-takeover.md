@@ -36,7 +36,7 @@ No one is accused. Humans make the block and suspicious matter report (SMR) deci
 **Grace Williams** is a retired school principal from Williamstown.
 
 - She is 63 and on a long-planned trip through Italy. She left Melbourne Airport on 18 Oct 2026, and a travel notice is on file.
-- Contact: grace.williams@example.com · verified mobile 0403 118 220 (the number on file **before** the change).
+- Contact: grace.williams@example.com · verified mobile 0491 570 157 (the number on file **before** the change).
 - She is independent and careful, and is rattled when she hears what happened.
 
 > "I'm in Florence — I haven't asked anyone to move my super!"
@@ -46,7 +46,7 @@ No one is accused. Humans make the block and suspicious matter report (SMR) deci
 | When | What happened |
 |---|---|
 | Sun 18 Oct 2026 | Grace leaves Melbourne Airport for Italy. Her travel notice is on file. |
-| Mon 2 Nov 2026, 10:42 | A caller impersonating Grace phones the contact centre. The caller passes knowledge-based checks using personal data that was likely exposed in a 2025 data breach, and says she "lost her phone overseas". The mobile is changed to 0488 902 551 and the email to grace.w.super@mailbox.example. A change-of-details alert goes to Grace's **old** email, which she doesn't read while travelling. |
+| Mon 2 Nov 2026, 10:42 | A caller impersonating Grace phones the contact centre. The caller passes knowledge-based checks using personal data that was likely exposed in a 2025 data breach, and says she "lost her phone overseas". The mobile is changed to 0491 570 158 and the email to grace.w.super@mailbox.example. A change-of-details alert goes to Grace's **old** email, which she doesn't read while travelling. |
 | Tue 3 Nov 2026, 21:14 | Online access is registered from a **new device**. The IP address is geolocated to **Sydney**. The MFA code goes to the **new** mobile. |
 | Fri 6 Nov 2026, 07:52 | An email request arrives to roll over the **full balance ($612,400)** to the "GW Family Superannuation Fund", about 93 hours after the contact details were changed. The SMSF's ABN was registered on 28 Oct 2026, 9 days earlier. The bank account is in the name "G Williams Holdings Pty Ltd". A driver licence image is attached. |
 
@@ -99,7 +99,7 @@ No one is accused. Humans make the block and suspicious matter report (SMR) deci
 - **Recommended actions:**
   1. Hold the rollover.
   2. Lock online access.
-  3. Call Grace back on the **pre-change verified number** (0403 118 220), never the new one.
+  3. Call Grace back on the **pre-change verified number** (0491 570 157), never the new one.
   4. Refer Grace to **IDCARE** for identity support.
   5. Consider a **suspicious matter report (SMR)** to AUSTRAC. It is due within **3 business days**, and lodging it is a human decision.
 - The language is neutral throughout. Grace is treated as the likely **victim**, not a suspect.
@@ -131,7 +131,7 @@ No one is accused. Humans make the block and suspicious matter report (SMR) deci
 
 ### 7. Reaching Grace — Client Communications Agent (Cara)
 
-- The **Client Communications Agent** contacts Grace only through her **previous verified** email and phone (grace.williams@example.com, 0403 118 220), never the changed details.
+- The **Client Communications Agent** contacts Grace only through her **previous verified** email and phone (grace.williams@example.com, 0491 570 157), never the changed details.
 - Grace confirms she never asked for a rollover. Her credentials are reset.
 - Cara's agent drafts a calm **reassurance letter** that covers:
   - what happened and what Caldova did

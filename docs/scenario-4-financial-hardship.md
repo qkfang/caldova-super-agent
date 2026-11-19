@@ -38,7 +38,7 @@ The agents handle the rules; the humans handle the person.
 - He is 47. His small café closed in mid-2025.
 - He has received **JobSeeker** continuously since Mon 6 Apr 2026, which is **31 weeks** by 9 Nov 2026.
 - He is behind on his mortgage and utility bills.
-- Contact: tom.bradley@example.com · 0422 304 120.
+- Contact: tom.bradley@example.com · 0491 570 110.
 - He is proud, embarrassed and stressed.
 
 > "I never thought I'd need to touch my super — I just need to catch up on the bills."

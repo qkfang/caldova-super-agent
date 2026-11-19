@@ -65,7 +65,8 @@ public static class AgentMetadataApi
         "MCP · payments_checkAuthorityLimit — flag payments that need Team Leader approval",
         "MCP · payments_requestApproval — raise an approval and post an Adaptive Card to Microsoft Teams (uses teams_sendApprovalCard)",
         "MCP · payments_getApprovalStatus — poll the approval state",
-        "MCP · payments_releasePayment — release the payment (gated, requires prior approval)"
+        "MCP · payments_releasePayment — release the payment (gated, requires prior approval)",
+        "MCP · teams_sendApprovalCard — deliver the Caldova payment-approval Adaptive Card to the approver in Microsoft Teams"
     ];
 
     private static readonly string[] NoMcpTools = Array.Empty<string>();

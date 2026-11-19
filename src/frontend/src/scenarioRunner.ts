@@ -404,7 +404,7 @@ export class ScenarioRunner {
 
     // Initial focus on the client entering the office.
     this.officeCamera.focusNode(inflight.customer.character.root, {
-      radius: 20,
+      radius: 30,
       beta: Math.PI / 3.2,
       durationSec: 1.2,
     });
@@ -416,7 +416,7 @@ export class ScenarioRunner {
     const ch = this.sim.getCharacterById(info.characterId);
     if (ch) {
       this.officeCamera.focusNode(ch.root, {
-        radius: 16,
+        radius: 26,
         beta: Math.PI / 3.4,
         durationSec: 1.0,
       });

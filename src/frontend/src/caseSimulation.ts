@@ -9,7 +9,7 @@ import {
   Vector3,
 } from "@babylonjs/core";
 import { OfficeLayout } from "./officeScene";
-import { PALETTES, VoxelCharacter, type VoxelCharacterPalette } from "./voxelCharacter";
+import { OFFICE_CHARACTER_SCALE, PALETTES, VoxelCharacter, type VoxelCharacterPalette } from "./voxelCharacter";
 import {
   CUSTOMER_PERSONAS,
   STAFF_PERSONAS,
@@ -18,6 +18,7 @@ import {
   type ScenarioId,
   type StaffPersona,
   type StaffRole,
+  type StaffTeam,
 } from "./personaData";
 import {
   getBeatNarration,
@@ -26,7 +27,7 @@ import {
   type CaseDecisionStatus,
   type ScenarioNarrationsJson,
 } from "./scenarios";
-import { APP_BASE_URL } from "./stepGate";
+import { APP_BASE_URL, STAGE_CONFIG } from "./stepGate";
 
 /**
  * Caldova Client Operations staff roles, mirroring the cast in
@@ -166,7 +167,7 @@ export interface SimLogger {
   setMetric(name: "submitted" | "processing" | "approved" | "rejected", value: number): void;
   log(message: string, kind?: "info" | "good" | "bad" | "warn"): void;
   setAgentStatus(id: string, busy: boolean, activity: string): void;
-  registerAgent(info: { id: string; name: string; role: AgentRole; color: string; palette: VoxelCharacterPalette }): void;
+  registerAgent(info: { id: string; name: string; role: AgentRole; team: StaffTeam; color: string; palette: VoxelCharacterPalette }): void;
 }
 
 /** Move a transform along XZ toward `target` at a given speed (m/s). */
@@ -226,14 +227,14 @@ interface CubicleZone {
  * regular cubicle, so it's modelled identically here).
  */
 const CUBICLE_ZONES: CubicleZone[] = [
-  { cx: -21, cz: 0 }, // Onboarding
-  { cx: -11, cz: 0 }, // Transfers
-  { cx: -1, cz: 0 }, // Payments
-  { cx: 9, cz: 0 }, // Comms
-  { cx: -11, cz: 10 }, // Benefits
-  { cx: -1, cz: 10 }, // Investments
-  { cx: 9, cz: 10 }, // Financial Crime
-  { cx: -21, cz: 10 }, // Team Leader
+  { cx: -21, cz: 0 }, // Onboarding (Superannuation wing)
+  { cx: -11, cz: 0 }, // Benefits (Superannuation wing)
+  { cx: -1, cz: 0 }, // Transfers (Superannuation wing)
+  { cx: 9, cz: 0 }, // Payments (Superannuation wing)
+  { cx: -11, cz: 10 }, // Investments (Wealth Management wing)
+  { cx: -1, cz: 10 }, // Comms (Wealth Management wing)
+  { cx: 9, cz: 10 }, // Financial Crime (Wealth Management wing)
+  { cx: -21, cz: 10 }, // Head of Client Operations (Team Leader)
 ];
 
 /** Front aisle Z (south of front-row cubicles, north of lobby furniture). */
@@ -500,6 +501,7 @@ export class CaseSimulation {
       const home = homeFor(persona.role);
       const palette = PALETTES[persona.palette];
       const ch = new VoxelCharacter(this.scene, persona.id, palette);
+      ch.root.scaling.setAll(OFFICE_CHARACTER_SCALE);
       ch.root.position = home.clone();
       ch.root.position.y = 0.2;
       const agent: StaffAgent = {
@@ -525,6 +527,7 @@ export class CaseSimulation {
         id: persona.id,
         name: persona.name,
         role: persona.role,
+        team: persona.team,
         color: persona.color,
         palette,
       });
@@ -565,6 +568,7 @@ export class CaseSimulation {
 
     const palette = PALETTES[scenario.palette];
     const ch = new VoxelCharacter(this.scene, `cust_${caseId}`, palette);
+    ch.root.scaling.setAll(OFFICE_CHARACTER_SCALE);
     ch.root.position = this.layout.spawnPoint.clone();
     ch.root.position.y = 0.2;
     // Slight lateral jitter so they don't overlap (only for unscripted spawns)
@@ -1382,6 +1386,7 @@ export class CaseSimulation {
         id: staff.id,
         name: staff.name,
         role: staff.role,
+        team: staff.persona.team,
         color: staff.color,
         palette: PALETTES[staff.persona.palette],
         personality: staff.persona.personality,
@@ -1398,6 +1403,12 @@ export class CaseSimulation {
         agentUrl: `${APP_BASE_URL}/agents/${encodeURIComponent(
           staff.persona.app_agent_id,
         )}`,
+        agent: {
+          name: staff.persona.agent_name,
+          tagline: staff.persona.agent_tagline,
+          subAgents:
+            Object.values(STAGE_CONFIG).find((s) => s.role === staff.role)?.agents ?? [],
+        },
       };
     }
 
@@ -1437,6 +1448,7 @@ export class CaseSimulation {
           status: customer.memberCase.status,
         },
         agentUrl: null,
+        agent: null,
       };
     }
 
@@ -1593,6 +1605,8 @@ export interface CharacterProfile {
   id: string;
   name: string;
   role: string;
+  /** Staff only — team the staff member belongs to. */
+  team?: string;
   color: string;
   /** Voxel palette so the profile card can render a matching character bust. */
   palette: VoxelCharacterPalette;
@@ -1619,6 +1633,12 @@ export interface CharacterProfile {
    * clients.
    */
   agentUrl: string | null;
+  /** Staff only — the AI agent working behind this person ("under the hood"). */
+  agent: {
+    name: string;
+    tagline: string;
+    subAgents: { name: string; description: string }[];
+  } | null;
 }
 
 function describeTask(task: Task): string {

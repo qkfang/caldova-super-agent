@@ -4,7 +4,7 @@
 /* ----- Markdown-rendered agent output ----------------------------------- */
 /* Applied to elements whose innerHTML is set via window.zcRenderMarkdown(). */
 .agent-md {
-    color: var(--cw-text, #e8eef9);
+    color: var(--cw-text, #0b1f3a);
     font-family: inherit;
     font-size: 0.92rem;
     line-height: 1.55;
@@ -22,7 +22,7 @@
 .agent-md h4,
 .agent-md h5,
 .agent-md h6 {
-    color: var(--cw-text-strong, #fff);
+    color: var(--cw-text-strong, #0b1f3a);
     margin: 1rem 0 0.45rem 0;
     line-height: 1.3;
     font-weight: 600;
@@ -44,10 +44,10 @@
 .agent-md li > p {
     margin: 0 0 0.35rem 0;
 }
-.agent-md strong { color: var(--cw-text-strong, #fff); font-weight: 600; }
+.agent-md strong { color: var(--cw-text-strong, #0b1f3a); font-weight: 600; }
 .agent-md em { color: inherit; }
 .agent-md a {
-    color: var(--accent, #38bdf8);
+    color: color-mix(in srgb, var(--accent, #38bdf8) 60%, #0b1f3a);
     text-decoration: underline;
     text-underline-offset: 2px;
 }
@@ -62,8 +62,8 @@
 .agent-md pre {
     margin: 0.5rem 0 0.75rem 0;
     padding: 0.65rem 0.85rem;
-    background: rgba(15, 22, 38, 0.7);
-    border: 1px solid rgba(120, 150, 200, 0.18);
+    background: #f6f7f9;
+    border: 1px solid rgba(16, 38, 72, 0.112);
     border-radius: 8px;
     overflow-x: auto;
     font-size: 0.85rem;
@@ -80,12 +80,12 @@
     padding: 0.35rem 0.85rem;
     border-left: 3px solid color-mix(in srgb, var(--accent, #38bdf8) 60%, transparent);
     background: rgba(120, 150, 200, 0.08);
-    color: var(--cw-muted, #97a3b6);
+    color: var(--cw-muted, #5d6b7e);
     border-radius: 0 6px 6px 0;
 }
 .agent-md hr {
     border: 0;
-    border-top: 1px solid rgba(120, 150, 200, 0.22);
+    border-top: 1px solid rgba(16, 38, 72, 0.136);
     margin: 0.85rem 0;
 }
 .agent-md table {
@@ -96,14 +96,14 @@
 }
 .agent-md th,
 .agent-md td {
-    border: 1px solid rgba(120, 150, 200, 0.22);
+    border: 1px solid rgba(16, 38, 72, 0.136);
     padding: 0.4rem 0.6rem;
     text-align: left;
     vertical-align: top;
 }
 .agent-md th {
     background: rgba(120, 150, 200, 0.12);
-    color: var(--cw-text-strong, #fff);
+    color: var(--cw-text-strong, #0b1f3a);
     font-weight: 600;
 }
 .agent-md-fallback {
@@ -145,127 +145,137 @@
 .back-link {
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
+    gap: 0.4rem;
     margin-bottom: 0.85rem;
-    color: var(--cw-muted, #97a3b6);
+    color: var(--cw-muted);
     text-decoration: none;
     font-size: 0.85rem;
-    letter-spacing: 0.2px;
+    font-weight: 500;
 }
 .back-link:hover {
-    color: var(--cw-text-strong, #fff);
+    color: var(--cw-primary);
     text-decoration: none;
 }
 
+/* Agent and scenario page hero — a light banner like a fund site's page
+   header: soft blue-to-ivory wash, navy type, the department accent as a
+   top rule and gentle glow, and gold hairline rings. */
 .agent-header {
     position: relative;
-    background: rgba(20, 28, 46, 0.82);
-    border: 1px solid rgba(120, 150, 200, 0.22);
-    border-radius: 16px;
-    padding: 1.4rem 1.6rem 1.5rem 1.6rem;
-    margin-bottom: 1.25rem;
-    backdrop-filter: blur(8px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    isolation: isolate;
     overflow: hidden;
+    margin-bottom: 1.5rem;
+    padding: 1.4rem 2rem 2rem 2rem;
+    border-radius: 22px;
+    color: var(--cw-text);
+    border: 1px solid var(--cw-line);
+    background:
+        radial-gradient(ellipse 45% 95% at 100% 0%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 66%),
+        linear-gradient(135deg, #eaf1fb 0%, #f4f7fc 55%, #fbf8f1 100%);
+    box-shadow: var(--cw-shadow-sm);
 }
 .agent-header::before {
     content: "";
     position: absolute;
     left: 0; top: 0; right: 0;
     height: 4px;
-    background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 30%, transparent));
+    background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 15%, transparent));
 }
 .agent-header::after {
     content: "";
     position: absolute;
-    right: -80px; top: -80px;
-    width: 260px; height: 260px;
+    z-index: -1;
+    right: -170px; bottom: -300px;
+    width: 460px; height: 460px;
     border-radius: 50%;
-    background: radial-gradient(circle, color-mix(in srgb, var(--accent) 18%, transparent) 0%, transparent 65%);
+    border: 1px solid rgba(201, 162, 74, 0.42);
+    outline: 1px solid rgba(201, 162, 74, 0.22);
+    outline-offset: 56px;
     pointer-events: none;
 }
+.agent-header .back-link { color: var(--cw-muted); margin-bottom: 1.1rem; }
+.agent-header .back-link:hover { color: var(--cw-primary); }
 .agent-header-row {
     display: flex;
-    gap: 1.1rem;
+    gap: 1.25rem;
     align-items: flex-start;
     position: relative;
     z-index: 1;
 }
 .agent-header-icon {
-    font-size: 1.9rem;
+    font-size: 2rem;
     line-height: 1;
-    width: 64px;
-    height: 64px;
-    border-radius: 14px;
-    background: color-mix(in srgb, var(--accent) 20%, rgba(20, 28, 46, 0.6));
-    border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+    width: 72px;
+    height: 72px;
+    border-radius: 18px;
+    background: #fff;
+    border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--cw-line));
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 12%, transparent), var(--cw-shadow-sm);
     display: grid;
     place-items: center;
     flex-shrink: 0;
 }
 .agent-header h1 {
-    margin: 0.1rem 0 0.2rem 0;
-    font-size: 1.7rem;
-    font-weight: 700;
-    color: #fff;
-    letter-spacing: -0.2px;
+    margin: 0.2rem 0 0.25rem 0;
+    font-size: clamp(1.8rem, 2.6vw, 2.35rem);
+    line-height: 1.15;
+    color: var(--cw-ink);
 }
 .agent-header-dept {
     text-transform: uppercase;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.16em;
     font-size: 0.72rem;
     font-weight: 700;
-    color: var(--accent);
+    color: color-mix(in srgb, var(--accent) 60%, var(--cw-ink));
 }
 .agent-header-persona {
-    color: rgba(214, 228, 245, 0.78);
-    font-size: 0.95rem;
+    color: var(--cw-text-2);
+    font-size: 0.98rem;
 }
 .agent-header .tagline {
-    margin: 0.45rem 0 0 0;
-    color: rgba(238, 242, 247, 0.85);
-    font-style: italic;
-    font-size: 0.95rem;
+    margin: 0.55rem 0 0 0;
+    max-width: 52rem;
+    color: var(--cw-text);
+    font-size: 1.02rem;
 }
-
+/* Content cards — white, hairline border, serif section titles. */
 .panel {
-    background: rgba(20, 28, 46, 0.78);
-    border: 1px solid rgba(120, 150, 200, 0.18);
-    border-radius: 14px;
-    padding: 1.3rem 1.5rem;
+    background: var(--cw-surface);
+    border: 1px solid var(--cw-line);
+    border-radius: 18px;
+    padding: 1.6rem 1.8rem;
     margin-bottom: 1.25rem;
-    backdrop-filter: blur(8px);
-    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.35);
+    box-shadow: var(--cw-shadow-sm);
 }
 .panel h2 {
-    margin-top: 0;
-    font-size: 0.78rem;
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    color: var(--cw-muted, #97a3b6);
-    font-weight: 700;
-    margin-bottom: 0.85rem;
+    margin: 0 0 1rem 0;
+    font-size: 1.45rem;
+    line-height: 1.25;
+    color: var(--cw-ink);
 }
 .panel h3 {
-    font-size: 0.95rem;
-    margin: 0 0 0.4rem 0;
-    color: #fff;
-    font-weight: 600;
+    font-size: 1rem;
+    margin: 0 0 0.45rem 0;
+    color: var(--cw-ink);
+    font-weight: 650;
 }
-.panel > p { color: rgba(238, 242, 247, 0.86); line-height: 1.55; }
-.panel .muted { color: var(--cw-muted, #97a3b6); font-size: 0.92rem; }
-.panel ul { margin: 0; padding-left: 1.1rem; color: rgba(238, 242, 247, 0.86); }
-.panel ul li { margin-bottom: 0.3rem; line-height: 1.5; }
-.panel ul li::marker { color: var(--accent, var(--cw-accent)); }
+.panel > p { color: var(--cw-text); line-height: 1.65; }
+.panel .muted { color: var(--cw-muted); font-size: 0.92rem; }
+.panel ul { margin: 0; padding-left: 1.15rem; color: var(--cw-text); }
+.panel ul li { margin-bottom: 0.35rem; line-height: 1.55; }
+.panel ul li::marker { color: color-mix(in srgb, var(--accent, var(--cw-accent)) 60%, #0b1f3a); }
+.panel table td,
+.panel table th,
+.agent-md td { font-variant-numeric: tabular-nums; }
 .approval {
-    color: rgba(238, 242, 247, 0.86);
-    background: rgba(110, 193, 255, 0.08);
-    border: 1px solid rgba(110, 193, 255, 0.22);
-    border-radius: 8px;
-    padding: 0.55rem 0.8rem;
-    font-size: 0.92rem;
+    color: var(--cw-text);
+    background: var(--cw-primary-soft);
+    border: 1px solid #cddcf5;
+    border-left: 4px solid var(--cw-primary);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    font-size: 0.94rem;
 }
-
 .two-col {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -277,10 +287,10 @@
 /* "Demo" — a single general description, no scenarios. */
 .demo {
     position: relative;
-    border: 1px solid rgba(120, 150, 200, 0.2);
-    border-radius: 12px;
-    padding: 1rem 1.15rem 1.1rem 1.15rem;
-    background: rgba(15, 22, 38, 0.55);
+    border: 1px solid var(--cw-line);
+    border-radius: 14px;
+    padding: 1.1rem 1.25rem 1.2rem 1.4rem;
+    background: var(--cw-surface-2);
     overflow: hidden;
 }
 .demo::before {
@@ -292,13 +302,13 @@
 }
 .demo p {
     margin: 0 0 0.65rem 0;
-    color: rgba(238, 242, 247, 0.88);
+    color: #344054;
     font-size: 0.95rem;
     line-height: 1.6;
 }
 .demo p:last-child { margin-bottom: 0; }
 
-/* "Scenario" — scripted claim journey with one step per AI agent. */
+/* "Scenario" — scripted member-case journey with one step per AI agent. */
 .scenario-steps {
     list-style: none;
     counter-reset: scenario-step;
@@ -310,10 +320,10 @@
 }
 .scenario-step {
     position: relative;
-    border: 1px solid rgba(120, 150, 200, 0.22);
-    border-radius: 12px;
-    padding: 0.95rem 1.1rem 1rem 1.1rem;
-    background: rgba(15, 22, 38, 0.55);
+    border: 1px solid var(--cw-line);
+    border-radius: 14px;
+    padding: 1.05rem 1.25rem 1.1rem 1.4rem;
+    background: var(--cw-surface-2);
     overflow: hidden;
 }
 .scenario-step::before {
@@ -336,8 +346,8 @@
     border-radius: 999px;
     display: grid;
     place-items: center;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid var(--accent, var(--cw-accent));
+    background: var(--cw-navy-800);
+    border: 2px solid color-mix(in srgb, var(--accent, var(--cw-accent)) 55%, #fff);
     color: #fff;
     font-weight: 700;
     font-size: 0.85rem;
@@ -347,7 +357,7 @@
 .scenario-step-title h3 {
     margin: 0;
     font-size: 1rem;
-    color: #fff;
+    color: #0b1f3a;
     font-weight: 600;
     letter-spacing: 0.2px;
 }
@@ -356,7 +366,7 @@
     align-items: center;
     gap: 0.4rem;
     margin-top: 0.2rem;
-    color: rgba(238, 242, 247, 0.78);
+    color: #475467;
     font-size: 0.85rem;
 }
 .scenario-step-agent-icon {
@@ -365,7 +375,7 @@
 }
 .scenario-step-summary {
     margin: 0 0 0.55rem 0;
-    color: rgba(238, 242, 247, 0.88);
+    color: #344054;
     font-size: 0.92rem;
     line-height: 1.55;
 }
@@ -373,21 +383,21 @@
     font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: rgba(255, 255, 255, 0.55);
+    color: #5d6b7e;
     font-weight: 600;
     margin: 0.4rem 0 0.3rem 0;
 }
 .scenario-step-actions {
     margin: 0;
     padding-left: 1.1rem;
-    color: rgba(238, 242, 247, 0.86);
+    color: #344054;
 }
 .scenario-step-actions li {
     margin-bottom: 0.3rem;
     line-height: 1.5;
     font-size: 0.92rem;
 }
-.scenario-step-actions li::marker { color: var(--accent, var(--cw-accent)); }
+.scenario-step-actions li::marker { color: color-mix(in srgb, var(--accent, var(--cw-accent)) 60%, #0b1f3a); }
 
 .other-agents {
     display: flex;
@@ -400,48 +410,48 @@
     gap: 0.45rem;
     padding: 0.4rem 0.8rem;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(120, 150, 200, 0.22);
+    background: rgba(16, 38, 72, 0.028);
+    border: 1px solid rgba(16, 38, 72, 0.136);
     text-decoration: none;
-    color: rgba(238, 242, 247, 0.85);
+    color: #344054;
     font-size: 0.85rem;
     transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 .other-agent:hover {
-    background: rgba(45, 212, 191, 0.1);
-    border-color: rgba(45, 212, 191, 0.4);
-    color: #fff;
+    background: var(--cw-primary-soft);
+    border-color: color-mix(in srgb, var(--cw-primary) 40%, transparent);
+    color: var(--cw-primary);
     text-decoration: none;
 }
 .other-agent-icon { font-size: 1rem; }
 
-/* Tabs (used on the Claims Intake agent page only). */
+/* Tabs (used on the Onboarding agent page only). */
 .agent-tabs {
     display: flex;
-    gap: 0.25rem;
-    border-bottom: 1px solid rgba(120, 150, 200, 0.22);
-    margin-bottom: 1.1rem;
+    gap: 0.5rem;
+    border-bottom: 1px solid var(--cw-line-strong);
+    margin-bottom: 1.4rem;
 }
 .agent-tab {
     background: transparent;
     border: none;
-    color: rgba(214, 228, 245, 0.7);
-    padding: 0.65rem 1.1rem;
-    font-size: 0.92rem;
+    color: var(--cw-muted);
+    padding: 0.8rem 1.15rem;
+    font-size: 0.98rem;
     font-weight: 600;
-    letter-spacing: 0.2px;
+    letter-spacing: 0;
     cursor: pointer;
-    border-bottom: 2px solid transparent;
+    border-bottom: 3px solid transparent;
     margin-bottom: -1px;
     transition: color 0.15s ease, border-color 0.15s ease;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
 }
-.agent-tab:hover { color: #fff; }
+.agent-tab:hover { color: var(--cw-primary); }
 .agent-tab.active {
-    color: #fff;
-    border-bottom-color: var(--accent, var(--cw-accent));
+    color: var(--cw-ink);
+    border-bottom-color: var(--cw-primary);
 }
 .agent-tab-panel { display: none; }
 .agent-tab-panel.active { display: block; }
@@ -455,19 +465,19 @@
 .engage-tabs-scope {
     margin-top: 0.9rem;
     padding-top: 0.6rem;
-    border-top: 1px dashed rgba(120, 150, 200, 0.22);
+    border-top: 1px dashed rgba(16, 38, 72, 0.136);
 }
 .engage-tabs {
     display: flex;
     flex-wrap: wrap;
     gap: 0.25rem;
-    border-bottom: 1px solid rgba(120, 150, 200, 0.18);
+    border-bottom: 1px solid rgba(16, 38, 72, 0.112);
     margin: 0.4rem 0 0.9rem 0;
 }
 .engage-tab-btn {
     background: transparent;
     border: none;
-    color: rgba(214, 228, 245, 0.7);
+    color: #475467;
     padding: 0.5rem 0.95rem;
     font-size: 0.85rem;
     font-weight: 600;
@@ -477,10 +487,10 @@
     margin-bottom: -1px;
     transition: color 0.15s ease, border-color 0.15s ease;
 }
-.engage-tab-btn:hover { color: #fff; }
+.engage-tab-btn:hover { color: var(--cw-primary); }
 .engage-tab-btn.active {
-    color: #fff;
-    border-bottom-color: var(--accent, var(--cw-accent));
+    color: var(--cw-ink);
+    border-bottom-color: var(--cw-primary);
 }
 .engage-tab-panel { display: none; }
 .engage-tab-panel.active { display: block; }
@@ -493,8 +503,8 @@
 }
 
 .engage-info-block {
-    background: rgba(10, 16, 28, 0.7);
-    border: 1px solid rgba(120, 150, 200, 0.18);
+    background: #f6f7f9;
+    border: 1px solid rgba(16, 38, 72, 0.112);
     border-radius: 8px;
     padding: 0.85rem 1rem;
     margin-bottom: 0.8rem;
@@ -504,13 +514,13 @@
     font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    color: var(--cw-muted, #97a3b6);
+    color: var(--cw-muted, #5d6b7e);
     font-weight: 700;
 }
-.engage-info-block p { margin: 0.2rem 0; color: rgba(238, 242, 247, 0.9); font-size: 0.9rem; }
+.engage-info-block p { margin: 0.2rem 0; color: #1d2939; font-size: 0.9rem; }
 .engage-info-block ul { margin: 0.3rem 0 0 1.1rem; padding: 0; }
 .engage-info-block ul li {
-    color: rgba(238, 242, 247, 0.9);
+    color: #1d2939;
     font-size: 0.88rem;
     margin-bottom: 0.2rem;
 }
@@ -519,24 +529,24 @@
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 0.45rem 1rem;
     font-size: 0.85rem;
-    color: rgba(238, 242, 247, 0.86);
+    color: #344054;
 }
 .engage-info-meta .k {
     display: block;
     font-size: 0.66rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: var(--cw-muted, #97a3b6);
+    color: var(--cw-muted, #5d6b7e);
     font-weight: 700;
     margin-bottom: 0.15rem;
 }
 
 .engage-pre {
-    background: rgba(8, 12, 22, 0.85);
-    border: 1px solid rgba(120, 150, 200, 0.18);
+    background: #f2f4f7;
+    border: 1px solid rgba(16, 38, 72, 0.112);
     border-radius: 8px;
     padding: 0.85rem 1rem;
-    color: rgba(238, 242, 247, 0.92);
+    color: #1d2939;
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-size: 0.82rem;
     line-height: 1.55;
@@ -552,7 +562,7 @@
     overflow-y: auto;
 }
 .engage-empty {
-    color: var(--cw-muted, #97a3b6);
+    color: var(--cw-muted, #5d6b7e);
     font-style: italic;
     font-size: 0.88rem;
     padding: 0.5rem 0;
@@ -577,13 +587,13 @@
     gap: 0.75rem;
     align-items: flex-start;
     padding: 0.6rem 0.85rem;
-    background: rgba(8, 12, 22, 0.55);
-    border: 1px solid rgba(120, 150, 200, 0.18);
+    background: #f6f7f9;
+    border: 1px solid rgba(16, 38, 72, 0.112);
     border-radius: 8px;
 }
 .engage-ref-card::before {
     content: "[" counter(engage-ref) "]";
-    color: var(--cw-muted, #97a3b6);
+    color: var(--cw-muted, #5d6b7e);
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-size: 0.82rem;
     flex: 0 0 auto;
@@ -600,12 +610,12 @@
     border: 1px solid transparent;
 }
 .engage-ref-kind-web {
-    color: #93c5fd;
+    color: #1661b4;
     background: rgba(59, 130, 246, 0.12);
     border-color: rgba(59, 130, 246, 0.35);
 }
 .engage-ref-kind-doc {
-    color: #86efac;
+    color: #0f7032;
     background: rgba(34, 197, 94, 0.12);
     border-color: rgba(34, 197, 94, 0.35);
 }
@@ -619,13 +629,13 @@
     word-break: break-word;
 }
 .engage-ref-title a {
-    color: #cfe3ff;
+    color: #185ec0;
     text-decoration: none;
 }
 .engage-ref-title a:hover { text-decoration: underline; }
 .engage-ref-url {
     margin-top: 0.2rem;
-    color: var(--cw-muted, #97a3b6);
+    color: var(--cw-muted, #5d6b7e);
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-size: 0.78rem;
     word-break: break-all;
@@ -633,11 +643,11 @@
 
 /* JSON viewer (collapsible). */
 .json-viewer {
-    background: rgba(8, 12, 22, 0.85);
-    border: 1px solid rgba(120, 150, 200, 0.18);
+    background: #f2f4f7;
+    border: 1px solid rgba(16, 38, 72, 0.112);
     border-radius: 8px;
     padding: 0.85rem 1rem;
-    color: rgba(238, 242, 247, 0.92);
+    color: #1d2939;
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-size: 0.82rem;
     line-height: 1.5;
@@ -647,21 +657,21 @@
 .json-viewer .jv-toggle {
     cursor: pointer;
     user-select: none;
-    color: rgba(214, 228, 245, 0.6);
+    color: #5d6b7e;
     width: 1em;
     display: inline-block;
     text-align: center;
     margin-right: 0.1rem;
 }
-.json-viewer .jv-toggle:hover { color: #fff; }
-.json-viewer .jv-key { color: #93c5fd; }
-.json-viewer .jv-string { color: #86efac; word-break: break-word; }
-.json-viewer .jv-number { color: #fcd34d; }
-.json-viewer .jv-boolean { color: #f0abfc; }
-.json-viewer .jv-null { color: #fca5a5; font-style: italic; }
-.json-viewer .jv-bracket { color: rgba(238, 242, 247, 0.7); }
-.json-viewer .jv-comma { color: rgba(238, 242, 247, 0.5); }
-.json-viewer .jv-summary { color: var(--cw-muted, #97a3b6); font-style: italic; margin-left: 0.25rem; }
+.json-viewer .jv-toggle:hover { color: #0b1f3a; }
+.json-viewer .jv-key { color: #1661b4; }
+.json-viewer .jv-string { color: #0f7032; word-break: break-word; }
+.json-viewer .jv-number { color: #954f12; }
+.json-viewer .jv-boolean { color: #a317bb; }
+.json-viewer .jv-null { color: #c11818; font-style: italic; }
+.json-viewer .jv-bracket { color: #475467; }
+.json-viewer .jv-comma { color: #5d6b7e; }
+.json-viewer .jv-summary { color: var(--cw-muted, #5d6b7e); font-style: italic; margin-left: 0.25rem; }
 .json-viewer .jv-block { display: block; }
 .json-viewer .jv-block.collapsed > .jv-children { display: none; }
 .json-viewer .jv-block.collapsed > .jv-summary { display: inline; }
@@ -674,74 +684,12 @@
     font-size: 0.78rem;
 }
 .json-viewer .jv-controls button {
-    background: rgba(20, 28, 46, 0.7);
-    border: 1px solid rgba(120, 150, 200, 0.32);
-    color: rgba(238, 242, 247, 0.86);
+    background: #f6f7f9;
+    border: 1px solid rgba(16, 38, 72, 0.198);
+    color: #344054;
     border-radius: 6px;
     padding: 0.25rem 0.6rem;
     cursor: pointer;
     font-size: 0.78rem;
 }
-.json-viewer .jv-controls button:hover { background: rgba(255, 255, 255, 0.06); color: #fff; }
-
-/* ── Wealth refresh ───────────────────────────────────────────────────
-   Calm, precise "private bank meets fintech" surfaces: hairline borders,
-   soft inner highlight, a luminous accent edge and tabular figures. */
-.agent-header,
-.panel {
-    background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.035) 0%, rgba(255, 255, 255, 0) 38%),
-        var(--cw-panel);
-    border-color: var(--cw-panel-border);
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.05),
-        0 18px 40px -18px rgba(0, 0, 0, 0.7);
-}
-.agent-header { border-radius: 18px; padding: 1.6rem 1.8rem 1.7rem 1.8rem; }
-.agent-header::before { height: 3px; }
-.agent-header h1 { letter-spacing: -0.02em; font-weight: 650; }
-.agent-header .tagline { font-style: normal; color: var(--cw-muted); }
-.agent-header-icon {
-    border-radius: 16px;
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 10%, transparent),
-                0 10px 24px -8px color-mix(in srgb, var(--accent) 55%, transparent);
-}
-.agent-header-dept { letter-spacing: 0.16em; }
-
-.panel { border-radius: 16px; }
-.panel h2 {
-    display: flex;
-    align-items: center;
-    gap: 0.55rem;
-    letter-spacing: 0.16em;
-}
-.panel h2::before {
-    content: "";
-    width: 14px;
-    height: 2px;
-    border-radius: 2px;
-    background: linear-gradient(90deg, var(--cw-accent), var(--cw-accent-warm));
-}
-
-.demo,
-.scenario-step,
-.engage-info-block {
-    background: rgba(8, 14, 26, 0.55);
-    border-color: var(--cw-panel-border);
-    border-radius: 12px;
-}
-
-.agent-tabs { gap: 0.15rem; border-bottom-color: var(--cw-panel-border); }
-.agent-tab.active,
-.engage-tab-btn.active {
-    box-shadow: 0 8px 14px -12px var(--accent, var(--cw-accent));
-}
-
-.engage-pre,
-.json-viewer { background: rgba(4, 8, 16, 0.82); border-color: var(--cw-panel-border); }
-
-.panel table td,
-.panel table th,
-.agent-md td { font-variant-numeric: tabular-nums; }
-
-.other-agent { background: rgba(255, 255, 255, 0.03); }
+.json-viewer .jv-controls button:hover { background: rgba(16, 38, 72, 0.042); color: #0b1f3a; }

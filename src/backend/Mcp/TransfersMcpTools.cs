@@ -127,8 +127,12 @@ public class TransfersMcpTools
         };
     }
 
-    internal static string BaseUrl(IConfiguration configuration) =>
-        (configuration["APP_BASE_URL"] ?? configuration["APP_MCP_URL"] ?? "http://localhost:5212").TrimEnd('/');
+    internal static string BaseUrl(IConfiguration configuration)
+    {
+        var configured = new[] { configuration["APP_BASE_URL"], configuration["APP_MCP_URL"] }
+            .FirstOrDefault(v => !string.IsNullOrWhiteSpace(v));
+        return (configured ?? "http://localhost:5212").Trim().TrimEnd('/');
+    }
 
     internal static string Serialize(object value) => JsonSerializer.Serialize(value, JsonOpts);
 

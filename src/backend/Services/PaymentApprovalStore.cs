@@ -671,13 +671,13 @@ public static class PaymentRules
         PaymentDate = "On approval — once the pension's portfolio has been redeemed to cash",
         Payees =
         [
-            new("Robert Chen", "063-***", "****4207", 50m),
-            new("Lily Chen", "082-***", "****9315", 50m),
+            new("Robert Chen", "083-***", "****9012", 50m),
+            new("Lily Chen", "013-***", "****4477", 50m),
         ],
         PayeesOnFile =
         [
-            new("Robert Chen", "4207", "nominated beneficiary (son, 50%)"),
-            new("Lily Chen", "9315", "nominated beneficiary (daughter, 50%)"),
+            new("Robert Chen", "9012", "nominated beneficiary (son, 50%)"),
+            new("Lily Chen", "4477", "nominated beneficiary (daughter, 50%)"),
         ],
         ExtraContext =
         [
@@ -711,12 +711,12 @@ public static class PaymentRules
         CaseDecidedBy = "Ben — Benefits & Eligibility Assessor",
         CaseRuleCited = PensionRuleTitle,
         PaymentDate = "First payment Tue 15/12/2026, then monthly",
-        Payees = [new("G & H Papadopoulos", "063-***", "****6612", 100m)],
+        Payees = [new("G & H Papadopoulos", "063-***", "****2214", 100m)],
         PayeesOnFile =
         [
-            new("George Papadopoulos", "6612", "member"),
-            new("G & H Papadopoulos", "6612", "joint account of the member and his spouse (nominated on the pension application)"),
-            new("George & Helen Papadopoulos", "6612", "joint account of the member and his spouse"),
+            new("George Papadopoulos", "2214", "member"),
+            new("G & H Papadopoulos", "2214", "joint account of the member and his spouse (nominated on the pension application)"),
+            new("George & Helen Papadopoulos", "2214", "joint account of the member and his spouse"),
         ],
         ExtraContext =
         [
@@ -747,7 +747,7 @@ public static class PaymentRules
         CaseRuleCited = RolloverRuleTitle,
         PaymentDate = "None — outbound instruction cancelled",
         BalanceBefore = 612_400m,
-        Payees = [new("G Williams Holdings Pty Ltd", "062-***", "****9907", 100m)],
+        Payees = [new("G Williams Holdings Pty Ltd", "062-***", "****7781", 100m)],
         PayeesOnFile =
         [
             new("Grace Williams", "2207", "member (nominated account held before the 02/11/2026 change of details)"),
@@ -760,7 +760,7 @@ public static class PaymentRules
             new("Payment block", "In place until Grace re-verifies her identity on details we already trust"),
         ],
         InputsHint = "A whole-balance rollover ($612,400) to a newly registered SMSF was requested on Fri 06/11/2026 at 07:52 — about 93 hours after Grace's contact details were changed by phone. Financial Crime has blocked the case; Payments confirms no money leaves the account.",
-        BlockedNextStep = "Client Communications contacts Grace on her pre-change verified number (0403 118 220) and email — never the details on the request.",
+        BlockedNextStep = "Client Communications contacts Grace on her pre-change verified number (0491 570 157) and email — never the details on the request.",
     };
 
     private static PaymentCaseProfile OnboardingPriya() => new()

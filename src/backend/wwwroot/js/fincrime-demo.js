@@ -127,7 +127,7 @@
             const parties = (activity.parties || []).map(p =>
                 `<span class="fc-party">${escapeHtml(p.name)} <small>· ${escapeHtml(p.role)}${p.dateOfBirth ? ' · DOB ' + escapeHtml(p.dateOfBirth) : ''}</small></span>`).join('');
             const smsf = activity.receivingSmsf
-                ? `<p class="fc-trusted">SMSF named on the request: <strong style="color:#fcd34d">${escapeHtml(activity.receivingSmsf.fundName)}</strong> · ABN ${escapeHtml(activity.receivingSmsf.abn)} · ESA ${escapeHtml(activity.receivingSmsf.esa)}</p>`
+                ? `<p class="fc-trusted">SMSF named on the request: <strong style="color:#b45309">${escapeHtml(activity.receivingSmsf.fundName)}</strong> · ABN ${escapeHtml(activity.receivingSmsf.abn)} · ESA ${escapeHtml(activity.receivingSmsf.esa)}</p>`
                 : '';
             partiesEl.innerHTML =
                 `<div class="fc-parties">${parties || '<span class="fc-muted-item">No parties recorded.</span>'}</div>` +

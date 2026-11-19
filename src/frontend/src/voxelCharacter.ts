@@ -33,6 +33,9 @@ export {
  * handler can identify which character was clicked, regardless of which
  * body part the ray actually hit.
  */
+/** Office staff and clients are drawn larger than life so they read clearly from the orbit camera. */
+export const OFFICE_CHARACTER_SCALE = 1.5;
+
 export interface CharacterPickMetadata {
   kind: "character";
   /** Matches the `id` passed to the VoxelCharacter constructor. */

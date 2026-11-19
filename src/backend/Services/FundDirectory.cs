@@ -125,7 +125,7 @@ public static class FundDirectory
         Abn: "98 765 432 109",
         Type: "Self-managed super fund (SMSF)",
         Channel: "SuperStream rollover to the SMSF's electronic service address (ESA)",
-        Contact: "As stated on the request: mobile 0488 902 551 · grace.w.super@mailbox.example (changed 2 Nov 2026 — not verified)",
+        Contact: "As stated on the request: mobile 0491 570 158 · grace.w.super@mailbox.example (changed 2 Nov 2026 — not verified)",
         Esa: "smsfmsg-gwfsf (as stated on the request)",
         TypicalTurnaroundDays: 3,
         TurnaroundNote: "The 3-business-day clock only starts once the SMSF verification passes and all required information is received.",
@@ -158,7 +158,7 @@ public static class FundDirectory
         TypicalTurnaroundDays: 3,
         TurnaroundNote: "3 business days for accumulation interests once the request is complete.",
         InsuranceHeld: null,
-        Notes: "Defined benefit members need a benefit quote before a rollover can be requested; accumulation members roll over through SuperStream as normal.",
+        Notes: "Defined benefit members need an exit benefit statement before a rollover can be requested; accumulation members roll over through SuperStream as normal.",
         Keywords: new[] { "public sector", "government", "defined benefit", "bluegum" });
 
     public static readonly FundDirectoryEntry MurrayRiver = new(
@@ -194,7 +194,7 @@ public static class FundDirectory
         Usi: null,
         Abn: "76 890 123 456",
         Type: "Group life insurer",
-        Channel: "Insurer notifications and claims — email and secure portal",
+        Channel: "Insurer notifications and cover enquiries — email and secure portal",
         Contact: "Group cover team · groupcover@kestrellife.example.com.au",
         Esa: null,
         TypicalTurnaroundDays: 5,
@@ -335,8 +335,9 @@ public static class FundDirectory
 
         var days = date.DayNumber - record.RegisteredOn.DayNumber;
         var newlyRegistered = days is >= 0 and < 90;
-        var registeredDetail = $"Registered {record.RegisteredOn.ToString("d MMM yyyy", CultureInfo.InvariantCulture)} — {record.ComplianceStatus}" +
-            (newlyRegistered ? $" (only {days} day{(days == 1 ? string.Empty : "s")} before this request)" : string.Empty) + ".";
+        var registeredDetail = $"Registered on {record.RegisteredOn.ToString("d MMM yyyy", CultureInfo.InvariantCulture)}" +
+            (newlyRegistered ? $" — only {days} day{(days == 1 ? string.Empty : "s")} before this request" : string.Empty) +
+            $". ATO status: {record.ComplianceStatus}.";
 
         var member = Normalise(memberName);
         var linked = member.Length > 0 && record.LinkedMembers.Any(m => Normalise(m) == member);

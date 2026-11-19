@@ -47,7 +47,7 @@
     {"at": "Client Operations Team Leader", "action": "team-leader-review", "narration": "Theo approves the block, locks Grace's online access and refers the case for a suspicious matter report to AUSTRAC — a human decision, due within 3 business days.", "duration": 2.5},
     {"at": "Benefits & Eligibility Assessor", "action": "benefits-handoff", "narration": "Ben passes the blocked case to Payments to make sure nothing can leave the account."},
     {"at": "Payments Officer", "action": "payment", "narration": "Penny cancels the outbound rollover payment and confirms no funds leave Grace's account — the full $612,400 stays put.", "duration": 2.5, "outcome": "rejected"},
-    {"at": "Client Communications Specialist", "action": "comms-notify", "narration": "Cara calls Grace on her previously verified mobile (0403 118 220). Grace confirms she never asked — her credentials are reset and a reassurance letter follows.", "duration": 2.0}
+    {"at": "Client Communications Specialist", "action": "comms-notify", "narration": "Cara calls Grace on her previously verified mobile (0491 570 157). Grace confirms she never asked — her credentials are reset and a reassurance letter follows.", "duration": 2.0}
   ],
   "result": {
     "status": "blocked",

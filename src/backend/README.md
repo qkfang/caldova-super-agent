@@ -76,7 +76,11 @@ the same Foundry configuration keys as the CLI host. Set them in
 | `AZURE_AI_SEARCH_CONNECTION_ID` | Foundry connection ID for Azure AI Search |
 | `AZURE_AI_SEARCH_INDEX_NAME` | Knowledge index (`wealth_knowledge` — see [`ai-search/`](../../ai-search)) |
 | `AZURE_BING_CONNECTION_ID` | Foundry Bing grounding connection ID |
-| `APP_MCP_URL` | Public base URL of this app (e.g. a dev tunnel) so Foundry can reach `/mcp` |
+| `APP_MCP_URL` | Public base URL of this app (e.g. a dev tunnel) so Foundry can reach `/mcp`. Leave it unset for purely local runs — otherwise agents call the MCP tools on that host. |
+| `AZURE_CONTENT_UNDERSTANDING_ENDPOINT` | Optional. Azure Content Understanding endpoint for the Financial Crime document-authenticity pass (falls back to manifest verdicts when unset) |
+| `AZURE_CONTENT_UNDERSTANDING_KEY` | Optional API key (otherwise `DefaultAzureCredential` is used) |
+| `AZURE_CONTENT_UNDERSTANDING_ANALYZER_ID` | Optional analyzer id (default `caldova_fincrime_authenticity_v1`, created on first use) |
+| `AZURE_CONTENT_UNDERSTANDING_COMPLETION_MODEL` / `_EMBEDDING_MODEL` | Optional model deployments for the analyzer (defaults `gpt-4.1` / `text-embedding-3-large`) |
 
 When the endpoint and model are set, `CaldovaAgentFactory.IsConfigured` is
 `true` and pages invoke the real agents (`factory.Create("payments")`, …).

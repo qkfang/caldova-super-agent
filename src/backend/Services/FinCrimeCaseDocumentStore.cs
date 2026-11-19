@@ -289,7 +289,7 @@ public class FinCrimeCaseDocumentStore
         AcceptedAccountNames: ["Priya Natarajan"],
         RequestedPayees: [],
         ReceivingSmsf: null,
-        VerifiedContact: "Via her adviser, Hannah Lewis (Yarra Private Wealth) · 0412 555 018 · priya.natarajan@example.com",
+        VerifiedContact: "Via her adviser, Hannah Lewis (Yarra Private Wealth) · 0491 570 156 · priya.natarajan@example.com",
         Timeline:
         [
             new(On(10, 28), false, "kyc", "Adviser · electronic ID check",
@@ -336,7 +336,7 @@ public class FinCrimeCaseDocumentStore
             MemberTfnLinked: false,
             BankDetailsMatch: false,
             EsaMatches: false),
-        VerifiedContact: "0403 118 220 · grace.williams@example.com (the details on file before the 02/11/2026 change)",
+        VerifiedContact: "0491 570 157 · grace.williams@example.com (the details on file before the 02/11/2026 change)",
         Timeline:
         [
             new(On(10, 18), false, "travel-notice", "Member · travel notice",
@@ -349,7 +349,7 @@ public class FinCrimeCaseDocumentStore
                 "amber"),
             new(At(11, 2, 10, 42), true, "contact-change", "Phone · contact centre",
                 "Mobile and email changed by phone",
-                "A caller identified as Grace passed knowledge-based questions and said she had 'lost her phone overseas'. Mobile 0403 118 220 → 0488 902 551; email grace.williams@example.com → grace.w.super@mailbox.example.",
+                "A caller identified as Grace passed knowledge-based questions and said she had 'lost her phone overseas'. Mobile 0491 570 157 → 0491 570 158; email grace.williams@example.com → grace.w.super@mailbox.example.",
                 "red"),
             new(At(11, 2, 10, 42), true, "alert", "Email · change-of-details alert",
                 "Change-of-details alert sent to the previous email",
@@ -361,7 +361,7 @@ public class FinCrimeCaseDocumentStore
                 "red", "Sydney, NSW"),
             new(At(11, 3, 21, 14), true, "mfa", "Online · MFA",
                 "MFA code sent to the changed mobile",
-                "One-time code sent to 0488 902 551 — the number changed the day before.",
+                "One-time code sent to 0491 570 158 — the number changed the day before.",
                 "red"),
             new(At(11, 6, 7, 52), true, "request", "Email · from the changed address",
                 "Request to roll over the whole balance ($612,400) to an SMSF",
@@ -393,7 +393,7 @@ public class FinCrimeCaseDocumentStore
         AcceptedAccountNames: ["George Papadopoulos", "G & H Papadopoulos"],
         RequestedPayees: ["G & H Papadopoulos"],
         ReceivingSmsf: null,
-        VerifiedContact: "0419 331 077 · georgep@example.com (or via his adviser, Marcus Tan)",
+        VerifiedContact: "0491 570 159 · georgep@example.com (or via his adviser, Marcus Tan)",
         Timeline:
         [
             new(On(11, 6), false, "info", "Paper forms",
@@ -423,7 +423,7 @@ public class FinCrimeCaseDocumentStore
         AcceptedAccountNames: ["Thomas Bradley", "Tom Bradley"],
         RequestedPayees: ["Thomas Bradley"],
         ReceivingSmsf: null,
-        VerifiedContact: "0422 304 120 · tom.bradley@example.com",
+        VerifiedContact: "0491 570 110 · tom.bradley@example.com",
         Timeline:
         [
             new(On(4, 6), false, "info", "Services Australia",
@@ -464,7 +464,7 @@ public class FinCrimeCaseDocumentStore
         AcceptedAccountNames: ["Robert Chen", "Lily Chen"],
         RequestedPayees: ["Robert Chen", "Lily Chen"],
         ReceivingSmsf: null,
-        VerifiedContact: "Robert Chen, for the family · 0433 190 420 · robert.chen@example.com",
+        VerifiedContact: "Robert Chen, for the family · 0491 570 006 · robert.chen@example.com",
         Timeline:
         [
             new(On(10, 12), false, "info", "Death certificate",

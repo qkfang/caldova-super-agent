@@ -38,7 +38,7 @@ This is the **golden-path** scenario for the demo (see [agent-demo.md](agent-dem
 **George Papadopoulos** is a retired electrical contractor from Oakleigh.
 
 - He is 66. His wife, Helen, is 63.
-- Contact: georgep@example.com · 0419 331 077.
+- Contact: georgep@example.com · 0491 570 159.
 - He is proud and practical, and a little anxious about "running out".
 
 > "Forty years on the tools — I just want a steady income and to stop worrying."

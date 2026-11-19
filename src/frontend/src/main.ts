@@ -49,12 +49,12 @@ function bootstrap(): void {
     "officeCam",
     -Math.PI / 4,
     Math.PI / 3.4,
-    72,
-    new Vector3(0, 1.2, 4),
+    58,
+    new Vector3(-2, 1.2, 4),
     officeScene,
   );
   officeCamera.attachControl(canvas, true);
-  officeCamera.lowerRadiusLimit = 36;
+  officeCamera.lowerRadiusLimit = 20;
   officeCamera.upperRadiusLimit = 120;
   officeCamera.lowerBetaLimit = Math.PI / 6;
   officeCamera.upperBetaLimit = Math.PI / 2.6;

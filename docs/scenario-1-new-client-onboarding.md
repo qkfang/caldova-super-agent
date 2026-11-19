@@ -32,7 +32,7 @@ An adviser-led new account. A busy professional's adviser sends Caldova an appli
 
 - She is 34 and a product manager. She has just started a new job at a Docklands fintech and lives in a Southbank apartment.
 - Her de facto partner is Arjun Mehta.
-- Contact: priya.natarajan@example.com · 0412 555 018.
+- Contact: priya.natarajan@example.com · 0491 570 156.
 - She is busy and organised, and wants everything done digitally.
 
 > "I've got super scattered across old jobs — I just want one account, set up properly."

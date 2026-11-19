@@ -1,109 +1,223 @@
-.page {
-    position: relative;
+/* Site chrome — Caldova Wealth.
+   Light utility bar + sticky white header (NavMenu) + light regulatory footer,
+   following the layout used by Australian super fund and wealth sites. */
+
+.site {
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
 }
 
-main {
+.site-main {
     flex: 1;
-    background: transparent;
 }
 
-.sidebar {
-    background: linear-gradient(180deg, var(--cw-sidebar-from) 0%, var(--cw-sidebar-to) 100%);
-    border-right: 1px solid rgba(130, 165, 210, 0.12);
-    box-shadow: 0 0 40px rgba(0, 0, 0, 0.55), inset -1px 0 0 rgba(45, 212, 191, 0.04);
+/* ── Utility bar ──────────────────────────────────────────────────────── */
+.utility-bar {
+    background: #eef0f3;
+    border-bottom: 1px solid var(--cw-line);
+    color: var(--cw-text-2);
+    font-size: 0.78rem;
 }
 
-.top-row {
-    background: rgba(15, 22, 38, 0.65);
-    border-bottom: 1px solid rgba(120, 150, 200, 0.14);
-    backdrop-filter: blur(10px);
-    justify-content: space-between;
-    height: 3.5rem;
+.utility-inner {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 1rem;
+    min-height: 36px;
 }
 
-.top-row ::deep .env-badge {
+.utility-products {
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+    flex-wrap: wrap;
+}
+
+.utility-products span:not(.utility-label) {
+    color: var(--cw-text);
+    font-weight: 500;
+}
+
+.utility-label {
     font-size: 0.66rem;
     text-transform: uppercase;
-    letter-spacing: 0.16em;
-    color: #a7f3e4;
-    background: rgba(45, 212, 191, 0.10);
-    border: 1px solid rgba(45, 212, 191, 0.32);
-    padding: 0.22rem 0.6rem;
-    border-radius: 999px;
+    letter-spacing: 0.14em;
     font-weight: 700;
+    color: var(--cw-gold-ink);
 }
 
-    .top-row ::deep a, .top-row ::deep .btn-link {
-        white-space: nowrap;
-        margin-left: 1.5rem;
-        text-decoration: none;
-        color: var(--cw-muted);
-        font-size: 0.85rem;
-        letter-spacing: 0.3px;
+.utility-trust {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    white-space: nowrap;
+}
+
+.utility-trust i {
+    color: var(--cw-gold-ink);
+    margin-right: 0.3rem;
+}
+
+/* ── Header ───────────────────────────────────────────────────────────── */
+.site-header {
+    position: sticky;
+    top: 0;
+    z-index: 800;
+    background: rgba(255, 255, 255, 0.97);
+    backdrop-filter: saturate(1.4) blur(8px);
+    border-bottom: 1px solid var(--cw-line);
+}
+
+/* ── Footer ───────────────────────────────────────────────────────────── */
+.site-footer {
+    margin-top: 2rem;
+    background: var(--cw-bg-2);
+    border-top: 1px solid var(--cw-line);
+    color: var(--cw-text-2);
+    font-size: 0.9rem;
+}
+
+.footer-top {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1fr);
+    gap: 2.5rem;
+    padding-top: 3.25rem;
+    padding-bottom: 2.5rem;
+}
+
+.footer-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+    color: var(--cw-navy-800);
+    text-decoration: none;
+}
+
+.footer-logo:hover {
+    color: var(--cw-navy-800);
+    text-decoration: none;
+}
+
+.footer-wordmark {
+    font-family: var(--cw-font-serif);
+    font-size: 1.4rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.footer-wordmark span {
+    font-family: var(--cw-font-sans);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--cw-gold-ink);
+    margin-left: 0.25rem;
+    vertical-align: middle;
+}
+
+.footer-brand p {
+    margin: 1rem 0 1.1rem 0;
+    max-width: 30rem;
+    line-height: 1.6;
+}
+
+.footer-commitments {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.45rem;
+}
+
+.footer-commitments i {
+    color: var(--cw-success);
+    margin-right: 0.45rem;
+}
+
+.footer-col h2 {
+    font-family: var(--cw-font-sans);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--cw-gold-ink);
+    margin: 0.4rem 0 1rem 0;
+}
+
+.footer-col ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.55rem;
+}
+
+.footer-col a {
+    color: var(--cw-navy-800);
+    text-decoration: none;
+}
+
+.footer-col a:hover {
+    color: var(--cw-primary);
+    text-decoration: underline;
+}
+
+.footer-legal {
+    border-top: 1px solid var(--cw-line-strong);
+    padding-top: 1.4rem;
+    padding-bottom: 1.8rem;
+    font-size: 0.78rem;
+    line-height: 1.6;
+    color: var(--cw-muted);
+}
+
+.footer-legal p {
+    margin: 0 0 0.5rem 0;
+    max-width: 70rem;
+}
+
+.footer-copy {
+    color: var(--cw-text-2);
+}
+
+@media (max-width: 900px) {
+    .utility-products .utility-label ~ span:nth-of-type(n+3) {
+        display: none;
     }
 
-    .top-row ::deep a:hover, .top-row ::deep .btn-link:hover {
-        color: var(--cw-text-strong);
-        text-decoration: none;
+    .footer-top {
+        grid-template-columns: 1fr 1fr;
     }
 
-    .top-row ::deep a:first-child {
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-@media (max-width: 640.98px) {
-    .top-row {
-        justify-content: space-between;
-    }
-
-    .top-row ::deep a, .top-row ::deep .btn-link {
-        margin-left: 0;
+    .footer-brand {
+        grid-column: 1 / -1;
     }
 }
 
-@media (min-width: 641px) {
-    .page {
-        flex-direction: row;
+@media (max-width: 640px) {
+    .utility-trust span:last-child {
+        display: none;
     }
 
-    .sidebar {
-        width: 260px;
-        height: 100vh;
-        position: sticky;
-        top: 0;
+    .utility-products {
+        display: none;
     }
 
-    .top-row {
-        position: sticky;
-        top: 0;
-        z-index: 1;
-    }
-
-    .top-row.auth ::deep a:first-child {
-        flex: 1;
-        text-align: right;
-        width: 0;
-    }
-
-    .top-row, article {
-        padding-left: 2rem !important;
-        padding-right: 1.5rem !important;
+    .utility-inner {
+        justify-content: flex-end;
     }
 }
 
+/* ── Unhandled-error banner ───────────────────────────────────────────── */
 #blazor-error-ui {
-    color-scheme: dark only;
-    background: rgba(60, 20, 24, 0.95);
-    color: #ffd9d9;
-    border-top: 1px solid rgba(255, 122, 122, 0.45);
+    background: #fef3f2;
+    color: #7a271a;
+    border-top: 1px solid #fecdca;
     bottom: 0;
-    box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.45);
+    box-shadow: 0 -6px 18px rgba(16, 24, 40, 0.08);
     box-sizing: border-box;
     display: none;
     left: 0;
@@ -114,7 +228,7 @@ main {
 }
 
     #blazor-error-ui .reload {
-        color: var(--cw-accent);
+        color: var(--cw-primary);
         font-weight: 600;
     }
 

@@ -739,7 +739,7 @@ public static class ProductDocumentCatalog
             "and a signature that doesn't match our records, the request can't proceed and is referred to Financial Crime.",
         OutcomeSummary:
             "Do not process the $612,400 rollover. Refer to Financial Crime today, keep the balance where it is, and " +
-            "only contact Grace on the details held before 2 Nov 2026 (mobile 0403 118 220). The 3-business-day " +
+            "only contact Grace on the details held before 2 Nov 2026 (mobile 0491 570 157). The 3-business-day " +
             "rollover clock hasn't started.",
         Items: new[]
         {

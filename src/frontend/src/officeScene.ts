@@ -9,34 +9,37 @@ import {
   Vector3,
 } from "@babylonjs/core";
 import { NeighbourhoodAmbient } from "./neighbourhoodAmbient";
-import { VoxelCharacter } from "./voxelCharacter";
+import { buildPark } from "./parkSurroundings";
+import { OFFICE_CHARACTER_SCALE, VoxelCharacter } from "./voxelCharacter";
 
 /**
  * Anchor points used by the simulation. Coordinates are in scene units.
  *
- * Layout (bird's-eye, X right / Z forward) — doubled full-floor footprint
- * (60 × 40 units, x∈[-30, 30], z∈[-15, 25]):
+ * Layout (bird's-eye, X right / Z forward) — one floor plate of the Caldova
+ * Wealth city tower (60 × 40 units, x∈[-30, 30], z∈[-15, 25]), organised by team:
  *
  *   z = +25 ┌────────────────────────────────────────────────────────────────┐
- *           │ IT / Cloud Infra Room │   MEETING ROOMS (A + B)  │ Kitchen     │
- *           ├───────────────────────┴──────────────────────────┴─────────────┤
- *           │ Team Leader   │ Benefits │ Invest-   │ Financial │ Coffee Area │  back row
- *           │ (exec office) │ & Elig.  │  ments    │  Crime    │ (Café)      │
- *           ├───────────────┼──────────┼───────────┼───────────┼─────────────┤
- *           │ Onboarding    │ Transfers│ Payments  │ Client    │ Play Area   │  front row
- *           │ & Requests    │ & Rolls  │           │ Comms     │ (ping-pong) │
- *           ├───────────────┴──────────┴───────────┴───────────┴─────────────┤
- *           │  Welcome counters  +  Reception  +  Client Waiting Area        │
+ *           │ INVESTMENT   │ identity  │ CLIENT MEETING   │ skyline  │ Staff   │
+ *           │ COMMITTEE    │ wall      │ SUITES + archive │ windows  │ Kitchen │
+ *           ├──────────────┴───────────┴──────────────────┴──────────┴─────────┤
+ *           │ HEAD OF CLIENT│ Investment│ Client &  │ Risk &    │ Client Café │  WEALTH
+ *           │ OPERATIONS    │ Solutions │ Adviser   │ Fin Crime │             │  MANAGEMENT
+ *           │ (corner)      │ Ivy       │ Comms Cara│ Felix     │             │  WING (back)
+ *           ├───────────────┼───────────┼───────────┼───────────┼─────────────┤
+ *           │ Onboarding    │ Benefits  │ Transfers │ Payments  │ Member      │  SUPERANNUATION
+ *           │ Olivia        │ Ben       │ Rory      │ Penny     │ Lounge      │  WING (front)
+ *           ├───────────────┴───────────┴───────────┴───────────┴─────────────┤
+ *           │  Private client lobby: concierge · Super / Wealth / Adviser desks │
  *   z = -15 └────────────────────────────────────────────────────────────────┘
  *           x = -30                                                     x = +30
  *
- * Each numbered department is its own zone, separated from neighbours by
- * tall office-screen partitions and a coloured floor accent. Cubicle
- * centres are spaced 10 units apart (front row at x = -21, -11, -1, +9 ;
- * back row at x = -11, -1, +9 with the Team Leader executive office at
- * x = -21, z = 10) so each booth has clear breathing room. The dedicated
- * Meeting Rooms section sits centre-back at z ≈ 19.5 between the back-row
- * cubicles and the filing cabinets.
+ * The Superannuation wing (front row) sits closest to the lobby because it is
+ * member-facing; the Wealth Management wing (back row) sits behind it beside
+ * the meeting suites and investment committee room. Each team has its own
+ * floor finish, floor lettering and wall banner. Pods are spaced 10 units
+ * apart (front row at x = -21, -11, -1, +9; back row likewise) so each pod has
+ * clear breathing room, and the simulation's aisle planner keeps working off
+ * the same grid.
  */
 export interface OfficeLayout {
   /** World position where clients spawn outside the door. */
@@ -85,41 +88,27 @@ export function buildOffice(scene: Scene): OfficeLayout {
     return m;
   };
 
-  // ----- Floor & exterior ground -----
-  // Doubled full-floor footprint: the office spans x∈[-30, 30], z∈[-15, 25]
-  // (60 × 40 units). The exterior ground is a grass-land that extends well
-  // beyond the office so the diorama edges don't cut off when the camera
-  // pans, and is decorated with trees, flowers, a fountain, and benches by
-  // `buildExteriorLandscape` further down.
-  const ground = MeshBuilder.CreateBox(
-    "ground",
-    { width: 110, depth: 110, height: 0.4 },
-    scene,
-  );
-  ground.position.y = -0.2;
-  ground.material = mat("ground", "#6aa84f");
+  // ----- Floor & park -----
+  // The office is one floor plate of the Caldova Wealth building:
+  // x∈[-30, 30], z∈[-15, 25] (60 × 40 units). `buildPark` lays out the lawn,
+  // paths, forecourt, pond, gazebo and trees around it.
+  buildPark(scene);
 
-  // Decorate the grass land surrounding the office with trees, flower
-  // patches, a fountain, benches, lampposts and a stone path leading to
-  // the entrance.
-  buildExteriorLandscape(scene, mat);
-
-  // Spawn moving voxel cars that loop through the new outdoor car park
-  // on the right-hand side of the office. Self-contained: the ambient
-  // instance ticks itself off the scene's render observable.
+  // Wandering lobby staff. Self-contained: the ambient instance ticks itself
+  // off the scene's render observable.
   buildOfficeAmbient(scene);
 
-  // Main office floor — light tile
+  // Main office floor — warm limestone
   const floor = MeshBuilder.CreateBox(
     "floor",
     { width: 60, depth: 40, height: 0.2 },
     scene,
   );
   floor.position = new Vector3(0, 0.0, 5);
-  floor.material = mat("floor", "#cfc6b4");
+  floor.material = mat("floor", "#dcd7cb");
 
   // Tile grid lines (subtle stripes baked in via thin overlay boxes)
-  const tileLine = mat("tileLine", "#a89e8a");
+  const tileLine = mat("tileLine", "#c9c3b4");
   for (let i = -29; i <= 29; i += 2) {
     const lineX = MeshBuilder.CreateBox(
       `tileX_${i}`,
@@ -139,15 +128,39 @@ export function buildOffice(scene: Scene): OfficeLayout {
     lineZ.material = tileLine;
   }
 
-  // Lobby wood floor — wider "client lobby" with welcome counters and
-  // client waiting area
+  // Private client lobby — dark slate stone with a brass inlay edge and
+  // burgundy waiting-area rugs.
   const lobbyFloor = MeshBuilder.CreateBox(
     "lobbyFloor",
     { width: 38, height: 0.06, depth: 8.5 },
     scene,
   );
   lobbyFloor.position = new Vector3(-5, 0.13, -10);
-  lobbyFloor.material = mat("lobbyFloor", "#c79e6e");
+  lobbyFloor.material = mat("lobbyFloor", "#3a4660");
+  const lobbyInlay = MeshBuilder.CreateBox(
+    "lobbyInlay",
+    { width: 38, height: 0.02, depth: 0.14 },
+    scene,
+  );
+  lobbyInlay.position = new Vector3(-5, 0.17, -5.9);
+  lobbyInlay.material = mat("lobbyInlay", "#c9a14a");
+  // Waiting-area rugs: brass-bordered burgundy under each sofa group.
+  for (const rx of [-15.5, 3.5]) {
+    const border = MeshBuilder.CreateBox(
+      `lobbyRugBorder_${rx}`,
+      { width: 6.4, height: 0.02, depth: 3.4 },
+      scene,
+    );
+    border.position = new Vector3(rx, 0.17, -12.0);
+    border.material = mat("lobbyRugBorder", "#c9a14a");
+    const rug = MeshBuilder.CreateBox(
+      `lobbyRug_${rx}`,
+      { width: 6.0, height: 0.025, depth: 3.0 },
+      scene,
+    );
+    rug.position = new Vector3(rx, 0.175, -12.0);
+    rug.material = mat("lobbyRug", "#6b2230");
+  }
 
   // Decorative break-room wood floor (back-right) so the kitchen feels distinct
   const kitchenFloor = MeshBuilder.CreateBox(
@@ -158,7 +171,7 @@ export function buildOffice(scene: Scene): OfficeLayout {
   kitchenFloor.position = new Vector3(24, 0.13, 20);
   kitchenFloor.material = mat("kitchenFloor", "#d8b884");
 
-  // Café / coffee-area accent floor (back-right column)
+  // Client café accent floor (back-right column)
   const cafeFloor = MeshBuilder.CreateBox(
     "cafeFloor",
     { width: 8, height: 0.06, depth: 6.5 },
@@ -167,27 +180,53 @@ export function buildOffice(scene: Scene): OfficeLayout {
   cafeFloor.position = new Vector3(26, 0.13, 9);
   cafeFloor.material = mat("cafeFloor", "#b88a64");
 
-  // Play area accent floor (front-right column)
-  const playFloor = MeshBuilder.CreateBox(
-    "playFloor",
+  // Member lounge accent floor (front-right column)
+  const loungeFloor = MeshBuilder.CreateBox(
+    "loungeFloor",
     { width: 10, height: 0.06, depth: 6.0 },
     scene,
   );
-  playFloor.position = new Vector3(24, 0.13, 0);
-  playFloor.material = mat("playFloor", "#2e5a4a");
+  loungeFloor.position = new Vector3(24, 0.13, 0);
+  loungeFloor.material = mat("loungeFloor", "#27324a");
 
-  // IT / cloud-infra room accent floor (back-far-left)
-  const itFloor = MeshBuilder.CreateBox(
-    "itFloor",
+  // Investment committee room accent floor (back-far-left): dark walnut
+  const committeeFloor = MeshBuilder.CreateBox(
+    "committeeFloor",
     { width: 10, height: 0.06, depth: 8.0 },
     scene,
   );
-  itFloor.position = new Vector3(-24, 0.13, 20);
-  itFloor.material = mat("itFloor", "#1f2a3f");
+  committeeFloor.position = new Vector3(-24, 0.13, 20);
+  committeeFloor.material = mat("committeeFloor", "#5a3d2b");
+
+  // Team wing floors: a carpet band under each row of pods so the two
+  // teams read as distinct wings. Superannuation (front) is a cool teal-
+  // grey; Wealth Management (back) is warm taupe with a brass edge.
+  const superBand = MeshBuilder.CreateBox(
+    "wingBandSuper",
+    { width: 38, height: 0.04, depth: 7.6 },
+    scene,
+  );
+  superBand.position = new Vector3(-6, 0.12, 0.2);
+  superBand.material = mat("wingBandSuper", "#b9cdd0");
+  const wealthBand = MeshBuilder.CreateBox(
+    "wingBandWealth",
+    { width: 38, height: 0.04, depth: 7.6 },
+    scene,
+  );
+  wealthBand.position = new Vector3(-6, 0.12, 10.2);
+  wealthBand.material = mat("wingBandWealth", "#d6c6a8");
+  for (const [name, z, hex] of [
+    ["wingEdgeSuper", -3.7, "#14b8a6"],
+    ["wingEdgeWealth", 6.3, "#c9a14a"],
+  ] as const) {
+    const edge = MeshBuilder.CreateBox(name, { width: 38, height: 0.05, depth: 0.14 }, scene);
+    edge.position = new Vector3(-6, 0.125, z);
+    edge.material = mat(name, hex);
+  }
 
   // ----- Walls -----
-  const wallMat = mat("wall", "#efe0c8");
-  const trimMat = mat("trim", "#cdb497");
+  const wallMat = mat("wall", "#e9edf3");
+  const trimMat = mat("trim", "#b79a5b");
 
   const makeWall = (
     name: string,
@@ -223,35 +262,42 @@ export function buildOffice(scene: Scene): OfficeLayout {
   trimBack.position = new Vector3(0, 0.25, 24.85);
   trimBack.material = trimMat;
 
-  // ----- "CLIENT OPERATIONS" identity wall (back-mid, between team leader
-  // office and the filing cabinets) -----
+  // ----- "CALDOVA WEALTH" identity wall (back-mid, between the Head of Client
+  // Operations office and the filing cabinets) -----
   const identityPanel = MeshBuilder.CreateBox(
     "identityPanel",
     { width: 8.0, height: 3.2, depth: 0.12 },
     scene,
   );
   identityPanel.position = new Vector3(-13, 2.3, 24.78);
-  identityPanel.material = mat("identityPanel", "#2a3a5c");
+  identityPanel.material = mat("identityPanel", "#1f2d4a");
 
   drawSignTexture(scene, identityPanel, 1024, 440, (ctx) => {
-    ctx.fillStyle = "#2a3a5c";
+    ctx.fillStyle = "#1f2d4a";
     ctx.fillRect(0, 0, 1024, 440);
+    ctx.fillStyle = "#c9a14a";
+    ctx.fillRect(50, 28, 924, 5);
+    ctx.fillStyle = "#e7c872";
+    ctx.font = "bold 112px sans-serif";
+    ctx.fillText("CALDOVA", 50, 150);
     ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 110px sans-serif";
-    ctx.fillText("CLIENT", 50, 140);
-    ctx.fillText("OPERATIONS", 50, 250);
+    ctx.font = "bold 76px sans-serif";
+    ctx.fillText("WEALTH", 50, 240);
+    ctx.font = "26px sans-serif";
+    ctx.fillStyle = "#b9c4dd";
+    ctx.fillText("SUPERANNUATION  ·  WEALTH MANAGEMENT  ·  CLIENT OPERATIONS", 50, 290);
     ctx.font = "28px sans-serif";
     ctx.fillStyle = "#cfd8ee";
-    const values = ["Integrity", "Focus", "Collaboration", "Empathy", "Results"];
+    const values = ["Trust", "Care", "Expertise", "Clarity", "Stewardship"];
     const colW = 1024 / values.length;
     for (let i = 0; i < values.length; i++) {
       // small icon circle
       ctx.beginPath();
-      ctx.arc(60 + i * colW + 30, 360, 22, 0, Math.PI * 2);
-      ctx.fillStyle = "#6ec1ff";
+      ctx.arc(60 + i * colW + 30, 372, 22, 0, Math.PI * 2);
+      ctx.fillStyle = "#c9a14a";
       ctx.fill();
       ctx.fillStyle = "#cfd8ee";
-      ctx.fillText(values[i], 60 + i * colW + 70, 370);
+      ctx.fillText(values[i], 60 + i * colW + 70, 382);
     }
   });
 
@@ -280,44 +326,83 @@ export function buildOffice(scene: Scene): OfficeLayout {
     }
   });
 
-  // ----- "WELCOME" sign on the reception desk side panel -----
+  // ----- Concierge backdrop behind the reception desk -----
   const welcomeSign = MeshBuilder.CreateBox(
     "welcomeSign",
-    { width: 2.6, height: 0.7, depth: 0.08 },
+    { width: 6.4, height: 2.0, depth: 0.14 },
     scene,
   );
-  welcomeSign.position = new Vector3(-17.5, 0.55, -8.4);
-  welcomeSign.material = mat("welcomeSign", "#3a5fb0");
-  drawSignTexture(scene, welcomeSign, 512, 160, (ctx) => {
-    ctx.fillStyle = "#3a5fb0";
-    ctx.fillRect(0, 0, 512, 160);
+  welcomeSign.position = new Vector3(-15.2, 1.0, -8.2);
+  welcomeSign.material = mat("welcomeSign", "#1f2d4a");
+  drawSignTexture(scene, welcomeSign, 768, 240, (ctx) => {
+    ctx.fillStyle = "#1f2d4a";
+    ctx.fillRect(0, 0, 768, 240);
+    ctx.fillStyle = "#c9a14a";
+    ctx.fillRect(30, 22, 708, 4);
+    ctx.fillRect(30, 214, 708, 4);
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "#e7c872";
+    ctx.font = "bold 78px sans-serif";
+    ctx.fillText("CALDOVA", 384, 84);
     ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 90px sans-serif";
-    ctx.fillText("WELCOME", 60, 110);
+    ctx.font = "bold 50px sans-serif";
+    ctx.fillText("WEALTH", 384, 142);
+    ctx.fillStyle = "#b9c4dd";
+    ctx.font = "26px sans-serif";
+    ctx.fillText("Welcome — how can we help today?", 384, 190);
   });
 
-  // ----- "We're here to help" entrance sign -----
+  // ----- Entrance sign on the front wall -----
   const helpSign = MeshBuilder.CreateBox(
     "helpSign",
-    { width: 2.0, height: 1.2, depth: 0.08 },
+    { width: 2.6, height: 1.2, depth: 0.08 },
     scene,
   );
-  helpSign.position = new Vector3(7.5, 1.0, -14.85);
-  helpSign.material = mat("helpSign", "#f4ecdb");
-  drawSignTexture(scene, helpSign, 320, 200, (ctx) => {
-    ctx.fillStyle = "#f4ecdb";
-    ctx.fillRect(0, 0, 320, 200);
-    ctx.fillStyle = "#1c2230";
-    ctx.font = "bold 36px sans-serif";
-    ctx.fillText("We're here", 40, 80);
-    ctx.fillText("to help.", 40, 130);
+  helpSign.position = new Vector3(7.5, 0.75, -15.2);
+  helpSign.material = mat("helpSign", "#1f2d4a");
+  drawSignTexture(scene, helpSign, 416, 192, (ctx) => {
+    ctx.fillStyle = "#1f2d4a";
+    ctx.fillRect(0, 0, 416, 192);
+    ctx.fillStyle = "#c9a14a";
+    ctx.fillRect(24, 20, 368, 4);
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 40px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("Your super &", 208, 82);
+    ctx.fillText("wealth, cared for.", 208, 130);
+    ctx.fillStyle = "#c9a14a";
+    ctx.fillRect(24, 168, 368, 4);
   });
 
-  // ----- Back-wall windows -----
+  // ----- Building name along the front wall (faces the forecourt) -----
+  const buildingSign = MeshBuilder.CreateBox(
+    "buildingSign",
+    { width: 13.0, height: 0.9, depth: 0.08 },
+    scene,
+  );
+  buildingSign.position = new Vector3(-17.0, 0.75, -15.2);
+  drawSignTexture(scene, buildingSign, 1280, 90, (ctx) => {
+    ctx.fillStyle = "#1f2d4a";
+    ctx.fillRect(0, 0, 1280, 90);
+    ctx.fillStyle = "#c9a14a";
+    ctx.fillRect(0, 0, 1280, 4);
+    ctx.fillRect(0, 86, 1280, 4);
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "#e7c872";
+    ctx.font = "bold 50px sans-serif";
+    ctx.fillText("CALDOVA WEALTH", 330, 46);
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 30px sans-serif";
+    ctx.fillText("SUPERANNUATION  ·  WEALTH MANAGEMENT", 880, 48);
+  });
+
+  // ----- Back-wall windows: a skyline view over the neighbouring towers -----
   const windowMat = mat("window", "#cfe7ff");
-  const windowFrame = mat("windowFrame", "#f6e9d4");
-  for (let i = 0; i < 6; i++) {
-    const x = 4 + i * 4.2;
+  const windowFrame = mat("windowFrame", "#b79a5b");
+  const skylineMat = skylineMaterial(scene, "skyline");
+  [-26.5, -22.5, 4, 8.2, 12.4, 16.6, 20.8, 25].forEach((x, i) => {
     const frame = MeshBuilder.CreateBox(
       `winFrame_${i}`,
       { width: 3.2, height: 2.6, depth: 0.1 },
@@ -331,8 +416,70 @@ export function buildOffice(scene: Scene): OfficeLayout {
       scene,
     );
     glass.position = new Vector3(x, 2.7, 24.79);
-    glass.material = windowMat;
+    glass.material = skylineMat;
+  });
+
+  // ----- Team wing banners: left wall signs + floor lettering -----
+  for (const [name, z, hex, label, sub] of [
+    ["Super", 0.2, "#0f766e", "SUPERANNUATION TEAM", "Members · Rollovers · Pensions"],
+    ["Wealth", 10.2, "#1f2d4a", "WEALTH MANAGEMENT TEAM", "Advice · Investments · Risk · Clients"],
+  ] as const) {
+    const banner = textPlane(scene, `wingBanner_${name}`, 8.4, 1.0, 1024, 122, (ctx) => {
+      ctx.fillStyle = hex;
+      ctx.fillRect(0, 0, 1024, 122);
+      ctx.fillStyle = "#c9a14a";
+      ctx.fillRect(0, 0, 1024, 6);
+      ctx.fillRect(0, 116, 1024, 6);
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 58px sans-serif";
+      ctx.fillText(label, 512, 50);
+      ctx.fillStyle = "#e7c872";
+      ctx.font = "30px sans-serif";
+      ctx.fillText(sub, 512, 94);
+    });
+    banner.position = new Vector3(-29.75, 3.95, z);
+    banner.rotation.y = -Math.PI / 2;
   }
+  for (const [name, z, hex, label] of [
+    ["Super", -4.9, "#0f766e", "SUPERANNUATION TEAM"],
+    ["Wealth", 6.9, "#8a6a1f", "WEALTH MANAGEMENT TEAM"],
+  ] as const) {
+    const lettering = textPlane(
+      scene,
+      `wingFloor_${name}`,
+      19,
+      1.1,
+      1536,
+      89,
+      (ctx) => {
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = hex;
+        ctx.font = "bold 62px sans-serif";
+        ctx.fillText(label.split("").join(" "), 768, 46);
+      },
+      true,
+    );
+    lettering.position = new Vector3(-6, 0.155, z);
+    lettering.rotation.x = Math.PI / 2;
+  }
+
+  // ----- Left-wall windows: the view across Flinders Lane -----
+  [-9, -1.5, 5.5, 13.5].forEach((z, i) => {
+    const frame = MeshBuilder.CreateBox(
+      `winFrameL_${i}`,
+      { width: 0.1, height: 2.2, depth: 3.4 },
+      scene,
+    );
+    frame.position = new Vector3(-29.84, 2.2, z);
+    frame.material = windowFrame;
+    const glass = MeshBuilder.CreatePlane(`winGlassL_${i}`, { width: 3.0, height: 1.9 }, scene);
+    glass.position = new Vector3(-29.78, 2.2, z);
+    glass.rotation.y = -Math.PI / 2;
+    glass.material = skylineMat;
+  });
 
   // ----- Front entrance (double doors) -----
   // Doors slide horizontally apart when a character (staff or client)
@@ -411,9 +558,9 @@ export function buildOffice(scene: Scene): OfficeLayout {
   mat1.material = mat("welcomeMat", "#3a3a44");
 
   // ----- Reception / Welcome lobby furniture (front-left) -----
-  // Reception desk (curved-look L)
-  const recDeskMat = mat("recDesk", "#a06a4c");
-  const recDeskTop = mat("recDeskTop", "#d4b596");
+  // Reception desk — walnut concierge desk with a pale stone top
+  const recDeskMat = mat("recDesk", "#4a3224");
+  const recDeskTop = mat("recDeskTop", "#e8dcc4");
   const recBase = MeshBuilder.CreateBox(
     "recDeskBase",
     { width: 4.5, height: 1.0, depth: 1.4 },
@@ -445,9 +592,25 @@ export function buildOffice(scene: Scene): OfficeLayout {
   trayLabel.material = mat("trayLabel", "#ffb347");
   // Reception monitor
   buildMonitor(scene, mat, new Vector3(-16.0, 1.07, -10.7), 0);
+  // Brass "CONCIERGE" plaque on the front of the desk
+  const conciergePlaque = MeshBuilder.CreateBox(
+    "conciergePlaque",
+    { width: 2.6, height: 0.4, depth: 0.05 },
+    scene,
+  );
+  conciergePlaque.position = new Vector3(-15.2, 0.62, -11.12);
+  drawSignTexture(scene, conciergePlaque, 416, 64, (ctx) => {
+    ctx.fillStyle = "#c9a14a";
+    ctx.fillRect(0, 0, 416, 64);
+    ctx.fillStyle = "#1f2d4a";
+    ctx.font = "bold 40px sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("CONCIERGE", 208, 34);
+  });
 
-  // Coffee table + sofas in lobby (Client Waiting Area)
-  const sofaMat = mat("sofa", "#3a5fb0");
+  // Coffee table + sofas in lobby (Client Waiting Area): cream leather
+  const sofaMat = mat("sofa", "#e8dcc4");
   const sofa1Seat = MeshBuilder.CreateBox(
     "sofa1Seat",
     { width: 1.2, height: 0.5, depth: 1.2 },
@@ -463,14 +626,14 @@ export function buildOffice(scene: Scene): OfficeLayout {
     scene,
   );
   cTableTop.position = new Vector3(-15.5, 0.45, -12.0);
-  cTableTop.material = mat("cTable", "#a06a4c");
+  cTableTop.material = mat("cTable", "#2a2f3a");
   const cTableLeg = MeshBuilder.CreateBox(
     "cTableLeg",
     { width: 1.4, height: 0.4, depth: 0.6 },
     scene,
   );
   cTableLeg.position = new Vector3(-15.5, 0.2, -12.0);
-  cTableLeg.material = mat("cTableLeg", "#7d4f33");
+  cTableLeg.material = mat("cTableLeg", "#c9a14a");
 
   // Additional waiting-area sofas across the front of the lobby
   const sofa3Seat = sofa1Seat.clone("sofa3Seat");
@@ -483,32 +646,36 @@ export function buildOffice(scene: Scene): OfficeLayout {
     scene,
   );
   cTable2Top.position = new Vector3(3.5, 0.45, -12.0);
-  cTable2Top.material = mat("cTable", "#a06a4c");
+  cTable2Top.material = mat("cTable", "#2a2f3a");
   const cTable2Leg = MeshBuilder.CreateBox(
     "cTable2Leg",
     { width: 1.4, height: 0.4, depth: 0.6 },
     scene,
   );
   cTable2Leg.position = new Vector3(3.5, 0.2, -12.0);
-  cTable2Leg.material = mat("cTableLeg", "#7d4f33");
+  cTable2Leg.material = mat("cTableLeg", "#c9a14a");
 
-  // "CLIENT WAITING AREA" sign on the front-low wall (right side)
+  // "CLIENT WAITING AREA" sign on the front-low wall (right side, faces the forecourt)
   const waitingSign = MeshBuilder.CreateBox(
     "waitingSign",
     { width: 4.2, height: 0.9, depth: 0.08 },
     scene,
   );
-  waitingSign.position = new Vector3(11, 1.1, -14.85);
+  waitingSign.position = new Vector3(11, 0.75, -15.2);
   drawSignTexture(scene, waitingSign, 640, 140, (ctx) => {
-    ctx.fillStyle = "#3a5fb0";
+    ctx.fillStyle = "#1f2d4a";
     ctx.fillRect(0, 0, 640, 140);
+    ctx.fillStyle = "#c9a14a";
+    ctx.fillRect(0, 0, 640, 5);
+    ctx.fillRect(0, 135, 640, 5);
     ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 56px sans-serif";
+    ctx.font = "bold 50px sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText("CLIENT WAITING", 320, 56);
-    ctx.font = "bold 44px sans-serif";
-    ctx.fillText("AREA", 320, 108);
+    ctx.fillText("CLIENT WAITING", 320, 52);
+    ctx.font = "bold 40px sans-serif";
+    ctx.fillStyle = "#e7c872";
+    ctx.fillText("LOUNGE", 320, 102);
   });
 
   // Lobby plants
@@ -519,68 +686,61 @@ export function buildOffice(scene: Scene): OfficeLayout {
 
   // Lobby decor — cushions on sofas, magazines on coffee table, a floor
   // lamp by the corner, a framed photo and a wall clock above reception.
-  buildCushion(scene, mat, "lobbyCushion1", new Vector3(-17.3, 0.7, -12.2), "#ffb347");
-  buildCushion(scene, mat, "lobbyCushion2", new Vector3(-16.7, 0.7, -11.8), "#e8504c");
-  buildCushion(scene, mat, "lobbyCushion3", new Vector3(-14.3, 0.7, -12.2), "#2e8a6e");
-  buildCushion(scene, mat, "lobbyCushion4", new Vector3(-13.7, 0.7, -11.8), "#b56fbf");
-  buildCushion(scene, mat, "lobbyCushion5", new Vector3(1.7, 0.7, -12.2), "#6ec1ff");
-  buildCushion(scene, mat, "lobbyCushion6", new Vector3(2.3, 0.7, -11.8), "#ffb347");
-  buildCushion(scene, mat, "lobbyCushion7", new Vector3(4.7, 0.7, -12.2), "#e8504c");
-  buildCushion(scene, mat, "lobbyCushion8", new Vector3(5.3, 0.7, -11.8), "#3a5fb0");
+  buildCushion(scene, mat, "lobbyCushion1", new Vector3(-17.3, 0.7, -12.2), "#1f2d4a");
+  buildCushion(scene, mat, "lobbyCushion2", new Vector3(-16.7, 0.7, -11.8), "#c9a14a");
+  buildCushion(scene, mat, "lobbyCushion3", new Vector3(-14.3, 0.7, -12.2), "#0f766e");
+  buildCushion(scene, mat, "lobbyCushion4", new Vector3(-13.7, 0.7, -11.8), "#1f2d4a");
+  buildCushion(scene, mat, "lobbyCushion5", new Vector3(1.7, 0.7, -12.2), "#c9a14a");
+  buildCushion(scene, mat, "lobbyCushion6", new Vector3(2.3, 0.7, -11.8), "#1f2d4a");
+  buildCushion(scene, mat, "lobbyCushion7", new Vector3(4.7, 0.7, -12.2), "#0f766e");
+  buildCushion(scene, mat, "lobbyCushion8", new Vector3(5.3, 0.7, -11.8), "#c9a14a");
   buildMagazines(scene, mat, "lobbyMags", new Vector3(-15.5, 0.51, -12.0));
   buildMagazines(scene, mat, "lobbyMags2", new Vector3(3.5, 0.51, -12.0));
   buildFloorLamp(scene, mat, "lobbyFloorLamp", new Vector3(-19.0, 0, -12.6), "#ffb347");
   buildFloorLamp(scene, mat, "lobbyFloorLamp2", new Vector3(8.5, 0, -12.6), "#6ec1ff");
 
   // ----- Department grid -----
-  // 8 dedicated departments arranged across the doubled floor. Each role
-  // gets its own coloured zone, separated from neighbours by tall office
-  // screen partitions and a labelled overhead sign.
+  // 8 dedicated departments arranged across the floor by team. Each role
+  // gets its own coloured pod, framed by timber-and-glass screens, with a
+  // labelled overhead sign that names the team it belongs to.
   //
-  // Front row (z = 0): Onboarding | Transfers | Payments | Comms
-  // Back  row (z = 10): Team Leader | Benefits | Investments | Financial Crime
-  // Right side: Play Area | Coffee Area | Kitchen | IT/Cloud Room
-  // Front (z < -7): Reception desk + Client Waiting Area + Welcome counters
+  // Superannuation wing (front row, z = 0):
+  //   Onboarding | Benefits | Transfers | Payments
+  // Wealth Management wing (back row, z = 10):
+  //   Head of Client Operations (corner) | Investments | Comms | Financial Crime
+  // Right side: Member Lounge | Client Café | Staff Kitchen
+  // Back-left: Investment Committee Room
+  // Front (z < -7): Concierge + Client Waiting Lounge + Service counters
 
-  // ----- Department cubicles (front and back rows) -----
-  type CubicleSpec = {
-    label: string;
-    accent: string;
-    cx: number;
-    cz: number;
-    sign: string;
-  };
-  // Cubicle centres are spaced 10 units apart (was 8) so each booth has
-  // visible breathing room between its accent floor and its neighbour's
-  // partition wall — keeps the diorama feeling spacious rather than
-  // cramped now that we have a dedicated meeting-rooms section.
+  // ----- Department pods (front and back rows) -----
   const cubicles: CubicleSpec[] = [
     // Sign text is the department keyword only (no "Officer" /
     // "Coordinator" / "Investigator" suffixes) so the label stays large
     // and legible from the orbit camera. Accents are the canonical
     // department colours (matching each staff member's shirt).
-    // Front row (z = 0)
-    { label: "onboarding",     accent: "#0ea5e9", cx: -21, cz: 0, sign: "ONBOARDING" },
-    { label: "transfers",      accent: "#10b981", cx: -11, cz: 0, sign: "TRANSFERS" },
-    { label: "payments",       accent: "#a855f7", cx:  -1, cz: 0, sign: "PAYMENTS" },
-    { label: "communications", accent: "#ec4899", cx:   9, cz: 0, sign: "COMMS" },
-    // Back row (z = 10) — Team Leader gets the executive corner office
-    { label: "benefits",    accent: "#6366f1", cx: -11, cz: 10, sign: "BENEFITS" },
-    { label: "investments", accent: "#f59e0b", cx:  -1, cz: 10, sign: "INVESTMENTS" },
-    { label: "finCrime",    accent: "#ef4444", cx:   9, cz: 10, sign: "FINANCIAL CRIME" },
+    // Superannuation wing (front row, z = 0)
+    { label: "onboarding", accent: "#0ea5e9", cx: -21, cz: 0, sign: "ONBOARDING", team: "super", screen: "case" },
+    { label: "benefits",   accent: "#6366f1", cx: -11, cz: 0, sign: "BENEFITS",   team: "super", screen: "checklist" },
+    { label: "transfers",  accent: "#10b981", cx:  -1, cz: 0, sign: "TRANSFERS",  team: "super", screen: "tracker" },
+    { label: "payments",   accent: "#a855f7", cx:   9, cz: 0, sign: "PAYMENTS",   team: "super", screen: "payment" },
+    // Wealth Management wing (back row, z = 10) — the Head of Client
+    // Operations gets the executive corner office at x = -21.
+    { label: "investments",    accent: "#f59e0b", cx: -11, cz: 10, sign: "INVESTMENTS",     team: "wealth", screen: "chart" },
+    { label: "communications", accent: "#ec4899", cx:  -1, cz: 10, sign: "COMMS",           team: "wealth", screen: "letter" },
+    { label: "finCrime",       accent: "#ef4444", cx:   9, cz: 10, sign: "FINANCIAL CRIME", team: "wealth", screen: "risk" },
   ];
   for (const c of cubicles) {
-    buildDepartmentZone(scene, mat, c.label, c.cx, c.cz, c.sign, c.accent);
+    buildDepartmentZone(scene, mat, c);
   }
 
-  // ----- Team Leader executive office (back-far-left) -----
+  // ----- Head of Client Operations executive office (back-far-left) -----
   buildTeamLeaderOffice(scene, mat, new Vector3(-21, 0, 10));
 
-  // ----- Meeting Rooms section (back, mid) -----
-  // Two glass-walled meeting rooms sit side-by-side along the back of the
-  // office, between the back-row cubicles and the filing cabinets. The
-  // section is unified by a shared accent floor strip and an overhead
-  // "MEETING ROOMS" banner mounted on the back wall.
+  // ----- Client Meeting Suites (back, mid) -----
+  // Two glass-walled suites sit side-by-side along the back of the office,
+  // between the Wealth wing and the archive. The section is unified by a
+  // shared accent floor strip and an overhead "CLIENT MEETING SUITES"
+  // banner mounted on the back wall.
   buildMeetingRoomSection(scene, mat, new Vector3(2.5, 0, 19.5));
 
   // ----- Filing cabinets / archive shelves (along the back wall) -----
@@ -606,7 +766,7 @@ export function buildOffice(scene: Scene): OfficeLayout {
   // Archive label rail along the top front edge of the cabinet bank —
   // one section per file type, sitting under the plants on top.
   buildArchiveLabels(scene, -0.5, 1.8, 23.33, 8.2, [
-    "Applications",
+    "Advice (SOA)",
     "Member Files",
     "Nominations",
     "Closed Cases",
@@ -650,26 +810,28 @@ export function buildOffice(scene: Scene): OfficeLayout {
   printerTop.position = new Vector3(15.0, 0.85, 10.0);
   printerTop.material = mat("printerTop", "#22252e");
 
-  // ----- Client-facing welcome counters in the lobby -----
-  buildLobbyCounter(scene, mat, "NEW ACCOUNTS", -7.5, -9.0, "#0ea5e9");
-  buildLobbyCounter(scene, mat, "MEMBER HELP",  -3.5, -9.0, "#14b8a6");
-  buildLobbyCounter(scene, mat, "ADVISER DESK",  0.5, -9.0, "#6366f1");
+  // ----- Client-facing service counters in the lobby -----
+  buildLobbyCounter(scene, mat, "SUPER SERVICES",  -7.5, -9.0, "#0f766e");
+  buildLobbyCounter(scene, mat, "WEALTH SERVICES", -3.5, -9.0, "#1f2d4a");
+  buildLobbyCounter(scene, mat, "ADVISER DESK",     0.5, -9.0, "#6366f1");
 
   // ----- Right-side zones -----
-  // Play area (front-right): ping-pong, arcade, beanbags
-  buildPlayArea(scene, mat, new Vector3(24, 0, 0));
-  // Coffee area (mid-right): bistro tables and pendant lamps
+  // Member lounge (front-right): seminar screen, armchairs, calculator kiosk
+  buildMemberLounge(scene, mat, new Vector3(24, 0, 0));
+  // Client café (mid-right): bistro tables and pendant lamps
   buildCafe(scene, mat, new Vector3(26, 0, 9));
-  // Kitchen / break room (back-right)
+  // Staff kitchen (back-right)
   buildKitchen(scene, mat, new Vector3(24, 0, 20));
-  // IT / Cloud Infra Room (back-far-left)
-  buildITRoom(scene, mat, new Vector3(-24, 0, 20));
+  // Investment committee room (back-far-left)
+  buildInvestmentCommittee(scene, mat, new Vector3(-24, 0, 20));
 
-  // Wall decor on the (now larger) back wall — clock and framed art near
-  // the identity panel.
+  // Closed-case credenza beside the Wealth wing, where Comms files each case.
+  buildCaseCredenza(scene, mat, new Vector3(4.0, 0, 8.6));
+
+  // Wall decor on the back wall — clock and framed art near the identity panel.
   buildWallClock(scene, mat, "recClock", new Vector3(-2.5, 3.6, 24.84));
-  buildFramedArt(scene, mat, "recArt1", new Vector3(0.5, 3.0, 24.84), 1.6, 1.2, "#3a5fb0");
-  buildFramedArt(scene, mat, "recArt2", new Vector3(2.5, 3.0, 24.84), 1.6, 1.2, "#2e8a6e");
+  buildFramedArt(scene, mat, "recArt1", new Vector3(0.5, 3.0, 24.84), 1.6, 1.2, "#1f2d4a");
+  buildFramedArt(scene, mat, "recArt2", new Vector3(2.5, 3.0, 24.84), 1.6, 1.2, "#c9a14a");
 
   // Decorative plants in walkways — placed in the gaps between cubicles
   // (now 10 units apart) and along the right-side circulation routes.
@@ -692,15 +854,15 @@ export function buildOffice(scene: Scene): OfficeLayout {
     receptionPoint: new Vector3(-13.5, 0, -9.5),
     exitPoint: new Vector3(0, 0, -18),
     onboardingDeskPoint: new Vector3(-21, 0, -0.6),
-    benefitsDeskPoint: new Vector3(-11, 0, 9.4),
-    investmentsDeskPoint: new Vector3(-1, 0, 9.4),
+    benefitsDeskPoint: new Vector3(-11, 0, -0.6),
+    transfersDeskPoint: new Vector3(-1, 0, -0.6),
+    paymentsDeskPoint: new Vector3(9, 0, -0.6),
+    investmentsDeskPoint: new Vector3(-11, 0, 9.4),
+    communicationsDeskPoint: new Vector3(-1, 0, 9.4),
     finCrimeDeskPoint: new Vector3(9, 0, 9.4),
-    transfersDeskPoint: new Vector3(-11, 0, -0.6),
-    paymentsDeskPoint: new Vector3(-1, 0, -0.6),
-    communicationsDeskPoint: new Vector3(9, 0, -0.6),
     teamLeaderDeskPoint: new Vector3(-21, 0, 9.5),
     inboxPoint: new Vector3(-14.0, 1.25, -10.4),
-    archivePoint: new Vector3(5.0, 1.4, 1.0),
+    archivePoint: new Vector3(4.0, 1.4, 8.6),
   };
 }
 
@@ -723,6 +885,84 @@ function drawSignTexture(
   m.specularColor = new Color3(0.05, 0.05, 0.05);
   m.emissiveColor = new Color3(0.18, 0.18, 0.18);
   mesh.material = m;
+}
+
+/**
+ * Flat plane carrying a drawn texture. It faces -z by default; rotate it to
+ * hang on a side wall (rotation.y) or lie on the floor (rotation.x = π/2).
+ */
+function textPlane(
+  scene: Scene,
+  name: string,
+  w: number,
+  h: number,
+  texW: number,
+  texH: number,
+  draw: (ctx: CanvasRenderingContext2D) => void,
+  transparent = false,
+): Mesh {
+  const plane = MeshBuilder.CreatePlane(name, { width: w, height: h }, scene);
+  const tex = new DynamicTexture(`tex_${name}`, { width: texW, height: texH }, scene, false);
+  draw(tex.getContext() as unknown as CanvasRenderingContext2D);
+  tex.update();
+  const m = new StandardMaterial(`planeMat_${name}`, scene);
+  m.diffuseTexture = tex;
+  m.specularColor = new Color3(0.05, 0.05, 0.05);
+  m.emissiveColor = new Color3(0.3, 0.3, 0.3);
+  if (transparent) {
+    tex.hasAlpha = true;
+    m.useAlphaFromDiffuseTexture = true;
+  }
+  plane.material = m;
+  return plane;
+}
+
+/** Shared "view over the city" texture for the office windows. */
+function skylineMaterial(scene: Scene, name: string): StandardMaterial {
+  const w = 512;
+  const h = 256;
+  const tex = new DynamicTexture(`tex_${name}`, { width: w, height: h }, scene, false);
+  const ctx = tex.getContext() as unknown as CanvasRenderingContext2D;
+  const sky = ctx.createLinearGradient(0, 0, 0, h);
+  sky.addColorStop(0, "#7fb8e8");
+  sky.addColorStop(1, "#dcedf8");
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = "rgba(255,255,255,0.7)";
+  ctx.fillRect(60, 40, 110, 22);
+  ctx.fillRect(90, 28, 70, 14);
+  ctx.fillRect(330, 70, 130, 20);
+  // Two layers of towers: pale and hazy at the back, bolder in front.
+  let seed = 42;
+  const rand = (): number => {
+    seed = (seed * 16807) % 2147483647;
+    return seed / 2147483647;
+  };
+  for (const [layerColour, minH, maxH, windowColour] of [
+    ["#a9bfd9", 90, 190, "#c8d8ea"],
+    ["#6f89ad", 50, 130, "#9db6d4"],
+  ] as const) {
+    let x = -10;
+    while (x < w) {
+      const bw = 34 + rand() * 40;
+      const bh = minH + rand() * (maxH - minH);
+      ctx.fillStyle = layerColour;
+      ctx.fillRect(x, h - bh, bw, bh);
+      ctx.fillStyle = windowColour;
+      for (let wy = h - bh + 8; wy < h - 6; wy += 14) {
+        for (let wx = x + 6; wx < x + bw - 8; wx += 12) {
+          if (rand() < 0.6) ctx.fillRect(wx, wy, 5, 7);
+        }
+      }
+      x += bw + 4 + rand() * 6;
+    }
+  }
+  tex.update();
+  const m = new StandardMaterial(`skylineMat_${name}`, scene);
+  m.diffuseTexture = tex;
+  m.specularColor = new Color3(0.05, 0.05, 0.05);
+  m.emissiveColor = new Color3(0.45, 0.45, 0.45);
+  return m;
 }
 
 /**
@@ -769,51 +1009,86 @@ function buildArchiveLabels(
   });
 }
 
+type TeamWing = "super" | "wealth";
+
+type ScreenKind = "case" | "checklist" | "tracker" | "payment" | "chart" | "letter" | "risk";
+
+interface CubicleSpec {
+  label: string;
+  accent: string;
+  cx: number;
+  cz: number;
+  sign: string;
+  team: TeamWing;
+  screen: ScreenKind;
+}
+
+/** Wing styling: sign colours, desk finish and the sign's team subtitle. */
+const WING_STYLE: Record<
+  TeamWing,
+  { signBg: string; subColour: string; desk: string; glassFrame: string; subtitle: string }
+> = {
+  super: {
+    signBg: "#0f766e",
+    subColour: "#bff3ec",
+    desk: "#cdb893",
+    glassFrame: "#14b8a6",
+    subtitle: "SUPERANNUATION TEAM",
+  },
+  wealth: {
+    signBg: "#1f2d4a",
+    subColour: "#e7c872",
+    desk: "#6a4b34",
+    glassFrame: "#c9a14a",
+    subtitle: "WEALTH MANAGEMENT TEAM",
+  },
+};
+
 /**
- * Build a single labelled department zone: a coloured floor accent, tall
- * "office screen" partitions on three sides, a labelled overhead sign,
- * and a desk with chair and props inside. Each role's accent colour
+ * Build a single labelled department zone: a coloured floor accent, timber
+ * and glass partitions on three sides, a labelled overhead sign naming the
+ * team, and a desk with chair and props inside. Each role's accent colour
  * differentiates their zone from neighbouring departments.
  */
 function buildDepartmentZone(
   scene: Scene,
   mat: MaterialFactory,
-  label: string,
-  cx: number,
-  cz: number,
-  signText: string,
-  accentHex: string,
+  spec: CubicleSpec,
 ): void {
   // Floor accent under the department zone
   const accent = MeshBuilder.CreateBox(
-    `dept_floor_${label}`,
+    `dept_floor_${spec.label}`,
     { width: 6.6, height: 0.05, depth: 5.4 },
     scene,
   );
-  accent.position = new Vector3(cx, 0.13, cz + 0.5);
-  accent.material = mat(`dept_floorMat_${label}`, accentHex);
+  accent.position = new Vector3(spec.cx, 0.13, spec.cz + 0.5);
+  accent.material = mat(`dept_floorMat_${spec.label}`, spec.accent);
 
   // Build the desk + screens via the cubicle helper
-  buildCubicle(scene, mat, label, cx, cz, signText, accentHex);
+  buildCubicle(scene, mat, spec);
 }
 
-/** Build a single labelled cubicle: tall office-screen partitions, desk,
+/** Build a single labelled pod: timber back screen, glass side screens, desk,
  *  monitor, chair, and overhead sign. Used by buildDepartmentZone. */
 function buildCubicle(
   scene: Scene,
   mat: MaterialFactory,
-  label: string,
-  cx: number,
-  cz: number,
-  signText: string,
-  accentHex = "#d8c7a7",
+  spec: CubicleSpec,
 ): void {
-  const cubicleWallMat = mat(`cub_${label}`, "#d8c7a7");
+  const { label, cx, cz, team, screen } = spec;
+  const signText = spec.sign;
+  const accentHex = spec.accent;
+  const wing = WING_STYLE[team];
+  const cubicleWallMat = mat(`cub_${label}`, team === "wealth" ? "#7a5a42" : "#d8cdb5");
+  const glassMat = mat(`cubGlass_${label}`, "#cfe7ff");
+  glassMat.alpha = 0.38;
   const accentMat = mat(`cubAccent_${label}`, accentHex);
-  const deskMat = mat(`desk_${label}`, "#bca78a");
+  const frameMat = mat(`cubFrame_${label}`, wing.glassFrame);
+  const deskMat = mat(`desk_${label}`, wing.desk);
   const chairMat = mat(`chair_${label}`, "#1c2230");
 
-  // Tall "office screen" partitions — back, left, right (1.8m tall)
+  // Tall partitions — a solid timber back screen with frosted-glass side
+  // screens (1.8m tall) so the pods feel open and light.
   const back = MeshBuilder.CreateBox(
     `cubBack_${label}`,
     { width: 6.0, height: 1.8, depth: 0.15 },
@@ -827,11 +1102,12 @@ function buildCubicle(
     scene,
   );
   left.position = new Vector3(cx - 2.95, 0.9, cz + 0.1);
-  left.material = cubicleWallMat;
+  left.material = glassMat;
   const right = left.clone(`cubRight_${label}`);
   right.position.x = cx + 2.95;
 
-  // Coloured stripe along the top of each screen for the dept accent
+  // Coloured stripe along the top of each screen for the dept accent, plus a
+  // slim brass/teal frame rail along the glass bottom edge.
   const topStripeBack = MeshBuilder.CreateBox(
     `cubBackStripe_${label}`,
     { width: 6.04, height: 0.18, depth: 0.18 },
@@ -848,6 +1124,15 @@ function buildCubicle(
   topStripeLeft.material = accentMat;
   const topStripeRight = topStripeLeft.clone(`cubRightStripe_${label}`);
   topStripeRight.position.x = cx + 2.95;
+  const railLeft = MeshBuilder.CreateBox(
+    `cubLeftRail_${label}`,
+    { width: 0.18, height: 0.1, depth: 5.04 },
+    scene,
+  );
+  railLeft.position = new Vector3(cx - 2.95, 0.05, cz + 0.1);
+  railLeft.material = frameMat;
+  const railRight = railLeft.clone(`cubRightRail_${label}`);
+  railRight.position.x = cx + 2.95;
 
   // Sign mounted ABOVE the back partition (top of partition is at y≈1.8;
   // the sign sits with its bottom edge resting on that lip and reads from
@@ -866,14 +1151,20 @@ function buildCubicle(
   sign.rotation.x = Math.PI / 6; // 30 degrees
   sign.position = new Vector3(cx, 2.55, cz + 2.4);
   drawSignTexture(scene, sign, 1440, 320, (ctx) => {
-    ctx.fillStyle = "#3a5fb0";
+    ctx.fillStyle = wing.signBg;
     ctx.fillRect(0, 0, 1440, 320);
+    // Department accent chip + brass rule frame the team-coloured sign.
+    ctx.fillStyle = accentHex;
+    ctx.fillRect(0, 0, 40, 320);
+    ctx.fillStyle = "#c9a14a";
+    ctx.fillRect(40, 0, 1400, 8);
+    ctx.fillRect(40, 312, 1400, 8);
     ctx.fillStyle = "#ffffff";
     // Auto-fit text so labels of varying length (e.g. "COMMS" vs
     // "FINANCIAL CRIME") never clip on either side of the sign. Start at a
     // comfortable size and shrink only if the measured text would breach
     // the safe inner width.
-    const safeWidth = 1280; // leave 80px padding on each side of 1440
+    const safeWidth = 1240; // leave padding either side of the 1440 sign
     let fontPx = 150;
     ctx.textBaseline = "middle";
     ctx.textAlign = "center";
@@ -882,7 +1173,10 @@ function buildCubicle(
       fontPx -= 6;
       ctx.font = `bold ${fontPx}px sans-serif`;
     }
-    ctx.fillText(signText, 720, 170);
+    ctx.fillText(signText, 740, 128);
+    ctx.fillStyle = wing.subColour;
+    ctx.font = "bold 54px sans-serif";
+    ctx.fillText(wing.subtitle, 740, 244);
   });
 
   // Slim accent strip directly under the sign so the larger sign visually
@@ -914,8 +1208,8 @@ function buildCubicle(
     leg.material = deskMat;
   }
 
-  // Monitor on desk
-  buildMonitor(scene, mat, new Vector3(cx - 0.6, 0.92, cz + 1.3), 0);
+  // Monitor on desk — each department's screen shows its own workflow
+  buildMonitor(scene, mat, new Vector3(cx - 0.6, 0.92, cz + 1.3), 0, screen);
   // Phone
   const phone = MeshBuilder.CreateBox(
     `phone_${label}`,
@@ -984,6 +1278,7 @@ function buildMonitor(
   mat: MaterialFactory,
   base: Vector3,
   rotY: number,
+  screenKind?: ScreenKind,
 ): void {
   const tag = `${base.x.toFixed(1)}_${base.z.toFixed(1)}`;
   const monBase = MeshBuilder.CreateBox(
@@ -1021,7 +1316,158 @@ function buildMonitor(
     base.z + Math.cos(rotY) * 0.05,
   );
   screen.rotation.y = rotY;
-  screen.material = mat(`screenMat_${tag}`, "#bcd7ee");
+  screen.material = screenKind
+    ? workflowScreenMaterial(scene, screenKind)
+    : mat(`screenMat_${tag}`, "#bcd7ee");
+}
+
+const workflowScreens = new WeakMap<Scene, Map<ScreenKind, StandardMaterial>>();
+
+/**
+ * Simple workflow graphics for each department's monitor — a Member Case, a
+ * NIGO/eligibility checklist, a rollover tracker, a payment breakdown, a
+ * portfolio chart, a letter draft and a risk meter. Contains no real or
+ * readable personal details.
+ */
+function workflowScreenMaterial(scene: Scene, kind: ScreenKind): StandardMaterial {
+  let perScene = workflowScreens.get(scene);
+  if (!perScene) {
+    perScene = new Map();
+    workflowScreens.set(scene, perScene);
+  }
+  const cached = perScene.get(kind);
+  if (cached) return cached;
+
+  const w = 256;
+  const h = 144;
+  const tex = new DynamicTexture(`workflowScreen_${kind}`, { width: w, height: h }, scene, false);
+  const ctx = tex.getContext() as unknown as CanvasRenderingContext2D;
+  ctx.fillStyle = "#f4f7fb";
+  ctx.fillRect(0, 0, w, h);
+  const bar = (colour: string, title: string): void => {
+    ctx.fillStyle = colour;
+    ctx.fillRect(0, 0, w, 24);
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 16px sans-serif";
+    ctx.textBaseline = "middle";
+    ctx.textAlign = "left";
+    ctx.fillText(title, 8, 13);
+  };
+  const lines = (x: number, y: number, count: number, width: number): void => {
+    ctx.fillStyle = "#c5cfdd";
+    for (let i = 0; i < count; i++) ctx.fillRect(x, y + i * 14, width - (i % 2) * 24, 6);
+  };
+
+  switch (kind) {
+    case "case":
+      bar("#0ea5e9", "MEMBER CASE");
+      ctx.fillStyle = "#9db6d4";
+      ctx.fillRect(10, 36, 44, 44);
+      lines(64, 38, 3, 170);
+      lines(10, 92, 3, 232);
+      break;
+    case "checklist":
+      bar("#6366f1", "ELIGIBILITY");
+      for (let i = 0; i < 5; i++) {
+        const y = 32 + i * 21;
+        ctx.fillStyle = i === 3 ? "#f59e0b" : "#10b981";
+        ctx.fillRect(10, y, 14, 14);
+        ctx.fillStyle = "#c5cfdd";
+        ctx.fillRect(34, y + 4, 150 - i * 12, 6);
+      }
+      break;
+    case "tracker": {
+      bar("#10b981", "ROLLOVER");
+      ctx.fillStyle = "#c5cfdd";
+      ctx.fillRect(20, 70, 216, 4);
+      const colours = ["#10b981", "#10b981", "#f59e0b", "#c5cfdd"];
+      colours.forEach((c, i) => {
+        ctx.fillStyle = c;
+        ctx.fillRect(18 + i * 70, 60, 24, 24);
+      });
+      ctx.fillStyle = "#10b981";
+      ctx.fillRect(20, 112, 120, 10);
+      ctx.fillStyle = "#c5cfdd";
+      ctx.fillRect(140, 112, 96, 10);
+      break;
+    }
+    case "payment":
+      bar("#a855f7", "PAYMENT");
+      lines(12, 34, 1, 150);
+      ctx.fillStyle = "#6366f1";
+      ctx.fillRect(12, 54, 160, 12);
+      ctx.fillStyle = "#ef4444";
+      ctx.fillRect(12, 74, 50, 12);
+      ctx.fillStyle = "#10b981";
+      ctx.fillRect(12, 94, 120, 12);
+      ctx.beginPath();
+      ctx.arc(214, 108, 14, 0, Math.PI * 2);
+      ctx.fillStyle = "#f59e0b";
+      ctx.fill();
+      break;
+    case "chart": {
+      bar("#c9a14a", "PORTFOLIO");
+      const heights = [30, 42, 36, 58, 52, 76, 70];
+      heights.forEach((bh, i) => {
+        ctx.fillStyle = i % 2 ? "#c9a14a" : "#1f2d4a";
+        ctx.fillRect(14 + i * 22, 130 - bh, 16, bh);
+      });
+      ctx.strokeStyle = "#10b981";
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(14, 96);
+      ctx.lineTo(60, 78);
+      ctx.lineTo(110, 86);
+      ctx.lineTo(160, 58);
+      ctx.lineTo(220, 44);
+      ctx.stroke();
+      break;
+    }
+    case "letter":
+      bar("#ec4899", "CLIENT UPDATE");
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(14, 34, 160, 96);
+      ctx.strokeStyle = "#c5cfdd";
+      ctx.strokeRect(14, 34, 160, 96);
+      lines(24, 46, 5, 130);
+      ctx.fillStyle = "#fbd5e8";
+      ctx.fillRect(188, 54, 54, 40);
+      ctx.fillStyle = "#ec4899";
+      ctx.beginPath();
+      ctx.moveTo(188, 54);
+      ctx.lineTo(215, 78);
+      ctx.lineTo(242, 54);
+      ctx.fill();
+      break;
+    case "risk":
+      bar("#ef4444", "RISK CHECK");
+      ctx.lineWidth = 14;
+      for (const [c, a0, a1] of [
+        ["#10b981", Math.PI, Math.PI * 1.34],
+        ["#f59e0b", Math.PI * 1.34, Math.PI * 1.67],
+        ["#ef4444", Math.PI * 1.67, Math.PI * 2],
+      ] as const) {
+        ctx.strokeStyle = c;
+        ctx.beginPath();
+        ctx.arc(128, 118, 62, a0, a1);
+        ctx.stroke();
+      }
+      ctx.strokeStyle = "#1f2d4a";
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.moveTo(128, 118);
+      ctx.lineTo(160, 76);
+      ctx.stroke();
+      break;
+  }
+  tex.update();
+
+  const m = new StandardMaterial(`workflowScreenMat_${kind}`, scene);
+  m.diffuseTexture = tex;
+  m.specularColor = new Color3(0.05, 0.05, 0.05);
+  m.emissiveColor = new Color3(0.55, 0.55, 0.55);
+  perScene.set(kind, m);
+  return m;
 }
 
 /** A pot with cube of leaves on top — used liberally to break up the floor. */
@@ -1047,7 +1493,7 @@ function buildPlant(
   leaves.material = mat(`plantLeavesMat_${tag}`, "#3f7a44");
 }
 
-/** Team Leader open office: large desk, big chair, "TEAM LEADER" sign. */
+/** Head of Client Operations office: large desk, big chair, executive sign. */
 function buildTeamLeaderOffice(
   scene: Scene,
   mat: MaterialFactory,
@@ -1087,19 +1533,19 @@ function buildTeamLeaderOffice(
   );
   sign.position = new Vector3(origin.x, 1.9, origin.z - 2.4);
   drawSignTexture(scene, sign, 512, 96, (ctx) => {
-    ctx.fillStyle = "#2a3a5c";
+    ctx.fillStyle = "#1f2d4a";
     ctx.fillRect(0, 0, 512, 96);
     ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 50px sans-serif";
+    ctx.font = "bold 38px sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText("TEAM LEADER", 256, 50);
+    ctx.fillText("HEAD OF CLIENT OPS", 256, 50);
   });
 
-  // Overhead "TEAM LEADER" sign matching the other department zones so the
-  // executive office is clearly labelled from the bird's-eye orbit camera.
-  // Mounted at the back of the office, enlarged and tilted 30° upward so the
-  // face angles toward the camera, with a slim gold accent strip underneath.
+  // Overhead sign matching the other department zones so the executive
+  // office is clearly labelled from the bird's-eye orbit camera. Mounted at
+  // the back of the office, enlarged and tilted 30° upward so the face angles
+  // toward the camera, with a slim gold accent strip underneath.
   const accentMat = mat("tlSignAccent", "#c9a14a");
   const overheadSign = MeshBuilder.CreateBox(
     "tlSignOverhead",
@@ -1109,20 +1555,28 @@ function buildTeamLeaderOffice(
   overheadSign.rotation.x = Math.PI / 6; // 30 degrees
   overheadSign.position = new Vector3(origin.x, 2.55, origin.z + 2.4);
   drawSignTexture(scene, overheadSign, 1440, 320, (ctx) => {
-    ctx.fillStyle = "#2a3a5c";
+    ctx.fillStyle = "#1f2d4a";
     ctx.fillRect(0, 0, 1440, 320);
+    ctx.fillStyle = "#14b8a6";
+    ctx.fillRect(0, 0, 40, 320);
+    ctx.fillStyle = "#c9a14a";
+    ctx.fillRect(40, 0, 1400, 8);
+    ctx.fillRect(40, 312, 1400, 8);
     ctx.fillStyle = "#ffffff";
-    const safeWidth = 1280;
-    let fontPx = 150;
+    const safeWidth = 1240;
+    let fontPx = 130;
     ctx.textBaseline = "middle";
     ctx.textAlign = "center";
     ctx.font = `bold ${fontPx}px sans-serif`;
-    const label = "TEAM LEADER";
+    const label = "HEAD OF CLIENT OPS";
     while (ctx.measureText(label).width > safeWidth && fontPx > 80) {
       fontPx -= 6;
       ctx.font = `bold ${fontPx}px sans-serif`;
     }
-    ctx.fillText(label, 720, 170);
+    ctx.fillText(label, 740, 128);
+    ctx.fillStyle = "#e7c872";
+    ctx.font = "bold 54px sans-serif";
+    ctx.fillText("LEADS BOTH TEAMS", 740, 244);
   });
 
   const overheadUnderline = MeshBuilder.CreateBox(
@@ -1212,20 +1666,21 @@ function buildTeamLeaderOffice(
   buildPlant(scene, mat, new Vector3(origin.x + 2.6, 1.6, origin.z + 2.6));
 }
 
-/** Glass-walled meeting room with a long table and chairs. */
 /**
- * Build a section of two glass-walled meeting rooms side-by-side along the
- * back of the office, unified by a shared accent floor and an overhead
- * "MEETING ROOMS" banner. Each room has its own conference table, chairs,
- * wall display and pendant lamps. The section is positioned by its
- * mid-point; the two rooms are placed symmetrically to its left and right.
+ * Build a section of two glass-walled client meeting suites side-by-side
+ * along the back of the office, unified by a shared accent floor and an
+ * overhead "CLIENT MEETING SUITES" banner. The Advice Suite hosts adviser and
+ * client reviews; Case Conference is where the Team Leader brings the
+ * specialists together on one case. Each suite has its own conference table,
+ * chairs, wall display and pendant lamps. The section is positioned by its
+ * mid-point; the two suites are placed symmetrically to its left and right.
  */
 function buildMeetingRoomSection(
   scene: Scene,
   mat: MaterialFactory,
   origin: Vector3,
 ): void {
-  // Shared accent floor under both rooms (slate blue) so the section reads
+  // Shared accent floor under both rooms (navy) so the section reads
   // as one unified zone from the bird's-eye camera.
   const sectionFloor = MeshBuilder.CreateBox(
     "mrSectionFloor",
@@ -1233,10 +1688,10 @@ function buildMeetingRoomSection(
     scene,
   );
   sectionFloor.position = new Vector3(origin.x, 0.13, origin.z + 0.2);
-  sectionFloor.material = mat("mrSectionFloorMat", "#3b4d72");
+  sectionFloor.material = mat("mrSectionFloorMat", "#2a3a5c");
 
-  // Overhead "MEETING ROOMS" banner mounted on the back wall, above the
-  // shared cabinet line, so the section is clearly labelled from a
+  // Overhead "CLIENT MEETING SUITES" banner mounted on the back wall, above
+  // the shared cabinet line, so the section is clearly labelled from a
   // distance.
   const banner = MeshBuilder.CreateBox(
     "mrSectionBanner",
@@ -1245,32 +1700,36 @@ function buildMeetingRoomSection(
   );
   banner.position = new Vector3(origin.x, 4.1, 24.78);
   drawSignTexture(scene, banner, 1024, 140, (ctx) => {
-    ctx.fillStyle = "#2a3a5c";
+    ctx.fillStyle = "#1f2d4a";
     ctx.fillRect(0, 0, 1024, 140);
+    ctx.fillStyle = "#c9a14a";
+    ctx.fillRect(0, 0, 1024, 6);
+    ctx.fillRect(0, 134, 1024, 6);
     ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 78px sans-serif";
+    ctx.font = "bold 70px sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText("MEETING ROOMS", 512, 76);
+    ctx.fillText("CLIENT MEETING SUITES", 512, 76);
   });
 
-  // Two rooms 9 units apart, centred on the section origin
+  // Two suites 9 units apart, centred on the section origin
   buildMeetingRoom(
     scene,
     mat,
     new Vector3(origin.x - 4.5, 0, origin.z),
     "mrA",
-    "MEETING ROOM A",
+    "ADVICE SUITE",
   );
   buildMeetingRoom(
     scene,
     mat,
     new Vector3(origin.x + 4.5, 0, origin.z),
     "mrB",
-    "MEETING ROOM B",
+    "CASE CONFERENCE",
   );
 }
 
+/** Glass-walled client meeting suite with a long table and chairs. */
 function buildMeetingRoom(
   scene: Scene,
   mat: MaterialFactory,
@@ -1629,7 +2088,7 @@ function buildKitchen(
     ctx.font = "bold 56px sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText("BREAK ROOM", 256, 60);
+    ctx.fillText("STAFF KITCHEN", 256, 60);
   });
 
   // Dining bar (high counter) with stools — front of the kitchen zone
@@ -1767,7 +2226,7 @@ function buildCafe(
     ctx.font = "bold 48px sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText("COFFEE AREA", 384, 50);
+    ctx.fillText("CLIENT CAFÉ", 384, 50);
   });
 
   // Tall corner plant
@@ -1779,278 +2238,355 @@ function buildCafe(
 }
 
 /**
- * Play Area: ping-pong table, arcade cabinet, beanbags, and a "PLAY ZONE"
- * sign. Sits on the front-right accent floor — a relaxation space for staff.
+ * Member Lounge: a quiet seminar-style corner with a retirement-income
+ * projection screen, cream armchairs and sofa around a brass coffee table,
+ * a calculator kiosk and a brochure rack. Sits on the front-right navy floor.
  */
-function buildPlayArea(
+function buildMemberLounge(
   scene: Scene,
   mat: MaterialFactory,
   origin: Vector3,
 ): void {
-  // Ping-pong table (centre)
-  const pingTop = MeshBuilder.CreateBox(
-    "playPingTop",
-    { width: 2.7, height: 0.1, depth: 1.5 },
-    scene,
-  );
-  pingTop.position = new Vector3(origin.x - 1.5, 0.85, origin.z + 0.5);
-  pingTop.material = mat("playPingTopMat", "#2e5a4a");
-  // White stripe down the middle (length-wise)
-  const pingStripe = MeshBuilder.CreateBox(
-    "playPingStripe",
-    { width: 2.7, height: 0.02, depth: 0.05 },
-    scene,
-  );
-  pingStripe.position = new Vector3(origin.x - 1.5, 0.91, origin.z + 0.5);
-  pingStripe.material = mat("playPingStripeMat", "#ffffff");
-  // Net across the middle
-  const pingNet = MeshBuilder.CreateBox(
-    "playPingNet",
-    { width: 0.04, height: 0.18, depth: 1.5 },
-    scene,
-  );
-  pingNet.position = new Vector3(origin.x - 1.5, 0.99, origin.z + 0.5);
-  pingNet.material = mat("playPingNetMat", "#1a1f2c");
-  // Legs
-  for (const [dx, dz] of [
-    [-1.2, -0.6],
-    [-1.2, 0.6],
-    [1.2, -0.6],
-    [1.2, 0.6],
-  ] as const) {
-    const leg = MeshBuilder.CreateBox(
-      `playPingLeg_${dx}_${dz}`,
-      { width: 0.1, height: 0.85, depth: 0.1 },
-      scene,
-    );
-    leg.position = new Vector3(origin.x - 1.5 + dx, 0.42, origin.z + 0.5 + dz);
-    leg.material = mat("playPingLegMat", "#1a1f2c");
-  }
-  // Two paddles on the table
-  for (const px of [-1.0, 1.0]) {
-    const paddle = MeshBuilder.CreateBox(
-      `playPaddle_${px}`,
-      { width: 0.32, height: 0.04, depth: 0.22 },
-      scene,
-    );
-    paddle.position = new Vector3(origin.x - 1.5 + px, 0.92, origin.z + 0.5 + (px > 0 ? -0.4 : 0.4));
-    paddle.material = mat("playPaddleMat", "#e8504c");
-  }
+  const cream = mat("loungeCream", "#e8dcc4");
+  const navy = mat("loungeNavy", "#1f2d4a");
+  const brass = mat("loungeBrass", "#c9a14a");
 
-  // Arcade cabinet (back-right of the zone)
-  const arcadeBody = MeshBuilder.CreateBox(
-    "playArcade",
-    { width: 0.9, height: 1.9, depth: 0.8 },
+  // Rug under the seating group
+  const rugBorder = MeshBuilder.CreateBox(
+    "loungeRugBorder",
+    { width: 6.6, height: 0.02, depth: 3.6 },
     scene,
   );
-  arcadeBody.position = new Vector3(origin.x + 2.5, 0.95, origin.z + 2.0);
-  arcadeBody.material = mat("playArcadeMat", "#1c2230");
-  const arcadeScreen = MeshBuilder.CreateBox(
-    "playArcadeScreen",
-    { width: 0.7, height: 0.55, depth: 0.05 },
+  rugBorder.position = new Vector3(origin.x - 0.8, 0.17, origin.z - 0.4);
+  rugBorder.material = brass;
+  const rug = MeshBuilder.CreateBox(
+    "loungeRug",
+    { width: 6.2, height: 0.025, depth: 3.2 },
     scene,
   );
-  arcadeScreen.position = new Vector3(origin.x + 2.5, 1.45, origin.z + 1.6);
-  drawSignTexture(scene, arcadeScreen, 256, 200, (ctx) => {
-    ctx.fillStyle = "#1a1f2c";
-    ctx.fillRect(0, 0, 256, 200);
-    // pixel-art "INSERT COIN"
-    ctx.fillStyle = "#ffb347";
-    ctx.font = "bold 32px monospace";
-    ctx.textAlign = "center";
-    ctx.fillText("INSERT", 128, 80);
-    ctx.fillText("COIN", 128, 120);
-    ctx.fillStyle = "#e8504c";
-    ctx.fillRect(40, 150, 24, 24);
-    ctx.fillStyle = "#6ec1ff";
-    ctx.fillRect(72, 150, 24, 24);
-    ctx.fillStyle = "#2e8a6e";
-    ctx.fillRect(160, 150, 24, 24);
-    ctx.fillStyle = "#ffb347";
-    ctx.fillRect(192, 150, 24, 24);
+  rug.position = new Vector3(origin.x - 0.8, 0.175, origin.z - 0.4);
+  rug.material = mat("loungeRugFill", "#3a4c70");
+
+  // Seminar screen on a low timber plinth against the back of the zone
+  const plinth = MeshBuilder.CreateBox(
+    "loungePlinth",
+    { width: 6.0, height: 0.7, depth: 0.4 },
+    scene,
+  );
+  plinth.position = new Vector3(origin.x - 0.8, 0.35, origin.z + 2.6);
+  plinth.material = mat("loungePlinth", "#5a3d2b");
+  const screen = MeshBuilder.CreateBox(
+    "loungeScreen",
+    { width: 5.6, height: 1.9, depth: 0.1 },
+    scene,
+  );
+  screen.position = new Vector3(origin.x - 0.8, 1.7, origin.z + 2.5);
+  drawSignTexture(scene, screen, 768, 260, (ctx) => {
+    ctx.fillStyle = "#16213a";
+    ctx.fillRect(0, 0, 768, 260);
+    ctx.fillStyle = "#e7c872";
+    ctx.font = "bold 34px sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText("RETIREMENT INCOME PROJECTION", 30, 48);
+    ctx.fillStyle = "#b9c4dd";
+    ctx.font = "22px sans-serif";
+    ctx.fillText("Illustrative only — general information", 30, 80);
+    // Rising balance bars with an income line
+    for (let i = 0; i < 10; i++) {
+      const bh = 40 + i * 14 - (i > 6 ? (i - 6) * 28 : 0);
+      ctx.fillStyle = i < 7 ? "#c9a14a" : "#14b8a6";
+      ctx.fillRect(40 + i * 62, 240 - bh, 44, bh);
+    }
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(40, 180);
+    ctx.lineTo(660, 170);
+    ctx.stroke();
   });
-  const arcadeJoy = MeshBuilder.CreateBox(
-    "playArcadeJoy",
-    { width: 0.7, height: 0.18, depth: 0.5 },
-    scene,
-  );
-  arcadeJoy.position = new Vector3(origin.x + 2.5, 1.0, origin.z + 1.6);
-  arcadeJoy.material = mat("playArcadeJoyMat", "#3a5fb0");
-  const arcadeMarquee = MeshBuilder.CreateBox(
-    "playArcadeMarquee",
-    { width: 0.95, height: 0.25, depth: 0.05 },
-    scene,
-  );
-  arcadeMarquee.position = new Vector3(origin.x + 2.5, 1.85, origin.z + 1.58);
-  drawSignTexture(scene, arcadeMarquee, 256, 64, (ctx) => {
-    ctx.fillStyle = "#e8504c";
-    ctx.fillRect(0, 0, 256, 64);
+
+  // Seating: a sofa and two armchairs facing the screen
+  const buildSeat = (tag: string, x: number, z: number, w: number): void => {
+    const seat = MeshBuilder.CreateBox(`${tag}_seat`, { width: w, height: 0.45, depth: 1.1 }, scene);
+    seat.position = new Vector3(x, 0.4, z);
+    seat.material = cream;
+    const back = MeshBuilder.CreateBox(`${tag}_back`, { width: w, height: 0.7, depth: 0.25 }, scene);
+    back.position = new Vector3(x, 0.85, z - 0.5);
+    back.material = cream;
+    for (const side of [-1, 1]) {
+      const arm = MeshBuilder.CreateBox(`${tag}_arm${side}`, { width: 0.22, height: 0.6, depth: 1.1 }, scene);
+      arm.position = new Vector3(x + side * (w / 2 - 0.11), 0.6, z);
+      arm.material = cream;
+    }
+  };
+  buildSeat("loungeSofa", origin.x - 0.8, origin.z - 1.4, 3.0);
+  buildSeat("loungeChairL", origin.x - 3.8, origin.z - 0.2, 1.3);
+  buildSeat("loungeChairR", origin.x + 2.2, origin.z - 0.2, 1.3);
+  buildCushion(scene, mat, "loungeCushionA", new Vector3(origin.x - 1.6, 0.75, origin.z - 1.5), "#1f2d4a");
+  buildCushion(scene, mat, "loungeCushionB", new Vector3(origin.x + 0.0, 0.75, origin.z - 1.5), "#c9a14a");
+
+  // Brass-and-glass coffee table with a magazine
+  const tableTop = MeshBuilder.CreateBox("loungeTableTop", { width: 1.8, height: 0.1, depth: 1.0 }, scene);
+  tableTop.position = new Vector3(origin.x - 0.8, 0.5, origin.z - 0.1);
+  tableTop.material = mat("loungeTableTop", "#2a2f3a");
+  const tableBase = MeshBuilder.CreateBox("loungeTableBase", { width: 1.5, height: 0.4, depth: 0.7 }, scene);
+  tableBase.position = new Vector3(origin.x - 0.8, 0.22, origin.z - 0.1);
+  tableBase.material = brass;
+  buildMagazines(scene, mat, "loungeMags", new Vector3(origin.x - 0.8, 0.56, origin.z - 0.1));
+
+  // Retirement calculator kiosk: pedestal with an angled tablet
+  const kioskBase = MeshBuilder.CreateBox("loungeKioskBase", { width: 0.7, height: 1.0, depth: 0.5 }, scene);
+  kioskBase.position = new Vector3(origin.x + 4.0, 0.5, origin.z - 1.8);
+  kioskBase.material = navy;
+  const kioskScreen = MeshBuilder.CreateBox("loungeKioskScreen", { width: 0.9, height: 0.55, depth: 0.06 }, scene);
+  kioskScreen.position = new Vector3(origin.x + 4.0, 1.25, origin.z - 1.85);
+  kioskScreen.rotation.x = -Math.PI / 7;
+  drawSignTexture(scene, kioskScreen, 256, 160, (ctx) => {
+    ctx.fillStyle = "#f4f7fb";
+    ctx.fillRect(0, 0, 256, 160);
+    ctx.fillStyle = "#c9a14a";
+    ctx.fillRect(0, 0, 256, 30);
+    ctx.fillStyle = "#1f2d4a";
+    ctx.font = "bold 20px sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText("MY SUPER", 10, 21);
+    ctx.fillStyle = "#14b8a6";
+    ctx.fillRect(14, 52, 150, 16);
+    ctx.fillStyle = "#c5cfdd";
+    ctx.fillRect(14, 80, 200, 10);
+    ctx.fillRect(14, 102, 170, 10);
+    ctx.fillRect(14, 124, 120, 10);
+  });
+
+  // Brochure rack
+  const rack = MeshBuilder.CreateBox("loungeRack", { width: 0.9, height: 1.5, depth: 0.3 }, scene);
+  rack.position = new Vector3(origin.x - 4.4, 0.75, origin.z + 1.9);
+  rack.material = mat("loungeRack", "#3a4c70");
+  ["#0f766e", "#c9a14a", "#6366f1", "#ec4899"].forEach((hex, i) => {
+    const leaflet = MeshBuilder.CreateBox(`loungeLeaflet_${i}`, { width: 0.7, height: 0.22, depth: 0.05 }, scene);
+    leaflet.position = new Vector3(origin.x - 4.4, 0.35 + i * 0.32, origin.z + 1.72);
+    leaflet.material = mat(`loungeLeaflet_${i}`, hex);
+  });
+
+  // Sign plaque tilted toward the overhead camera
+  const sign = MeshBuilder.CreateBox("loungeSign", { width: 4.0, height: 0.75, depth: 0.06 }, scene);
+  sign.rotation.x = Math.PI / 6;
+  sign.position = new Vector3(origin.x - 0.8, 3.05, origin.z + 2.5);
+  drawSignTexture(scene, sign, 640, 120, (ctx) => {
+    ctx.fillStyle = "#1f2d4a";
+    ctx.fillRect(0, 0, 640, 120);
+    ctx.fillStyle = "#c9a14a";
+    ctx.fillRect(0, 0, 640, 5);
+    ctx.fillRect(0, 115, 640, 5);
     ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 36px monospace";
+    ctx.font = "bold 54px sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText("ARCADE", 128, 32);
+    ctx.fillText("MEMBER LOUNGE", 320, 62);
   });
 
-  // Beanbags (front of the zone)
-  for (const [bx, bz, hex] of [
-    [-2.5, -2.0, "#e8504c"],
-    [-1.0, -2.2, "#ffb347"],
-    [0.5, -2.0, "#6ec1ff"],
-  ] as const) {
-    const bag = MeshBuilder.CreateBox(
-      `playBean_${bx}_${bz}`,
-      { width: 0.95, height: 0.55, depth: 0.95 },
-      scene,
-    );
-    bag.position = new Vector3(origin.x + bx, 0.27, origin.z + bz);
-    bag.material = mat(`playBeanMat_${bx}_${bz}`, hex);
-  }
-
-  // "PLAY AREA" sign on the right wall
-  const sign = MeshBuilder.CreateBox(
-    "playSign",
-    { width: 0.08, height: 0.6, depth: 2.6 },
-    scene,
-  );
-  sign.position = new Vector3(origin.x + 4.9, 2.5, origin.z);
-  drawSignTexture(scene, sign, 384, 96, (ctx) => {
-    ctx.fillStyle = "#2e5a4a";
-    ctx.fillRect(0, 0, 384, 96);
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 48px sans-serif";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText("PLAY AREA", 192, 50);
-  });
-
-  // Pendant lamp over the table and a corner plant
-  buildPendantLamp(scene, mat, "playPendant", new Vector3(origin.x - 1.5, 3.4, origin.z + 0.5), "#ffb347");
-  buildPlant(scene, mat, new Vector3(origin.x + 4.0, 0, origin.z - 2.5));
+  buildFloorLamp(scene, mat, "loungeFloorLamp", new Vector3(origin.x + 4.3, 0, origin.z + 2.2), "#ffd166");
+  buildPendantLamp(scene, mat, "loungePendant", new Vector3(origin.x - 0.8, 3.4, origin.z - 0.1), "#c9a14a");
+  buildPlant(scene, mat, new Vector3(origin.x + 4.3, 0, origin.z + 0.9));
 }
 
 /**
- * IT / Cloud Infra Room: glass partition front, rows of server racks with
- * blinking-light decals, a workbench, and a "CLOUD INFRA" sign. Sits on
- * the back-far-left dark accent floor.
+ * Investment Committee Room: a glass-fronted boardroom with a walnut table,
+ * leather chairs and a wall display of the asset-allocation view the
+ * Wealth Management Team reviews. Sits on the back-far-left walnut floor.
  */
-function buildITRoom(
+function buildInvestmentCommittee(
   scene: Scene,
   mat: MaterialFactory,
   origin: Vector3,
 ): void {
-  const glass = mat("itGlass", "#cfe7ff");
-  const frame = mat("itFrame", "#2a3a5c");
+  const glass = mat("icGlass", "#cfe7ff");
+  glass.alpha = 0.4;
+  const frame = mat("icFrame", "#c9a14a");
 
   // Glass partition (front + right side, opens to the office)
   const front = MeshBuilder.CreateBox(
-    "itFront",
+    "icFront",
     { width: 9.6, height: 2.6, depth: 0.1 },
     scene,
   );
   front.position = new Vector3(origin.x, 1.3, origin.z - 3.6);
   front.material = glass;
   const rightWall = MeshBuilder.CreateBox(
-    "itRight",
+    "icRight",
     { width: 0.1, height: 2.6, depth: 7.4 },
     scene,
   );
   rightWall.position = new Vector3(origin.x + 4.8, 1.3, origin.z);
   rightWall.material = glass;
-
-  // Frames
   const frontFrame = MeshBuilder.CreateBox(
-    "itFrontFrame",
+    "icFrontFrame",
     { width: 9.6, height: 0.12, depth: 0.14 },
     scene,
   );
   frontFrame.position = new Vector3(origin.x, 2.6, origin.z - 3.6);
   frontFrame.material = frame;
   const rightFrame = MeshBuilder.CreateBox(
-    "itRightFrame",
+    "icRightFrame",
     { width: 0.14, height: 0.12, depth: 7.4 },
     scene,
   );
   rightFrame.position = new Vector3(origin.x + 4.8, 2.6, origin.z);
   rightFrame.material = frame;
 
-  // Sign above
+  // Sign above the front glass
   const sign = MeshBuilder.CreateBox(
-    "itSign",
-    { width: 4.2, height: 0.6, depth: 0.06 },
+    "icSign",
+    { width: 5.4, height: 0.6, depth: 0.06 },
     scene,
   );
   sign.position = new Vector3(origin.x, 3.15, origin.z - 3.6);
-  drawSignTexture(scene, sign, 640, 110, (ctx) => {
-    ctx.fillStyle = "#1f2a3f";
-    ctx.fillRect(0, 0, 640, 110);
-    ctx.fillStyle = "#6ec1ff";
-    ctx.font = "bold 56px sans-serif";
+  drawSignTexture(scene, sign, 864, 96, (ctx) => {
+    ctx.fillStyle = "#1f2d4a";
+    ctx.fillRect(0, 0, 864, 96);
+    ctx.fillStyle = "#c9a14a";
+    ctx.fillRect(0, 0, 864, 4);
+    ctx.fillRect(0, 92, 864, 4);
+    ctx.fillStyle = "#e7c872";
+    ctx.font = "bold 50px sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText("IT / CLOUD INFRA", 320, 60);
+    ctx.fillText("INVESTMENT COMMITTEE", 432, 50);
   });
 
-  // Server racks — two rows along the back of the room
-  const rackBodyMat = mat("itRack", "#1a1f2c");
-  for (let row = 0; row < 2; row++) {
-    for (let col = 0; col < 4; col++) {
-      const rx = origin.x - 3.6 + col * 1.5;
-      const rz = origin.z + 1.0 + row * 1.6;
-      const rack = MeshBuilder.CreateBox(
-        `itRack_${row}_${col}`,
-        { width: 1.1, height: 2.0, depth: 0.9 },
-        scene,
-      );
-      rack.position = new Vector3(rx, 1.0, rz);
-      rack.material = rackBodyMat;
-      // Indicator-light face
-      const face = MeshBuilder.CreateBox(
-        `itRackFace_${row}_${col}`,
-        { width: 0.95, height: 1.7, depth: 0.05 },
-        scene,
-      );
-      face.position = new Vector3(rx, 1.05, rz - 0.46);
-      drawSignTexture(scene, face, 128, 256, (ctx) => {
-        ctx.fillStyle = "#0f141d";
-        ctx.fillRect(0, 0, 128, 256);
-        // Stack of "blade" rows with little LEDs
-        const ledColors = ["#2e8a6e", "#6ec1ff", "#ffb347", "#e8504c"];
-        for (let r = 0; r < 14; r++) {
-          ctx.fillStyle = "#22252e";
-          ctx.fillRect(8, 10 + r * 17, 112, 12);
-          for (let l = 0; l < 4; l++) {
-            ctx.fillStyle = ledColors[(row + col + r + l) % ledColors.length];
-            ctx.fillRect(16 + l * 14, 13 + r * 17, 6, 6);
-          }
-        }
-      });
-    }
+  // Boardroom table (long axis along z) with brass trim
+  const tableTop = MeshBuilder.CreateBox(
+    "icTable",
+    { width: 1.9, height: 0.14, depth: 5.4 },
+    scene,
+  );
+  tableTop.position = new Vector3(origin.x, 0.85, origin.z + 0.2);
+  tableTop.material = mat("icTableMat", "#8a6240");
+  const tableInlay = MeshBuilder.CreateBox(
+    "icTableInlay",
+    { width: 0.12, height: 0.02, depth: 5.0 },
+    scene,
+  );
+  tableInlay.position = new Vector3(origin.x, 0.93, origin.z + 0.2);
+  tableInlay.material = mat("icTableInlay", "#c9a14a");
+  for (const lz of [-2.0, 2.4]) {
+    const leg = MeshBuilder.CreateBox(`icTableLeg_${lz}`, { width: 1.3, height: 0.85, depth: 0.3 }, scene);
+    leg.position = new Vector3(origin.x, 0.42, origin.z + lz);
+    leg.material = mat("icTableLeg", "#3a2a20");
   }
 
-  // Workbench / IT desk along the right interior wall
-  const benchTop = MeshBuilder.CreateBox(
-    "itBench",
-    { width: 3.0, height: 0.12, depth: 1.0 },
-    scene,
-  );
-  benchTop.position = new Vector3(origin.x + 3.0, 0.85, origin.z - 1.6);
-  benchTop.material = mat("itBenchMat", "#bca78a");
-  const benchBase = MeshBuilder.CreateBox(
-    "itBenchBase",
-    { width: 2.8, height: 0.85, depth: 0.9 },
-    scene,
-  );
-  benchBase.position = new Vector3(origin.x + 3.0, 0.43, origin.z - 1.6);
-  benchBase.material = mat("itBenchBaseMat", "#7d4f33");
-  buildMonitor(scene, mat, new Vector3(origin.x + 2.4, 0.92, origin.z - 1.7), 0);
-  buildLaptop(scene, mat, "itLaptop", new Vector3(origin.x + 3.6, 0.92, origin.z - 1.5), false, "#3a5fb0");
+  // Chairs: four a side plus a chair at the head
+  const chairMat = mat("icChair", "#1f2d4a");
+  const buildChair = (tag: string, x: number, z: number, backSide: 1 | -1 | 0): void => {
+    const seat = MeshBuilder.CreateBox(`icChairSeat_${tag}`, { width: 0.6, height: 0.12, depth: 0.6 }, scene);
+    seat.position = new Vector3(x, 0.55, z);
+    seat.material = chairMat;
+    const back = MeshBuilder.CreateBox(
+      `icChairBack_${tag}`,
+      backSide === 0 ? { width: 0.6, height: 0.8, depth: 0.12 } : { width: 0.12, height: 0.8, depth: 0.6 },
+      scene,
+    );
+    back.position =
+      backSide === 0
+        ? new Vector3(x, 0.95, z + 0.3)
+        : new Vector3(x + backSide * 0.3, 0.95, z);
+    back.material = chairMat;
+  };
+  [-1.8, -0.6, 0.6, 1.8].forEach((dz, i) => {
+    buildChair(`L${i}`, origin.x - 1.4, origin.z + 0.2 + dz, -1);
+    buildChair(`R${i}`, origin.x + 1.4, origin.z + 0.2 + dz, 1);
+  });
+  buildChair("head", origin.x, origin.z - 2.9, 0);
 
-  // Cool floor lamp + ceiling pendants for atmospheric lighting
-  buildPendantLamp(scene, mat, "itPendantA", new Vector3(origin.x - 2.0, 4.2, origin.z + 1.5), "#6ec1ff");
-  buildPendantLamp(scene, mat, "itPendantB", new Vector3(origin.x + 1.0, 4.2, origin.z + 1.5), "#6ec1ff");
-  buildPendantLamp(scene, mat, "itPendantC", new Vector3(origin.x - 2.0, 4.2, origin.z - 1.5), "#6ec1ff");
-  buildPendantLamp(scene, mat, "itPendantD", new Vector3(origin.x + 1.0, 4.2, origin.z - 1.5), "#6ec1ff");
+  // Wall display on the left wall: asset allocation donut and portfolio bars
+  const display = textPlane(scene, "icDisplay", 5.6, 2.0, 896, 320, (ctx) => {
+    ctx.fillStyle = "#16213a";
+    ctx.fillRect(0, 0, 896, 320);
+    ctx.fillStyle = "#e7c872";
+    ctx.font = "bold 36px sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText("ASSET ALLOCATION — MODEL PORTFOLIOS", 28, 50);
+    const slices: Array<[string, number]> = [
+      ["#c9a14a", 0.36],
+      ["#14b8a6", 0.28],
+      ["#6366f1", 0.2],
+      ["#b9c4dd", 0.16],
+    ];
+    let a = -Math.PI / 2;
+    for (const [c, f] of slices) {
+      ctx.beginPath();
+      ctx.moveTo(200, 180);
+      ctx.arc(200, 180, 100, a, a + f * Math.PI * 2);
+      ctx.closePath();
+      ctx.fillStyle = c;
+      ctx.fill();
+      a += f * Math.PI * 2;
+    }
+    ctx.beginPath();
+    ctx.arc(200, 180, 46, 0, Math.PI * 2);
+    ctx.fillStyle = "#16213a";
+    ctx.fill();
+    for (let i = 0; i < 6; i++) {
+      const bh = 50 + i * 22;
+      ctx.fillStyle = i % 2 ? "#c9a14a" : "#14b8a6";
+      ctx.fillRect(420 + i * 70, 290 - bh, 48, bh);
+    }
+  });
+  display.position = new Vector3(-29.72, 2.3, origin.z + 0.2);
+  display.rotation.y = -Math.PI / 2;
+
+  buildPendantLamp(scene, mat, "icPendantA", new Vector3(origin.x, 4.2, origin.z - 1.0), "#c9a14a");
+  buildPendantLamp(scene, mat, "icPendantB", new Vector3(origin.x, 4.2, origin.z + 1.8), "#c9a14a");
+}
+
+/**
+ * Closed-case credenza: a low walnut cabinet with brass pulls and a
+ * "CLOSED CASES" plaque. Client Communications files each finished case
+ * folder on top of it.
+ */
+function buildCaseCredenza(
+  scene: Scene,
+  mat: MaterialFactory,
+  origin: Vector3,
+): void {
+  const body = MeshBuilder.CreateBox(
+    "credenza",
+    { width: 2.8, height: 1.3, depth: 0.8 },
+    scene,
+  );
+  body.position = new Vector3(origin.x, 0.65, origin.z);
+  body.material = mat("credenzaMat", "#5a3d2b");
+  const top = MeshBuilder.CreateBox(
+    "credenzaTop",
+    { width: 3.0, height: 0.1, depth: 0.9 },
+    scene,
+  );
+  top.position = new Vector3(origin.x, 1.35, origin.z);
+  top.material = mat("credenzaTopMat", "#e8dcc4");
+  for (let i = 0; i < 3; i++) {
+    const pull = MeshBuilder.CreateBox(
+      `credenzaPull_${i}`,
+      { width: 0.5, height: 0.06, depth: 0.05 },
+      scene,
+    );
+    pull.position = new Vector3(origin.x - 0.9 + i * 0.9, 0.8, origin.z - 0.42);
+    pull.material = mat("credenzaPull", "#c9a14a");
+  }
+  const plaque = MeshBuilder.CreateBox(
+    "credenzaPlaque",
+    { width: 1.6, height: 0.3, depth: 0.04 },
+    scene,
+  );
+  plaque.position = new Vector3(origin.x, 0.38, origin.z - 0.43);
+  drawSignTexture(scene, plaque, 384, 72, (ctx) => {
+    ctx.fillStyle = "#c9a14a";
+    ctx.fillRect(0, 0, 384, 72);
+    ctx.fillStyle = "#1f2d4a";
+    ctx.font = "bold 40px sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("CLOSED CASES", 192, 38);
+  });
 }
 
 // ===== Voxel-pack-inspired prop helpers =====
@@ -2458,632 +2994,9 @@ function buildMagazines(
 }
 
 /**
- * Decorate the grass land surrounding the office with voxel trees, flower
- * patches, a small fountain, benches, lampposts and a stone path that
- * leads from the client spawn point to the office entrance. All meshes
- * are static and live entirely outside the office walls
- * (x∈[-30, 30], z∈[-15, 25]) so they never overlap interior furniture or
- * agent walking paths.
- */
-function buildExteriorLandscape(
-  scene: Scene,
-  mat: MaterialFactory,
-): void {
-  const makeBox = (
-    name: string,
-    w: number,
-    h: number,
-    d: number,
-    pos: Vector3,
-    hex: string,
-  ): Mesh => {
-    const box = MeshBuilder.CreateBox(name, { width: w, height: h, depth: d }, scene);
-    box.position = pos;
-    box.material = mat(name, hex);
-    return box;
-  };
-
-  // Voxel tree: brown trunk + leafy cube, with a slight scale knob.
-  const makeTree = (x: number, z: number, scale = 1, leafHex = "#3f7a44"): void => {
-    const tag = `ext_tree_${x.toFixed(1)}_${z.toFixed(1)}`;
-    makeBox(
-      `${tag}_trunk`,
-      0.45 * scale,
-      1.3 * scale,
-      0.45 * scale,
-      new Vector3(x, 0.65 * scale, z),
-      "#7a4f2a",
-    );
-    makeBox(
-      `${tag}_leaves`,
-      1.6 * scale,
-      1.5 * scale,
-      1.6 * scale,
-      new Vector3(x, 1.85 * scale, z),
-      leafHex,
-    );
-    // A second smaller cube of leaves on top, gives a chunky voxel canopy.
-    makeBox(
-      `${tag}_leaves_top`,
-      1.0 * scale,
-      0.7 * scale,
-      1.0 * scale,
-      new Vector3(x, 2.85 * scale, z),
-      leafHex,
-    );
-  };
-
-  // A small flower patch: a darker grass square with 3-4 coloured flower
-  // cubes on top.
-  const makeFlowerPatch = (
-    x: number,
-    z: number,
-    colors: string[] = ["#e8504c", "#ffd166", "#f4a3c7", "#f0f0f0"],
-  ): void => {
-    const tag = `ext_flowers_${x.toFixed(1)}_${z.toFixed(1)}`;
-    makeBox(
-      `${tag}_pad`,
-      1.6,
-      0.06,
-      1.6,
-      new Vector3(x, 0.05, z),
-      "#5a9648",
-    );
-    const offsets: Array<[number, number]> = [
-      [-0.45, -0.45],
-      [0.45, -0.4],
-      [-0.4, 0.45],
-      [0.45, 0.45],
-    ];
-    for (let i = 0; i < offsets.length; i++) {
-      const [dx, dz] = offsets[i];
-      const c = colors[i % colors.length];
-      // stem
-      makeBox(
-        `${tag}_stem_${i}`,
-        0.08,
-        0.32,
-        0.08,
-        new Vector3(x + dx, 0.24, z + dz),
-        "#3f7a44",
-      );
-      // bloom
-      makeBox(
-        `${tag}_bloom_${i}`,
-        0.28,
-        0.22,
-        0.28,
-        new Vector3(x + dx, 0.5, z + dz),
-        c,
-      );
-    }
-  };
-
-  // Voxel park bench: wooden seat + back, two stone supports.
-  const makeBench = (
-    cx: number,
-    cz: number,
-    facing: "N" | "S" | "E" | "W" = "N",
-  ): void => {
-    const tag = `ext_bench_${cx.toFixed(1)}_${cz.toFixed(1)}`;
-    const seatLong = 1.8;
-    const seatShort = 0.5;
-    const horiz = facing === "E" || facing === "W";
-    const w = horiz ? seatShort : seatLong;
-    const d = horiz ? seatLong : seatShort;
-    // seat
-    makeBox(`${tag}_seat`, w, 0.14, d, new Vector3(cx, 0.45, cz), "#7a4f2a");
-    // back rail — offset behind the seat, on the side opposite the
-    // direction the bench is facing.
-    let bx = cx;
-    let bz = cz;
-    let bw = w;
-    let bd = 0.12;
-    if (facing === "N") bz = cz + 0.2; // back is to the south, faces N
-    else if (facing === "S") bz = cz - 0.2;
-    else if (facing === "E") {
-      bx = cx - 0.2;
-      bw = 0.12;
-      bd = d;
-    } else if (facing === "W") {
-      bx = cx + 0.2;
-      bw = 0.12;
-      bd = d;
-    }
-    makeBox(`${tag}_back`, bw, 0.55, bd, new Vector3(bx, 0.78, bz), "#7a4f2a");
-    // legs
-    const legColor = "#8a8576";
-    if (horiz) {
-      makeBox(`${tag}_legA`, 0.18, 0.4, 0.18, new Vector3(cx, 0.2, cz - 0.7), legColor);
-      makeBox(`${tag}_legB`, 0.18, 0.4, 0.18, new Vector3(cx, 0.2, cz + 0.7), legColor);
-    } else {
-      makeBox(`${tag}_legA`, 0.18, 0.4, 0.18, new Vector3(cx - 0.7, 0.2, cz), legColor);
-      makeBox(`${tag}_legB`, 0.18, 0.4, 0.18, new Vector3(cx + 0.7, 0.2, cz), legColor);
-    }
-  };
-
-  // Lamppost: tall slim post with a glowing cube head.
-  const makeLamppost = (x: number, z: number): void => {
-    const tag = `ext_lamp_${x.toFixed(1)}_${z.toFixed(1)}`;
-    makeBox(`${tag}_post`, 0.22, 2.4, 0.22, new Vector3(x, 1.2, z), "#3a3a44");
-    makeBox(`${tag}_arm`, 0.6, 0.14, 0.14, new Vector3(x + 0.3, 2.35, z), "#3a3a44");
-    const head = makeBox(
-      `${tag}_head`,
-      0.45,
-      0.45,
-      0.45,
-      new Vector3(x + 0.55, 2.35, z),
-      "#ffe6a8",
-    );
-    const m = head.material as StandardMaterial;
-    m.emissiveColor = Color3.FromHexString("#ffd066");
-  };
-
-  // Decorative voxel rock cluster.
-  const makeRock = (x: number, z: number, scale = 1): void => {
-    const tag = `ext_rock_${x.toFixed(1)}_${z.toFixed(1)}`;
-    makeBox(
-      `${tag}_a`,
-      0.9 * scale,
-      0.5 * scale,
-      0.9 * scale,
-      new Vector3(x, 0.25 * scale, z),
-      "#8a8576",
-    );
-    makeBox(
-      `${tag}_b`,
-      0.5 * scale,
-      0.35 * scale,
-      0.5 * scale,
-      new Vector3(x + 0.4 * scale, 0.18 * scale, z + 0.2 * scale),
-      "#9a958a",
-    );
-  };
-
-  // Central voxel fountain: stone basin, water, central pillar with droplet
-  // accent. Placed in the front lawn left of the entrance path.
-  const makeFountain = (cx: number, cz: number): void => {
-    const tag = `ext_fountain_${cx.toFixed(1)}_${cz.toFixed(1)}`;
-    // Outer stone ring (built from 4 rim segments around a square basin).
-    const stone = "#cdc6b4";
-    const stoneDark = "#9a9486";
-    // Basin pad (slightly raised square)
-    makeBox(`${tag}_base`, 4.4, 0.2, 4.4, new Vector3(cx, 0.1, cz), stoneDark);
-    // Stone rim
-    makeBox(`${tag}_rimN`, 4.4, 0.45, 0.4, new Vector3(cx, 0.42, cz - 2.0), stone);
-    makeBox(`${tag}_rimS`, 4.4, 0.45, 0.4, new Vector3(cx, 0.42, cz + 2.0), stone);
-    makeBox(`${tag}_rimE`, 0.4, 0.45, 4.4, new Vector3(cx + 2.0, 0.42, cz), stone);
-    makeBox(`${tag}_rimW`, 0.4, 0.45, 4.4, new Vector3(cx - 2.0, 0.42, cz), stone);
-    // Water surface
-    makeBox(`${tag}_water`, 3.6, 0.1, 3.6, new Vector3(cx, 0.45, cz), "#5fa8d6");
-    // Central pillar
-    makeBox(`${tag}_pillar1`, 0.9, 0.9, 0.9, new Vector3(cx, 0.95, cz), stone);
-    makeBox(`${tag}_pillar2`, 0.6, 0.6, 0.6, new Vector3(cx, 1.7, cz), stone);
-    // Top "spray" — a translucent-looking light-blue cube.
-    makeBox(`${tag}_spray`, 0.4, 0.5, 0.4, new Vector3(cx, 2.25, cz), "#cfe7ff");
-    // Droplet beads around the pillar
-    for (const [dx, dz] of [
-      [0.9, 0],
-      [-0.9, 0],
-      [0, 0.9],
-      [0, -0.9],
-    ]) {
-      makeBox(
-        `${tag}_drop_${dx}_${dz}`,
-        0.16,
-        0.16,
-        0.16,
-        new Vector3(cx + dx, 1.1, cz + dz),
-        "#9bd0ee",
-      );
-    }
-  };
-
-  // Stone slab — used to build the entrance path.
-  const makePathSlab = (x: number, z: number, w: number, d: number): void => {
-    const tag = `ext_path_${x.toFixed(1)}_${z.toFixed(1)}`;
-    makeBox(`${tag}`, w, 0.06, d, new Vector3(x, 0.03, z), "#cdc6b4");
-  };
-
-  // ---- Entrance path: from spawn (0, -18) up to the doors at z=-15. ----
-  // The office floor begins around z=-15 so the path runs from the front
-  // grass to the welcome mat. Three slabs give it a stepping-stone feel.
-  for (let i = 0; i < 6; i++) {
-    const z = -27 + i * 2;
-    makePathSlab(0, z, 3.2, 1.6);
-  }
-  // A wider stone "apron" right in front of the doors.
-  makePathSlab(0, -16.0, 5.0, 1.4);
-
-  // ---- Front lawn (z < -15): fountain + benches + trees + flowers. ----
-  // Fountain on the front-left lawn, away from the entrance path.
-  makeFountain(-12, -22);
-  // Benches flanking the fountain so visitors can sit while they wait.
-  makeBench(-15.5, -22, "E");
-  makeBench(-8.5, -22, "W");
-  // A second bench on the right side facing the path, for symmetry.
-  makeBench(10, -19, "S");
-  makeBench(-6, -16.5, "S");
-
-  // Trees along the front lawn, offset away from the path and the
-  // entrance arc. Mirror across x=0 so the lawn looks balanced.
-  const frontTrees: Array<[number, number, number]> = [
-    [-26, -20, 1.0],
-    [-22, -27, 1.1],
-    [-18, -32, 0.9],
-    [-10, -29, 1.0],
-    [-4, -33, 0.85],
-    [4, -33, 0.85],
-    [10, -29, 1.0],
-    [18, -32, 0.9],
-    [22, -27, 1.1],
-    [26, -20, 1.0],
-    [16, -22, 0.95],
-    [-16, -32, 0.8],
-  ];
-  for (const [x, z, s] of frontTrees) makeTree(x, z, s);
-
-  // Flower patches along the front, dotted between trees.
-  const frontFlowers: Array<[number, number]> = [
-    [-20, -18],
-    [-6, -18],
-    [6, -18],
-    [20, -18],
-    [-14, -26],
-    [14, -26],
-    [-25, -28],
-    [25, -28],
-    [-3, -22.5],
-    [3, -22.5],
-  ];
-  for (const [x, z] of frontFlowers) makeFlowerPatch(x, z);
-
-  // Lampposts framing the entrance path.
-  makeLamppost(-3.2, -17);
-  makeLamppost(3.2, -17);
-  makeLamppost(-3.2, -25);
-  makeLamppost(3.2, -25);
-
-  // Rocks for visual breakup.
-  makeRock(-22, -33, 1.0);
-  makeRock(22, -33, 1.0);
-  makeRock(-30, -22, 0.9);
-  makeRock(30, -22, 0.9);
-
-  // ---- Left side strip (x < -30) ----
-  const leftTrees: Array<[number, number, number]> = [
-    [-36, -10, 1.0],
-    [-40, -2, 1.1],
-    [-36, 6, 0.95],
-    [-42, 14, 1.05],
-    [-37, 22, 1.0],
-    [-44, 0, 0.9],
-    [-48, 10, 0.85],
-    [-46, -8, 0.95],
-  ];
-  for (const [x, z, s] of leftTrees) makeTree(x, z, s);
-  makeFlowerPatch(-34, -4);
-  makeFlowerPatch(-34, 12);
-  makeFlowerPatch(-39, 18);
-  makeBench(-34, 4, "E");
-  makeRock(-38, -16, 0.9);
-  makeLamppost(-34, 0);
-  makeLamppost(-34, 18);
-
-  // ---- Right side strip (x > 30): outdoor staff car park ----
-  // Replaces what used to be a row of decorative trees with a small
-  // surface car park so the office reads as a real workplace. The car
-  // park has an asphalt apron, painted bay markings, a few parked
-  // voxel cars, and a one-way driving lane. Moving traffic is wired up
-  // separately by `buildOfficeAmbient`.
-  buildCarPark(scene, mat);
-  // Keep a couple of trees and a lamppost at the far edge so the lot
-  // still feels framed by the surrounding green belt.
-  makeTree(48, 10, 0.85);
-  makeTree(46, -8, 0.95);
-  makeTree(37, 22, 1.0);
-  makeRock(38, -16, 0.9);
-  makeLamppost(34, -10);
-  makeLamppost(34, 16);
-
-  // ---- Back strip (z > 25) ----
-  const backTrees: Array<[number, number, number]> = [
-    [-26, 30, 1.0],
-    [-18, 33, 1.1],
-    [-10, 30, 0.95],
-    [-2, 34, 1.05],
-    [6, 30, 0.95],
-    [14, 33, 1.0],
-    [22, 30, 1.0],
-    [26, 36, 0.9],
-    [-26, 38, 0.9],
-    [0, 40, 1.0],
-    [16, 40, 0.95],
-    [-14, 40, 0.95],
-  ];
-  for (const [x, z, s] of backTrees) makeTree(x, z, s);
-  makeFlowerPatch(-22, 36);
-  makeFlowerPatch(0, 30);
-  makeFlowerPatch(20, 36);
-  makeRock(-30, 30, 0.9);
-  makeRock(30, 30, 0.9);
-}
-
-/**
- * Build the outdoor staff car park along the right-hand strip of the
- * office grounds. Layout (looking down at the diorama):
+ * Spawn the wandering lobby staff (greeter, cleaner and courier).
  *
- *   x = 33                                      x = 49
- *   ┌────────────────────────────────────────────────────┐
- *   │ asphalt apron                                       │
- *   │ ── driving lane (one-way, runs north along x≈35) ── │
- *   │  ┌──┬──┬──┬──┬──┬──┬──┬──┐ angled parking bays      │
- *   │  │  │  │  │  │  │  │  │  │ (cars nose-east)         │
- *   │  └──┴──┴──┴──┴──┴──┴──┴──┘                          │
- *   └────────────────────────────────────────────────────┘
- *   z = -12                                       z = +18
- *
- * The lot is purely scenic — no layout points are exposed because the
- * simulation never routes characters here. Moving traffic is added by
- * {@link buildOfficeAmbient}.
- */
-function buildCarPark(scene: Scene, mat: MaterialFactory): void {
-  const makeBox = (
-    name: string,
-    w: number,
-    h: number,
-    d: number,
-    pos: Vector3,
-    hex: string,
-  ): Mesh => {
-    const box = MeshBuilder.CreateBox(name, { width: w, height: h, depth: d }, scene);
-    box.position = pos;
-    box.material = mat(name, hex);
-    return box;
-  };
-
-  // ----- Asphalt apron -----
-  // Sits a hair above the surrounding grass (y = 0) so the boundary
-  // reads cleanly without z-fighting against the ground slab.
-  const lotCx = 41;
-  const lotCz = 3;
-  const lotW = 16; // x-extent
-  const lotD = 30; // z-extent
-  makeBox(
-    "carpark_asphalt",
-    lotW,
-    0.08,
-    lotD,
-    new Vector3(lotCx, 0.06, lotCz),
-    "#3a3d44",
-  );
-
-  // ----- Kerb edges -----
-  // Light concrete kerb along the long edges so the lot reads as bounded.
-  const kerbHex = "#cdc6b4";
-  const kerbW = 0.3;
-  makeBox(
-    "carpark_kerb_w",
-    kerbW,
-    0.18,
-    lotD,
-    new Vector3(lotCx - lotW / 2 + kerbW / 2, 0.13, lotCz),
-    kerbHex,
-  );
-  makeBox(
-    "carpark_kerb_e",
-    kerbW,
-    0.18,
-    lotD,
-    new Vector3(lotCx + lotW / 2 - kerbW / 2, 0.13, lotCz),
-    kerbHex,
-  );
-  makeBox(
-    "carpark_kerb_n",
-    lotW,
-    0.18,
-    kerbW,
-    new Vector3(lotCx, 0.13, lotCz + lotD / 2 - kerbW / 2),
-    kerbHex,
-  );
-  makeBox(
-    "carpark_kerb_s",
-    lotW,
-    0.18,
-    kerbW,
-    new Vector3(lotCx, 0.13, lotCz - lotD / 2 + kerbW / 2),
-    kerbHex,
-  );
-
-  // ----- Painted bay markings -----
-  // Eight parking bays along the east half of the lot. Each bay is
-  // 3.0 deep (z) and 3.5 wide (x). Stripes are painted on the
-  // asphalt at every bay boundary plus a long stop-line on the east
-  // kerb side.
-  const stripeHex = "#f4f1e8";
-  const bayCount = 8;
-  const bayDepth = 3.0; // z step between stripes
-  const bayWidth = 3.5; // x extent of each bay
-  const bayCxX = 44.5; // bay area centre x (east half of lot)
-  const firstBayCz = lotCz - ((bayCount - 1) * bayDepth) / 2;
-  for (let i = 0; i <= bayCount; i++) {
-    const z = firstBayCz - bayDepth / 2 + i * bayDepth;
-    makeBox(
-      `carpark_bay_stripe_${i}`,
-      bayWidth,
-      0.02,
-      0.12,
-      new Vector3(bayCxX, 0.105, z),
-      stripeHex,
-    );
-  }
-  // Long stop-line along the wheel-stop side of the bays.
-  makeBox(
-    "carpark_bay_stopline",
-    0.15,
-    0.02,
-    bayCount * bayDepth,
-    new Vector3(bayCxX + bayWidth / 2, 0.105, lotCz),
-    stripeHex,
-  );
-
-  // Centre-lane dashes along the driving lane (x ≈ 38.5).
-  const laneCxX = 38.5;
-  for (let i = -6; i <= 6; i++) {
-    const z = lotCz + i * 2.0;
-    makeBox(
-      `carpark_lane_dash_${i + 6}`,
-      0.15,
-      0.02,
-      0.9,
-      new Vector3(laneCxX, 0.105, z),
-      stripeHex,
-    );
-  }
-
-  // ----- Wheel stops at the head of each parking bay -----
-  for (let i = 0; i < bayCount; i++) {
-    const z = firstBayCz + i * bayDepth;
-    makeBox(
-      `carpark_wheelstop_${i}`,
-      0.5,
-      0.18,
-      bayWidth - 0.6,
-      new Vector3(bayCxX + bayWidth / 2 - 0.4, 0.15, z),
-      "#9a9486",
-    );
-  }
-
-  // ----- Parked voxel cars in a few of the bays -----
-  // Simple chassis + cabin + windows + four wheels. Cars face west
-  // (nose toward the driving lane, i.e. -x), parked nose-out so the
-  // silhouettes read clearly when the camera orbits.
-  const parkedSpecs: Array<{
-    bay: number;
-    bodyHex: string;
-    topHex: string;
-  }> = [
-    { bay: 0, bodyHex: "#e84b3a", topHex: "#1c1c1c" },
-    { bay: 2, bodyHex: "#3a8fd6", topHex: "#1f5fa0" },
-    { bay: 3, bodyHex: "#ffd166", topHex: "#c4a14a" },
-    { bay: 5, bodyHex: "#5fa657", topHex: "#3a7a3a" },
-    { bay: 7, bodyHex: "#c188d4", topHex: "#3a3a3a" },
-  ];
-  for (const spec of parkedSpecs) {
-    const z = firstBayCz + spec.bay * bayDepth;
-    buildParkedCar(scene, mat, new Vector3(bayCxX, 0.1, z), spec.bodyHex, spec.topHex);
-  }
-
-  // ----- "P" car-park sign at the south entrance -----
-  const signCx = lotCx - lotW / 2 + 0.6;
-  const signCz = lotCz - lotD / 2 - 0.8;
-  makeBox(
-    "carpark_sign_post",
-    0.18,
-    2.2,
-    0.18,
-    new Vector3(signCx, 1.1, signCz),
-    "#3a3a44",
-  );
-  const signPlate = makeBox(
-    "carpark_sign_plate",
-    1.1,
-    1.1,
-    0.12,
-    new Vector3(signCx, 2.1, signCz),
-    "#2b6cb0",
-  );
-  // Paint a big white "P" on the front of the sign plate using a
-  // dynamic texture so it's instantly readable from a bird's-eye view.
-  const signTex = new DynamicTexture(
-    "carpark_sign_tex",
-    { width: 128, height: 128 },
-    scene,
-    false,
-  );
-  const ctx = signTex.getContext() as unknown as CanvasRenderingContext2D;
-  ctx.fillStyle = "#2b6cb0";
-  ctx.fillRect(0, 0, 128, 128);
-  ctx.fillStyle = "#f4f1e8";
-  ctx.font = "bold 110px sans-serif";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText("P", 64, 70);
-  signTex.update();
-  const signMat = new StandardMaterial("carpark_sign_mat", scene);
-  signMat.diffuseTexture = signTex;
-  signMat.specularColor = new Color3(0.05, 0.05, 0.05);
-  signMat.emissiveColor = new Color3(0.2, 0.2, 0.25);
-  signPlate.material = signMat;
-}
-
-/**
- * Build a single parked voxel car (body + cabin + tinted windows +
- * four wheel cubes). Mirrors the silhouette of the ambient sedans
- * used in the neighbourhood scene so the diorama looks consistent.
- *
- * The car's long axis runs along X (width = 2.4, depth = 1.3) so a
- * row of bays stacked along Z reads as cars parked side-by-side with
- * their noses pointing toward -x (the driving lane).
- */
-function buildParkedCar(
-  scene: Scene,
-  mat: MaterialFactory,
-  pos: Vector3,
-  bodyHex: string,
-  topHex: string,
-): void {
-  const tag = `carpark_parked_${pos.x.toFixed(1)}_${pos.z.toFixed(1)}`;
-  const makeBox = (
-    name: string,
-    w: number,
-    h: number,
-    d: number,
-    p: Vector3,
-    hex: string,
-  ): Mesh => {
-    const box = MeshBuilder.CreateBox(name, { width: w, height: h, depth: d }, scene);
-    box.position = p;
-    box.material = mat(name, hex);
-    return box;
-  };
-  // Body (long axis on X so the car spans across the bay)
-  makeBox(`${tag}_body`, 2.4, 0.7, 1.3, new Vector3(pos.x, pos.y + 0.5, pos.z), bodyHex);
-  // Cabin (also oriented with its long axis on X)
-  makeBox(`${tag}_top`, 1.4, 0.55, 1.2, new Vector3(pos.x - 0.05, pos.y + 1.1, pos.z), topHex);
-  // Windows (slightly inset so the cabin still shows colour)
-  makeBox(
-    `${tag}_win`,
-    1.2,
-    0.4,
-    1.25,
-    new Vector3(pos.x - 0.05, pos.y + 1.1, pos.z),
-    "#cfe7ff",
-  );
-  // Four wheels at the corners
-  const wheelHex = "#1c2230";
-  for (const [dx, dz] of [
-    [0.8, 0.55],
-    [-0.8, 0.55],
-    [0.8, -0.55],
-    [-0.8, -0.55],
-  ]) {
-    makeBox(
-      `${tag}_wheel_${dx}_${dz}`,
-      0.4,
-      0.4,
-      0.3,
-      new Vector3(pos.x + dx, pos.y + 0.25, pos.z + dz),
-      wheelHex,
-    );
-  }
-}
-
-/**
- * Spawn moving voxel cars that drive through the office car park.
- *
- * Reuses {@link NeighbourhoodAmbient} so the cars have the same
- * silhouette and animation feel as the neighbourhood traffic. The
+ * Reuses {@link NeighbourhoodAmbient} for the pedestrian animation. The
  * ambient instance ticks itself off `scene.onBeforeRenderObservable`
  * so callers don't have to thread an update callback through the
  * office layout return type.
@@ -3091,43 +3004,6 @@ function buildParkedCar(
 function buildOfficeAmbient(scene: Scene): void {
   const root = new TransformNode("office_ambient_root", scene);
   const ambient = new NeighbourhoodAmbient(scene, root);
-
-  // Driving lane runs north-south along x ≈ 38.5 (the centre of the
-  // car-park lane drawn in {@link buildCarPark}). Two cars loop in
-  // opposite-feeling directions for a bit of life. Routes reach
-  // beyond the lot bounds at each end so cars enter and exit the
-  // diorama from off-screen.
-  ambient.addCar(
-    "office_carpark_in",
-    [
-      [38.5, -22],
-      [38.5, 18],
-    ],
-    { type: "sedan", bodyColor: "#3a8fd6", topColor: "#1f5fa0", speed: 3.6 },
-  );
-  ambient.addCar(
-    "office_carpark_out",
-    [
-      [37.0, 24],
-      [37.0, -16],
-    ],
-    { type: "mini", bodyColor: "#e84b3a", topColor: "#1c1c1c", speed: 3.2 },
-  );
-  // A slower jeep that also loops along the car-park driving lane,
-  // staying entirely within the asphalt strip on the right side of
-  // the office. Previously this car crossed in front of the building
-  // along z = -12, which cut through the office floor (z ∈ [-15, 25])
-  // and the entrance path — visually it looked like the jeep was
-  // driving straight into the lobby. Keeping it on the lane (x ≈ 39,
-  // z ∈ carpark bounds) ensures cars never drive into buildings.
-  ambient.addCar(
-    "office_carpark_cross",
-    [
-      [39.0, -22],
-      [39.0, 24],
-    ],
-    { type: "jeep", bodyColor: "#5fa657", topColor: "#3a7a3a", speed: 2.8 },
-  );
 
   // ----- Ambient lobby cast -----
   // Three voxel staff wander inside the office to bring the space to life:
@@ -3184,12 +3060,15 @@ function buildOfficeAmbient(scene: Scene): void {
 
   // Visual props in their hands so each role reads at a glance.
   if (cleaner) {
+    cleaner.root.scaling.setAll(OFFICE_CHARACTER_SCALE);
     attachMop(scene, cleaner);
   }
   if (courier) {
+    courier.root.scaling.setAll(OFFICE_CHARACTER_SCALE);
     attachParcel(scene, courier);
   }
   if (greeter) {
+    greeter.root.scaling.setAll(OFFICE_CHARACTER_SCALE);
     attachClipboard(scene, greeter);
   }
 

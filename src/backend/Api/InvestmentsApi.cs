@@ -406,7 +406,7 @@ public static class InvestmentsApi
         var plan = new InvestmentPlan("investmentHold", "Investment hold — what happens while the account is frozen", new[]
         {
             new InvestmentPlanRow("1", "Member-initiated switches and model changes", null, "On hold",
-                "Only actioned after Grace is verified on her pre-change number (0403 118 220)."),
+                "Only actioned after Grace is verified on her pre-change number (0491 570 157)."),
             new InvestmentPlanRow("2", "Redemptions, withdrawals and rollovers out", null, "On hold",
                 "The SMSF rollover is held by Transfers & Rollovers — no units are sold."),
             new InvestmentPlanRow("3", "Existing investments", 612_400m, "Unchanged",
@@ -448,11 +448,11 @@ public static class InvestmentsApi
             {
                 "No investment action is taken while the Financial Crime hold is in place.",
                 "Grace's $612,400 stays invested in Balanced, so normal market movements still apply during the hold.",
-                "Instructions received through the changed contact details (mobile 0488 902 551, email grace.w.super@mailbox.example) must not be actioned.",
-                "Once Grace is verified on her pre-change number and confirms her wishes, no portfolio repair is needed — nothing was sold or switched.",
+                "Instructions received through the changed contact details (mobile 0491 570 158, email grace.w.super@mailbox.example) must not be actioned.",
+                "Once Grace is verified on her pre-change number and confirms her wishes, nothing needs to be unwound — nothing was sold or switched.",
             },
             ActionNote:
-                "No investment action — account frozen pending the Financial Crime review. The $612,400 balance stays invested; no switches, redemptions or rollovers are processed until Grace is verified on her pre-change number (0403 118 220).",
+                "No investment action — account frozen pending the Financial Crime review. The $612,400 balance stays invested; no switches, redemptions or rollovers are processed until Grace is verified on her pre-change number (0491 570 157).",
             NextSteps: new[]
             {
                 "Keep the investment-instruction hold until Financial Crime and the Team Leader release it.",
@@ -1195,7 +1195,8 @@ public static class InvestmentsApi
         }
 
         var q = message.ToLowerInvariant();
-        bool Has(params string[] words) => words.Any(w => q.Contains(w, StringComparison.Ordinal));
+        // Word-start matching, so "fit" matches "fits" but not "benefit".
+        bool Has(params string[] words) => words.Any(w => Regex.IsMatch(q, @"\b" + Regex.Escape(w)));
 
         if (Has("should", "recommend", "switch", "change model", "better", "advice", "advise"))
         {
@@ -1203,13 +1204,35 @@ public static class InvestmentsApi
                 ? a.PortfolioFit
                 : $"{a.PortfolioFit} The lowest-cost option compared is {a.Comparison.Summary.LowestCostOption} at {Money(a.Comparison.Summary.LowestTotal)} p.a.";
             return "I can't give personal financial advice — choosing or changing an investment is a decision for the adviser and " +
-                   $"the client. What I can do is lay out the facts: {facts}";
+                   $"the client. Here are the facts I can share.\n\n{facts}";
         }
 
-        if (Has("fee", "cost", "cheap", "expens", "dollar", "price", "$"))
+        if (Has("hold", "frozen", "freeze", "scam", "fraud", "takeover", "suspicious"))
+        {
+            return a.ActionNote ?? "There's no investment hold on this case. " + a.Profile.AnalysisSummary;
+        }
+
+        if (Has("plan", "bucket", "income", "sequenc", "drawdown", "redeem", "redemption", "sell", "unit", "raise",
+                "fund the", "withdraw", "proceeds", "spread"))
+        {
+            if (a.Plan is null)
+                return "No income or redemption plan is needed on this case. " + a.Profile.AnalysisSummary;
+
+            var rows = a.Plan.Rows.Select(r => $"- **{r.Step}. {r.Item}**{(r.Amount is decimal amt ? $" — {MoneySmart(amt)}" : string.Empty)} ({r.Timing}). {r.Note}");
+            var reply = $"**{a.Plan.Title}**\n\n{string.Join("\n", rows)}" +
+                        (string.IsNullOrWhiteSpace(a.Plan.Note) ? string.Empty : $"\n\n_{a.Plan.Note}_");
+            if (a.Profile.Scenario == "income-strategy")
+            {
+                reply += "\n\nIf markets fall, the cash bucket keeps the $6,500 monthly payments flowing for up to two years without " +
+                         "selling Balanced units at low prices (sequencing risk). The bucket is refilled from Balanced at reviews — the adviser's call.";
+            }
+            return reply;
+        }
+
+        if (Has("fee", "cost", "cheap", "expens", "dollar", "price", "icr"))
         {
             if (a.Comparison is null)
-                return $"This case doesn't need a fee comparison — {a.Profile.AnalysisSummary} The Caldova admin fee is tiered " +
+                return $"This case doesn't need a fee comparison. {a.Profile.AnalysisSummary} For reference, the Caldova admin fee is tiered " +
                        "(0.30% on the first $250,000, 0.15% to $1,000,000, 0.05% to $2,000,000, nil above) plus $180 p.a., and the " +
                        "0.10% buy/sell spread applies to any units sold.";
             var lines = a.Comparison.Rows.Select(r =>
@@ -1225,7 +1248,7 @@ public static class InvestmentsApi
             var lines = a.FactSheets
                 .Where(fs => fs.Returns is not null)
                 .Select(fs => $"- **{fs.ShortName}** — 1 year {Pct(fs.Returns!.OneYearPercent)}, 3 years {Pct(fs.Returns.ThreeYearPercentPa)} p.a., " +
-                              $"5 years {Pct(fs.Returns.FiveYearPercentPa)} p.a. (to {fs.Returns.PeriodEnding ?? fs.AsAt})");
+                              $"5 years {Pct(fs.Returns.FiveYearPercentPa)} p.a. (to {FormatDate(fs.Returns.PeriodEnding ?? fs.AsAt)})");
             return "Illustrative model returns, net of investment fees and before admin fees and tax:\n\n" +
                    string.Join("\n", lines) + $"\n\n{PastPerformanceWarning}";
         }
@@ -1235,40 +1258,15 @@ public static class InvestmentsApi
             var sheet = a.FactSheets.FirstOrDefault();
             var risk = sheet is null
                 ? string.Empty
-                : $" {sheet.ShortName}: growth/defensive {sheet.GrowthDefensive}, standard risk measure {sheet.RiskBand} — {sheet.RiskLabel} " +
+                : $"\n\n{sheet.ShortName}: growth/defensive {sheet.GrowthDefensive}, standard risk measure {sheet.RiskBand} — {sheet.RiskLabel} " +
                   $"({sheet.NegativeYearsIn20} negative years in 20), minimum suggested timeframe {sheet.MinimumTimeframeYears} years.";
-            return $"{a.PortfolioFit}{risk} Recorded risk profile: {a.Profile.RiskProfile}. {a.Profile.Soa}.";
-        }
-
-        if (Has("bucket", "income", "sequenc", "drawdown", "minimum", "pension payment"))
-        {
-            if (a.Profile.Scenario != "income-strategy")
-                return "There's no pension income strategy on this case. " + a.Profile.AnalysisSummary;
-            return "The instructed structure keeps two years of payments — $156,000, or 24 monthly payments of $6,500 — in the Caldova " +
-                   "Cash Account and term deposits, with $1,094,000 in Balanced. If markets fall, George's income keeps flowing from " +
-                   "the bucket for up to two years without selling Balanced units at low prices (sequencing risk). $78,000 p.a. is " +
-                   "6.24% of the balance, above the 5% minimum ($62,500 p.a.; $38,870 pro-rated this year). The bucket is refilled " +
-                   "from Balanced at reviews — the adviser's call.";
-        }
-
-        if (Has("redeem", "redemption", "sell", "unit", "spread", "withdraw", "proceeds", "cash"))
-        {
-            if (a.Plan is null)
-                return "No redemption is planned on this case. " + a.Profile.AnalysisSummary;
-            var rows = a.Plan.Rows.Select(r => $"- {r.Step}. {r.Item}{(r.Amount is decimal amt ? $" — {MoneySmart(amt)}" : string.Empty)} ({r.Timing}). {r.Note}");
-            return $"**{a.Plan.Title}**\n\n{string.Join("\n", rows)}" +
-                   (string.IsNullOrWhiteSpace(a.Plan.Note) ? string.Empty : $"\n\n_{a.Plan.Note}_");
+            return $"{a.PortfolioFit}{risk}\n\nRecorded risk profile: {a.Profile.RiskProfile}. {a.Profile.Soa}.";
         }
 
         if (Has("workbook", "excel", "xlsx", "spreadsheet", "download"))
         {
             return "The client workbook was generated when you engaged me — use the **Download workbook** link in step 3. It has the case " +
                    "summary, the comparison or plan, fact-sheet details and asset allocation, and my recommendations for adviser review.";
-        }
-
-        if (Has("hold", "frozen", "freeze", "scam", "fraud", "takeover", "suspicious"))
-        {
-            return a.ActionNote ?? "There's no investment hold on this case. " + a.Profile.AnalysisSummary;
         }
 
         if (Has("approv", "human", "sign off", "sign-off"))
@@ -1347,7 +1345,14 @@ public static class InvestmentsApi
         {
             title = a.Chart.Title,
             yAxis = a.Chart.YAxis,
-            bars = a.Chart.Bars.Select(b => new { label = b.Label, value = b.Value, display = MoneySmart(b.Value), highlight = b.Highlight }),
+            // Fee charts show cents ($6,930.00); balance charts show whole dollars.
+            bars = a.Chart.Bars.Select(b => new
+            {
+                label = b.Label,
+                value = b.Value,
+                display = a.Comparison is not null ? Money(b.Value) : MoneySmart(b.Value),
+                highlight = b.Highlight
+            }),
             mermaid = StripMermaidFence(a.Chart.MermaidBlock)
         },
         plan = a.Plan is null ? null : new

@@ -8,8 +8,9 @@ team — Olivia, Ben, Ivy, Felix, Rory, Penny, Cara and Theo — verifies, asses
 confirms it. The AI agents draft, check, summarise and recommend; people make the decisions.
 
 The 3D scene is built with **Babylon.js** in an isometric voxel style: a blocky open-plan
-office with department cubicles, and a voxel Melbourne outside — Docklands, the airport,
-Oakleigh, Lygon St and Box Hill — complete with a green-and-gold tram on Collins St.
+office floor with department pods split into a Superannuation wing and a Wealth Management
+wing, set in a park, plus a voxel Melbourne neighbourhood — Docklands, the
+airport, Oakleigh, Lygon St and Box Hill — complete with a green-and-gold tram on Collins St.
 
 ## Tech stack
 
@@ -50,38 +51,47 @@ The "See how this team uses these agents" links point at the companion Blazor si
   *Box Hill — Family Home (Robert)*. *Caldova Wealth — Client Operations* sits in the centre.
   Streets are signed Collins St, Flinders Lane, Lygon St, Chapel St, Swan St, Glenferrie Rd
   and Toorak Rd; a tram, delivery vans, cyclists, pedestrians and pets keep it moving.
-- **Lobby** — glass front doors, reception with the Onboarding inbox, the *New Accounts*,
-  *Member Help* and *Adviser Desk* counters, and the *Client Waiting Area*.
-- **Operations floor** — one cubicle per department, each in its department colour:
-  front row **ONBOARDING** (Olivia), **TRANSFERS** (Rory), **PAYMENTS** (Penny),
-  **COMMS** (Cara); back row **TEAM LEADER** (Theo, corner office), **BENEFITS** (Ben),
-  **INVESTMENTS** (Ivy), **FINANCIAL CRIME** (Felix). The *Client Operations* identity wall,
-  the *Our Process* board (1 Request · 2 Verify · 3 Assess · 4 Action · 5 Confirm) and the
-  archive cabinets (*Applications*, *Member Files*, *Nominations*, *Closed Cases*) complete
-  the room.
+- **Lobby** — glass front doors, a walnut concierge desk with the Onboarding inbox, the *Super
+  Services*, *Wealth Services* and *Adviser Desk* counters, and the *Client Waiting Lounge*.
+- **Operations floor** — one pod per department, organised by team. The **Superannuation
+  Team** wing sits at the front: **ONBOARDING** (Olivia), **BENEFITS** (Ben), **TRANSFERS**
+  (Rory), **PAYMENTS** (Penny). The **Wealth Management Team** wing sits behind it:
+  **INVESTMENTS** (Ivy), **COMMS** (Cara), **FINANCIAL CRIME** (Felix), with **HEAD OF CLIENT
+  OPS** (Theo) in the corner office leading both teams. Each wing has its own floor finish,
+  floor lettering and wall banner, and each pod's monitor shows its own workflow screen. The
+  *Caldova Wealth* identity wall, the *Our Process* board (1 Request · 2 Verify · 3 Assess ·
+  4 Action · 5 Confirm), the archive cabinets (*Advice (SOA)*, *Member Files*, *Nominations*,
+  *Closed Cases*), the *Client Meeting Suites*, the *Investment Committee* room, the *Member
+  Lounge*, *Client Café* and *Staff Kitchen* complete the floor.
+- **Park setting** — the office sits in a green park: a stone forecourt with a water
+  feature, gravel paths, a pond with a jetty, a gazebo, a picnic area, flower beds and
+  trees (`src/parkSurroundings.ts`).
 - **HUD**:
   - Top bar shows live counts (**Received · In flight · Completed · Declined**) and the
     **Operations Office | Neighbourhood** scene toggle.
   - Left panel lists each staff member with their role and current activity.
   - Right panel streams the activity log in real time.
   - **Submit a request** opens the scenario picker; x1 / x2 / x5 sets the simulation speed.
-  - Click any character for their profile card (staff link to their agent walkthrough page).
+  - Click any character to open a centered popup. For staff it shows the human on the left and
+    the AI agent under the hood on the right (its sub-agents and a link to the agent's page in
+    the backend); clients show their person and case.
 
 ## The team
 
-| Staff | Role | Department | Agent page |
-|---|---|---|---|
-| Olivia | Onboarding & Requests Officer | Onboarding & Requests | `/agents/onboarding` |
-| Ben | Benefits & Eligibility Assessor | Benefits & Eligibility | `/agents/benefits-eligibility` |
-| Ivy | Investment Analyst | Investment Solutions | `/agents/investment-analyst` |
-| Felix | Financial Crime Investigator | Financial Crime | `/agents/financial-crime` |
-| Rory | Transfers & Rollovers Coordinator | Transfers & Rollovers | `/agents/transfers-rollovers` |
-| Penny | Payments Officer | Payments | `/agents/payments` |
-| Cara | Client Communications Specialist | Client Communications | `/agents/client-communications` |
-| Theo | Client Operations Team Leader | Team Leader Office | `/agents/team-leader` |
+| Staff | Team | Role | Department | Agent page |
+|---|---|---|---|---|
+| Olivia | Superannuation | Onboarding & Requests Officer | Onboarding & Requests | `/agents/onboarding` |
+| Ben | Superannuation | Benefits & Eligibility Assessor | Benefits & Eligibility | `/agents/benefits-eligibility` |
+| Rory | Superannuation | Transfers & Rollovers Coordinator | Transfers & Rollovers | `/agents/transfers-rollovers` |
+| Penny | Superannuation | Payments Officer | Payments | `/agents/payments` |
+| Ivy | Wealth Management | Investment Analyst | Investment Solutions | `/agents/investment-analyst` |
+| Cara | Wealth Management | Client Communications Specialist | Client Communications | `/agents/client-communications` |
+| Felix | Wealth Management | Financial Crime Investigator | Financial Crime | `/agents/financial-crime` |
+| Theo | Leadership (both teams) | Client Operations Team Leader | Team Leader Office | `/agents/team-leader` |
 
-Olivia, Ben, Penny and Cara work every case; Ivy, Felix, Rory and Theo join scripted cases
-as specialist consultations and otherwise rotate through their own work at their desks.
+The AI Agents panel groups the cast by team, and each profile card shows the staff member's
+team. Olivia, Ben, Penny and Cara work every case; Ivy, Felix, Rory and Theo join scripted
+cases as specialist consultations and otherwise rotate through their own work at their desks.
 
 ## Scripted scenarios
 

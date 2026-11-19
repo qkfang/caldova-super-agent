@@ -361,7 +361,7 @@ public class InvestmentsMcpTools
     // ─────────────────────────────────────────────────────────────────────
 
     [McpServerTool(Name = "generateClientWorkbook"),
-     Description("Generate the client's Excel (.xlsx) workbook for adviser review: Case Summary; Model Comparison with total annual fees in dollars; Fact Sheets and Asset Allocation (when fact sheets are supplied); one sheet per table in the summary or recommendations (e.g. holdings, an income or redemption plan); and Recommendations with the required disclaimers. Saves the file under wwwroot/investments/output/ and returns JSON with its downloadUrl (/investments/download/{fileName}).")]
+     Description("Generate the client's Excel (.xlsx) workbook for adviser review: Case Summary; Model Comparison with total annual fees in dollars; Fact Sheets and Asset Allocation (when fact sheets are supplied); one sheet per table in the summary or recommendations (e.g. holdings, an income or redemption plan); and Recommendations with the required warnings. Saves the file under wwwroot/investments/output/ and returns JSON with its downloadUrl (/investments/download/{fileName}).")]
     public string GenerateClientWorkbook(
         [Description("Case number, e.g. REQ-20261103-DEMO01. Used in the file name.")]
         string caseNumber,
@@ -596,14 +596,17 @@ public class InvestmentsMcpTools
         FitColumns(ws, 14, 50);
 
         // Asset allocation: one column per model, one row per asset class.
+        // "Australian shares (ASX 300 index)" and "Australian shares" share a row.
         var withAllocation = factSheets.Where(f => f.AssetAllocation.Count > 0).ToList();
         if (withAllocation.Count == 0) return;
+
+        static string BaseClass(string assetClass) => Regex.Replace(assetClass, @"\s*\(.*?\)\s*$", string.Empty).Trim();
 
         var alloc = wb.Worksheets.Add(UniqueSheetName(wb, "Asset Allocation"));
         sheets.Add(alloc.Name);
         var assetClasses = withAllocation
             .SelectMany(f => f.AssetAllocation)
-            .Select(a => (a.AssetClass, a.Type))
+            .Select(a => (AssetClass: BaseClass(a.AssetClass), a.Type))
             .DistinctBy(a => a.AssetClass, StringComparer.OrdinalIgnoreCase)
             .OrderBy(a => string.Equals(a.Type, "defensive", StringComparison.OrdinalIgnoreCase) ? 1 : 0)
             .ToList();
@@ -619,9 +622,10 @@ public class InvestmentsMcpTools
             alloc.Cell(ar, 2).Value = string.IsNullOrEmpty(type) ? string.Empty : char.ToUpperInvariant(type[0]) + type[1..];
             for (var i = 0; i < withAllocation.Count; i++)
             {
-                var match = withAllocation[i].AssetAllocation
-                    .FirstOrDefault(a => string.Equals(a.AssetClass, assetClass, StringComparison.OrdinalIgnoreCase));
-                if (match is not null) alloc.Cell(ar, 3 + i).Value = match.TargetPercent;
+                var matches = withAllocation[i].AssetAllocation
+                    .Where(a => string.Equals(BaseClass(a.AssetClass), assetClass, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+                if (matches.Count > 0) alloc.Cell(ar, 3 + i).Value = matches.Sum(a => a.TargetPercent);
             }
             ar++;
         }
@@ -1192,7 +1196,17 @@ public class InvestmentsMcpTools
                     section.Tables.Add((label, TableRows(value)));
                     break;
                 case JsonValueKind.Array:
-                    section.Fields.Add((label, string.Join("; ", value.EnumerateArray().Select(ScalarText))));
+                    // One row per item so long lists stay readable in Excel.
+                    var items = value.EnumerateArray().Select(ScalarText).Where(t => t.Length > 0).ToList();
+                    if (items.Count <= 1)
+                    {
+                        section.Fields.Add((label, items.FirstOrDefault() ?? string.Empty));
+                    }
+                    else
+                    {
+                        for (var i = 0; i < items.Count; i++)
+                            section.Fields.Add((i == 0 ? label : string.Empty, "• " + items[i]));
+                    }
                     break;
                 case JsonValueKind.Object:
                     foreach (var sub in value.EnumerateObject())

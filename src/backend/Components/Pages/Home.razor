@@ -1,350 +1,642 @@
 @page "/"
+@using System.Text.RegularExpressions
 
 <PageTitle>Wealth Team in a Day — Caldova Wealth</PageTitle>
 
-<div class="hero">
-    <div class="hero-inner">
-        <div class="eyebrow">
-            <span class="eyebrow-dot"></span>
-            Caldova Wealth · Client Operations · Melbourne
-        </div>
-        <div class="trust-strip" aria-label="Platform assurances">
-            <span class="trust-pill">🔒 Encrypted</span>
-            <span class="trust-pill">🧾 Fully audited</span>
-            <span class="trust-pill">👤 Human-approved</span>
-        </div>
-        <h1>An AI operations team your advisers and members can <span class="hl">trust</span>.</h1>
-        <p class="lead">
-            A coordinated team of specialised Microsoft Foundry agents supporting the people who run
-            Caldova's super, pension and investment platform — onboarding, benefits and eligibility,
-            investment solutions, financial crime, transfers and rollovers, payments and client
-            communications, with a team leader watching the whole floor. Agents check, calculate,
-            draft and recommend; humans approve. Open any card to see the agent work a real case.
+<section class="home-hero" aria-labelledby="home-hero-title">
+    <div class="home-hero-copy">
+        <div class="hero-eyebrow">Caldova Wealth · Client Operations</div>
+        <h1 id="home-hero-title">An operations team your members and advisers can <span class="hl">trust</span>.</h1>
+        <p class="hero-lead">
+            Specialised Microsoft Foundry agents support the people who run Caldova's super, pension and investment
+            platform — onboarding, benefits and eligibility, investments, financial crime, transfers and rollovers,
+            payments and member communications, with a team leader overseeing the floor. Agents check, calculate,
+            draft and recommend; a qualified person approves.
         </p>
-        <div class="hero-meta" aria-label="Demo at a glance">
-            <div class="hero-stat"><span class="hero-stat-num">8</span><span class="hero-stat-label">Specialist agents</span></div>
-            <div class="hero-stat"><span class="hero-stat-num">5</span><span class="hero-stat-label">Live member cases</span></div>
-            <div class="hero-stat"><span class="hero-stat-num">100%</span><span class="hero-stat-label">Payments human-approved</span></div>
-            <div class="hero-stat"><span class="hero-stat-num">0</span><span class="hero-stat-label">Personal advice given</span></div>
+        <div class="hero-actions">
+            <a class="hero-btn hero-btn-solid" href="#agents">Meet the agents</a>
+            <a class="hero-btn hero-btn-ghost" href="@($"scenarios/{ScenarioCatalog.All[0].Id}")">Run a scenario <span aria-hidden="true">→</span></a>
         </div>
-        <div class="scenarios-line">
-            <strong>Scenarios</strong>
+        <p class="hero-footnote">Demonstration environment. Members, cases and figures are illustrative and general in nature.</p>
+    </div>
+
+    <aside class="hero-board" aria-label="Recent member cases">
+        <div class="hero-board-head">
+            <span class="live-dot" aria-hidden="true"></span>
+            <span>Recent member cases</span>
+            <span class="hero-board-count">@ScenarioCatalog.All.Count cases</span>
+        </div>
+        <ul class="hero-board-list">
             @foreach (var scenario in ScenarioCatalog.All)
             {
-                <a class="chip" href="@($"/scenarios/{scenario.Id}")">@scenario.Icon @scenario.ShortTitle</a>
+                <li>
+                    <a href="@($"scenarios/{scenario.Id}")">
+                        <span class="hb-icon" aria-hidden="true">@scenario.Icon</span>
+                        <span class="hb-body">
+                            <span class="hb-name">@scenario.Customer</span>
+                            <span class="hb-meta">@scenario.ShortTitle · @scenario.CaseNumber</span>
+                        </span>
+                        <span class="hb-status @StatusClass(scenario.Outcome)">@CleanOutcome(scenario.Outcome)</span>
+                    </a>
+                </li>
             }
+        </ul>
+        <div class="hero-board-foot">
+            <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+            Every payment is approved by a person before it's released
         </div>
-    </div>
-    <svg class="hero-chart" viewBox="0 0 800 200" preserveAspectRatio="none" aria-hidden="true">
-        <defs>
-            <linearGradient id="hc-fill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stop-color="#2dd4bf" stop-opacity="0.28" />
-                <stop offset="1" stop-color="#2dd4bf" stop-opacity="0" />
-            </linearGradient>
-            <linearGradient id="hc-line" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0" stop-color="#3b82f6" />
-                <stop offset="1" stop-color="#2dd4bf" />
-            </linearGradient>
-        </defs>
-        <path d="M0 160 C 60 150, 100 170, 160 140 S 260 120, 320 110 S 430 130, 490 90 S 600 70, 660 50 S 760 40, 800 20 L800 200 L0 200 Z" fill="url(#hc-fill)" />
-        <path d="M0 160 C 60 150, 100 170, 160 140 S 260 120, 320 110 S 430 130, 490 90 S 600 70, 660 50 S 760 40, 800 20" fill="none" stroke="url(#hc-line)" stroke-width="2" vector-effect="non-scaling-stroke" />
-    </svg>
-    <div class="hero-glow" aria-hidden="true"></div>
-</div>
+    </aside>
+</section>
 
-<div class="section-label">The operations office</div>
-
-<div class="agent-grid">
-    @foreach (var agent in AgentCatalog.All)
+<nav class="quick-links" aria-label="Common tasks">
+    @foreach (var link in QuickLinks)
     {
-        <a class="agent-card" href="@($"/agents/{agent.Id}")" style="--accent: @agent.Accent">
-            <div class="agent-card-icon" aria-hidden="true">@agent.Icon</div>
-            <div class="agent-card-body">
-                <div class="agent-card-dept">@agent.Department</div>
-                <h2>@agent.Name</h2>
-                <div class="agent-card-persona">@agent.Persona</div>
-                <p>@agent.Tagline</p>
-                <div class="agent-card-cta">View agent →</div>
-            </div>
+        <a class="quick-link" href="@link.Href">
+            <span class="ql-icon"><i class="@link.Icon" aria-hidden="true"></i></span>
+            <span class="ql-label">@link.Label</span>
         </a>
     }
-</div>
+</nav>
+
+<section id="agents" class="home-section">
+    <div class="section-head">
+        <div class="section-eyebrow">The operations office</div>
+        <h2>Meet your specialist agents</h2>
+        <p>
+            Each department has its own AI agent — with a clear role, its own tools and a named colleague who
+            reviews its work. Open any agent to watch it work a real member case.
+        </p>
+    </div>
+    <div class="agent-grid">
+        @foreach (var agent in AgentCatalog.All)
+        {
+            <a class="agent-card" href="@($"agents/{agent.Id}")" style="--accent: @agent.Accent">
+                <div class="agent-card-top">
+                    <span class="agent-card-icon" aria-hidden="true">@agent.Icon</span>
+                    <span class="agent-card-dept">@agent.Department</span>
+                </div>
+                <h3>@agent.Name</h3>
+                <div class="agent-card-persona">@agent.Persona</div>
+                <p>@agent.Tagline</p>
+                <span class="agent-card-cta">View agent <span aria-hidden="true">→</span></span>
+            </a>
+        }
+    </div>
+</section>
+
+<section class="numbers-band" aria-labelledby="numbers-title">
+    <div class="numbers-intro">
+        <div class="section-eyebrow">By the numbers</div>
+        <h2 id="numbers-title">Built for oversight, not autopilot</h2>
+        <p>The agents do the legwork. People keep the judgement — especially when money moves or a member is vulnerable.</p>
+    </div>
+    <div class="numbers-grid">
+        <div class="number">
+            <span class="number-value">@AgentCatalog.All.Count</span>
+            <span class="number-label">Specialist agents, one for each department</span>
+        </div>
+        <div class="number">
+            <span class="number-value">@ScenarioCatalog.All.Count</span>
+            <span class="number-label">End-to-end member journeys to explore</span>
+        </div>
+        <div class="number">
+            <span class="number-value">100<small>%</small></span>
+            <span class="number-label">Of payments approved by a person</span>
+        </div>
+        <div class="number">
+            <span class="number-value">0</span>
+            <span class="number-label">Personal advice given by an agent</span>
+        </div>
+    </div>
+</section>
+
+<section id="journey" class="home-section">
+    <div class="section-head">
+        <div class="section-eyebrow">How it works</div>
+        <h2>How a member request moves through Caldova</h2>
+        <p>Request → verify → assess → action → confirm. Each stage is owned by a specialist agent and checked by a person.</p>
+    </div>
+    <ol class="journey-steps">
+        @foreach (var (agent, index) in AgentCatalog.All.Select((a, i) => (a, i + 1)))
+        {
+            <li style="--accent: @agent.Accent">
+                <a href="@($"agents/{agent.Id}")">
+                    <span class="journey-num">@index</span>
+                    <span class="journey-icon" aria-hidden="true">@agent.Icon</span>
+                    <span class="journey-dept">@agent.Department</span>
+                </a>
+            </li>
+        }
+    </ol>
+</section>
+
+<section class="home-section trust-section" aria-labelledby="trust-title">
+    <div class="section-head section-head-center">
+        <div class="section-eyebrow">Why members can rely on the office</div>
+        <h2 id="trust-title">Confidence built into every case</h2>
+    </div>
+    <div class="trust-grid">
+        <div class="trust-item">
+            <span class="trust-icon"><i class="fa-solid fa-user-check" aria-hidden="true"></i></span>
+            <h3>A person approves</h3>
+            <p>Payments, hardship releases and death benefits wait for a named approver in Microsoft Teams. No agent releases money on its own.</p>
+        </div>
+        <div class="trust-item">
+            <span class="trust-icon"><i class="fa-solid fa-file-shield" aria-hidden="true"></i></span>
+            <h3>Everything on the record</h3>
+            <p>Every tool call — with its inputs and results — is captured in the agent's output, so the audit trail shows what was checked and why.</p>
+        </div>
+        <div class="trust-item">
+            <span class="trust-icon"><i class="fa-solid fa-comments" aria-hidden="true"></i></span>
+            <h3>Plain English, general information</h3>
+            <p>Members and advisers get clear, timely updates. Agents give general information only — never personal financial advice.</p>
+        </div>
+    </div>
+</section>
+
+@code {
+    private sealed record QuickLink(string Label, string Href, string Icon);
+
+    private static readonly QuickLink[] QuickLinks =
+    {
+        new("Open a new account", "agents/onboarding", "fa-solid fa-user-plus"),
+        new("Assess a benefit claim", "agents/benefits-eligibility", "fa-solid fa-scale-balanced"),
+        new("Review a portfolio", "agents/investment-analyst", "fa-solid fa-chart-line"),
+        new("Check for fraud", "agents/financial-crime", "fa-solid fa-user-shield"),
+        new("Release a payment", "agents/payments", "fa-solid fa-money-check-dollar"),
+        new("Update a member", "agents/client-communications", "fa-solid fa-envelope-open-text"),
+    };
+
+    // Outcomes end with a status emoji (e.g. "Account opened ✅"); the status pill carries that meaning instead.
+    private static string CleanOutcome(string outcome) =>
+        Regex.Replace(outcome, @"[\s\p{So}\p{Cs}\p{Mn}]+$", string.Empty);
+
+    private static string StatusClass(string outcome) =>
+        outcome.Contains("block", StringComparison.OrdinalIgnoreCase) ? "is-blocked"
+        : outcome.Contains("partial", StringComparison.OrdinalIgnoreCase) ? "is-partial"
+        : "is-done";
+}
 
 <style>
-    .hero {
+    /* ── Hero — light, soft blue-to-ivory wash with navy type ─────────── */
+    .home-hero {
         position: relative;
+        isolation: isolate;
         overflow: hidden;
+        display: grid;
+        grid-template-columns: minmax(0, 1.3fr) minmax(320px, 1fr);
+        gap: 2.75rem;
+        align-items: center;
+        padding: 3.4rem 3.25rem 5.75rem 3.25rem;
+        border-radius: 24px;
+        color: var(--cw-text);
+        border: 1px solid var(--cw-line);
         background:
-            radial-gradient(ellipse 50% 70% at 88% 0%, rgba(45, 212, 191, 0.20), transparent 70%),
-            radial-gradient(ellipse 45% 60% at 0% 100%, rgba(59, 130, 246, 0.16), transparent 70%),
-            linear-gradient(135deg, #07142a 0%, #0a1c36 55%, #08172d 100%);
-        color: #fff;
-        padding: 2.8rem 2.4rem 3.4rem 2.4rem;
-        border: 1px solid rgba(130, 165, 210, 0.2);
-        border-radius: 20px;
-        margin-bottom: 1.9rem;
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 24px 60px -24px rgba(0, 0, 0, 0.8);
+            radial-gradient(ellipse 55% 85% at 100% 0%, rgba(22, 96, 208, 0.12), transparent 62%),
+            linear-gradient(135deg, #eaf1fb 0%, #f4f7fc 55%, #fbf8f1 100%);
     }
-    .hero::before {
+    /* Concentric gold hairline rings — a quiet "private wealth" motif. */
+    .home-hero::before,
+    .home-hero::after {
         content: "";
         position: absolute;
-        inset: 0 0 auto 0;
-        height: 2px;
-        background: linear-gradient(90deg, transparent, #2dd4bf 30%, #3b82f6 70%, transparent);
-        opacity: 0.85;
-    }
-    .hero-inner { position: relative; z-index: 1; }
-
-    .hero-chart {
-        position: absolute;
-        left: 0; right: 0; bottom: 0;
-        width: 100%;
-        height: 46%;
-        opacity: 0.55;
-        pointer-events: none;
-    }
-
-    .hero-glow {
-        position: absolute;
-        right: -120px;
-        top: -140px;
-        width: 420px;
-        height: 420px;
+        z-index: -1;
         border-radius: 50%;
-        background: radial-gradient(circle, rgba(45, 212, 191, 0.2) 0%, transparent 65%);
         pointer-events: none;
     }
+    .home-hero::before {
+        right: -220px;
+        bottom: -400px;
+        width: 640px;
+        height: 640px;
+        border: 1px solid rgba(201, 162, 74, 0.45);
+    }
+    .home-hero::after {
+        right: -340px;
+        bottom: -520px;
+        width: 880px;
+        height: 880px;
+        border: 1px solid rgba(201, 162, 74, 0.25);
+    }
 
-    .eyebrow {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 0.72rem;
+    .hero-eyebrow {
+        font-size: 0.74rem;
+        font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.16em;
-        color: #a7f3e4;
-        margin: 0 0.9rem 0.9rem 0;
-        font-weight: 600;
-    }
-    .eyebrow-dot {
-        width: 8px; height: 8px; border-radius: 50%;
-        background: #2dd4bf;
-        box-shadow: 0 0 0 4px rgba(45, 212, 191, 0.18), 0 0 14px rgba(45, 212, 191, 0.7);
+        letter-spacing: 0.18em;
+        color: var(--cw-gold-ink);
+        margin-bottom: 1rem;
     }
 
-    .trust-strip { display: inline-flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.9rem; vertical-align: top; }
-    .trust-pill {
-        font-size: 0.68rem;
-        letter-spacing: 0.06em;
-        color: var(--cw-gold, #e3c47e);
-        background: rgba(227, 196, 126, 0.07);
-        border: 1px solid rgba(227, 196, 126, 0.28);
-        padding: 0.18rem 0.6rem;
-        border-radius: 999px;
-        font-weight: 600;
-    }
-
-    .hero h1 {
-        margin: 0 0 0.75rem 0;
-        font-size: 2.3rem;
-        line-height: 1.14;
-        font-weight: 650;
-        letter-spacing: -0.025em;
-        color: #fff;
+    .home-hero h1 {
+        margin: 0 0 1rem 0;
+        font-size: clamp(2.1rem, 3.4vw, 3.15rem);
+        line-height: 1.1;
+        color: var(--cw-ink);
         max-width: 40rem;
     }
-    .hero h1 .hl {
-        color: #2dd4bf;
-        background: linear-gradient(135deg, #5eead4, #60a5fa);
-        -webkit-background-clip: text;
-        background-clip: text;
-        -webkit-text-fill-color: transparent;
+    .home-hero h1 .hl {
+        color: var(--cw-gold-ink);
+        font-style: italic;
     }
 
-    .hero .lead {
-        font-size: 1rem;
-        line-height: 1.6;
-        max-width: 56rem;
-        color: rgba(226, 236, 250, 0.82);
+    .hero-lead {
         margin: 0;
+        max-width: 40rem;
+        font-size: 1.05rem;
+        line-height: 1.65;
+        color: var(--cw-text-2);
     }
 
-    .hero-meta {
+    .hero-actions {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.7rem;
-        margin: 1.4rem 0 1.1rem 0;
+        gap: 0.75rem;
+        margin: 1.75rem 0 1.4rem 0;
     }
-    .hero-stat {
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
-        border: 1px solid rgba(130, 165, 210, 0.22);
-        border-radius: 12px;
-        padding: 0.65rem 1rem;
-        backdrop-filter: blur(8px);
-        min-width: 8rem;
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
-    }
-    .hero-stat-num {
-        display: block;
-        font-size: 1.6rem;
-        font-weight: 650;
-        color: #fff;
-        line-height: 1.1;
-        letter-spacing: -0.02em;
-        font-variant-numeric: tabular-nums;
-    }
-    .hero-stat-label {
-        display: block;
-        font-size: 0.64rem;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        color: rgba(167, 243, 228, 0.7);
-        margin-top: 3px;
-    }
-
-    .scenarios-line {
-        margin-top: 0.6rem;
-        font-size: 0.92rem;
-        color: rgba(226, 236, 250, 0.78);
-    }
-    .scenarios-line strong { color: #fff; margin-right: 0.4rem; }
-    .chip {
-        display: inline-block;
-        background: rgba(125, 211, 252, 0.08);
-        border: 1px solid rgba(125, 211, 252, 0.26);
-        color: #d6f1ff;
-        padding: 0.22rem 0.75rem;
+    .hero-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        height: 48px;
+        padding: 0 1.6rem;
         border-radius: 999px;
-        margin-right: 0.4rem;
-        font-size: 0.82rem;
+        font-weight: 600;
+        font-size: 0.95rem;
+        text-decoration: none;
+        transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
     }
-    a.chip { text-decoration: none; margin-bottom: 0.4rem; transition: background 0.15s ease, border-color 0.15s ease; }
-    a.chip:hover { background: rgba(45, 212, 191, 0.16); border-color: rgba(45, 212, 191, 0.55); color: #fff; }
+    .hero-btn:hover { text-decoration: none; }
+    .hero-btn-solid { background: var(--cw-primary); color: #fff; border: 1.5px solid var(--cw-primary); }
+    .hero-btn-solid:hover { background: var(--cw-primary-hover); border-color: var(--cw-primary-hover); color: #fff; }
+    .hero-btn-ghost { color: var(--cw-navy-800); background: #fff; border: 1.5px solid var(--cw-navy-800); }
+    .hero-btn-ghost:hover { color: #fff; background: var(--cw-navy-800); }
 
-    .section-label {
+    .hero-footnote {
+        margin: 0;
+        font-size: 0.76rem;
+        color: var(--cw-muted);
+    }
+
+    /* White "case board" card on the light hero. */
+    .hero-board {
+        background: #fff;
+        border: 1px solid var(--cw-line);
+        border-radius: 20px;
+        padding: 1.1rem 1.1rem 0.9rem 1.1rem;
+        box-shadow: var(--cw-shadow-lg);
+    }
+    .hero-board-head {
         display: flex;
         align-items: center;
-        gap: 0.7rem;
-        font-size: 0.7rem;
-        text-transform: uppercase;
-        letter-spacing: 0.16em;
-        color: var(--cw-muted, #93a3bb);
+        gap: 0.55rem;
+        padding: 0 0.35rem 0.8rem 0.35rem;
+        border-bottom: 1px solid var(--cw-line);
         font-weight: 600;
-        margin: 0 0 0.8rem 0.15rem;
+        font-size: 0.92rem;
+        color: var(--cw-ink);
     }
-    .section-label::after {
-        content: "";
-        flex: 1;
-        height: 1px;
-        background: linear-gradient(90deg, rgba(130, 165, 210, 0.3), transparent);
+    .live-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #12b76a;
+        box-shadow: 0 0 0 4px rgba(18, 183, 106, 0.16);
+    }
+    .hero-board-count {
+        margin-left: auto;
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: var(--cw-text-2);
+        background: var(--cw-surface-2);
+        border: 1px solid var(--cw-line);
+        border-radius: 999px;
+        padding: 0.15rem 0.6rem;
+    }
+    .hero-board-list {
+        list-style: none;
+        margin: 0.5rem 0 0.4rem 0;
+        padding: 0;
+    }
+    .hero-board-list a {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.6rem 0.4rem;
+        border-radius: 12px;
+        color: var(--cw-ink);
+        text-decoration: none;
+        transition: background 0.15s ease;
+    }
+    .hero-board-list a:hover { background: var(--cw-surface-2); text-decoration: none; }
+    .hb-icon {
+        flex-shrink: 0;
+        width: 36px;
+        height: 36px;
+        display: grid;
+        place-items: center;
+        border-radius: 10px;
+        background: var(--cw-surface-2);
+        border: 1px solid var(--cw-line);
+        font-size: 1rem;
+    }
+    .hb-body { display: flex; flex-direction: column; min-width: 0; line-height: 1.3; }
+    .hb-name { font-weight: 600; font-size: 0.92rem; }
+    .hb-meta {
+        font-size: 0.76rem;
+        color: var(--cw-muted);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .hb-status {
+        margin-left: auto;
+        flex-shrink: 0;
+        font-size: 0.7rem;
+        font-weight: 700;
+        border-radius: 999px;
+        padding: 0.2rem 0.6rem;
+        white-space: nowrap;
+    }
+    .hb-status.is-done { color: var(--cw-success); background: #e6f4ee; }
+    .hb-status.is-partial { color: var(--cw-warn); background: #fdf1e1; }
+    .hb-status.is-blocked { color: var(--cw-danger); background: #fdeceb; }
+    .hero-board-foot {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 0.35rem 0.1rem 0.35rem;
+        border-top: 1px solid var(--cw-line);
+        font-size: 0.76rem;
+        color: var(--cw-muted);
+    }
+    .hero-board-foot i { color: var(--cw-gold-ink); }
+    /* ── Quick links (overlapping the hero, as on fund sites) ─────────── */
+    .quick-links {
+        position: relative;
+        z-index: 2;
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        margin: -3.6rem 2.25rem 0 2.25rem;
+        background: #fff;
+        border: 1px solid var(--cw-line);
+        border-radius: 18px;
+        box-shadow: var(--cw-shadow-lg);
+        overflow: hidden;
+    }
+    .quick-link {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.7rem;
+        padding: 1.45rem 0.75rem 1.3rem 0.75rem;
+        text-align: center;
+        color: var(--cw-ink);
+        font-weight: 600;
+        font-size: 0.92rem;
+        text-decoration: none;
+        border-right: 1px solid var(--cw-line);
+        transition: background 0.15s ease, color 0.15s ease;
+    }
+    .quick-link:last-child { border-right: 0; }
+    .quick-link:hover { background: #f8fafd; color: var(--cw-primary); text-decoration: none; }
+    .ql-icon {
+        width: 50px;
+        height: 50px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background: var(--cw-primary-soft);
+        color: var(--cw-primary);
+        font-size: 1.15rem;
+        transition: transform 0.15s ease;
+    }
+    .quick-link:hover .ql-icon { transform: translateY(-2px); }
+
+    /* ── Sections ─────────────────────────────────────────────────────── */
+    .home-section { margin-top: 4.5rem; }
+    .section-head { max-width: 46rem; margin-bottom: 1.75rem; }
+    .section-head-center { margin-left: auto; margin-right: auto; text-align: center; }
+    .section-eyebrow {
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        color: var(--cw-gold-ink);
+        margin-bottom: 0.6rem;
+    }
+    .section-head h2,
+    .numbers-intro h2 {
+        margin: 0 0 0.6rem 0;
+        font-size: clamp(1.7rem, 2.4vw, 2.2rem);
+        line-height: 1.2;
+    }
+    .section-head p,
+    .numbers-intro p {
+        margin: 0;
+        color: var(--cw-muted);
+        font-size: 1.02rem;
+        line-height: 1.65;
     }
 
+    /* ── Agent cards ──────────────────────────────────────────────────── */
     .agent-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
         gap: 1.1rem;
     }
-
     .agent-card {
         position: relative;
         display: flex;
-        gap: 0.9rem;
-        align-items: flex-start;
-        background:
-            linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0) 40%),
-            rgba(14, 22, 38, 0.8);
-        border: 1px solid rgba(130, 165, 210, 0.16);
-        border-radius: 16px;
-        padding: 1.1rem 1.15rem 1.05rem 1.15rem;
+        flex-direction: column;
+        padding: 1.35rem 1.35rem 1.2rem 1.35rem;
+        background: #fff;
+        border: 1px solid var(--cw-line);
+        border-radius: 18px;
+        color: var(--cw-text);
         text-decoration: none;
-        color: inherit;
-        backdrop-filter: blur(8px);
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
-        transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease;
-        overflow: hidden;
-    }
-    .agent-card::before {
-        content: "";
-        position: absolute;
-        left: 0; top: 0; right: 0;
-        height: 2px;
-        background: linear-gradient(90deg, var(--accent, #2dd4bf), transparent 75%);
-        opacity: 0.9;
-    }
-    .agent-card::after {
-        content: "";
-        position: absolute;
-        right: -40px; top: -40px;
-        width: 160px; height: 160px;
-        border-radius: 50%;
-        background: radial-gradient(circle, color-mix(in srgb, var(--accent, #2dd4bf) 22%, transparent) 0%, transparent 70%);
-        pointer-events: none;
-        opacity: 0.55;
+        box-shadow: var(--cw-shadow-sm);
+        transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
     }
     .agent-card:hover {
-        transform: translateY(-4px);
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 18px 40px -16px color-mix(in srgb, var(--accent, #2dd4bf) 45%, rgba(0, 0, 0, 0.8));
-        border-color: color-mix(in srgb, var(--accent, #2dd4bf) 50%, rgba(130, 165, 210, 0.16));
+        transform: translateY(-3px);
+        border-color: color-mix(in srgb, var(--cw-primary) 35%, var(--cw-line));
+        box-shadow: var(--cw-shadow-lg);
+        text-decoration: none;
+        color: var(--cw-text);
     }
-    .agent-card:hover { text-decoration: none; }
-
+    .agent-card-top { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 1rem; }
     .agent-card-icon {
-        font-size: 1.6rem;
-        line-height: 1;
-        flex: 0 0 auto;
         width: 46px;
         height: 46px;
-        border-radius: 12px;
-        background: color-mix(in srgb, var(--accent, #2dd4bf) 16%, rgba(14, 22, 38, 0.6));
-        border: 1px solid color-mix(in srgb, var(--accent, #2dd4bf) 40%, transparent);
         display: grid;
         place-items: center;
-        position: relative;
-        z-index: 1;
-    }
-
-    .agent-card-body { min-width: 0; flex: 1; position: relative; z-index: 1; }
-    .agent-card-body h2 {
-        font-size: 1.05rem;
-        margin: 0.15rem 0 0.2rem 0;
-        color: #fff;
-        font-weight: 650;
-        letter-spacing: -0.01em;
+        flex-shrink: 0;
+        border-radius: 13px;
+        font-size: 1.35rem;
+        background: color-mix(in srgb, var(--accent) 12%, #fff);
+        border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
     }
     .agent-card-dept {
-        font-size: 0.68rem;
-        text-transform: uppercase;
-        letter-spacing: 0.14em;
-        color: var(--accent, #2dd4bf);
+        font-size: 0.7rem;
         font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: color-mix(in srgb, var(--accent) 60%, var(--cw-ink));
     }
-    .agent-card-persona {
-        font-size: 0.8rem;
-        color: rgba(200, 216, 238, 0.7);
-        margin-bottom: 0.4rem;
+    .agent-card h3 {
+        margin: 0 0 0.2rem 0;
+        font-size: 1.12rem;
+        font-weight: 650;
+        color: var(--cw-ink);
     }
-    .agent-card p {
-        margin: 0;
-        font-size: 0.9rem;
-        color: rgba(226, 236, 250, 0.8);
-        line-height: 1.5;
-    }
+    .agent-card-persona { font-size: 0.84rem; color: var(--cw-muted); margin-bottom: 0.65rem; }
+    .agent-card p { margin: 0 0 1rem 0; font-size: 0.93rem; line-height: 1.55; color: var(--cw-text); }
     .agent-card-cta {
-        margin-top: 0.7rem;
-        font-size: 0.78rem;
-        color: var(--accent, #2dd4bf);
+        margin-top: auto;
+        font-size: 0.88rem;
         font-weight: 600;
-        letter-spacing: 0.3px;
-        opacity: 0.85;
-        transition: transform 0.15s ease, opacity 0.15s ease;
+        color: var(--cw-primary);
     }
-    .agent-card:hover .agent-card-cta {
-        opacity: 1;
-        transform: translateX(3px);
-    }
+    .agent-card-cta span { display: inline-block; transition: transform 0.15s ease; }
+    .agent-card:hover .agent-card-cta span { transform: translateX(3px); }
 
-    @@media (max-width: 640px) {
-        .hero { padding: 1.75rem 1.25rem 2.6rem 1.25rem; }
-        .hero h1 { font-size: 1.6rem; }
+    /* ── By the numbers ───────────────────────────────────────────────── */
+    .numbers-band {
+        margin-top: 4.5rem;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+        gap: 2.5rem;
+        align-items: center;
+        padding: 2.75rem 2.75rem;
+        background: #fff;
+        border: 1px solid var(--cw-line);
+        border-radius: 22px;
+        box-shadow: var(--cw-shadow-sm);
+    }
+    .numbers-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 1.5rem;
+    }
+    .number {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding-left: 1.25rem;
+        border-left: 2px solid color-mix(in srgb, var(--cw-gold) 55%, transparent);
+    }
+    .number-value {
+        font-family: var(--cw-font-serif);
+        font-size: clamp(2.4rem, 3.6vw, 3.4rem);
+        font-weight: 500;
+        line-height: 1;
+        color: var(--cw-navy-800);
+        letter-spacing: -0.02em;
+        font-variant-numeric: lining-nums;
+    }
+    .number-value small { font-size: 0.55em; margin-left: 0.05em; }
+    .number-label { font-size: 0.88rem; color: var(--cw-muted); line-height: 1.45; }
+
+    /* ── Journey ──────────────────────────────────────────────────────── */
+    .journey-steps {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        grid-template-columns: repeat(8, minmax(0, 1fr));
+        gap: 0.5rem;
+        counter-reset: none;
+    }
+    .journey-steps li { position: relative; }
+    .journey-steps li:not(:last-child)::after {
+        content: "";
+        position: absolute;
+        top: 22px;
+        left: calc(50% + 26px);
+        right: calc(-50% + 22px);
+        height: 2px;
+        background: linear-gradient(90deg, var(--cw-line-strong), var(--cw-line));
+    }
+    .journey-steps a {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.55rem;
+        text-align: center;
+        color: var(--cw-ink);
+        text-decoration: none;
+        padding: 0 0.25rem;
+    }
+    .journey-steps a:hover { text-decoration: none; color: var(--cw-primary); }
+    .journey-num {
+        width: 44px;
+        height: 44px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background: var(--cw-navy-800);
+        color: #fff;
+        font-weight: 700;
+        font-size: 0.95rem;
+        box-shadow: 0 0 0 5px var(--cw-bg), 0 0 0 6px color-mix(in srgb, var(--accent) 45%, transparent);
+        transition: background 0.15s ease;
+    }
+    .journey-steps a:hover .journey-num { background: var(--cw-primary); }
+    .journey-icon { font-size: 1.25rem; line-height: 1; margin-top: 0.3rem; }
+    .journey-dept { font-size: 0.84rem; font-weight: 600; line-height: 1.3; }
+
+    /* ── Trust pillars ────────────────────────────────────────────────── */
+    .trust-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1.25rem;
+    }
+    .trust-item {
+        padding: 1.75rem 1.6rem;
+        background: #fff;
+        border: 1px solid var(--cw-line);
+        border-radius: 18px;
+        text-align: center;
+    }
+    .trust-icon {
+        width: 56px;
+        height: 56px;
+        margin: 0 auto 1rem auto;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background: var(--cw-navy-800);
+        color: var(--cw-gold);
+        font-size: 1.3rem;
+    }
+    .trust-item h3 {
+        margin: 0 0 0.5rem 0;
+        font-family: var(--cw-font-serif);
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+    .trust-item p { margin: 0; color: var(--cw-muted); font-size: 0.94rem; line-height: 1.6; }
+
+    /* ── Responsive ───────────────────────────────────────────────────── */
+    @@media (max-width: 1100px) {
+        .home-hero { grid-template-columns: minmax(0, 1fr); padding: 2.5rem 2rem 5.5rem 2rem; }
+        .quick-links { grid-template-columns: repeat(3, minmax(0, 1fr)); margin-left: 1rem; margin-right: 1rem; }
+        .quick-link:nth-child(3n) { border-right: 0; }
+        .quick-link:nth-child(-n+3) { border-bottom: 1px solid var(--cw-line); }
+        .numbers-band { grid-template-columns: 1fr; }
+        .journey-steps { grid-template-columns: repeat(4, minmax(0, 1fr)); row-gap: 1.75rem; }
+        .journey-steps li::after { display: none; }
+    }
+    @@media (max-width: 720px) {
+        .home-hero { padding: 2rem 1.25rem 5rem 1.25rem; border-radius: 18px; }
+        .quick-links { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-left: 0.5rem; margin-right: 0.5rem; }
+        .quick-link:nth-child(3n) { border-right: 1px solid var(--cw-line); }
+        .quick-link:nth-child(2n) { border-right: 0; }
+        .quick-link:nth-child(-n+4) { border-bottom: 1px solid var(--cw-line); }
+        .numbers-band { padding: 1.75rem 1.4rem; }
+        .numbers-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .journey-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .trust-grid { grid-template-columns: 1fr; }
     }
 </style>

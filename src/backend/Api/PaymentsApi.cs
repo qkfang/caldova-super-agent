@@ -1342,7 +1342,7 @@ public static class PaymentsApi
         var sb = new StringBuilder();
         var why = !agentConfigured
             ? "the Foundry agent isn't configured"
-            : $"the Foundry agent call didn't complete ({agentError ?? "no reply"})";
+            : $"the Foundry agent call didn't complete ({Shorten(agentError ?? "no reply", 160)})";
         sb.AppendLine($"> Deterministic demo run — {why}. The Payments desk ran the payments_* MCP tools locally; see Raw Output for every call.");
         sb.AppendLine();
 
@@ -1732,6 +1732,9 @@ public static class PaymentsApi
             .Replace("*", "\\*")
             .Replace("_", "\\_")
             .Replace("|", "\\|");
+
+    private static string Shorten(string value, int max) =>
+        value.Length > max ? value[..(max - 1)] + "…" : value;
 
     private static string Sanitize(string value) =>
         (value ?? string.Empty).Replace('\r', ' ').Replace('\n', ' ');

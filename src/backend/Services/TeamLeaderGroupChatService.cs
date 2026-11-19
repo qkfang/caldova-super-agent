@@ -357,8 +357,8 @@ public class TeamLeaderGroupChatService
         ],
         "rollover-grace" =>
         [
-            "Grace Williams, 63, direct member, Caldova Super (Select) CS-1058220, balance $612,400; travelling in Italy since 18 Oct 2026 (travel notice on file); verified mobile before the change: 0403 118 220.",
-            "2 Nov 2026 10:42 — a caller impersonating Grace passed knowledge-based checks and changed the mobile to 0488 902 551 and the email to grace.w.super@mailbox.example.",
+            "Grace Williams, 63, direct member, Caldova Super (Select) CS-1058220, balance $612,400; travelling in Italy since 18 Oct 2026 (travel notice on file); verified mobile before the change: 0491 570 157.",
+            "2 Nov 2026 10:42 — a caller impersonating Grace passed knowledge-based checks and changed the mobile to 0491 570 158 and the email to grace.w.super@mailbox.example.",
             "3 Nov 2026 21:14 — online access registered from a new device on a Sydney IP; MFA code sent to the new mobile.",
             "6 Nov 2026 07:52 (~93 hours after the change) — request to roll over the full balance to 'GW Family Superannuation Fund': SMSF ABN registered 28 Oct 2026; bank account name 'G Williams Holdings Pty Ltd'.",
             "ATO SMSF verification service: the ABN is a registered SMSF but Grace's TFN is NOT linked; bank details and ESA don't match. Licence image tampered (font/DOB mismatch, missing hologram).",
@@ -604,7 +604,7 @@ public class TeamLeaderGroupChatService
                 "going to the new number, then this request at 07:52 on 6 November — about 93 hours after the change — to move everything to a nine-day-old SMSF. " +
                 "The licence image has an altered date-of-birth font and no hologram, and the payee name doesn't match. These are AUSTRAC- and ATO-listed indicators — " +
                 "Grace is the likely victim, not a suspect.\n" +
-                "Recommendation: hold, lock online access, call back on the pre-change number 0403 118 220, refer to IDCARE, and consider an SMR within 3 business days — your call."),
+                "Recommendation: hold, lock online access, call back on the pre-change number 0491 570 157, refer to IDCARE, and consider an SMR within 3 business days — your call."),
             new("transfers-rollovers",
                 "Where does the SuperStream rollover stand?",
                 "On hold. The 3-business-day clock only runs once all required information has been received and verified, and a failed SMSF verification means it hasn't. " +
@@ -617,7 +617,7 @@ public class TeamLeaderGroupChatService
                 "Recommendation: keep the block in place."),
             new("client-communications",
                 "How do we reach the real Grace?",
-                "Only on her pre-change verified details — grace.williams@example.com and 0403 118 220 — never the new ones. I'll call at a time that suits her in Florence, " +
+                "Only on her pre-change verified details — grace.williams@example.com and 0491 570 157 — never the new ones. I'll call at a time that suits her in Florence, " +
                 "then send a calm reassurance letter: her money is safe, what we've done, free IDCARE support on 1800 595 160, and how to reach a person. " +
                 "No mention of any report to authorities. It needs your approval before it goes.\n" +
                 "Recommendation: call first, letter second — human-approved."),
@@ -626,7 +626,7 @@ public class TeamLeaderGroupChatService
             "1. Rollover blocked and cancelled; payment block until Grace re-verifies (Rory, Penny).\n" +
             "2. Lock online access, restore the pre-change contact details and reset her credentials (Felix).\n" +
             "3. SMR referral approved to the AML/CTF compliance officer — due within 3 business days, by Wed 11 Nov 2026 — and kept strictly confidential.\n" +
-            "4. Cara calls Grace on 0403 118 220, then sends the reassurance letter after my review, with the IDCARE referral.\n" +
+            "4. Cara calls Grace on 0491 570 157, then sends the reassurance letter after my review, with the IDCARE referral.\n" +
             "5. QA: review how a phone change of details passed knowledge-based checks — step-up verification to the existing number next time.\n" +
             "Outcome: request blocked 🛡️ — Grace's $612,400 is protected."),
 
