@@ -905,12 +905,14 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
     bubble.material = faceMat;
   };
 
-  // A small map-pin label that sits above a zone.
+  // A small map-pin label that sits above a zone. `signY` lifts the sign
+  // (and lengthens its pole) for labels that must clear a tall roof.
   const makeLabel = (
     x: number,
     z: number,
     text: string,
     color = "#1c2230",
+    signY = 5.6,
   ): void => {
     // Measure text first so the sign and texture are sized to fit the
     // label exactly — no fixed-width signs that look stretched on short
@@ -938,7 +940,7 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
       { width: signWidth, height: signHeight, depth: 0.18 },
       scene,
     );
-    sign.position = new Vector3(x, 5.6, z);
+    sign.position = new Vector3(x, signY, z);
     // Rotate around Y so the sign faces the camera, then tilt the top
     // forward a little so the face angles up toward the bird's-eye view.
     sign.rotation.y = -Math.PI / 6;
@@ -971,10 +973,10 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
     // Tiny pole under the sign
     const pole = MeshBuilder.CreateBox(
       `nh_label_pole_${x}_${z}`,
-      { width: 0.18, height: 5.0, depth: 0.18 },
+      { width: 0.18, height: signY - 0.6, depth: 0.18 },
       scene,
     );
-    pole.position = new Vector3(x, 2.5, z);
+    pole.position = new Vector3(x, (signY - 0.6) / 2, z);
     pole.material = mat("labelPole", "#7a7a7a");
     attach(pole);
   };
@@ -1488,7 +1490,7 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
   attach(path);
 
   // Office label
-  makeLabel(-10, 13, "Caldova Wealth — Client Operations", "#2a3a5c");
+  makeLabel(-10, 8, "Caldova Wealth — Client Operations", "#2a3a5c", 9.4);
 
   // ----- Captures: scenery referenced by the life-event animations -----
   // These are populated as each zone is built below, then handed to the
@@ -1733,7 +1735,7 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
     // Briefcase marker (💼)
     makeIncidentMarker(zx + 1.2, 3.4, zz + 4.8, "briefcase");
 
-    makeLabel(zx + 3, zz + 4, "Docklands — New Job (Priya)", "#3a8fd6");
+    makeLabel(zx + 4, zz + 8, "Docklands — New Job (Priya)", "#3a8fd6", 7.4);
   }
 
   // ----- Zone 3: Lygon St — Café Closed (Tom) -----
@@ -1868,18 +1870,20 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
     makeBox("nh_plane_tail", 0.6, 1.0, 0.2, new Vector3(zx + 0.8, 1.0, zz - 4), "#3a5fb0");
     makeBox("nh_plane_wing", 0.8, 0.15, 3.2, new Vector3(zx - 1, 0.7, zz - 4), "#dcdcdc");
 
-    // Baggage trolley stacked with suitcases, ready for departure
-    makeBox("nh_lug_trolley", 2.4, 0.3, 1.0, new Vector3(zx + 2, 0.25, zz - 1.5), "#7a7a7a");
-    makeBox("nh_lug_case1", 0.8, 0.5, 0.6, new Vector3(zx + 2.8, 0.65, zz - 1.5), "#b03a6f");
-    makeBox("nh_lug_case2", 0.8, 0.5, 0.6, new Vector3(zx + 2.0, 0.65, zz - 1.5), "#3a6dc4");
-    makeBox("nh_lug_case3", 0.8, 0.5, 0.6, new Vector3(zx + 1.2, 0.65, zz - 1.5), "#5a8a4a");
+    // Baggage trolley stacked with suitcases on the apron, ready for
+    // departure (kept clear of the terminal footprint, z ≥ zz - 2.5).
+    makeBox("nh_lug_trolley", 2.4, 0.3, 1.0, new Vector3(zx + 2.6, 0.25, zz - 3.8), "#7a7a7a");
+    makeBox("nh_lug_case1", 0.8, 0.5, 0.6, new Vector3(zx + 3.4, 0.65, zz - 3.8), "#b03a6f");
+    makeBox("nh_lug_case2", 0.8, 0.5, 0.6, new Vector3(zx + 2.6, 0.65, zz - 3.8), "#3a6dc4");
+    makeBox("nh_lug_case3", 0.8, 0.5, 0.6, new Vector3(zx + 1.8, 0.65, zz - 3.8), "#5a8a4a");
 
-    // Grace with her phone, about to fly out
-    makePerson(zx + 1, zz - 0.5, "customerProtection", { x: -10, z: 4 });
-    graceAlertAt = new Vector3(zx + 1, 0, zz - 0.5);
+    // Grace at the departures door with her phone, about to fly out
+    makePerson(zx + 2.6, zz - 3.0, "customerProtection", { x: -10, z: 4 });
+    // The alert pulses around the spot where she sets off for the office.
+    graceAlertAt = new Vector3(zx + 8, 0, zz - 4);
 
     // Shield marker (🛡️) — her account is being protected
-    makeIncidentMarker(zx + 2, 2.4, zz - 1.5, "shield");
+    makeIncidentMarker(zx + 2.6, 2.6, zz - 3.8, "shield");
 
     // Pushed south-east of the terminal so the label sits on open grass
     // between the airport and the main road, instead of running off the

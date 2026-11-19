@@ -1,113 +1,208 @@
-// Auto-extracted from the matching razor page.
+// Team Leader page — "Try it out" (floor dashboard) and "Group Chat" wiring.
 // Loaded as a permanent script from App.razor so init runs reliably on full
-// page load AND on Blazor enhanced navigation. Inline <script> tags inside
-// razor pages do NOT re-execute on enhanced nav, which left dropdowns stuck
-// on the SSR fallback (e.g. "— Loading claims —") until manual refresh.
+// page load AND on Blazor enhanced navigation (inline <script> tags inside
+// razor pages do not re-execute on enhanced nav).
     (function () {
+        function escapeHtml(s) {
+            return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+        }
+
+        function isDirect(adviserName) {
+            return !adviserName || /^\s*none/i.test(adviserName);
+        }
+
+        function caseOptionLabel(c) {
+            return `${escapeHtml(c.caseNumber)} — ${escapeHtml(c.clientName)} (${escapeHtml(c.requestType)})`;
+        }
+
+        // ── Try it out: floor dashboard ────────────────────────────────────
         function init() {
         const root = document.querySelector('.leader-panel');
         if (!root || root.dataset.wired === '1') return;
         root.dataset.wired = '1';
 
         const $ = sel => root.querySelector(sel);
-        const selectEl = $('#leader-claim-select');
+        const selectEl = $('#leader-case-select');
         const refreshBtn = $('#leader-refresh-btn');
         const emptyEl = $('#leader-empty');
-        const cardEl = $('#leader-claim-card');
+        const cardEl = $('#leader-case-card');
         const step2El = $('#leader-step-2');
         const processBtn = $('#leader-process-btn');
         const processStatus = $('#leader-process-status');
+        const resultsEl = $('#leader-results');
         const engageScope = $('.engage-tabs-scope');
 
-        let selectedClaim = null;
+        let selectedCase = null;
 
-        function escapeHtml(s) {
-            return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
-        }
-
-        function setSelectedClaim(claim) {
-            selectedClaim = claim;
-            if (!claim) {
+        function setSelectedCase(c) {
+            selectedCase = c;
+            resultsEl.hidden = true;
+            if (!c) {
                 cardEl.hidden = true;
-                if (step2El) step2El.hidden = true;
+                step2El.hidden = true;
                 processBtn.disabled = true;
                 return;
             }
-            $('#leader-claim-num').textContent = claim.claimNumber;
-            $('#leader-claim-customer').textContent = claim.customerName || '—';
-            $('#leader-claim-policy').textContent   = claim.policyNumber || '—';
-            $('#leader-claim-type').textContent     = claim.claimType || '—';
-            $('#leader-claim-date').textContent     = claim.incidentDate || '—';
-            $('#leader-claim-location').textContent = claim.incidentLocation || '—';
-            $('#leader-claim-desc').textContent     = claim.incidentDescription || '—';
-            $('#leader-claim-loss').textContent     = claim.estimatedLoss || '—';
-            $('#leader-claim-urgency').textContent  = claim.urgency || '—';
+            $('#leader-case-num').textContent = c.caseNumber;
+            $('#leader-case-client').textContent = c.clientName || '—';
+            $('#leader-case-member').textContent = c.memberNumber || '—';
+            $('#leader-case-type').textContent = c.requestType || '—';
+            $('#leader-case-received').textContent = c.receivedDate || '—';
+            $('#leader-case-adviser').textContent = isDirect(c.adviserName)
+                ? 'None — direct member'
+                : `${c.adviserName}${c.adviserPractice ? ' (' + c.adviserPractice + ')' : ''}`;
+            $('#leader-case-amount').textContent = c.amount || '—';
+            $('#leader-case-priority').textContent = `${c.priority || '—'}${c.priorityReason ? ' — ' + c.priorityReason : ''}`;
+            $('#leader-case-request').textContent = c.requestSummary || '—';
             cardEl.hidden = false;
-            // Reveal step 2 (engage agent) now that a claim is picked.
-            if (step2El) step2El.hidden = false;
+            // Reveal step 2 (engage agent) now that a case is picked.
+            step2El.hidden = false;
             processBtn.disabled = false;
         }
 
-        async function loadClaims() {
+        async function loadCases() {
             selectEl.innerHTML = '<option value="">— Loading… —</option>';
             emptyEl.hidden = true;
-            cardEl.hidden = true;
-            if (step2El) step2El.hidden = true;
-            processBtn.disabled = true;
+            setSelectedCase(null);
             processStatus.hidden = true;
 
             try {
-                const res = await fetch('/team-leader/claims');
+                const res = await fetch('/team-leader/cases');
                 if (!res.ok) throw new Error('HTTP ' + res.status);
-                const claims = await res.json();
-                if (!claims.length) {
-                    selectEl.innerHTML = '<option value="">— No claims available —</option>';
+                const cases = await res.json();
+                if (!cases.length) {
+                    selectEl.innerHTML = '<option value="">— No cases on the floor —</option>';
                     emptyEl.hidden = false;
                     return;
                 }
-                selectEl.innerHTML = '<option value="">— Select a claim —</option>' +
-                    claims.map(c =>
-                        `<option value="${escapeHtml(c.claimNumber)}">` +
-                        `${escapeHtml(c.claimNumber)} — ${escapeHtml(c.customerName)} (${escapeHtml(c.claimType)})` +
-                        `</option>`).join('');
+                selectEl.innerHTML = '<option value="">— Select a case —</option>' +
+                    cases.map(c => `<option value="${escapeHtml(c.caseNumber)}">${caseOptionLabel(c)}</option>`).join('');
             } catch (err) {
                 selectEl.innerHTML = '<option value="">— Failed to load —</option>';
                 processStatus.hidden = false;
                 processStatus.className = 'leader-status error';
-                processStatus.textContent = 'Failed to load claims: ' + err.message;
+                processStatus.textContent = 'Failed to load cases: ' + err.message;
             }
         }
 
-        async function selectClaim(claimNumber) {
+        async function selectCase(caseNumber) {
             processStatus.hidden = true;
-            if (!claimNumber) {
-                setSelectedClaim(null);
+            if (!caseNumber) {
+                setSelectedCase(null);
                 return;
             }
             try {
-                const res = await fetch(`/team-leader/claims/${encodeURIComponent(claimNumber)}`);
+                const res = await fetch(`/team-leader/cases/${encodeURIComponent(caseNumber)}`);
                 if (!res.ok) throw new Error('HTTP ' + res.status);
-                const claim = await res.json();
-                setSelectedClaim(claim);
+                setSelectedCase(await res.json());
             } catch (err) {
-                setSelectedClaim(null);
+                setSelectedCase(null);
                 processStatus.hidden = false;
                 processStatus.className = 'leader-status error';
-                processStatus.textContent = 'Failed to load claim: ' + err.message;
+                processStatus.textContent = 'Failed to load case: ' + err.message;
             }
         }
 
-        async function processClaim() {
-            if (!selectedClaim) return;
+        const stateLabels = { due: 'Due', running: 'Running', paused: 'Paused', watch: 'Watch', ok: 'Done' };
+
+        function focusClass(caseNumber, focusNumber) {
+            return caseNumber === focusNumber ? 'is-focus' : '';
+        }
+
+        function caseCell(caseNumber, clientName) {
+            return `<td class="tl-case">${escapeHtml(caseNumber)}<small>${escapeHtml(clientName)}</small></td>`;
+        }
+
+        function renderFocus(f) {
+            const facts = (f.keyFacts || []).map(k => `<li>${escapeHtml(k)}</li>`).join('');
+            $('#leader-focus').innerHTML =
+                `<div class="tl-focus-head">` +
+                    `<span class="tl-focus-label">Theo's focus</span>` +
+                    `<span class="tl-focus-title">${escapeHtml(f.caseNumber)} · ${escapeHtml(f.clientName)} · ${escapeHtml(f.requestType)}</span>` +
+                    `<span class="tl-badge watch">${escapeHtml(f.stage)}</span>` +
+                `</div>` +
+                `<div class="tl-focus-grid">` +
+                    `<div><span class="k">Owner</span>${escapeHtml(f.owner)}</div>` +
+                    `<div><span class="k">Decision for Theo</span>${escapeHtml(f.decision)}</div>` +
+                    `<div class="span-2"><span class="k">Where it stands</span>${escapeHtml(f.summary)}</div>` +
+                    `<div class="span-2"><span class="k">Recommendation</span>${escapeHtml(f.recommendation)}</div>` +
+                    (facts ? `<div class="span-2"><span class="k">Key facts on file</span><ul class="tl-facts">${facts}</ul></div>` : '') +
+                `</div>`;
+        }
+
+        function renderFloor(data) {
+            const floor = data.floor || {};
+            const focusNumber = data.caseNumber;
+
+            $('#leader-asat').textContent = floor.asAt || '';
+            renderFocus(data.focus || {});
+
+            $('#leader-stage-tiles').innerHTML = (floor.stageCounts || []).map(s =>
+                `<div class="tl-tile${s.count > 0 && s.stage === 'Awaiting approval' ? ' hot' : ''}">` +
+                    `<span class="tl-tile-count">${escapeHtml(s.count)}</span>` +
+                    `<span class="tl-tile-stage">${escapeHtml(s.stage)}</span>` +
+                    `<span class="tl-tile-hint">${escapeHtml(s.hint)}</span>` +
+                `</div>`).join('');
+
+            const clocks = floor.clocks || [];
+            $('#leader-clocks-body').innerHTML = clocks.length
+                ? clocks.map(c =>
+                    `<tr class="${focusClass(c.caseNumber, focusNumber)}">` +
+                        `<td><span class="tl-badge ${escapeHtml(c.state)}">${escapeHtml(stateLabels[c.state] || c.state)}</span>${escapeHtml(c.clock)}</td>` +
+                        caseCell(c.caseNumber, c.clientName) +
+                        `<td>${escapeHtml(c.rule)}</td>` +
+                        `<td>${escapeHtml(c.status)}</td>` +
+                    `</tr>`).join('')
+                : '<tr><td colspan="4">No clocks running.</td></tr>';
+
+            const escalations = floor.escalations || [];
+            $('#leader-escalations').innerHTML = escalations.length
+                ? escalations.map(e =>
+                    `<li class="${focusClass(e.caseNumber, focusNumber)}">` +
+                        `<span class="tl-badge ${escapeHtml(String(e.severity || '').toLowerCase())}">${escapeHtml(e.severity)}</span>` +
+                        `<strong>${escapeHtml(e.clientName)}</strong> · ${escapeHtml(e.caseNumber)} — ${escapeHtml(e.reason)}` +
+                        `<span class="tl-esc-meta">Owner: ${escapeHtml(e.owner)} · ${escapeHtml(e.clock)}</span>` +
+                    `</li>`).join('')
+                : '<li>No escalations on the floor.</li>';
+
+            const approvals = floor.approvals || [];
+            $('#leader-approvals-body').innerHTML = approvals.length
+                ? approvals.map(a =>
+                    `<tr class="${focusClass(a.caseNumber, focusNumber)}">` +
+                        `<td><strong>${escapeHtml(a.priority)}</strong></td>` +
+                        caseCell(a.caseNumber, a.clientName) +
+                        `<td>${escapeHtml(a.item)}</td>` +
+                        `<td>${escapeHtml(a.authority)}</td>` +
+                        `<td>${escapeHtml(a.recommendation)}</td>` +
+                        `<td>${escapeHtml(a.due)}</td>` +
+                    `</tr>`).join('')
+                : '<tr><td colspan="6">Nothing waiting for approval.</td></tr>';
+
+            const vulnerable = floor.vulnerable || [];
+            $('#leader-vulnerable').innerHTML = vulnerable.length
+                ? vulnerable.map(v =>
+                    `<li class="${focusClass(v.caseNumber, focusNumber)}">` +
+                        `<strong>${escapeHtml(v.clientName)}</strong> · ${escapeHtml(v.caseNumber)} — ${escapeHtml(v.flag)}` +
+                        `<span class="tl-meta">${escapeHtml(v.handling)}</span>` +
+                    `</li>`).join('')
+                : '<li>No vulnerable members flagged.</li>';
+
+            $('#leader-coaching').innerHTML = (floor.coaching || []).map(c => `<li>${escapeHtml(c)}</li>`).join('');
+            $('#leader-priorities').innerHTML = (floor.priorities || []).map(p => `<li>${escapeHtml(p)}</li>`).join('');
+        }
+
+        async function processCase() {
+            if (!selectedCase) return;
             processBtn.disabled = true;
             processStatus.hidden = false;
             processStatus.className = 'leader-status';
-            processStatus.innerHTML = '<span class="spinner"></span>Engaging Team Leader Agent…';
+            processStatus.innerHTML = '<span class="spinner"></span>Theo\'s agent is reviewing the floor…';
+            resultsEl.hidden = true;
 
             try {
                 const data = await window.zcAgentStream({
                     url: '/team-leader/process',
-                    body: { claimNumber: selectedClaim.claimNumber },
+                    body: { caseNumber: selectedCase.caseNumber },
                     onDelta: (_chunk, fullText) => {
                         if (window.engageTabsStreamNarrative) {
                             window.engageTabsStreamNarrative(engageScope, fullText);
@@ -118,21 +213,22 @@
                         processStatus.textContent = 'Agent error: ' + msg;
                     }
                 });
-                if (!data) throw new Error('No response from agent');
+                if (!data) throw new Error('No response from the agent');
 
-                if (data.agentNotes) {
-                    processStatus.textContent = 'Team Leader Agent produced a report.';
-                } else if (!data.agentConfigured) {
+                processStatus.className = 'leader-status';
+                if (data.agentConfigured && data.agentNotes) {
+                    processStatus.textContent = 'Team Leader Agent reviewed the floor — the live briefing is in the Agent Narrative tab; the dashboard below is built from the case data.';
+                } else if (data.agentConfigured) {
                     processStatus.className = 'leader-status error';
-                    processStatus.textContent =
-                        'Team Leader Foundry agent is not configured. ' +
-                        'Set AZURE_AI_PROJECT_ENDPOINT and AZURE_AI_MODEL_DEPLOYMENT_NAME to enable it.';
+                    processStatus.textContent = 'Live agent unavailable' + (data.agentError ? ' (' + data.agentError + ')' : '') +
+                        ' — showing the floor dashboard built from the case data.';
                 } else {
-                    processStatus.className = 'leader-status error';
-                    processStatus.textContent = data.agentError
-                        ? 'Team Leader Agent failed: ' + data.agentError
-                        : 'Team Leader Agent returned no narrative.';
+                    processStatus.textContent = 'Floor dashboard built from the case data (Foundry agent not configured — no live narrative).';
                 }
+
+                renderFloor(data);
+                resultsEl.hidden = false;
+                resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
                 // Surface input + raw output in the Engage Agent sub-tabs.
                 if (window.engageTabsRender) {
@@ -140,17 +236,17 @@
                 }
             } catch (err) {
                 processStatus.className = 'leader-status error';
-                processStatus.textContent = 'Failed to process: ' + err.message;
+                processStatus.textContent = 'Failed to review the floor: ' + err.message;
             } finally {
-                processBtn.disabled = !selectedClaim;
+                processBtn.disabled = !selectedCase;
             }
         }
 
-        selectEl.addEventListener('change', () => selectClaim(selectEl.value));
-        refreshBtn.addEventListener('click', loadClaims);
-        processBtn.addEventListener('click', processClaim);
+        selectEl.addEventListener('change', () => selectCase(selectEl.value));
+        refreshBtn.addEventListener('click', loadCases);
+        processBtn.addEventListener('click', processCase);
 
-        loadClaims();
+        loadCases();
         }
 
         // ── Group Chat panel wiring ────────────────────────────────────
@@ -160,85 +256,76 @@
             root.dataset.wired = '1';
 
             const $ = sel => root.querySelector(sel);
-            const selectEl   = $('#gc-claim-select');
+            const selectEl   = $('#gc-case-select');
             const refreshBtn = $('#gc-refresh-btn');
             const emptyEl    = $('#gc-empty');
-            const cardEl     = $('#gc-claim-card');
+            const cardEl     = $('#gc-case-card');
             const step2El    = $('#gc-step-2');
             const startBtn   = $('#gc-start-btn');
             const statusEl   = $('#gc-status');
             const rosterEl   = $('#gc-roster');
             const transcript = $('#gc-transcript');
             const transcriptStep = $('#gc-transcript-step');
+            const modeEl     = $('#gc-mode');
 
-            let selectedClaim = null;
+            let selectedCase = null;
             let activeStream = null;
 
-            function escapeHtml(s) {
-                return String(s ?? '').replace(/[&<>"']/g, c =>
-                    ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
-            }
-
-            function setSelectedClaim(claim) {
-                selectedClaim = claim;
-                if (!claim) {
+            function setSelectedCase(c) {
+                selectedCase = c;
+                if (!c) {
                     cardEl.hidden = true;
-                    if (step2El) step2El.hidden = true;
+                    step2El.hidden = true;
                     startBtn.disabled = true;
                     return;
                 }
-                $('#gc-claim-num').textContent = claim.claimNumber;
-                $('#gc-claim-customer').textContent = claim.customerName || '—';
-                $('#gc-claim-policy').textContent   = claim.policyNumber || '—';
-                $('#gc-claim-type').textContent     = claim.claimType || '—';
-                $('#gc-claim-date').textContent     = claim.incidentDate || '—';
-                $('#gc-claim-desc').textContent     = claim.incidentDescription || '—';
+                $('#gc-case-num').textContent = c.caseNumber;
+                $('#gc-case-client').textContent = c.clientName || '—';
+                $('#gc-case-type').textContent = c.requestType || '—';
+                $('#gc-case-received').textContent = c.receivedDate || '—';
+                $('#gc-case-priority').textContent = `${c.priority || '—'}${c.priorityReason ? ' — ' + c.priorityReason : ''}`;
+                $('#gc-case-request').textContent = c.requestSummary || '—';
                 cardEl.hidden = false;
-                // Reveal step 2 (start group chat) now that a claim is picked.
-                if (step2El) step2El.hidden = false;
-                startBtn.disabled = false;
+                // Reveal step 2 (start group chat) now that a case is picked.
+                step2El.hidden = false;
+                startBtn.disabled = !!activeStream;
             }
 
-            async function loadClaims() {
+            async function loadCases() {
                 selectEl.innerHTML = '<option value="">— Loading… —</option>';
                 emptyEl.hidden = true;
-                cardEl.hidden = true;
-                if (step2El) step2El.hidden = true;
-                startBtn.disabled = true;
+                setSelectedCase(null);
                 statusEl.hidden = true;
                 try {
-                    const res = await fetch('/team-leader/claims');
+                    const res = await fetch('/team-leader/cases');
                     if (!res.ok) throw new Error('HTTP ' + res.status);
-                    const claims = await res.json();
-                    if (!claims.length) {
-                        selectEl.innerHTML = '<option value="">— No claims available —</option>';
+                    const cases = await res.json();
+                    if (!cases.length) {
+                        selectEl.innerHTML = '<option value="">— No cases on the floor —</option>';
                         emptyEl.hidden = false;
                         return;
                     }
-                    selectEl.innerHTML = '<option value="">— Select a claim —</option>' +
-                        claims.map(c =>
-                            `<option value="${escapeHtml(c.claimNumber)}">` +
-                            `${escapeHtml(c.claimNumber)} — ${escapeHtml(c.customerName)} (${escapeHtml(c.claimType)})` +
-                            `</option>`).join('');
+                    selectEl.innerHTML = '<option value="">— Select a case —</option>' +
+                        cases.map(c => `<option value="${escapeHtml(c.caseNumber)}">${caseOptionLabel(c)}</option>`).join('');
                 } catch (err) {
                     selectEl.innerHTML = '<option value="">— Failed to load —</option>';
                     statusEl.hidden = false;
                     statusEl.className = 'leader-status error';
-                    statusEl.textContent = 'Failed to load claims: ' + err.message;
+                    statusEl.textContent = 'Failed to load cases: ' + err.message;
                 }
             }
 
-            async function selectClaim(claimNumber) {
-                if (!claimNumber) { setSelectedClaim(null); return; }
+            async function selectCase(caseNumber) {
+                if (!caseNumber) { setSelectedCase(null); return; }
                 try {
-                    const res = await fetch(`/team-leader/claims/${encodeURIComponent(claimNumber)}`);
+                    const res = await fetch(`/team-leader/cases/${encodeURIComponent(caseNumber)}`);
                     if (!res.ok) throw new Error('HTTP ' + res.status);
-                    setSelectedClaim(await res.json());
+                    setSelectedCase(await res.json());
                 } catch (err) {
-                    setSelectedClaim(null);
+                    setSelectedCase(null);
                     statusEl.hidden = false;
                     statusEl.className = 'leader-status error';
-                    statusEl.textContent = 'Failed to load claim: ' + err.message;
+                    statusEl.textContent = 'Failed to load case: ' + err.message;
                 }
             }
 
@@ -248,13 +335,13 @@
                     if (!res.ok) throw new Error('HTTP ' + res.status);
                     const parts = await res.json();
                     rosterEl.innerHTML =
-                        `<span class="gc-chip leader">Theo — Claims Team Leader (chair)</span>` +
+                        `<span class="gc-chip leader">Theo — Client Operations Team Leader (chair)</span>` +
                         parts.map(p =>
                             `<span class="gc-chip">${escapeHtml(p.persona)} — ${escapeHtml(p.role)}</span>`
                         ).join('');
                 } catch (err) {
                     rosterEl.innerHTML =
-                        `<span class="gc-chip">Failed to load roster: ${escapeHtml(err.message)}</span>`;
+                        `<span class="gc-chip">Failed to load the roster: ${escapeHtml(err.message)}</span>`;
                 }
             }
 
@@ -268,7 +355,7 @@
 
                 const kindLabel = ({
                     info: 'orchestration', ask: 'asks', reply: 'replies',
-                    conclude: 'concludes', error: 'error'
+                    conclude: 'concludes with a plan', error: 'error'
                 })[turn.kind] || turn.kind;
 
                 const div = document.createElement('div');
@@ -286,25 +373,29 @@
             }
 
             async function startGroupChat() {
-                if (!selectedClaim) return;
+                if (!selectedCase) return;
                 if (activeStream) { try { activeStream.close(); } catch { /* ignore — closing an already-closed stream */ } activeStream = null; }
 
                 startBtn.disabled = true;
                 statusEl.hidden = false;
                 statusEl.className = 'leader-status';
-                statusEl.innerHTML = '<span class="spinner"></span>Opening group chat…';
+                statusEl.innerHTML = '<span class="spinner"></span>Opening the group chat…';
                 transcript.innerHTML = '';
+                modeEl.textContent = '';
                 transcriptStep.hidden = false;
 
                 try {
                     const res = await fetch('/team-leader/groupchat/start', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ claimNumber: selectedClaim.claimNumber })
+                        body: JSON.stringify({ caseNumber: selectedCase.caseNumber })
                     });
                     const data = await res.json();
                     if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
 
+                    modeEl.textContent = data.mode === 'live'
+                        ? 'Live Foundry agents'
+                        : 'Scripted replay — Foundry not configured';
                     statusEl.innerHTML = '<span class="spinner"></span>Theo is chairing the discussion…';
                     transcriptStep.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
@@ -317,8 +408,8 @@
                             sse.close();
                             activeStream = null;
                             statusEl.className = 'leader-status';
-                            statusEl.textContent = 'Group chat complete.';
-                            startBtn.disabled = !selectedClaim;
+                            statusEl.textContent = 'Group chat complete — Theo\'s plan is at the end of the transcript.';
+                            startBtn.disabled = !selectedCase;
                             return;
                         }
                         appendTurn(turn);
@@ -329,20 +420,20 @@
                         if (!startBtn.disabled) return;
                         statusEl.className = 'leader-status error';
                         statusEl.textContent = 'Stream interrupted.';
-                        startBtn.disabled = !selectedClaim;
+                        startBtn.disabled = !selectedCase;
                     };
                 } catch (err) {
                     statusEl.className = 'leader-status error';
-                    statusEl.textContent = 'Failed to start group chat: ' + err.message;
-                    startBtn.disabled = !selectedClaim;
+                    statusEl.textContent = 'Failed to start the group chat: ' + err.message;
+                    startBtn.disabled = !selectedCase;
                 }
             }
 
-            selectEl.addEventListener('change', () => selectClaim(selectEl.value));
-            refreshBtn.addEventListener('click', loadClaims);
+            selectEl.addEventListener('change', () => selectCase(selectEl.value));
+            refreshBtn.addEventListener('click', loadCases);
             startBtn.addEventListener('click', startGroupChat);
 
-            loadClaims();
+            loadCases();
             loadRoster();
         }
 

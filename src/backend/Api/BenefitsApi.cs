@@ -169,8 +169,9 @@ public static class BenefitsApi
 
             if (AgentSseStreaming.WantsEventStream(httpContext))
             {
-                var streamingAgent = factory.IsConfigured ? factory.Create("benefits") : null;
-                await AgentSseStreaming.StreamAsync(httpContext, streamingAgent, prompt, BuildEnvelope, logger, "Benefits & Eligibility Agent");
+                var (streamingAgent, createError) = TryCreateAgent(factory, logger);
+                await AgentSseStreaming.StreamAsync(httpContext, streamingAgent, prompt,
+                    (trace, error) => BuildEnvelope(trace, error ?? createError), logger, "Benefits & Eligibility Agent");
                 return Results.Empty;
             }
 
@@ -196,6 +197,25 @@ public static class BenefitsApi
 
     private static string Sanitize(string value) =>
         value.Replace('\r', ' ').Replace('\n', ' ');
+
+    /// <summary>
+    /// Create the live agent when Foundry is configured. A creation failure
+    /// is logged and returned as an error so the stream still completes with
+    /// the deterministic report.
+    /// </summary>
+    private static (CaldovaAgent? Agent, string? Error) TryCreateAgent(CaldovaAgentFactory factory, ILogger logger)
+    {
+        if (!factory.IsConfigured) return (null, null);
+        try
+        {
+            return (factory.Create("benefits"), null);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Benefits & Eligibility Agent could not be created; returning the deterministic eligibility report");
+            return (null, ex.Message);
+        }
+    }
 
     private static string StatusText(ChecklistStatus status) => status.ToString().ToLowerInvariant();
 

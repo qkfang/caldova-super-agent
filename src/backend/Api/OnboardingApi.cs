@@ -169,8 +169,9 @@ public static class OnboardingApi
 
             if (AgentSseStreaming.WantsEventStream(httpContext))
             {
-                var streamingAgent = factory.IsConfigured ? factory.Create("onboarding") : null;
-                await AgentSseStreaming.StreamAsync(httpContext, streamingAgent, prompt, BuildEnvelope, logger, "Onboarding Agent");
+                var (streamingAgent, createError) = TryCreateAgent(factory, logger);
+                await AgentSseStreaming.StreamAsync(httpContext, streamingAgent, prompt,
+                    (trace, error) => BuildEnvelope(trace, error ?? createError), logger, "Onboarding Agent");
                 return Results.Empty;
             }
 
@@ -235,7 +236,7 @@ public static class OnboardingApi
             var record = store.Add(sample.Id, fields, priority, priorityReason);
 
             var nigo = (request.Nigo is { Count: > 0 }
-                    ? request.Nigo.Select(n => new NigoCheck(
+                    ? request.Nigo.Take(MaxNigoItems).Select(n => new NigoCheck(
                         Clean(n.Id), Clean(n.Label), NormaliseNigoStatus(n.Status), Clean(n.Note)))
                     : sample.ExpectedNigo)
                 .ToList();
@@ -278,7 +279,33 @@ public static class OnboardingApi
     private static string Sanitize(string value) =>
         value.Replace('\r', ' ').Replace('\n', ' ');
 
-    private static string Clean(string? value) => (value ?? string.Empty).Trim();
+    /// <summary>
+    /// Create the live agent when Foundry is configured. A creation failure
+    /// is logged and returned as an error so the stream still completes with
+    /// the deterministic extraction.
+    /// </summary>
+    private static (CaldovaAgent? Agent, string? Error) TryCreateAgent(CaldovaAgentFactory factory, ILogger logger)
+    {
+        if (!factory.IsConfigured) return (null, null);
+        try
+        {
+            return (factory.Create("onboarding"), null);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Onboarding Agent could not be created; falling back to deterministic demo data");
+            return (null, ex.Message);
+        }
+    }
+
+    private const int MaxFieldLength = 2000;
+    private const int MaxNigoItems = 30;
+
+    private static string Clean(string? value)
+    {
+        var trimmed = (value ?? string.Empty).Trim();
+        return trimmed.Length <= MaxFieldLength ? trimmed : trimmed[..MaxFieldLength];
+    }
 
     private static string? NormalisePriority(string? value) =>
         Priorities.FirstOrDefault(p => string.Equals(p, value?.Trim(), StringComparison.OrdinalIgnoreCase));

@@ -4,6 +4,9 @@ param baseName string = 'zc'
 @description('Azure region for all resources')
 param location string = 'eastus2'
 
+@description('Azure region for the App Service plan and web apps (can differ from location when regional App Service quota is exhausted)')
+param appServiceLocation string = location
+
 @description('Principal object IDs to grant access to deployed resources')
 param principals array = []
 
@@ -98,7 +101,7 @@ module appService 'appservice.bicep' = {
     appServicePlanName: appServicePlanName
     frontendAppName: frontendAppName
     backendAppName: backendAppName
-    location: location
+    location: appServiceLocation
     tags: commonTags
     appInsightsConnectionString: monitoring.outputs.appInsightsConnectionString
     appInsightsInstrumentationKey: monitoring.outputs.appInsightsInstrumentationKey

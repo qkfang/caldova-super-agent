@@ -37,9 +37,9 @@
         const requestTypeSelect = $('#intake-request-type');
         const nigoList = $('#intake-nigo-list');
         const nigoSummary = $('#intake-nigo-summary');
-        const priorityEl = $('#intake-urgency');
+        const priorityEl = $('#intake-priority');
         const prioritySelect = $('#intake-priority-select');
-        const priorityPill = $('#intake-urgency-pill');
+        const priorityPill = $('#intake-priority-pill');
         const priorityReason = $('#intake-priority-reason');
         const routingPreview = $('#intake-routing-preview');
         const routingPreviewList = $('#intake-routing-preview-list');
@@ -186,7 +186,7 @@
         function updatePriorityPill() {
             const level = prioritySelect.value || 'Standard';
             priorityPill.textContent = level;
-            priorityPill.className = 'intake-urgency-pill ' + level.toLowerCase();
+            priorityPill.className = 'intake-priority-pill ' + level.toLowerCase();
         }
 
         function renderRoutingPreview(routing) {

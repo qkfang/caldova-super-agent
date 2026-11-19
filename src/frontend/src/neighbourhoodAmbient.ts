@@ -1731,8 +1731,8 @@ export function makeHardshipCloudIncident(
   groundCenter: Vector3,
 ): IncidentAnimation {
   const cloudMat = new StandardMaterial("nh_hardship_cloud_mat", scene);
-  cloudMat.diffuseColor = Color3.FromHexString("#9aa0a8");
-  cloudMat.emissiveColor = Color3.FromHexString("#5a6068");
+  cloudMat.diffuseColor = Color3.FromHexString("#80868f");
+  cloudMat.emissiveColor = Color3.FromHexString("#40454d");
   cloudMat.specularColor = new Color3(0, 0, 0);
   cloudMat.alpha = 0;
   const puffs: Array<{ mesh: Mesh; base: Vector3 }> = [];

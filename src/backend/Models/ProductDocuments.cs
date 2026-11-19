@@ -173,10 +173,16 @@ public static class ProductDocumentCatalog
     /// Returns the eligibility report for <paramref name="c"/>, keyed off its
     /// <see cref="CaseRecord.SampleId"/>. Falls back to a generic "need more
     /// info" report (with rule documents chosen by request type) for any case
-    /// that isn't one of the five worked scenarios.
+    /// that isn't one of the five worked scenarios — including a scenario
+    /// case whose request type was changed on the Onboarding form.
     /// </summary>
-    public static EligibilityReport BuildReport(CaseRecord c) =>
-        (c.SampleId ?? string.Empty).ToLowerInvariant() switch
+    public static EligibilityReport BuildReport(CaseRecord c)
+    {
+        var sample = RequestSampleCatalog.FindById(c.SampleId ?? string.Empty);
+        if (sample is null || !string.Equals(sample.RequestType, c.RequestType, StringComparison.OrdinalIgnoreCase))
+            return GenericReport(c);
+
+        return sample.Id switch
         {
             "onboarding-priya" => PriyaReport(c),
             "rollover-grace" => GraceReport(c),
@@ -185,6 +191,7 @@ public static class ProductDocumentCatalog
             "death-benefit-robert" => RobertReport(c),
             _ => GenericReport(c),
         };
+    }
 
     private static EligibilityChecklistItem Item(string id, string label, ChecklistStatus status, string finding, string clauseRef) =>
         new(id, label, status, finding, clauseRef);
@@ -211,7 +218,7 @@ public static class ProductDocumentCatalog
                     "driver licence checked through the Document Verification Service, DVS) by us or your " +
                     "adviser, or with certified copies. We also screen new members against politically " +
                     "exposed person (PEP) and sanctions lists.",
-                    "AML/CTF Act 2006 — customer identification"),
+                    "AML/CTF Act 2006 — identity verification (KYC)"),
                 new RuleSection("PDS-2", "Your tax file number (TFN)",
                     "Please give us your TFN. You don't have to, but without it we can't accept personal " +
                     "contributions, extra tax applies to employer contributions and it is harder to find " +
@@ -271,7 +278,7 @@ public static class ProductDocumentCatalog
                     "The trustee may only deduct a fee for financial product advice from a member's account " +
                     "if the advice is personal advice to that member, the member has given a written request " +
                     "or consent, and the trustee holds it. Caldova accepts a consent signed and dated by the " +
-                    "member that states the adviser, the fee amount, the services and the period covered, and " +
+                    "member that states the adviser, the fee amount, the services and the period it applies to, and " +
                     "says the consent can be withdrawn at any time. The best-interests duty and the sole " +
                     "purpose test still apply.",
                     "SIS Act s99FA"),
@@ -549,7 +556,7 @@ public static class ProductDocumentCatalog
                 new RuleSection("PDS-7", "Signatures and identity",
                     "Withdrawal and rollover requests must be signed by you, and the signature must match our " +
                     "records. We may ask for certified identification and check documents for alteration before we act.",
-                    "AML/CTF Act 2006 — ongoing customer due diligence"),
+                    "AML/CTF Act 2006 — ongoing due diligence"),
                 new RuleSection("PDS-8", "Paying to the right account",
                     "We only pay withdrawals to an account in your own name, and rollovers to the receiving " +
                     "fund's verified account.",

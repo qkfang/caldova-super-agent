@@ -1,22 +1,22 @@
-@page "/agents/fraud-investigation"
+@page "/agents/financial-crime"
 
-<PageTitle>Fraud Investigation Agent — Claims Team in a Day</PageTitle>
+<PageTitle>Financial Crime Agent — Wealth Team in a Day</PageTitle>
 
 <div class="agent-header" style="--accent: #ef4444">
-    <a class="back-link" href="/"><span aria-hidden="true">←</span> Back to claims office</a>
+    <a class="back-link" href="/"><span aria-hidden="true">←</span> Back to the operations office</a>
     <div class="agent-header-row">
         <div class="agent-header-icon">🛡️</div>
         <div>
-            <div class="agent-header-dept">Fraud Investigation</div>
-            <h1>Fraud Investigation Agent</h1>
-            <div class="agent-header-persona">Felix — Fraud Investigator</div>
-            <p class="tagline">Quietly checks every claim for inconsistencies — fairly and explainably.</p>
+            <div class="agent-header-dept">Financial Crime</div>
+            <h1>Financial Crime Agent</h1>
+            <div class="agent-header-persona">Felix — Financial Crime Investigator</div>
+            <p class="tagline">Protects members from fraud, scams and identity takeover.</p>
         </div>
     </div>
 </div>
 
 <div class="agent-tab-scope" style="--accent: #ef4444">
-    <nav class="agent-tabs" role="tablist" aria-label="Fraud Investigation agent details">
+    <nav class="agent-tabs" role="tablist" aria-label="Financial Crime agent details">
         <button type="button" class="agent-tab active" data-tab="overview" role="tab" aria-selected="true" tabindex="0">Overview</button>
         <button type="button" class="agent-tab" data-tab="try" role="tab" aria-selected="false" tabindex="-1">Try it out</button>
     </nav>
@@ -25,53 +25,97 @@
     <section class="panel" style="--accent: #ef4444">
         <h2>What this agent does</h2>
         <p>
-            Scores the claim for fraud risk, explains every flag in plain English, and
-            recommends investigation steps for a human investigator.
+            Felix's agent protects members' super and investments from fraud, scams and identity
+            takeover, and supports Caldova's AML/CTF obligations. It checks documents for tampering,
+            builds the account-activity timeline, tests rollovers to self-managed super funds against
+            the ATO's verification results, screens new clients and claimants, and explains every risk
+            indicator in plain English — so a human investigator can decide quickly and fairly.
         </p>
         <div class="two-col">
             <div>
                 <h3>Responsibilities</h3>
                 <ul>
-                    <li>Build a timeline from emails, form data, and documents.</li>
-                    <li>Compare the claim against prior claim history.</li>
-                    <li>Run duplicate-receipt and document-tamper checks.</li>
-                    <li>Produce an explainable risk score with cited indicators.</li>
-                    <li>Recommend next investigation steps — never accuse the customer.</li>
+                    <li>Check identity documents, bank statements, SMSF details, death certificates and hardship letters for authenticity.</li>
+                    <li>Build the account-activity timeline — contact-detail changes, new devices, MFA events, money-out requests and travel notices.</li>
+                    <li>Test rollovers to SMSFs against the ATO SMSF verification service (SVS) and known red flags.</li>
+                    <li>Screen new clients and claimants (KYC, politically exposed persons and sanctions).</li>
+                    <li>Produce an explainable risk score with the evidence behind every indicator.</li>
+                    <li>Recommend proportionate controls — holds, account locks, call-backs on trusted numbers, IDCARE referral and SMR consideration.</li>
                 </ul>
             </div>
             <div>
                 <h3>Tools available</h3>
                 <ul>
-                    <li>Timeline builder</li>
-                    <li>Document comparison</li>
-                    <li>Duplicate receipt checker</li>
-                    <li>Prior claims search</li>
-                    <li>Risk scoring model</li>
+                    <li>Azure Content Understanding — document authenticity (custom field schema + checks layer)</li>
+                    <li>Account-activity timeline</li>
+                    <li>ATO SMSF verification service (SVS) result reader</li>
+                    <li>PEP and sanctions screening</li>
+                    <li>AUSTRAC / ATO red-flag guide via Azure AI Search (<code>wealth_knowledge</code>)</li>
+                    <li>Explainable risk scoring</li>
                 </ul>
                 <h3>Human approval</h3>
                 <p class="approval">
-                    Always required before fraud referral, claim delay due to investigation,
-                    customer interview, or fraud-based decline.
+                    Always required before blocking or holding a request on financial-crime grounds,
+                    locking an account or online access, lodging a suspicious matter report (SMR) with
+                    AUSTRAC, or contacting a member about suspected fraud.
                 </p>
             </div>
         </div>
     </section>
 
     <section class="panel" style="--accent: #ef4444">
-        <h2>How this agent helps with the claim</h2>
+        <h2>How Felix's agent works</h2>
+        <div class="two-col">
+            <div>
+                <h3>Guardrails</h3>
+                <ul>
+                    <li><strong>Never accuses.</strong> Neutral, evidence-based language — "indicator", "inconsistency", "needs verification". In an identity takeover the member is the victim.</li>
+                    <li><strong>No tipping off.</strong> SMRs, and the suspicion behind them, stay confidential.</li>
+                    <li><strong>Trusted contacts only.</strong> Call-backs use the details on file before any change — never details supplied with the request.</li>
+                    <li><strong>Privacy first.</strong> TFNs and bank account numbers stay masked (for example <code>*** *** 418</code>, <code>****7781</code>).</li>
+                    <li><strong>Proportionate.</strong> Most requests are low risk and continue without extra friction — bereaved families and members in hardship aren't asked for more than is needed.</li>
+                </ul>
+            </div>
+            <div>
+                <h3>Red flags it looks for</h3>
+                <ul>
+                    <li>Contact or payment details changed shortly before a withdrawal or rollover.</li>
+                    <li>A new SMSF set up to receive someone's benefits.</li>
+                    <li>Altered or fake identity and hardship documents.</li>
+                    <li>A hardship request followed by a rollover to an SMSF.</li>
+                    <li>Illegal early-release promoters and pushy "free super health check" switching offers.</li>
+                    <li>Elder financial abuse — impersonation, or pressure to roll over to an SMSF someone else controls.</li>
+                </ul>
+                <h3>Controls it recommends</h3>
+                <ul>
+                    <li>Call back on the verified number on file.</li>
+                    <li>Hold money-out requests after a recent change of details.</li>
+                    <li>Dual approval for new payees; pay only to nominated or linked accounts.</li>
+                    <li>SVS and ESA checks before any rollover to an SMSF.</li>
+                    <li>Step-up (SMS code) verification for payments and changes.</li>
+                    <li>An SMR to AUSTRAC within 3 business days of forming a suspicion — a human decision.</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="panel" style="--accent: #ef4444">
+        <h2>How this agent helps with a case</h2>
         <div class="demo">
             <p>
-                Every new claim is quietly checked by Felix's fraud agent in the background. It
-                builds a timeline from the email, form, and document timestamps, looks for
-                duplicate receipts across the network, and compares the claim against the
-                customer's prior history.
+                When a request arrives to roll Grace Williams's whole balance — $612,400 — into a
+                nine-day-old SMSF, Felix's agent lines up the evidence in seconds: her mobile and email
+                were changed by phone about 93 hours earlier, a new device logged in from Sydney while
+                her travel notice says Italy, the one-time code went to the new number, the ATO's SMSF
+                verification fails, the payee account is in a company's name and the licence image has
+                been altered. It scores the risk at 92/100 and recommends holding the rollover, locking
+                online access and calling Grace on the number Caldova already trusted.
             </p>
             <p>
-                The output is an explainable risk score with the indicators that drove it. Most
-                claims come back green and continue along the standard path with no customer
-                friction. Anything elevated is handed to a human fraud investigator with the
-                evidence laid out — the agent never makes the call to delay or refer a claim
-                on its own.
+                Felix and the Team Leader make the call, and Grace's money never leaves her account. Most
+                cases come back low risk — Priya's KYC screening is clear, the documents for Robert's
+                late mother's death benefit are genuine, and Tom's hardship documents check out — so they
+                move on without extra friction.
             </p>
         </div>
     </section>
@@ -79,84 +123,110 @@
     </div>
 
     <div class="agent-tab-panel" data-panel="try" role="tabpanel">
-    <section class="panel fraud-panel" style="--accent: #ef4444">
-        <h2>Try It Out — Fraud Investigation Demo</h2>
-        <p class="muted fraud-help">
-            Pick a claim that the Claims Intake demo has already lodged, then engage
-            Felix's fraud agent to score the case for fraud risk and recommend the
-            next investigation steps. The demo runs live against the
-            <code>/fraud/*</code> endpoints in this app.
+    <section class="panel fc-panel" style="--accent: #ef4444">
+        <h2>Try it out — Financial crime review</h2>
+        <p class="muted fc-help">
+            Pick a Member Case, review its account activity, scan the documents on the case, then
+            engage Felix's agent for an explainable risk score and recommended controls. The demo runs
+            live against the <code>/fincrime/*</code> endpoints in this app — without Foundry or
+            Content Understanding configured, a deterministic assessment built from the case data keeps
+            every step working.
         </p>
 
-        <!-- Step 1 — pick a claim -->
-        <div class="fraud-step" data-step="1">
-            <div class="fraud-step-head">
-                <span class="fraud-step-num">1</span>
-                <h3>Pick a claim to investigate</h3>
+        <!-- Step 1 — pick a case -->
+        <div class="fc-step" data-step="1">
+            <div class="fc-step-head">
+                <span class="fc-step-num">1</span>
+                <h3>Pick a case to review</h3>
             </div>
             <p class="muted">
-                The dropdown lists every claim minted by the
-                <a href="/agents/claims-intake">Claims Intake</a> Try It Out tab.
-                Run that demo first if the list is empty.
+                The list shows the five scenario cases plus any opened live in the
+                <a href="/agents/onboarding">Onboarding</a> Try it out tab.
             </p>
-            <div class="fraud-claim-row">
-                <select id="fraud-claim-select" class="fraud-select">
-                    <option value="">— Loading claims… —</option>
+            <div class="fc-case-row">
+                <select id="fc-case-select" class="fc-select" aria-label="Member Case">
+                    <option value="">— Loading cases… —</option>
                 </select>
-                <button type="button" id="fraud-refresh-btn" class="fraud-secondary" title="Reload claims">↻</button>
+                <button type="button" id="fc-refresh-btn" class="fc-secondary" title="Reload cases" aria-label="Reload cases">↻</button>
             </div>
-            <div class="fraud-empty" id="fraud-empty" hidden>
-                No claims found in memory. Lodge one from the
-                <a href="/agents/claims-intake">Claims Intake</a> Try It Out tab first.
+            <div class="fc-empty" id="fc-empty" hidden>
+                No cases found in memory. Open one from the
+                <a href="/agents/onboarding">Onboarding</a> Try it out tab first.
             </div>
         </div>
 
-        <!-- Step 2 — claim details -->
-        <div class="fraud-step" data-step="2" id="fraud-claim-step" hidden>
-            <div class="fraud-step-head">
-                <span class="fraud-step-num">2</span>
-                <h3>Review the captured claim</h3>
-            </div>
-            <div class="fraud-claim-grid" id="fraud-claim-details"></div>
-        </div>
-
-        <!-- Step 2b — case documents -->
-        <div class="fraud-step" data-step="2b" id="fraud-docs-step" hidden>
-            <div class="fraud-step-head">
-                <span class="fraud-step-num">2b</span>
-                <h3>Scan documents on the case</h3>
+        <!-- Step 2 — review the case and its account activity -->
+        <div class="fc-step" data-step="2" id="fc-case-step" hidden>
+            <div class="fc-step-head">
+                <span class="fc-step-num">2</span>
+                <h3>Review the case and its account activity</h3>
             </div>
             <p class="muted">
-                These are the ID and scan documents on the claim file. Felix's
-                fraud agent will run each selected document through Azure
-                Content Understanding, score it as <em>legit / suspicious / fake</em>,
-                and explain every authenticity check it ran. Tick or untick to
-                control which documents are reviewed, or pick extra samples
-                from the popover.
+                The request, the people on the case, the account-activity timeline and the screening
+                results Felix's agent will weigh.
             </p>
-            <div class="fraud-docs-row">
-                <div id="fraud-case-docs" class="fraud-doc-grid">
-                    <div class="fraud-doc-empty muted">Loading case documents…</div>
+            <div class="fc-case-grid" id="fc-case-details"></div>
+
+            <div class="fc-review-grid">
+                <div class="fc-review-block fc-review-wide">
+                    <div class="fc-label">Account-activity timeline</div>
+                    <ol class="fc-timeline" id="fc-timeline"><li class="fc-muted-item">Loading…</li></ol>
                 </div>
-                <span id="fraud-sample-host"></span>
+                <div class="fc-review-block">
+                    <div class="fc-label">Screening &amp; verification</div>
+                    <ul class="fc-screening" id="fc-screening"><li class="fc-muted-item">Loading…</li></ul>
+                </div>
+                <div class="fc-review-block">
+                    <div class="fc-label">People on the case</div>
+                    <div id="fc-parties" class="fc-parties"><span class="fc-muted-item">Loading…</span></div>
+                </div>
             </div>
         </div>
 
-        <!-- Step 3 — engage agent -->
-        <div class="fraud-step" data-step="3" id="fraud-process-step" hidden>
-            <div class="fraud-step-head">
-                <span class="fraud-step-num">3</span>
-                <h3>Engage Fraud Investigation Agent</h3>
+        <!-- Step 3 — scan the documents on the case -->
+        <div class="fc-step" data-step="3" id="fc-docs-step" hidden>
+            <div class="fc-step-head">
+                <span class="fc-step-num">3</span>
+                <h3>Scan the documents on the case</h3>
             </div>
             <p class="muted">
-                Felix builds a timeline from the captured claim, runs fraud
-                indicators &amp; rules, cross-checks against history, and produces
-                a risk summary with recommended next actions for a human investigator.
+                Each selected document goes through Azure Content Understanding and a deterministic
+                checks layer — name and date of birth against the record on file, dates, tamper
+                indicators, security features, MRZ check digits, DVS, account age, SMSF registration and
+                SVS — and is scored <em>legit</em>, <em>suspicious</em> or <em>fake</em>. Untick a document
+                to leave it out, or add a specimen from the popover.
             </p>
-            <button id="fraud-process-btn" type="button">Run fraud investigation</button>
-            <div id="fraud-process-status" class="fraud-status" hidden></div>
+            <div class="fc-docs-row">
+                <div id="fc-case-docs" class="fc-doc-grid">
+                    <div class="fc-doc-empty muted">Loading case documents…</div>
+                </div>
+                <span id="fc-sample-host"></span>
+            </div>
+            <button id="fc-scan-btn" class="fc-primary" type="button">Scan documents</button>
+            <div id="fc-scan-status" class="fc-status" hidden></div>
 
-            <div class="engage-tabs-scope" data-engage-role="fraud">
+            <div id="fc-doc-output" class="fc-doc-output" hidden>
+                <div class="fc-label">Document authenticity</div>
+                <p class="muted fc-doc-output-hint" id="fc-doc-output-hint"></p>
+                <div id="fc-doc-cards" class="fc-doc-cards"></div>
+            </div>
+        </div>
+
+        <!-- Step 4 — engage the agent -->
+        <div class="fc-step" data-step="4" id="fc-process-step" hidden>
+            <div class="fc-step-head">
+                <span class="fc-step-num">4</span>
+                <h3>Engage the Financial Crime Agent</h3>
+            </div>
+            <p class="muted">
+                Felix's agent receives the case, the account-activity timeline, the screening results and
+                the document findings, then produces an explainable risk score and recommended controls
+                for the human investigator.
+            </p>
+            <button id="fc-process-btn" class="fc-primary" type="button">Run financial crime review</button>
+            <div id="fc-process-status" class="fc-status" hidden></div>
+
+            <div class="engage-tabs-scope" data-engage-role="financial-crime">
                 <div class="engage-tabs" role="tablist">
                     <button type="button" class="engage-tab-btn active" data-engage-tab="narrative">Agent Narrative</button>
                     <button type="button" class="engage-tab-btn" data-engage-tab="reference">Reference</button>
@@ -210,45 +280,42 @@
             </div>
         </div>
 
-        <!-- Step 4 — output -->
-        <div class="fraud-step" data-step="4" id="fraud-output-step" hidden>
-            <div class="fraud-step-head">
-                <span class="fraud-step-num">4</span>
+        <!-- Step 5 — risk summary & recommended actions -->
+        <div class="fc-step" data-step="5" id="fc-output-step" hidden>
+            <div class="fc-step-head">
+                <span class="fc-step-num">5</span>
                 <h3>Risk summary &amp; recommended actions</h3>
             </div>
 
-            <div class="fraud-risk-card">
-                <div class="fraud-risk-head">
-                    <span class="fraud-risk-label">Fraud Risk Score</span>
-                    <span class="fraud-risk-pill" id="fraud-risk-pill"></span>
-                    <span class="fraud-risk-num" id="fraud-risk-num"></span>
+            <div class="fc-risk-card">
+                <div class="fc-risk-head">
+                    <span class="fc-risk-label">Financial crime risk</span>
+                    <span class="fc-risk-pill" id="fc-risk-pill"></span>
+                    <span class="fc-risk-num" id="fc-risk-num"></span>
                 </div>
-                <p id="fraud-risk-summary" class="fraud-risk-summary"></p>
+                <p id="fc-risk-summary" class="fc-risk-summary"></p>
+                <p id="fc-agent-view" class="fc-agent-view" hidden></p>
             </div>
 
-            <div class="fraud-output-grid">
-                <div class="fraud-output-block">
-                    <div class="fraud-output-label">Risk indicators</div>
-                    <ul id="fraud-indicators" class="fraud-list"></ul>
+            <div class="fc-output-grid">
+                <div class="fc-output-block fc-output-wide">
+                    <div class="fc-label">Risk indicators &amp; evidence</div>
+                    <ul id="fc-indicators" class="fc-indicators"></ul>
+                    <p id="fc-score-breakdown" class="fc-score-breakdown"></p>
                 </div>
-                <div class="fraud-output-block">
-                    <div class="fraud-output-label">Timeline inconsistencies</div>
-                    <ul id="fraud-inconsistencies" class="fraud-list"></ul>
+                <div class="fc-output-block">
+                    <div class="fc-label">Recommended actions</div>
+                    <ol id="fc-actions" class="fc-actions"></ol>
                 </div>
-                <div class="fraud-output-block">
-                    <div class="fraud-output-label">Investigation action plan</div>
-                    <ol id="fraud-actions" class="fraud-list"></ol>
+                <div class="fc-output-block">
+                    <div class="fc-label">What checked out</div>
+                    <ul id="fc-clear" class="fc-clear"></ul>
                 </div>
-                <div class="fraud-output-block">
-                    <div class="fraud-output-label">Human approval required</div>
-                    <p id="fraud-approval" class="fraud-approval-text"></p>
+                <div class="fc-output-block fc-output-wide">
+                    <div class="fc-label">Human approval required</div>
+                    <p id="fc-approval" class="fc-approval-text"></p>
+                    <p id="fc-smr" class="fc-smr" hidden></p>
                 </div>
-            </div>
-
-            <div id="fraud-doc-output" class="fraud-doc-output" hidden>
-                <div class="fraud-output-label">Document authenticity</div>
-                <p class="muted fraud-doc-output-hint" id="fraud-doc-output-hint"></p>
-                <div id="fraud-doc-cards" class="fraud-doc-cards"></div>
             </div>
         </div>
     </section>
@@ -256,32 +323,38 @@
 </div>
 
 <style>
-    .fraud-panel { --fraud-accent: #ef4444; }
-    .fraud-help { margin-bottom: 0.9rem; }
-    .fraud-help code { background: rgba(239, 68, 68, 0.12); padding: 1px 6px; border-radius: 4px; font-size: 0.85rem; }
+    .fc-panel { --fc-accent: #ef4444; }
+    .fc-help { margin-bottom: 0.9rem; }
+    .fc-panel code { background: rgba(239, 68, 68, 0.12); padding: 1px 6px; border-radius: 4px; font-size: 0.85rem; }
 
-    .fraud-step {
+    .fc-step {
         border: 1px solid rgba(120, 150, 200, 0.18);
         background: rgba(15, 22, 38, 0.4);
         border-radius: 12px;
         padding: 0.95rem 1.1rem 1rem 1.1rem;
         margin-top: 0.9rem;
     }
-    .fraud-step-head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.3rem; }
-    .fraud-step-head h3 { margin: 0; color: #fff; font-size: 1rem; }
-    .fraud-step-num {
+    .fc-step-head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.3rem; }
+    .fc-step-head h3 { margin: 0; color: #fff; font-size: 1rem; }
+    .fc-step-num {
         display: inline-grid; place-items: center;
         width: 1.55rem; height: 1.55rem;
         border-radius: 50%;
-        background: color-mix(in srgb, var(--fraud-accent) 22%, rgba(20, 28, 46, 0.7));
-        border: 1px solid color-mix(in srgb, var(--fraud-accent) 55%, transparent);
-        color: var(--fraud-accent);
+        background: color-mix(in srgb, var(--fc-accent) 22%, rgba(20, 28, 46, 0.7));
+        border: 1px solid color-mix(in srgb, var(--fc-accent) 55%, transparent);
+        color: var(--fc-accent);
         font-size: 0.78rem; font-weight: 700;
     }
-    .fraud-step .muted { color: var(--cw-muted, #97a3b6); font-size: 0.9rem; margin: 0.35rem 0 0.7rem 0; }
+    .fc-step .muted { color: var(--cw-muted, #97a3b6); font-size: 0.9rem; margin: 0.35rem 0 0.7rem 0; }
+    .fc-label {
+        font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.12em;
+        color: var(--cw-muted, #97a3b6); font-weight: 700; margin-bottom: 0.4rem;
+    }
+    .fc-muted-item { color: var(--cw-muted, #97a3b6); font-size: 0.84rem; list-style: none; }
 
-    .fraud-claim-row { display: flex; gap: 0.5rem; align-items: center; }
-    .fraud-select {
+    /* Step 1 */
+    .fc-case-row { display: flex; gap: 0.5rem; align-items: center; }
+    .fc-select {
         flex: 1;
         background: rgba(10, 16, 28, 0.7);
         border: 1px solid rgba(120, 150, 200, 0.22);
@@ -290,12 +363,12 @@
         font-size: 0.9rem;
         padding: 0.55rem 0.7rem;
     }
-    .fraud-select:focus {
+    .fc-select:focus {
         outline: none;
-        border-color: var(--fraud-accent);
-        box-shadow: 0 0 0 3px color-mix(in srgb, var(--fraud-accent) 25%, transparent);
+        border-color: var(--fc-accent);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--fc-accent) 25%, transparent);
     }
-    .fraud-secondary {
+    .fc-secondary {
         background: transparent;
         color: rgba(238, 242, 247, 0.86);
         border: 1px solid rgba(120, 150, 200, 0.32);
@@ -304,8 +377,8 @@
         font-size: 0.95rem;
         cursor: pointer;
     }
-    .fraud-secondary:hover { background: rgba(255, 255, 255, 0.05); color: #fff; }
-    .fraud-empty {
+    .fc-secondary:hover { background: rgba(255, 255, 255, 0.05); color: #fff; }
+    .fc-empty {
         margin-top: 0.6rem;
         padding: 0.6rem 0.8rem;
         background: rgba(245, 158, 11, 0.10);
@@ -314,27 +387,91 @@
         color: #fcd34d;
         font-size: 0.86rem;
     }
-    .fraud-empty a { color: #fde68a; }
+    .fc-empty a { color: #fde68a; }
 
-    .fraud-claim-grid {
+    /* Step 2 */
+    .fc-case-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 0.45rem 0.85rem;
         font-size: 0.86rem;
         color: rgba(238, 242, 247, 0.86);
     }
-    @@media (max-width: 820px) { .fraud-claim-grid { grid-template-columns: 1fr; } }
-    .fraud-claim-grid .k {
-        display: inline-block; min-width: 110px;
+    .fc-case-grid .k {
+        display: inline-block; min-width: 118px;
         color: var(--cw-muted, #97a3b6); font-weight: 600;
         text-transform: uppercase; font-size: 0.66rem; letter-spacing: 0.08em;
         margin-right: 0.5rem;
     }
-    .fraud-claim-grid .span-2 { grid-column: span 2; }
-    @@media (max-width: 820px) { .fraud-claim-grid .span-2 { grid-column: span 1; } }
+    .fc-case-grid .span-2 { grid-column: span 2; }
+    .fc-review-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.7rem;
+        margin-top: 0.85rem;
+    }
+    .fc-review-block, .fc-output-block {
+        background: rgba(10, 16, 28, 0.7);
+        border: 1px solid rgba(120, 150, 200, 0.18);
+        border-radius: 8px;
+        padding: 0.65rem 0.85rem;
+    }
+    .fc-review-wide, .fc-output-wide { grid-column: span 2; }
+    @@media (max-width: 820px) {
+        .fc-case-grid, .fc-review-grid, .fc-output-grid { grid-template-columns: 1fr; }
+        .fc-case-grid .span-2, .fc-review-wide, .fc-output-wide { grid-column: span 1; }
+    }
 
-    #fraud-process-btn {
-        background: var(--fraud-accent);
+    .fc-timeline { list-style: none; margin: 0; padding: 0; }
+    .fc-timeline li {
+        display: grid;
+        grid-template-columns: 172px 1fr;
+        gap: 0.7rem;
+        padding: 0.45rem 0 0.45rem 0.7rem;
+        border-left: 3px solid #94a3b8;
+        margin-bottom: 0.35rem;
+    }
+    .fc-timeline li.flag-red { border-left-color: #ef4444; }
+    .fc-timeline li.flag-amber { border-left-color: #f59e0b; }
+    .fc-timeline li.flag-ok { border-left-color: #22c55e; }
+    .fc-timeline li.flag-info { border-left-color: #64748b; }
+    .fc-tl-when {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 0.78rem; color: rgba(238, 242, 247, 0.78);
+    }
+    .fc-tl-channel {
+        font-size: 0.64rem; text-transform: uppercase; letter-spacing: 0.1em;
+        color: var(--cw-muted, #97a3b6); font-weight: 700;
+    }
+    .fc-tl-summary { color: #fff; font-weight: 600; font-size: 0.88rem; }
+    .fc-tl-detail { color: rgba(238, 242, 247, 0.8); font-size: 0.83rem; line-height: 1.45; }
+    @@media (max-width: 720px) { .fc-timeline li { grid-template-columns: 1fr; gap: 0.2rem; } }
+
+    .fc-screening, .fc-clear { list-style: none; margin: 0; padding: 0; font-size: 0.84rem; line-height: 1.45; color: rgba(238, 242, 247, 0.88); }
+    .fc-screening li, .fc-clear li { display: flex; gap: 0.45rem; align-items: flex-start; padding: 0.18rem 0; }
+    .fc-icon { width: 1rem; flex: 0 0 1rem; font-weight: 700; }
+    .fc-icon.pass { color: #86efac; }
+    .fc-icon.fail { color: #fca5a5; }
+    .fc-icon.warn { color: #fcd34d; }
+    .fc-icon.info, .fc-icon.na { color: #94a3b8; }
+    .fc-screening .fc-check-name { font-weight: 600; color: rgba(238, 242, 247, 0.94); }
+
+    .fc-parties { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .fc-party {
+        background: rgba(239, 68, 68, 0.08);
+        border: 1px solid rgba(239, 68, 68, 0.28);
+        border-radius: 999px;
+        padding: 0.2rem 0.65rem;
+        font-size: 0.8rem;
+        color: rgba(238, 242, 247, 0.92);
+    }
+    .fc-party small { color: var(--cw-muted, #97a3b6); }
+    .fc-trusted { margin: 0.6rem 0 0 0; font-size: 0.82rem; color: rgba(238, 242, 247, 0.86); }
+    .fc-trusted strong { color: #86efac; }
+
+    /* Buttons & status */
+    .fc-primary {
+        background: var(--fc-accent);
         color: #2a0606;
         border: none;
         border-radius: 8px;
@@ -342,98 +479,30 @@
         font-size: 0.9rem;
         font-weight: 700;
         cursor: pointer;
-        margin-top: 0.35rem;
+        margin-top: 0.6rem;
     }
-    #fraud-process-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    .fraud-status { margin-top: 0.6rem; font-size: 0.88rem; color: rgba(238, 242, 247, 0.88); }
-    .fraud-status.error { color: #fca5a5; }
-    .fraud-status .spinner {
+    .fc-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .fc-status { margin-top: 0.6rem; font-size: 0.88rem; color: rgba(238, 242, 247, 0.88); }
+    .fc-status.error { color: #fca5a5; }
+    .fc-status .spinner {
         display: inline-block; width: 12px; height: 12px;
         border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff;
         border-radius: 50%; margin-right: 6px; vertical-align: middle;
-        animation: fraud-spin 0.7s linear infinite;
+        animation: fc-spin 0.7s linear infinite;
     }
-    @@keyframes fraud-spin { to { transform: rotate(360deg); } }
+    @@keyframes fc-spin { to { transform: rotate(360deg); } }
 
-    .fraud-risk-card {
-        background: color-mix(in srgb, var(--fraud-accent) 10%, rgba(15, 22, 38, 0.7));
-        border: 1px solid color-mix(in srgb, var(--fraud-accent) 35%, transparent);
-        border-radius: 10px;
-        padding: 0.8rem 1rem;
-        margin-top: 0.4rem;
-    }
-    .fraud-risk-head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.35rem; }
-    .fraud-risk-label { color: #fff; font-weight: 700; font-size: 0.9rem; }
-    .fraud-risk-pill {
-        padding: 0.18rem 0.7rem;
-        border-radius: 999px;
-        font-size: 0.72rem; font-weight: 700;
-        text-transform: uppercase; letter-spacing: 0.1em;
-    }
-    .fraud-risk-pill.high   { background: rgba(239, 68, 68, 0.18); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }
-    .fraud-risk-pill.medium { background: rgba(245, 158, 11, 0.18); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.4); }
-    .fraud-risk-pill.low    { background: rgba(34, 197, 94, 0.16); color: #86efac; border: 1px solid rgba(34, 197, 94, 0.4); }
-    .fraud-risk-num {
-        margin-left: auto;
-        color: rgba(238, 242, 247, 0.86);
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-        font-size: 0.85rem;
-    }
-    .fraud-risk-summary { margin: 0; color: rgba(238, 242, 247, 0.88); font-size: 0.88rem; line-height: 1.45; }
-
-    .fraud-output-grid {
+    /* Step 3 — case documents */
+    .fc-docs-row { display: flex; gap: 0.7rem; align-items: flex-start; flex-wrap: wrap; }
+    .fc-doc-grid {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 0.7rem;
-        margin-top: 0.7rem;
-    }
-    @@media (max-width: 820px) { .fraud-output-grid { grid-template-columns: 1fr; } }
-    .fraud-output-block {
-        background: rgba(10, 16, 28, 0.7);
-        border: 1px solid rgba(120, 150, 200, 0.18);
-        border-radius: 8px;
-        padding: 0.65rem 0.85rem;
-    }
-    .fraud-output-label {
-        font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.12em;
-        color: var(--cw-muted, #97a3b6); font-weight: 700; margin-bottom: 0.4rem;
-    }
-    .fraud-list { margin: 0; padding-left: 1.1rem; color: rgba(238, 242, 247, 0.88); font-size: 0.86rem; line-height: 1.5; }
-    .fraud-list li { margin: 0.2rem 0; }
-    .fraud-approval-text { margin: 0; color: rgba(238, 242, 247, 0.88); font-size: 0.88rem; line-height: 1.45; }
-
-    .fraud-notes {
-        margin-top: 0.7rem;
-        background: rgba(10, 16, 28, 0.7);
-        border: 1px solid rgba(120, 150, 200, 0.18);
-        border-radius: 8px;
-        padding: 0.7rem 0.85rem;
-    }
-    .fraud-notes-label {
-        font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.12em;
-        color: var(--cw-muted, #97a3b6); font-weight: 700; margin-bottom: 0.35rem;
-    }
-    .fraud-notes pre {
-        color: rgba(238, 242, 247, 0.86);
-        font-size: 0.82rem;
-        line-height: 1.5;
-        white-space: pre-wrap;
-        margin: 0;
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    }
-
-    /* Step 2b — case documents */
-    .fraud-docs-row { display: flex; gap: 0.7rem; align-items: flex-start; flex-wrap: wrap; }
-    .fraud-doc-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
         gap: 0.55rem;
         flex: 1;
         min-width: 260px;
     }
-    .fraud-doc-empty { padding: 0.55rem; }
-    .fraud-doc-tile {
+    .fc-doc-empty { padding: 0.55rem; }
+    .fc-doc-tile {
         position: relative;
         background: rgba(10, 16, 28, 0.7);
         border: 1px solid rgba(120, 150, 200, 0.22);
@@ -443,107 +512,81 @@
         flex-direction: column;
         gap: 0.35rem;
     }
-    .fraud-doc-tile.selected {
-        border-color: var(--fraud-accent);
-        box-shadow: 0 0 0 1px color-mix(in srgb, var(--fraud-accent) 40%, transparent);
+    .fc-doc-tile.selected {
+        border-color: var(--fc-accent);
+        box-shadow: 0 0 0 1px color-mix(in srgb, var(--fc-accent) 40%, transparent);
     }
-    .fraud-doc-tile img {
-        width: 100%;
-        height: 100px;
-        object-fit: cover;
-        border-radius: 5px;
-        background: #0a101c;
-        cursor: zoom-in;
+    .fc-doc-tile img {
+        width: 100%; height: 100px; object-fit: cover;
+        border-radius: 5px; background: #0a101c; cursor: zoom-in;
     }
-    .fraud-doc-tile .fraud-doc-title {
-        font-size: 0.78rem;
-        color: rgba(238, 242, 247, 0.92);
-        line-height: 1.25;
-    }
-    .fraud-doc-tile .fraud-doc-kind {
-        font-size: 0.66rem;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
+    .fc-doc-title { font-size: 0.78rem; color: rgba(238, 242, 247, 0.92); line-height: 1.25; }
+    .fc-doc-kind {
+        font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.1em;
         color: var(--cw-muted, #97a3b6);
     }
-    .fraud-doc-tile .fraud-doc-toggle {
-        display: flex; align-items: center; gap: 0.35rem;
-        font-size: 0.78rem;
-        color: rgba(238, 242, 247, 0.86);
-    }
-    .fraud-doc-tile.removable .fraud-doc-remove {
+    .fc-doc-toggle { display: flex; align-items: center; gap: 0.35rem; font-size: 0.78rem; color: rgba(238, 242, 247, 0.86); }
+    .fc-doc-remove {
         position: absolute; top: 4px; right: 6px;
         background: transparent; color: rgba(238, 242, 247, 0.65);
         border: none; cursor: pointer; font-size: 0.85rem; padding: 2px 4px;
     }
-    .fraud-doc-tile.removable .fraud-doc-remove:hover { color: #fca5a5; }
+    .fc-doc-remove:hover { color: #fca5a5; }
+    #fc-sample-host { align-self: stretch; display: flex; align-items: flex-start; position: relative; }
 
-    /* Sample-doc popover trigger sits inside the docs row */
-    #fraud-sample-host { align-self: stretch; display: flex; align-items: flex-start; }
-
-    /* Step 4 — per-document authenticity card */
-    .fraud-doc-output { margin-top: 0.9rem; }
-    .fraud-doc-output-hint { margin: 0 0 0.5rem 0; font-size: 0.82rem; }
-    .fraud-doc-cards { display: grid; gap: 0.7rem; }
-    .fraud-doc-card {
+    .fc-doc-output { margin-top: 0.9rem; }
+    .fc-doc-output-hint { margin: 0 0 0.5rem 0; font-size: 0.82rem; }
+    .fc-doc-cards { display: grid; gap: 0.7rem; }
+    .fc-doc-card {
         background: rgba(10, 16, 28, 0.7);
         border: 1px solid rgba(120, 150, 200, 0.18);
         border-radius: 10px;
         padding: 0.7rem 0.85rem;
         display: grid;
-        grid-template-columns: 110px 1fr;
-        gap: 0.7rem;
+        grid-template-columns: 130px 1fr;
+        gap: 0.8rem;
     }
-    @@media (max-width: 720px) { .fraud-doc-card { grid-template-columns: 1fr; } }
-    .fraud-doc-card img {
-        width: 100%; max-height: 130px; object-fit: cover;
+    @@media (max-width: 720px) { .fc-doc-card { grid-template-columns: 1fr; } }
+    .fc-doc-card img {
+        width: 100%; max-height: 150px; object-fit: cover;
         border-radius: 6px; background: #0a101c; cursor: zoom-in;
     }
-    .fraud-doc-card-head { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
-    .fraud-doc-card-title { color: #fff; font-weight: 600; font-size: 0.92rem; }
-    .fraud-doc-card-kind {
-        font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.1em;
-        color: var(--cw-muted, #97a3b6);
-    }
-    .fraud-doc-verdict {
+    .fc-doc-card-head { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+    .fc-doc-card-title { color: #fff; font-weight: 600; font-size: 0.92rem; }
+    .fc-doc-verdict {
         padding: 0.16rem 0.62rem;
         border-radius: 999px;
         font-size: 0.7rem; font-weight: 700;
         text-transform: uppercase; letter-spacing: 0.1em;
     }
-    .fraud-doc-verdict.legit      { background: rgba(34, 197, 94, 0.16); color: #86efac; border: 1px solid rgba(34, 197, 94, 0.4); }
-    .fraud-doc-verdict.suspicious { background: rgba(245, 158, 11, 0.18); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.4); }
-    .fraud-doc-verdict.fake       { background: rgba(239, 68, 68, 0.18); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }
-    .fraud-doc-source {
+    .fc-doc-verdict.legit      { background: rgba(34, 197, 94, 0.16); color: #86efac; border: 1px solid rgba(34, 197, 94, 0.4); }
+    .fc-doc-verdict.suspicious { background: rgba(245, 158, 11, 0.18); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.4); }
+    .fc-doc-verdict.fake       { background: rgba(239, 68, 68, 0.18); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }
+    .fc-doc-source {
         font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.1em;
         color: var(--cw-muted, #97a3b6); margin-left: auto;
     }
-    .fraud-doc-section-label {
+    .fc-doc-summary { margin: 0.4rem 0 0 0; color: rgba(238, 242, 247, 0.92); font-size: 0.86rem; }
+    .fc-doc-section-label {
         font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.12em;
         color: var(--cw-muted, #97a3b6); font-weight: 700; margin: 0.55rem 0 0.25rem 0;
     }
-    .fraud-doc-reasons { margin: 0; padding-left: 1.05rem; font-size: 0.84rem; line-height: 1.45; color: rgba(238, 242, 247, 0.88); }
-    .fraud-doc-reasons li { margin: 0.18rem 0; }
-    .fraud-doc-checks { list-style: none; margin: 0; padding: 0; font-size: 0.84rem; line-height: 1.45; color: rgba(238, 242, 247, 0.88); }
-    .fraud-doc-checks li { display: flex; gap: 0.45rem; align-items: flex-start; padding: 0.15rem 0; }
-    .fraud-doc-checks .check-icon { width: 1rem; flex: 0 0 1rem; font-weight: 700; }
-    .fraud-doc-checks .check-icon.pass { color: #86efac; }
-    .fraud-doc-checks .check-icon.fail { color: #fca5a5; }
-    .fraud-doc-checks .check-icon.warn { color: #fcd34d; }
-    .fraud-doc-checks .check-icon.na   { color: #94a3b8; }
-    .fraud-doc-checks .check-name { font-weight: 600; color: rgba(238, 242, 247, 0.94); }
-    .fraud-doc-checks .check-detail { color: rgba(238, 242, 247, 0.78); }
-    .fraud-doc-cu {
+    .fc-doc-reasons { margin: 0; padding-left: 1.05rem; font-size: 0.84rem; line-height: 1.45; color: rgba(238, 242, 247, 0.88); }
+    .fc-doc-reasons li { margin: 0.18rem 0; }
+    .fc-doc-checks { list-style: none; margin: 0; padding: 0; font-size: 0.84rem; line-height: 1.45; color: rgba(238, 242, 247, 0.88); }
+    .fc-doc-checks li { display: flex; gap: 0.45rem; align-items: flex-start; padding: 0.15rem 0; }
+    .fc-doc-checks .check-name { font-weight: 600; color: rgba(238, 242, 247, 0.94); }
+    .fc-doc-checks .check-detail { color: rgba(238, 242, 247, 0.78); }
+    .fc-doc-na { margin-top: 0.3rem; font-size: 0.8rem; color: var(--cw-muted, #97a3b6); }
+    .fc-doc-na summary { cursor: pointer; }
+    .fc-doc-cu {
         margin-top: 0.5rem;
         background: rgba(15, 22, 38, 0.6);
         border: 1px solid rgba(120, 150, 200, 0.18);
         border-radius: 6px;
     }
-    .fraud-doc-cu summary {
-        cursor: pointer; padding: 0.35rem 0.55rem; font-size: 0.78rem;
-        color: var(--cw-muted, #97a3b6);
-    }
-    .fraud-doc-cu pre {
+    .fc-doc-cu summary { cursor: pointer; padding: 0.35rem 0.55rem; font-size: 0.78rem; color: var(--cw-muted, #97a3b6); }
+    .fc-doc-cu pre {
         margin: 0; padding: 0.55rem 0.7rem;
         font-size: 0.78rem; line-height: 1.45;
         color: rgba(238, 242, 247, 0.86);
@@ -552,23 +595,102 @@
         max-height: 240px; overflow: auto;
     }
 
-    /* Lightweight reusable lightbox shared with the Notice pages */
-    .fraud-lightbox {
+    /* Step 5 — risk summary */
+    .fc-risk-card {
+        background: color-mix(in srgb, var(--fc-accent) 10%, rgba(15, 22, 38, 0.7));
+        border: 1px solid color-mix(in srgb, var(--fc-accent) 35%, transparent);
+        border-radius: 10px;
+        padding: 0.8rem 1rem;
+        margin-top: 0.4rem;
+    }
+    .fc-risk-head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.35rem; }
+    .fc-risk-label { color: #fff; font-weight: 700; font-size: 0.9rem; }
+    .fc-risk-pill {
+        padding: 0.18rem 0.7rem;
+        border-radius: 999px;
+        font-size: 0.72rem; font-weight: 700;
+        text-transform: uppercase; letter-spacing: 0.1em;
+    }
+    .fc-risk-pill.high   { background: rgba(239, 68, 68, 0.18); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }
+    .fc-risk-pill.medium { background: rgba(245, 158, 11, 0.18); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.4); }
+    .fc-risk-pill.low    { background: rgba(34, 197, 94, 0.16); color: #86efac; border: 1px solid rgba(34, 197, 94, 0.4); }
+    .fc-risk-num {
+        margin-left: auto;
+        color: rgba(238, 242, 247, 0.86);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 0.85rem;
+    }
+    .fc-risk-summary { margin: 0; color: rgba(238, 242, 247, 0.9); font-size: 0.88rem; line-height: 1.5; }
+    .fc-agent-view { margin: 0.45rem 0 0 0; color: var(--cw-muted, #97a3b6); font-size: 0.8rem; }
+
+    .fc-output-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.7rem;
+        margin-top: 0.7rem;
+    }
+    .fc-indicators { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.45rem; }
+    .fc-indicator {
+        border-left: 3px solid #64748b;
+        background: rgba(15, 22, 38, 0.55);
+        border-radius: 6px;
+        padding: 0.45rem 0.65rem;
+    }
+    .fc-indicator.sev-high { border-left-color: #ef4444; }
+    .fc-indicator.sev-medium { border-left-color: #f59e0b; }
+    .fc-indicator.sev-low { border-left-color: #eab308; }
+    .fc-indicator.sev-info { border-left-color: #38bdf8; }
+    .fc-ind-head { display: flex; align-items: baseline; gap: 0.6rem; }
+    .fc-ind-title { color: #fff; font-weight: 600; font-size: 0.88rem; }
+    .fc-ind-points {
+        margin-left: auto;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 0.78rem; color: #fca5a5;
+    }
+    .fc-indicator.sev-info .fc-ind-points { color: #7dd3fc; }
+    .fc-ind-evidence { color: rgba(238, 242, 247, 0.84); font-size: 0.83rem; line-height: 1.45; margin-top: 0.15rem; }
+    .fc-ind-source { color: var(--cw-muted, #97a3b6); font-size: 0.72rem; margin-top: 0.2rem; }
+    .fc-score-breakdown {
+        margin: 0.55rem 0 0 0; color: var(--cw-muted, #97a3b6);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.78rem;
+    }
+    .fc-actions { margin: 0; padding-left: 1.15rem; color: rgba(238, 242, 247, 0.88); font-size: 0.85rem; line-height: 1.5; }
+    .fc-actions li { margin: 0.3rem 0; }
+    .fc-actions strong { color: #fff; }
+    .fc-approval-badge {
+        display: inline-block; margin-left: 0.35rem;
+        padding: 0.05rem 0.45rem; border-radius: 999px;
+        font-size: 0.64rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+        background: rgba(245, 158, 11, 0.16); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.4);
+        vertical-align: middle;
+    }
+    .fc-approval-text { margin: 0; color: rgba(238, 242, 247, 0.88); font-size: 0.88rem; line-height: 1.45; }
+    .fc-smr {
+        margin: 0.6rem 0 0 0;
+        padding: 0.5rem 0.7rem;
+        border-radius: 6px;
+        background: rgba(239, 68, 68, 0.08);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        color: #fecaca; font-size: 0.84rem; line-height: 1.45;
+    }
+
+    /* Lightbox */
+    .fc-lightbox {
         position: fixed; inset: 0;
         background: rgba(10, 16, 28, 0.85);
         display: none; align-items: center; justify-content: center;
         z-index: 9000; padding: 2rem;
     }
-    .fraud-lightbox.open { display: flex; }
-    .fraud-lightbox img { max-width: 96vw; max-height: 92vh; border-radius: 8px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
-    .fraud-lightbox .fraud-lightbox-close {
+    .fc-lightbox.open { display: flex; }
+    .fc-lightbox img { max-width: 96vw; max-height: 92vh; border-radius: 8px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+    .fc-lightbox-close {
         position: absolute; top: 14px; right: 18px;
         background: transparent; color: #fff;
         border: none; font-size: 2rem; cursor: pointer;
     }
 
-    /* Sample-docs popover (scoped so it doesn't fight the global Notice CSS) */
-    .fraud-sample-trigger {
+    /* Specimen popover */
+    .fc-sample-trigger {
         display: inline-block; padding: 0.45rem 0.7rem;
         background: rgba(239, 68, 68, 0.12);
         border: 1px solid rgba(239, 68, 68, 0.4);
@@ -576,43 +698,44 @@
         color: #fca5a5; font-size: 0.85rem; cursor: pointer;
         white-space: nowrap;
     }
-    .fraud-sample-trigger:hover { background: rgba(239, 68, 68, 0.18); }
-    .fraud-sample-popover {
+    .fc-sample-trigger:hover { background: rgba(239, 68, 68, 0.18); }
+    .fc-sample-popover {
         position: absolute;
+        top: 100%;
+        right: 0;
         margin-top: 6px;
         background: #0f172a;
         border: 1px solid rgba(120, 150, 200, 0.32);
         border-radius: 10px;
         padding: 0.7rem;
-        width: 380px;
+        width: 400px;
+        max-width: 90vw;
         box-shadow: 0 18px 38px rgba(0, 0, 0, 0.45);
         z-index: 80;
         display: none;
     }
-    .fraud-sample-popover.open { display: block; }
-    .fraud-sample-popover .fraud-sample-grid {
+    .fc-sample-popover.open { display: block; }
+    .fc-sample-popover-title { font-weight: 600; color: #fff; margin-bottom: 4px; }
+    .fc-sample-popover-hint { font-size: 0.76rem; color: #97a3b6; margin-bottom: 8px; }
+    .fc-sample-grid {
         display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.45rem;
         max-height: 380px; overflow: auto;
     }
-    .fraud-sample-popover .fraud-sample-tile {
+    .fc-sample-tile {
         background: rgba(10, 16, 28, 0.7);
         border: 1px solid rgba(120, 150, 200, 0.18);
         border-radius: 8px;
         padding: 0.4rem;
         display: flex; flex-direction: column; gap: 0.3rem;
     }
-    .fraud-sample-popover .fraud-sample-tile img {
-        width: 100%; height: 80px; object-fit: cover; border-radius: 5px; background: #0a101c; cursor: zoom-in;
-    }
-    .fraud-sample-popover .fraud-sample-tile .fraud-sample-label {
-        font-size: 0.74rem; color: rgba(238, 242, 247, 0.92); line-height: 1.25;
-    }
-    .fraud-sample-popover .fraud-sample-tile .fraud-sample-add {
-        background: var(--fraud-accent); color: #2a0606;
+    .fc-sample-tile img { width: 100%; height: 80px; object-fit: cover; border-radius: 5px; background: #0a101c; cursor: zoom-in; }
+    .fc-sample-label { font-size: 0.74rem; color: rgba(238, 242, 247, 0.92); line-height: 1.25; }
+    .fc-sample-expected { font-size: 0.64rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--cw-muted, #97a3b6); }
+    .fc-sample-add {
+        background: var(--fc-accent); color: #2a0606;
         border: none; border-radius: 5px;
         padding: 0.3rem 0.5rem; font-size: 0.78rem; font-weight: 700;
         cursor: pointer;
     }
-    .fraud-sample-popover .fraud-sample-tile .fraud-sample-add:disabled { opacity: 0.4; cursor: not-allowed; }
+    .fc-sample-add:disabled { opacity: 0.4; cursor: not-allowed; }
 </style>
-

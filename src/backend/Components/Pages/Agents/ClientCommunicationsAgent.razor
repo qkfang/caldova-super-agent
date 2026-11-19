@@ -116,8 +116,8 @@
                 </select>
                 <button type="button" id="comms-refresh-btn" class="comms-secondary" title="Refresh the case list">↻ Refresh</button>
             </div>
-            <div class="comms-claim-summary" id="comms-case-summary" hidden>
-                <div class="comms-claim-summary-grid">
+            <div class="comms-case-box" id="comms-case-summary" hidden>
+                <div class="comms-case-grid">
                     <div><span class="k">Client</span><span id="comms-case-client"></span></div>
                     <div><span class="k">Member no.</span><span id="comms-case-member"></span></div>
                     <div><span class="k">Request type</span><span id="comms-case-type"></span></div>
@@ -382,26 +382,26 @@
     }
     .comms-secondary:hover { background: rgba(255, 255, 255, 0.05); color: #fff; }
 
-    .comms-claim-summary {
+    .comms-case-box {
         margin-top: 0.7rem;
         background: rgba(10, 16, 28, 0.7);
         border: 1px solid rgba(120, 150, 200, 0.18);
         border-radius: 8px;
         padding: 0.7rem 0.85rem;
     }
-    .comms-claim-summary-grid {
+    .comms-case-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 0.4rem 0.85rem;
         font-size: 0.85rem;
         color: rgba(238, 242, 247, 0.88);
     }
-    .comms-claim-summary-grid .span-2 { grid-column: span 2; }
+    .comms-case-grid .span-2 { grid-column: span 2; }
     @@media (max-width: 720px) {
-        .comms-claim-summary-grid { grid-template-columns: 1fr; }
-        .comms-claim-summary-grid .span-2 { grid-column: span 1; }
+        .comms-case-grid { grid-template-columns: 1fr; }
+        .comms-case-grid .span-2 { grid-column: span 1; }
     }
-    .comms-claim-summary-grid .k {
+    .comms-case-grid .k {
         display: inline-block; min-width: 120px;
         color: var(--cw-muted, #97a3b6); font-weight: 600;
         text-transform: uppercase; font-size: 0.66rem; letter-spacing: 0.08em;

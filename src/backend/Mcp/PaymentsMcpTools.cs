@@ -396,7 +396,7 @@ public class PaymentsMcpTools
             caseNumber = r.CaseNumber,
             status = r.StatusKey,
             raised = !blocked,
-            alreadyRaised,
+            alreadyRaised = alreadyRaised && !blocked,
             paymentType = PaymentTypes.Label(r.PaymentType),
             grossAmount = r.GrossAmount,
             taxWithheld = r.TaxWithheld,

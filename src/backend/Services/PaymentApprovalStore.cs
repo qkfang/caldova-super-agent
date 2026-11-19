@@ -502,6 +502,12 @@ public sealed record PaymentCaseProfile
     /// <summary>How the deceased member is referred to in a bereavement letter (e.g. "your mother, Mei").</summary>
     public string? DeceasedReference { get; init; }
 
+    /// <summary>Why the benefit is paid this way, for a bereavement letter (e.g. "as Mei set out in her binding nomination").</summary>
+    public string? PaymentBasis { get; init; }
+
+    /// <summary>Where incoming money is invested (invest-on-arrival cases).</summary>
+    public string? InvestmentOption { get; init; }
+
     /// <summary>Next step recorded when the payment is blocked.</summary>
     public string? BlockedNextStep { get; init; }
 }
@@ -681,6 +687,7 @@ public static class PaymentRules
         ],
         InputsHint = "Mei Chen's Caldova Pension (CP-3019042, about $486,200) is paid as a lump sum, split 50/50 under her binding nomination. The gross amount is the total benefit; each payee's share is worked out from it.",
         DeceasedReference = "your mother, Mei",
+        PaymentBasis = "as Mei set out in her binding nomination",
         LetterNote = "If you have any questions, please call us. If you're unhappy with how we've handled this, you can make a complaint through our internal dispute resolution process and then, if needed, to the Australian Financial Complaints Authority (AFCA).",
     };
 
@@ -783,6 +790,7 @@ public static class PaymentRules
             new("Adviser fee", "$3,300 a year incl. GST — $275 a month, deducted under the signed consent (s99FA)"),
         ],
         InputsHint = "Money is coming in, not going out. The Harbourline rollover (about $41,800) is invested on arrival in the Growth model, keeping 1% in the Caldova Cash Account. There's no payee and nothing to release.",
+        InvestmentOption = "Caldova Managed Portfolio — Growth",
     };
 
     private static PaymentCaseProfile Generic(CaseRecord r)
@@ -841,6 +849,7 @@ public static class PaymentRules
                     CaseApprovalNote = "Approved by Benefits & Eligibility — confirm the nomination and each recipient's tax dependency before release.",
                     CaseRuleCited = DeathBenefitRuleTitle,
                     DeceasedReference = "the member",
+                    PaymentBasis = "in line with the trustee's decision on the death benefit",
                     InputsHint = "Death benefits are paid as nominated (or as the trustee decides). Adult children who weren't financially dependent are non-dependants for tax (17% on the taxed element).",
                 };
             case RequestTypes.PensionCommencement:

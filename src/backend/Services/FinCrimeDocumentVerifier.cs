@@ -261,7 +261,6 @@ public class FinCrimeDocumentVerifier
         {
             ExcludeVisualStudioCredential = true,
             ExcludeVisualStudioCodeCredential = true,
-            ExcludeSharedTokenCacheCredential = true,
         };
         if (!string.IsNullOrWhiteSpace(_tenantId)) options.TenantId = _tenantId;
         return new ContentUnderstandingClient(endpoint, new DefaultAzureCredential(options));

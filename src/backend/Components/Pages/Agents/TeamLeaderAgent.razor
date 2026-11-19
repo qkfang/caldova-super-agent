@@ -1,16 +1,16 @@
 @page "/agents/team-leader"
 
-<PageTitle>Team Leader Agent — Claims Team in a Day</PageTitle>
+<PageTitle>Team Leader Agent — Wealth Team in a Day</PageTitle>
 
 <div class="agent-header" style="--accent: #14b8a6">
-    <a class="back-link" href="/"><span aria-hidden="true">←</span> Back to claims office</a>
+    <a class="back-link" href="/"><span aria-hidden="true">←</span> Back to the operations office</a>
     <div class="agent-header-row">
         <div class="agent-header-icon">🧭</div>
         <div>
             <div class="agent-header-dept">Team Leader Office</div>
             <h1>Team Leader Agent</h1>
-            <div class="agent-header-persona">Theo — Claims Team Leader</div>
-            <p class="tagline">Watches the whole floor — escalations, approvals, and SLA.</p>
+            <div class="agent-header-persona">Theo — Client Operations Team Leader</div>
+            <p class="tagline">Watches the whole floor — SLAs, IDR clocks and approvals.</p>
         </div>
     </div>
 </div>
@@ -26,54 +26,59 @@
     <section class="panel" style="--accent: #14b8a6">
         <h2>What this agent does</h2>
         <p>
-            Oversees the workload, approves higher-value items, surfaces escalations and SLA
-            breaches, and keeps quality and consistency across the office.
+            Runs the client operations floor alongside Theo: workload, service levels and complaint
+            clocks, the queue of human approvals, quality, and the members who need extra care.
+            It watches every Member Case and every specialist agent's output, surfaces what needs a
+            leader's attention, and recommends — Theo decides.
         </p>
         <div class="two-col">
             <div>
                 <h3>Responsibilities</h3>
                 <ul>
-                    <li>Maintain a live dashboard of every claim and its current stage.</li>
-                    <li>Surface SLA breaches, vulnerable customers, and complaints.</li>
-                    <li>Receive and digitally approve recommendations from other agents.</li>
-                    <li>Run quality assurance checks on outgoing decisions and messages.</li>
-                    <li>Reassign work when a queue is overloaded.</li>
+                    <li>Keep a live view of every Member Case, its stage and its owner.</li>
+                    <li>Track the clocks — rollovers and Payday Super allocations (3 business days), complaints (30, 45 or 90 days) and SMRs (3 business days).</li>
+                    <li>Queue approvals with the working attached — financial-crime blocks, partial approvals, hardship releases, death benefits, large payments and pension commencements.</li>
+                    <li>Make sure vulnerable members — bereaved families, members in hardship, scam victims — get a human touch.</li>
+                    <li>Run QA sampling and surface coaching insights for the team.</li>
+                    <li>Chair the multi-agent group chat on any case.</li>
                 </ul>
             </div>
             <div>
                 <h3>Tools available</h3>
                 <ul>
-                    <li>Claims dashboard</li>
-                    <li>Work queue manager</li>
+                    <li>Operations floor dashboard</li>
+                    <li>SLA &amp; IDR clock tracker</li>
+                    <li>Approval queue (Microsoft Teams)</li>
                     <li>Escalation router</li>
-                    <li>QA checker</li>
-                    <li>Approval workflow</li>
-                    <li>Reporting</li>
+                    <li>QA sampler</li>
+                    <li>Group-chat orchestration</li>
                 </ul>
                 <h3>Human approval</h3>
                 <p class="approval">
-                    Required for high-value approvals, declines, complaints, policy exceptions,
-                    work reassignment rules, or regulatory risk.
+                    Theo makes every final call on declines and partial approvals, financial-crime blocks
+                    and SMRs, single payments of $250,000 or more, every death benefit, pension
+                    commencements of $1,000,000 or more, hardship releases and complaint responses.
                 </p>
             </div>
         </div>
     </section>
 
     <section class="panel" style="--accent: #14b8a6">
-        <h2>How this agent helps with the claim</h2>
+        <h2>How this agent helps with the case</h2>
         <div class="demo">
             <p>
-                Theo's team-leader agent gives the human team leader a single live view of every
-                claim on the floor — current stage, SLA position, vulnerability flags, and any
-                approvals waiting. It surfaces the cases that genuinely need a leader's attention
-                and pushes the rest down the page.
+                Theo's agent gives the human team leader one view of the whole floor: which Member
+                Cases are waiting on whom, which clocks are running — a suspicious matter report due in
+                three business days, a hardship payment promised for Friday, a pension due to start on
+                Monday — and which members need a gentler hand. The cases that genuinely need a
+                leader rise to the top; everything else stays out of the way.
             </p>
             <p>
-                Recommendations from the other agents — coverage decisions, settlement amounts,
-                customer messages — arrive in a queue ready for one-click digital approval, with
-                the agent's working and a quick QA summary attached. When a queue gets overloaded
-                or a target slips, the agent flags it early so work can be reassigned before
-                anything is missed.
+                Recommendations from the other agents — a block on a fake SMSF rollover, a $10,000
+                partial hardship release, a $1.25 million pension commencement, a death benefit paid
+                under a binding nomination — arrive in an approval queue with the working, the rule
+                and the authority limit attached. And when a case needs the whole team, Theo opens a
+                group chat and the specialists agree a plan in minutes.
             </p>
         </div>
     </section>
@@ -84,47 +89,44 @@
     <section class="panel leader-panel" style="--accent: #14b8a6">
         <h2>Try It Out — Team Leader Demo</h2>
         <p class="muted leader-help">
-            Walk through how Theo's team-leader agent picks up a claim that
-            Claims Intake has just lodged, reviews the case from a leader's
-            perspective, and produces a structured workload / escalation /
-            approval briefing. All steps run live against the
-            <code>/team-leader/*</code> endpoints in this app.
+            Pick a Member Case for Theo to focus on, then engage the Team Leader Agent: it reviews the
+            whole floor — counts by stage, SLA and complaint clocks, escalations, the approval queue,
+            vulnerable members and coaching insights — and recommends today's priorities. All steps run
+            live against the <code>/team-leader/*</code> endpoints in this app.
         </p>
 
-        <!-- Step 1 — pick a Claim ID -->
+        <!-- Step 1 — pick a case -->
         <div class="leader-step" data-step="1">
             <div class="leader-step-head">
                 <span class="leader-step-num">1</span>
-                <h3>Pick a Claim ID</h3>
+                <h3>Pick a case</h3>
             </div>
             <p class="muted">
-                Theo works from the queue of claims already lodged by Iris's
-                Claims Intake Agent. Pick one of the claim cases held in memory
-                for this demo.
+                The floor holds the five scenario cases plus any case opened live in the
+                <a href="/agents/onboarding">Onboarding</a> demo. The case you pick becomes Theo's focus.
             </p>
-            <div class="leader-claim-row">
-                <select id="leader-claim-select" aria-label="Claim ID">
-                    <option value="">— Select a claim —</option>
+            <div class="leader-case-row">
+                <select id="leader-case-select" aria-label="Member Case">
+                    <option value="">— Select a case —</option>
                 </select>
                 <button type="button" id="leader-refresh-btn" class="leader-secondary"
-                        title="Reload the list of claims">↻ Refresh</button>
+                        title="Reload the list of cases">↻ Refresh</button>
             </div>
             <p class="muted leader-empty" id="leader-empty" hidden>
-                No claims yet. Run the
-                <a href="/agents/claims-intake">Claims Intake Try It Out</a>
-                tab first to lodge a claim, then come back here.
+                No cases yet. Open one in the
+                <a href="/agents/onboarding">Onboarding</a> demo, then come back here.
             </p>
-            <div class="leader-claim-card" id="leader-claim-card" hidden>
-                <div class="leader-claim-num" id="leader-claim-num"></div>
-                <div class="leader-claim-grid">
-                    <div><span class="k">Customer</span><span id="leader-claim-customer"></span></div>
-                    <div><span class="k">Policy</span><span id="leader-claim-policy"></span></div>
-                    <div><span class="k">Claim type</span><span id="leader-claim-type"></span></div>
-                    <div><span class="k">Incident date</span><span id="leader-claim-date"></span></div>
-                    <div class="span-2"><span class="k">Incident location</span><span id="leader-claim-location"></span></div>
-                    <div class="span-2"><span class="k">Description</span><span id="leader-claim-desc"></span></div>
-                    <div><span class="k">Estimated loss</span><span id="leader-claim-loss"></span></div>
-                    <div><span class="k">Urgency</span><span id="leader-claim-urgency"></span></div>
+            <div class="leader-case-card" id="leader-case-card" hidden>
+                <div class="leader-case-num" id="leader-case-num"></div>
+                <div class="leader-case-grid">
+                    <div><span class="k">Client</span><span id="leader-case-client"></span></div>
+                    <div><span class="k">Member no.</span><span id="leader-case-member"></span></div>
+                    <div><span class="k">Request type</span><span id="leader-case-type"></span></div>
+                    <div><span class="k">Received</span><span id="leader-case-received"></span></div>
+                    <div><span class="k">Adviser</span><span id="leader-case-adviser"></span></div>
+                    <div><span class="k">Amount</span><span id="leader-case-amount"></span></div>
+                    <div class="span-2"><span class="k">Priority</span><span id="leader-case-priority"></span></div>
+                    <div class="span-2"><span class="k">Request</span><span id="leader-case-request"></span></div>
                 </div>
             </div>
         </div>
@@ -136,11 +138,10 @@
                 <h3>Engage Team Leader Agent</h3>
             </div>
             <p class="muted">
-                Theo's team-leader agent reviews the claim from a leader's
-                perspective and produces a structured workload, escalation,
-                approval-queue, and coaching briefing.
+                Theo's agent reviews the floor with your case in focus and produces a workload,
+                escalation, approval-queue and coaching briefing. It recommends; Theo decides.
             </p>
-            <button id="leader-process-btn" type="button" disabled>Process with Team Leader Agent</button>
+            <button id="leader-process-btn" type="button" disabled>Review the floor with Theo</button>
             <div id="leader-process-status" class="leader-status" hidden></div>
 
             <div class="engage-tabs-scope" data-engage-role="team-leader">
@@ -197,52 +198,107 @@
             </div>
         </div>
 
+        <!-- Step 3 — floor dashboard -->
+        <div class="leader-step" data-step="3" id="leader-results" hidden>
+            <div class="leader-step-head">
+                <span class="leader-step-num">3</span>
+                <h3>Floor dashboard</h3>
+                <span class="tl-asat" id="leader-asat"></span>
+            </div>
+
+            <div class="tl-focus" id="leader-focus"></div>
+
+            <div class="tl-section">
+                <h4>Cases by stage</h4>
+                <div class="tl-tiles" id="leader-stage-tiles"></div>
+            </div>
+
+            <div class="tl-section">
+                <h4>SLA &amp; complaint clocks</h4>
+                <div class="tl-table-wrap">
+                    <table class="tl-table">
+                        <thead><tr><th>Clock</th><th>Case</th><th>Rule</th><th>Status</th></tr></thead>
+                        <tbody id="leader-clocks-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="tl-section">
+                <h4>Escalations</h4>
+                <ul class="tl-escalations" id="leader-escalations"></ul>
+            </div>
+
+            <div class="tl-section">
+                <h4>Approval queue — waiting on Theo</h4>
+                <div class="tl-table-wrap">
+                    <table class="tl-table">
+                        <thead><tr><th>#</th><th>Case</th><th>Approval</th><th>Why it needs a human</th><th>Recommendation</th><th>Due</th></tr></thead>
+                        <tbody id="leader-approvals-body"></tbody>
+                    </table>
+                </div>
+                <p class="muted tl-note">Theo's agent recommends; Theo decides. Payment approvals are actioned in Microsoft Teams.</p>
+            </div>
+
+            <div class="tl-grid-2">
+                <div class="tl-section">
+                    <h4>Vulnerable members</h4>
+                    <ul class="tl-list" id="leader-vulnerable"></ul>
+                </div>
+                <div class="tl-section">
+                    <h4>Quality &amp; coaching insights</h4>
+                    <ul class="tl-list" id="leader-coaching"></ul>
+                </div>
+            </div>
+
+            <div class="tl-section">
+                <h4>Recommended priorities for today</h4>
+                <ol class="tl-priorities" id="leader-priorities"></ol>
+            </div>
+        </div>
+
     </section>
     </div>
 
     <div class="agent-tab-panel" data-panel="groupchat" role="tabpanel">
     <section class="panel groupchat-panel" style="--accent: #14b8a6">
-        <h2>Group Chat — Team Leader and the whole claims team</h2>
+        <h2>Group Chat — Theo and the whole operations team</h2>
         <p class="muted groupchat-help">
-            Theo (Team Leader) opens a group chat about a single claim and runs a
-            short discussion with the seven other claims-office agents. Theo
-            chairs the meeting: at each turn Theo decides which specialist
-            should speak next, and stops the discussion when the team has
-            reached a conclusion. Modelled on the
-            <code>GroupChatManager</code> pattern in Microsoft Agent Framework
-            (<code>Microsoft.Agents.AI.Workflows</code>).
+            Theo opens a group chat about one Member Case and runs a short stand-up with the seven
+            specialist agents — Olivia, Ben, Ivy, Felix, Rory, Penny and Cara. Theo chairs: at each
+            turn he decides who should speak next, and he closes with a plan once the team has
+            covered what the case needs. Modelled on the <code>GroupChatManager</code> pattern in
+            Microsoft Agent Framework (<code>Microsoft.Agents.AI.Workflows</code>). Without Foundry
+            configured, a scripted replay built from the case facts streams instead.
         </p>
 
-        <!-- Step 1 — pick a Claim ID for the group chat -->
+        <!-- Step 1 — pick a case for the group chat -->
         <div class="leader-step" data-step="1">
             <div class="leader-step-head">
                 <span class="leader-step-num">1</span>
-                <h3>Pick a Claim ID</h3>
+                <h3>Pick a case</h3>
             </div>
             <p class="muted">
-                Choose one of the claims held in memory for this demo. The
-                whole team will discuss it together.
+                Choose one of the Member Cases on the floor. The whole team will discuss it together.
             </p>
-            <div class="leader-claim-row">
-                <select id="gc-claim-select" aria-label="Claim ID">
-                    <option value="">— Select a claim —</option>
+            <div class="leader-case-row">
+                <select id="gc-case-select" aria-label="Member Case">
+                    <option value="">— Select a case —</option>
                 </select>
                 <button type="button" id="gc-refresh-btn" class="leader-secondary"
-                        title="Reload the list of claims">↻ Refresh</button>
+                        title="Reload the list of cases">↻ Refresh</button>
             </div>
             <p class="muted leader-empty" id="gc-empty" hidden>
-                No claims yet. Run the
-                <a href="/agents/claims-intake">Claims Intake Try It Out</a>
-                tab first to lodge a claim, then come back here.
+                No cases yet. Open one in the
+                <a href="/agents/onboarding">Onboarding</a> demo, then come back here.
             </p>
-            <div class="leader-claim-card" id="gc-claim-card" hidden>
-                <div class="leader-claim-num" id="gc-claim-num"></div>
-                <div class="leader-claim-grid">
-                    <div><span class="k">Customer</span><span id="gc-claim-customer"></span></div>
-                    <div><span class="k">Policy</span><span id="gc-claim-policy"></span></div>
-                    <div><span class="k">Claim type</span><span id="gc-claim-type"></span></div>
-                    <div><span class="k">Incident date</span><span id="gc-claim-date"></span></div>
-                    <div class="span-2"><span class="k">Description</span><span id="gc-claim-desc"></span></div>
+            <div class="leader-case-card" id="gc-case-card" hidden>
+                <div class="leader-case-num" id="gc-case-num"></div>
+                <div class="leader-case-grid">
+                    <div><span class="k">Client</span><span id="gc-case-client"></span></div>
+                    <div><span class="k">Request type</span><span id="gc-case-type"></span></div>
+                    <div><span class="k">Received</span><span id="gc-case-received"></span></div>
+                    <div><span class="k">Priority</span><span id="gc-case-priority"></span></div>
+                    <div class="span-2"><span class="k">Request</span><span id="gc-case-request"></span></div>
                 </div>
             </div>
         </div>
@@ -254,9 +310,8 @@
                 <h3>Start the group chat</h3>
             </div>
             <p class="muted">
-                Theo opens the room with the seven specialist agents. He asks one
-                question at a time and decides when the team has reached a
-                conclusion (or after eight turns, whichever comes first).
+                Theo opens the room with the seven specialists, asks one question at a time, and
+                closes with a plan when the team has what it needs (with a hard cap of 20 turns).
             </p>
 
             <div class="gc-roster" id="gc-roster" aria-label="Participants"></div>
@@ -270,6 +325,7 @@
             <div class="leader-step-head">
                 <span class="leader-step-num">3</span>
                 <h3>Live transcript</h3>
+                <span class="tl-asat" id="gc-mode"></span>
             </div>
             <div id="gc-transcript" class="gc-transcript" aria-live="polite"></div>
         </div>
@@ -280,7 +336,8 @@
 <style>
     .leader-panel { --leader-accent: #14b8a6; }
     .leader-help { margin-bottom: 0.9rem; }
-    .leader-help code { background: rgba(245, 158, 11, 0.12); padding: 1px 6px; border-radius: 4px; font-size: 0.85rem; }
+    .leader-help code { background: rgba(20, 184, 166, 0.15); padding: 1px 6px; border-radius: 4px; font-size: 0.85rem; }
+    .leader-panel a, .groupchat-panel a { color: var(--leader-accent); }
 
     .leader-step {
         border: 1px solid rgba(120, 150, 200, 0.18);
@@ -303,8 +360,8 @@
     }
     .leader-step .muted { color: var(--cw-muted, #97a3b6); font-size: 0.9rem; margin: 0.35rem 0 0.7rem 0; }
 
-    .leader-claim-row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
-    .leader-claim-row select {
+    .leader-case-row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+    .leader-case-row select {
         background: rgba(10, 16, 28, 0.7);
         border: 1px solid rgba(120, 150, 200, 0.32);
         border-radius: 6px;
@@ -312,8 +369,9 @@
         padding: 0.5rem 0.7rem;
         font-size: 0.9rem;
         min-width: 280px;
+        flex: 1 1 320px;
     }
-    .leader-claim-row select:focus {
+    .leader-case-row select:focus {
         outline: none;
         border-color: var(--leader-accent);
         box-shadow: 0 0 0 3px color-mix(in srgb, var(--leader-accent) 25%, transparent);
@@ -330,33 +388,32 @@
     .leader-secondary:hover { background: rgba(255, 255, 255, 0.05); color: #fff; }
 
     .leader-empty { margin-top: 0.6rem; }
-    .leader-empty a { color: var(--leader-accent); }
 
-    .leader-claim-card {
+    .leader-case-card {
         margin-top: 0.8rem;
         background: rgba(10, 16, 28, 0.7);
         border: 1px solid rgba(120, 150, 200, 0.18);
         border-radius: 8px;
         padding: 0.8rem 0.95rem;
     }
-    .leader-claim-num {
+    .leader-case-num {
         font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
         color: var(--leader-accent);
         font-weight: 700;
         font-size: 0.95rem;
         margin-bottom: 0.45rem;
     }
-    .leader-claim-grid {
+    .leader-case-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 0.4rem 0.85rem;
         font-size: 0.85rem;
         color: rgba(238, 242, 247, 0.88);
     }
-    @@media (max-width: 820px) { .leader-claim-grid { grid-template-columns: 1fr; } }
-    .leader-claim-grid .span-2 { grid-column: span 2; }
-    @@media (max-width: 820px) { .leader-claim-grid .span-2 { grid-column: span 1; } }
-    .leader-claim-grid .k {
+    @@media (max-width: 820px) { .leader-case-grid { grid-template-columns: 1fr; } }
+    .leader-case-grid .span-2 { grid-column: span 2; }
+    @@media (max-width: 820px) { .leader-case-grid .span-2 { grid-column: span 1; } }
+    .leader-case-grid .k {
         display: inline-block;
         min-width: 110px;
         color: var(--cw-muted, #97a3b6);
@@ -369,7 +426,7 @@
 
     #leader-process-btn {
         background: var(--leader-accent);
-        color: #1a1100;
+        color: #07221f;
         border: none;
         border-radius: 8px;
         padding: 0.55rem 1.1rem;
@@ -393,6 +450,128 @@
         animation: leader-spin 0.7s linear infinite;
     }
     @@keyframes leader-spin { to { transform: rotate(360deg); } }
+
+    /* ── Floor dashboard ─────────────────────────────────────────────── */
+    .tl-asat {
+        margin-left: auto;
+        font-size: 0.72rem;
+        color: var(--cw-muted, #97a3b6);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 600;
+        text-align: right;
+    }
+    .tl-section { margin-top: 0.95rem; }
+    .tl-section h4 {
+        margin: 0 0 0.45rem 0;
+        color: #ccfbf1;
+        font-size: 0.74rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+    .tl-focus {
+        margin-top: 0.6rem;
+        background: color-mix(in srgb, var(--leader-accent) 10%, rgba(10, 16, 28, 0.75));
+        border: 1px solid color-mix(in srgb, var(--leader-accent) 40%, transparent);
+        border-radius: 10px;
+        padding: 0.8rem 0.95rem;
+    }
+    .tl-focus-head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-bottom: 0.45rem; }
+    .tl-focus-label {
+        font-size: 0.66rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+        color: var(--leader-accent);
+    }
+    .tl-focus-title { color: #fff; font-weight: 700; font-size: 0.95rem; }
+    .tl-focus-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem 1rem; font-size: 0.86rem; color: rgba(238, 242, 247, 0.9); }
+    .tl-focus-grid .span-2 { grid-column: span 2; }
+    @@media (max-width: 820px) {
+        .tl-focus-grid { grid-template-columns: 1fr; }
+        .tl-focus-grid .span-2 { grid-column: span 1; }
+    }
+    .tl-focus-grid .k {
+        display: block;
+        color: var(--cw-muted, #97a3b6); font-weight: 700;
+        text-transform: uppercase; font-size: 0.64rem; letter-spacing: 0.08em;
+        margin-bottom: 0.1rem;
+    }
+    .tl-facts { margin: 0.2rem 0 0 1.05rem; padding: 0; font-size: 0.82rem; color: rgba(238, 242, 247, 0.82); line-height: 1.45; }
+
+    .tl-tiles { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.55rem; }
+    @@media (max-width: 900px) { .tl-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    .tl-tile {
+        background: rgba(10, 16, 28, 0.7);
+        border: 1px solid rgba(120, 150, 200, 0.2);
+        border-radius: 10px;
+        padding: 0.6rem 0.75rem;
+    }
+    .tl-tile.hot {
+        border-color: color-mix(in srgb, var(--leader-accent) 60%, transparent);
+        background: color-mix(in srgb, var(--leader-accent) 12%, rgba(10, 16, 28, 0.7));
+    }
+    .tl-tile-count { display: block; font-size: 1.55rem; font-weight: 700; color: #fff; line-height: 1.1; }
+    .tl-tile-stage { display: block; font-size: 0.74rem; font-weight: 700; color: #ccfbf1; margin-top: 0.15rem; }
+    .tl-tile-hint { display: block; font-size: 0.7rem; color: var(--cw-muted, #97a3b6); margin-top: 0.1rem; }
+
+    .tl-table-wrap { overflow-x: auto; }
+    .tl-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; color: rgba(238, 242, 247, 0.9); }
+    .tl-table th {
+        text-align: left;
+        font-size: 0.64rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+        color: var(--cw-muted, #97a3b6);
+        padding: 0.35rem 0.5rem;
+        border-bottom: 1px solid rgba(120, 150, 200, 0.25);
+    }
+    .tl-table td {
+        padding: 0.45rem 0.5rem;
+        border-bottom: 1px solid rgba(120, 150, 200, 0.12);
+        vertical-align: top;
+        line-height: 1.4;
+    }
+    .tl-table tr.is-focus td { background: color-mix(in srgb, var(--leader-accent) 10%, transparent); }
+    .tl-table .tl-case { white-space: nowrap; }
+    .tl-table .tl-case small { display: block; color: var(--cw-muted, #97a3b6); }
+    .tl-note { margin: 0.45rem 0 0 0 !important; font-size: 0.8rem !important; }
+
+    .tl-badge {
+        display: inline-block;
+        padding: 0.05rem 0.5rem;
+        border-radius: 999px;
+        font-size: 0.66rem; font-weight: 700;
+        text-transform: uppercase; letter-spacing: 0.06em;
+        border: 1px solid rgba(148, 163, 184, 0.4);
+        color: #cbd5e1;
+        background: rgba(148, 163, 184, 0.12);
+        white-space: nowrap;
+        margin-right: 0.35rem;
+    }
+    .tl-badge.due, .tl-badge.urgent { color: #fca5a5; border-color: rgba(239, 68, 68, 0.45); background: rgba(239, 68, 68, 0.14); }
+    .tl-badge.running, .tl-badge.high { color: #fde68a; border-color: rgba(245, 158, 11, 0.45); background: rgba(245, 158, 11, 0.14); }
+    .tl-badge.paused { color: #c4b5fd; border-color: rgba(139, 92, 246, 0.45); background: rgba(139, 92, 246, 0.14); }
+    .tl-badge.ok { color: #86efac; border-color: rgba(34, 197, 94, 0.45); background: rgba(34, 197, 94, 0.14); }
+    .tl-badge.watch { color: #99f6e4; border-color: rgba(20, 184, 166, 0.45); background: rgba(20, 184, 166, 0.12); }
+
+    .tl-escalations, .tl-list { list-style: none; margin: 0; padding: 0; }
+    .tl-escalations li, .tl-list li {
+        background: rgba(10, 16, 28, 0.65);
+        border: 1px solid rgba(120, 150, 200, 0.16);
+        border-radius: 8px;
+        padding: 0.5rem 0.7rem;
+        margin-bottom: 0.4rem;
+        font-size: 0.84rem;
+        line-height: 1.45;
+        color: rgba(238, 242, 247, 0.9);
+    }
+    .tl-escalations li.is-focus, .tl-list li.is-focus {
+        border-color: color-mix(in srgb, var(--leader-accent) 55%, transparent);
+        background: color-mix(in srgb, var(--leader-accent) 9%, rgba(10, 16, 28, 0.65));
+    }
+    .tl-escalations .tl-esc-meta, .tl-list .tl-meta { display: block; font-size: 0.76rem; color: var(--cw-muted, #97a3b6); margin-top: 0.15rem; }
+    .tl-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1rem; }
+    @@media (max-width: 820px) { .tl-grid-2 { grid-template-columns: 1fr; } }
+    .tl-priorities { margin: 0 0 0 1.2rem; padding: 0; font-size: 0.86rem; color: rgba(238, 242, 247, 0.92); line-height: 1.5; }
+    .tl-priorities li { margin-bottom: 0.3rem; }
+    .tl-priorities li::marker { color: var(--leader-accent); font-weight: 700; }
 
     /* ── Group Chat panel ─────────────────────────────────────────────── */
     .groupchat-panel { --leader-accent: #14b8a6; }
@@ -467,4 +646,3 @@
     .gc-msg.gc-error { border-left-color: #f87171; background: rgba(127, 29, 29, 0.25); }
     .gc-msg.gc-conclude { border-left-color: #34d399; background: color-mix(in srgb, #34d399 10%, rgba(10, 16, 28, 0.7)); }
 </style>
-

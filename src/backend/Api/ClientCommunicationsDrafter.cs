@@ -82,7 +82,7 @@ internal static class ClientCommunicationsDrafter
         var summary = new CaseSummary(
             SentimentLabel: "Positive · busy",
             Sentiment:
-                "Priya has just started a new job and wants her super \"set up properly first time\" and done digitally. " +
+                "Priya has just started a new job and wants it done digitally and properly: \"I've got super scattered across old jobs — I just want one account, set up properly.\" " +
                 "Low anxiety, high expectations — she'll appreciate short sections and two clear actions. " +
                 "Hannah (her adviser) wants a clean onboarding and a precise list of what's still needed.",
             WhatHappened:
@@ -310,7 +310,7 @@ internal static class ClientCommunicationsDrafter
             Channel: "SMS (pre-change verified mobile only)",
             Recipient: $"{r.ClientName} · 0403 118 220 — never 0488 902 551",
             Subject: null,
-            Body: $"Caldova: Hi Grace, as we discussed, your super is safe and no money has moved. We've emailed you at your usual address. We'll never ask for codes or passwords. {CaldovaPhone}",
+            Body: $"Caldova: Hi Grace, as discussed, your super is safe and no money has moved. Details are in your usual email. We never ask for codes or passwords. {CaldovaPhone}",
             Tone: "Brief and reassuring; no links.",
             Compliance:
             [
@@ -378,7 +378,7 @@ internal static class ClientCommunicationsDrafter
 
                 **Your payment schedule**
 
-                | | |
+                | Payment | Details |
                 |---|---|
                 | Regular payment | **$6,500 a month** ($78,000 a year) |
                 | First payment | **Tuesday 15 December 2026** |
@@ -474,7 +474,7 @@ internal static class ClientCommunicationsDrafter
             Channel: "SMS",
             Recipient: $"{r.ClientName} · {r.ClientPhone}",
             Subject: null,
-            Body: $"Caldova: Congratulations on your retirement, George! Your pension CP-3077881 has started. Your first $6,500 payment arrives 15 Dec. Letter on its way. Questions? {CaldovaPhone}",
+            Body: $"Caldova: Congratulations on your retirement, George! Your pension has started and your first $6,500 payment arrives 15 Dec. Letter to follow. {CaldovaPhone}",
             Tone: "Short, warm and celebratory.",
             Compliance:
             [
@@ -740,7 +740,7 @@ internal static class ClientCommunicationsDrafter
             Channel: "SMS",
             Recipient: $"{r.ClientName} · {r.ClientPhone}",
             Subject: null,
-            Body: $"Caldova: Robert, we're so sorry for your loss. Your mother's pension has been paid as she wished, and we've emailed you the details. Call Cara on {CaldovaPhone} anytime.",
+            Body: $"Caldova: Robert, we're so sorry for your loss. Your mother's pension has been paid as she wished; details are in your email. Call Cara on {CaldovaPhone} anytime.",
             Tone: "Gentle; sent after Cara's call, never instead of it.",
             Compliance:
             [

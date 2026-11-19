@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using ClosedXML.Excel;
 using Microsoft.Extensions.Logging;
@@ -56,6 +57,7 @@ public class InvestmentsMcpTools
     {
         WriteIndented = false,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
     };
 
@@ -210,7 +212,7 @@ public class InvestmentsMcpTools
                 Note: c.Option.Note);
         }).ToList();
 
-        var feeBasis = new FeeBasis(
+        var feeBasis = new ModelFeeBasis(
             Balance: balance,
             AdminFee: admin,
             AdminFeeWorking: AdminFeeWorking(balance),
@@ -223,7 +225,7 @@ public class InvestmentsMcpTools
         var highest = rows.OrderByDescending(r => r.TotalFee).First();
         var selected = rows.FirstOrDefault(r => r.Selected);
 
-        var summary = new ComparisonSummary(
+        var summary = new ModelComparisonSummary(
             LowestCostOption: lowest.Name,
             LowestTotal: lowest.TotalFee,
             HighestCostOption: highest.Name,
@@ -248,7 +250,7 @@ public class InvestmentsMcpTools
             Summary: summary);
     }
 
-    private static string BuildComparisonMarkdown(IReadOnlyList<ModelCostRow> rows, FeeBasis basis)
+    private static string BuildComparisonMarkdown(IReadOnlyList<ModelCostRow> rows, ModelFeeBasis basis)
     {
         var md = new StringBuilder();
         md.AppendLine("| Option | Growth / defensive | Investment fee (ICR) | Investment fee p.a. | Admin + account-keeping fee p.a. | Total Caldova fees p.a. |");
@@ -277,7 +279,7 @@ public class InvestmentsMcpTools
         return md.ToString().TrimEnd();
     }
 
-    private static List<string> BuildObservations(IReadOnlyList<ModelCostRow> rows, FeeBasis basis, IReadOnlyList<ModelOption> options)
+    private static List<string> BuildObservations(IReadOnlyList<ModelCostRow> rows, ModelFeeBasis basis, IReadOnlyList<ModelOption> options)
     {
         var obs = new List<string>();
         var lowest = rows.OrderBy(r => r.TotalFee).First();
@@ -373,7 +375,7 @@ public class InvestmentsMcpTools
         if (string.IsNullOrWhiteSpace(caseNumber))
             return JsonError("caseNumber is required.");
 
-        JsonSection summary;
+        WorkbookJsonSection summary;
         try { summary = ReadSection(caseSummaryJson); }
         catch (Exception ex) { return JsonError($"Could not parse caseSummaryJson: {ex.Message}"); }
 
@@ -381,7 +383,7 @@ public class InvestmentsMcpTools
         try { models = string.IsNullOrWhiteSpace(modelsJson) ? ModelsPayload.Empty : ParseModelsPayload(modelsJson); }
         catch (Exception ex) { return JsonError($"Could not parse modelsJson: {ex.Message}"); }
 
-        JsonSection recs;
+        WorkbookJsonSection recs;
         try { recs = ReadSection(recommendationsJson); }
         catch (Exception ex) { return JsonError($"Could not parse recommendationsJson: {ex.Message}"); }
 
@@ -442,7 +444,7 @@ public class InvestmentsMcpTools
     private static readonly XLColor AccentColour = XLColor.FromHtml("#F59E0B");
     private const string MoneyFormat = "$#,##0.00";
 
-    private static void WriteSummarySheet(XLWorkbook wb, string caseNumber, JsonSection summary, List<string> sheets)
+    private static void WriteSummarySheet(XLWorkbook wb, string caseNumber, WorkbookJsonSection summary, List<string> sheets)
     {
         var ws = wb.Worksheets.Add(UniqueSheetName(wb, "Case Summary"));
         sheets.Add(ws.Name);
@@ -653,7 +655,7 @@ public class InvestmentsMcpTools
         FitColumns(ws, columns.Count, 60);
     }
 
-    private static void WriteRecommendationsSheet(XLWorkbook wb, JsonSection recs, List<string> sheets)
+    private static void WriteRecommendationsSheet(XLWorkbook wb, WorkbookJsonSection recs, List<string> sheets)
     {
         var ws = wb.Worksheets.Add(UniqueSheetName(wb, "Recommendations"));
         sheets.Add(ws.Name);
@@ -877,6 +879,10 @@ public class InvestmentsMcpTools
                 band = b;
             }
         }
+        // Re-parsing our own serialised FactSheet (analyzeFactSheet output).
+        band ??= (int?)Dec(el, "riskBand");
+        riskLabel ??= Str(el, "riskLabel");
+        negativeYears ??= Str(el, "negativeYearsIn20");
 
         FactSheetReturns? returns = null;
         if (el.TryGetProperty("returns", out var ret) && ret.ValueKind == JsonValueKind.Object)
@@ -890,7 +896,7 @@ public class InvestmentsMcpTools
                 Warning: Str(ret, "warning") ?? PastPerformanceWarning);
         }
 
-        var allocation = new List<AllocationRow>();
+        var allocation = new List<FactSheetAllocation>();
         if (el.TryGetProperty("assetAllocation", out var aa) && aa.ValueKind == JsonValueKind.Array)
         {
             foreach (var a in aa.EnumerateArray())
@@ -898,18 +904,18 @@ public class InvestmentsMcpTools
                 var assetClass = Str(a, "assetClass") ?? Str(a, "name");
                 var target = Dec(a, "targetPercent") ?? Dec(a, "percent") ?? Dec(a, "weightPercent");
                 if (assetClass is not null && target is not null)
-                    allocation.Add(new AllocationRow(assetClass, Str(a, "type") ?? string.Empty, target.Value, Str(a, "rangePercent")));
+                    allocation.Add(new FactSheetAllocation(assetClass, Str(a, "type") ?? string.Empty, target.Value, Str(a, "rangePercent")));
             }
         }
 
-        var holdings = new List<HoldingRow>();
+        var holdings = new List<FactSheetHolding>();
         if (el.TryGetProperty("topHoldings", out var th) && th.ValueKind == JsonValueKind.Array)
         {
             foreach (var h in th.EnumerateArray())
             {
                 var holding = h.ValueKind == JsonValueKind.String ? h.GetString() : Str(h, "holding") ?? Str(h, "name");
                 if (!string.IsNullOrWhiteSpace(holding))
-                    holdings.Add(new HoldingRow(holding!, Dec(h, "weightPercent") ?? Dec(h, "weight")));
+                    holdings.Add(new FactSheetHolding(holding!, Dec(h, "weightPercent") ?? Dec(h, "weight")));
             }
         }
 
@@ -1008,8 +1014,8 @@ public class InvestmentsMcpTools
             Returns: r1 is null && r3 is null && r5 is null
                 ? null
                 : new FactSheetReturns(null, r1, r3, r5, null, PastPerformanceWarning),
-            AssetAllocation: Array.Empty<AllocationRow>(),
-            TopHoldings: Array.Empty<HoldingRow>(),
+            AssetAllocation: Array.Empty<FactSheetAllocation>(),
+            TopHoldings: Array.Empty<FactSheetHolding>(),
             SectorNotes: Array.Empty<string>(),
             AvailableOn: Array.Empty<string>(),
             SuitableFor: null,
@@ -1161,9 +1167,9 @@ public class InvestmentsMcpTools
         return false;
     }
 
-    private static JsonSection ReadSection(string? json)
+    private static WorkbookJsonSection ReadSection(string? json)
     {
-        var section = new JsonSection();
+        var section = new WorkbookJsonSection();
         if (string.IsNullOrWhiteSpace(json)) return section;
 
         using var doc = JsonDocument.Parse(json);
@@ -1374,6 +1380,7 @@ public class InvestmentsMcpTools
         return shortName.Length == 0 ? name : shortName;
     }
 
+    // "humanApprovalRequired" → "Human approval required" (sentence case labels).
     private static string Humanize(string name)
     {
         if (string.IsNullOrEmpty(name)) return name;
@@ -1382,8 +1389,18 @@ public class InvestmentsMcpTools
         for (var i = 1; i < name.Length; i++)
         {
             var c = name[i];
-            if (char.IsUpper(c) && !char.IsUpper(name[i - 1])) sb.Append(' ');
-            sb.Append(c == '_' ? ' ' : c);
+            if (c == '_')
+            {
+                sb.Append(' ');
+                continue;
+            }
+            if (char.IsUpper(c) && !char.IsUpper(name[i - 1]))
+            {
+                sb.Append(' ');
+                sb.Append(char.ToLowerInvariant(c));
+                continue;
+            }
+            sb.Append(c);
         }
         return sb.ToString();
     }
@@ -1412,9 +1429,9 @@ public class InvestmentsMcpTools
 // Investment data shapes (serialised camelCase in tool output)
 // ─────────────────────────────────────────────────────────────────────────
 
-internal sealed record AllocationRow(string AssetClass, string Type, decimal TargetPercent, string? RangePercent);
+internal sealed record FactSheetAllocation(string AssetClass, string Type, decimal TargetPercent, string? RangePercent);
 
-internal sealed record HoldingRow(string Holding, decimal? WeightPercent);
+internal sealed record FactSheetHolding(string Holding, decimal? WeightPercent);
 
 internal sealed record FactSheetReturns(
     string? PeriodEnding,
@@ -1441,8 +1458,8 @@ internal sealed record FactSheet(
     string? NegativeYearsIn20,
     int? MinimumTimeframeYears,
     FactSheetReturns? Returns,
-    IReadOnlyList<AllocationRow> AssetAllocation,
-    IReadOnlyList<HoldingRow> TopHoldings,
+    IReadOnlyList<FactSheetAllocation> AssetAllocation,
+    IReadOnlyList<FactSheetHolding> TopHoldings,
     IReadOnlyList<string> SectorNotes,
     IReadOnlyList<string> AvailableOn,
     string? SuitableFor,
@@ -1476,7 +1493,7 @@ internal sealed record ModelsPayload(List<ModelOption> Options, List<FactSheet> 
     public static ModelsPayload Empty => new(new List<ModelOption>(), new List<FactSheet>(), null);
 }
 
-internal sealed record FeeBasis(
+internal sealed record ModelFeeBasis(
     decimal Balance,
     decimal AdminFee,
     string AdminFeeWorking,
@@ -1504,7 +1521,7 @@ internal sealed record ModelCostRow(
     string? Style,
     string? Note);
 
-internal sealed record ComparisonSummary(
+internal sealed record ModelComparisonSummary(
     string LowestCostOption,
     decimal LowestTotal,
     string HighestCostOption,
@@ -1515,15 +1532,15 @@ internal sealed record ComparisonSummary(
 
 internal sealed record ModelComparison(
     decimal Balance,
-    FeeBasis FeeBasis,
+    ModelFeeBasis FeeBasis,
     IReadOnlyList<ModelCostRow> Rows,
     string ComparisonMarkdown,
     string ChartMermaid,
     IReadOnlyList<string> Observations,
-    ComparisonSummary Summary);
+    ModelComparisonSummary Summary);
 
 /// <summary>Flattened view of a free-form JSON object passed to the workbook tool.</summary>
-internal sealed class JsonSection
+internal sealed class WorkbookJsonSection
 {
     public List<(string Label, object? Value)> Fields { get; } = new();
     public List<(string Name, List<List<(string Column, object? Value)>> Rows)> Tables { get; } = new();

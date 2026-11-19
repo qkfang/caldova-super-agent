@@ -183,7 +183,12 @@ aside h2 {
 .agent-card .status {
   font-size: 9px;
   padding: 2px 6px;
-  border-radius: 999px;
+  /* Cap the pill so long status lines wrap instead of squeezing the
+     staff name and role column. */
+  max-width: 128px;
+  text-align: center;
+  line-height: 1.25;
+  border-radius: 10px;
   background: rgba(255, 255, 255, 0.06);
   color: var(--muted);
   text-transform: uppercase;
