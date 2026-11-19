@@ -30,6 +30,14 @@ record OnboardingSubmitRequest(
     IReadOnlyList<OnboardingNigoItem>? Nigo);
 
 /// <summary>
+/// One hand-off for a newly opened Member Case: the agent page route id
+/// (e.g. <c>benefits-eligibility</c>), why the case goes there, and whether
+/// that team picks it up next (<paramref name="Primary"/>) or is told in
+/// parallel.
+/// </summary>
+public record OnboardingRoute(string AgentId, string Reason, bool Primary);
+
+/// <summary>
 /// HTTP endpoints behind the "Try it out" tab on the Onboarding agent page
 /// (<c>/agents/onboarding</c>). They let the page:
 ///
@@ -298,49 +306,50 @@ public static class OnboardingApi
     /// <summary>
     /// Hand-offs for a newly opened case, by request type, following the
     /// canonical scenario flows. Primary routes are the specialists who pick
-    /// the case up next; the others are told about it in parallel.
+    /// the case up next; the others are told about it in parallel. Also used
+    /// by the Onboarding page's Overview tab.
     /// </summary>
-    private static IReadOnlyList<(string AgentId, string Reason, bool Primary)> RoutesFor(string requestType) =>
-        requestType switch
+    public static IReadOnlyList<OnboardingRoute> RoutesFor(string? requestType) =>
+        CanonicalRequestType(requestType) switch
         {
             RequestTypes.NewAccount =>
             [
-                ("financial-crime", "KYC/AML screening (PEP and sanctions) before any money moves.", true),
-                ("benefits-eligibility", "Rules check — s99FA adviser fee consent, binding nomination and investment fit (TMD).", true),
-                ("transfers-rollovers", "Consolidate the external funds by SuperStream — warn about insurance cover that ends on rollover.", false),
+                new("financial-crime", "KYC/AML screening (PEP and sanctions) before any money moves.", true),
+                new("benefits-eligibility", "Rules check — s99FA adviser fee consent, binding nomination and investment fit (TMD).", true),
+                new("transfers-rollovers", "Consolidate the external funds by SuperStream — warn about insurance cover that ends on rollover.", false),
             ],
             RequestTypes.RolloverOutSmsf =>
             [
-                ("financial-crime", "Urgent referral — account-takeover indicators. Contact the member only on the verified details held before any recent change.", true),
-                ("benefits-eligibility", "SMSF rollover rules — the ATO SMSF verification service (SVS) must pass before any rollover.", true),
-                ("transfers-rollovers", "Hold — don't dispatch the rollover until Financial Crime and Benefits & Eligibility clear it.", false),
+                new("financial-crime", "Urgent referral — account-takeover indicators. Contact the member only on the verified details held before any recent change.", true),
+                new("benefits-eligibility", "SMSF rollover rules — the ATO SMSF verification service (SVS) must pass before any rollover.", true),
+                new("transfers-rollovers", "Hold — don't dispatch the rollover until Financial Crime and Benefits & Eligibility clear it.", false),
             ],
             RequestTypes.PensionCommencement =>
             [
-                ("benefits-eligibility", "Condition of release, transfer balance cap, minimum drawdown and reversionary nomination.", true),
-                ("investment-analyst", "Income strategy — cash bucket and model portfolio for the adviser to discuss.", false),
-                ("team-leader", "Commencement of $1,000,000 or more needs Team Leader approval before it starts.", false),
+                new("benefits-eligibility", "Condition of release, transfer balance cap, minimum drawdown and reversionary nomination.", true),
+                new("investment-analyst", "Income strategy — cash bucket and model portfolio for the adviser to discuss.", false),
+                new("team-leader", "Commencement of $1,000,000 or more needs Team Leader approval before it starts.", false),
             ],
             RequestTypes.FinancialHardship =>
             [
-                ("benefits-eligibility", "Severe financial hardship criteria and the $10,000 payment limit.", true),
-                ("team-leader", "Vulnerable-member review — hardship releases always need human approval.", false),
+                new("benefits-eligibility", "Severe financial hardship criteria and the $10,000 payment limit.", true),
+                new("team-leader", "Vulnerable-member review — hardship releases always need human approval.", false),
             ],
             RequestTypes.DeathBenefit =>
             [
-                ("team-leader", "Case owner — compassionate oversight; every death benefit needs Team Leader approval.", true),
-                ("financial-crime", "Authenticity check of the certified death certificate and beneficiaries' ID.", false),
-                ("benefits-eligibility", "Binding nomination validity, SIS dependants and tax status.", false),
-                ("payments", "Stop pension payments on the deceased member's account now.", false),
+                new("team-leader", "Case owner — compassionate oversight; every death benefit needs Team Leader approval.", true),
+                new("financial-crime", "Authenticity check of the certified death certificate and beneficiaries' ID.", false),
+                new("benefits-eligibility", "Binding nomination validity, SIS dependants and tax status.", false),
+                new("payments", "Stop pension payments on the deceased member's account now.", false),
             ],
             _ =>
             [
-                ("benefits-eligibility", "Assess the request against the PDS, trust deed and super law.", true),
+                new("benefits-eligibility", "Assess the request against the PDS, trust deed and super law.", true),
             ],
         };
 
     private static IReadOnlyList<object> BuildRouting(string? requestType) =>
-        RoutesFor(CanonicalRequestType(requestType))
+        RoutesFor(requestType)
             .Select(r =>
             {
                 var agent = AgentCatalog.FindById(r.AgentId);

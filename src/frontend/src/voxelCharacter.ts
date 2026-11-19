@@ -719,7 +719,7 @@ export class VoxelCharacter {
    * AI sub-agent currently delegated to the case. Each icon is a flat
    * billboard plane painted with the staff member's palette (skin/hair/shirt)
    * so the audience reads them as the same persona's AI clones, and carries
-   * a floating name label such as "Agent Iris #1 — Intake Triage Assistant".
+   * a floating name label such as "Agent Olivia #1 — Form Extraction".
    *
    * Pass an empty array (or call `hideThoughtBulbs`) to clear.
    */
@@ -834,7 +834,7 @@ export class VoxelCharacter {
 
 /**
  * Build a flat plane mesh whose material renders a small label such as
- * "Agent Iris #1" via DynamicTexture. Used by `showThoughtBulbs` to put
+ * "Agent Olivia #1" via DynamicTexture. Used by `showThoughtBulbs` to put
  * a floating name above each AI sub-agent persona bulb.
  */
 function makeAgentLabelMesh(scene: Scene, name: string, text: string): Mesh {

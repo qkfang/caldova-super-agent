@@ -48,6 +48,9 @@ resource project 'Microsoft.CognitiveServices/accounts/projects@2025-06-01' = {
 resource modelDeployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
   parent: foundry
   name: 'gpt-5.4'
+  dependsOn: [
+    project
+  ]
   sku: {
     name: 'GlobalStandard'
     capacity: 100
@@ -79,6 +82,9 @@ resource bingAccount 'Microsoft.Bing/accounts@2020-06-10' = {
 resource aiSearchConnection 'Microsoft.CognitiveServices/accounts/connections@2025-10-01-preview' = if (aiSearchEndpoint != '') {
   parent: foundry
   name: 'ai-search-connection'
+  dependsOn: [
+    modelDeployment
+  ]
   properties: {
     authType: 'AAD'
     category: 'CognitiveSearch'
@@ -94,6 +100,9 @@ resource aiSearchConnection 'Microsoft.CognitiveServices/accounts/connections@20
 resource aiSearchProjectConnection 'Microsoft.CognitiveServices/accounts/projects/connections@2025-10-01-preview' = if (aiSearchEndpoint != '') {
   parent: project
   name: 'ai-search-connection-project'
+  dependsOn: [
+    aiSearchConnection
+  ]
   properties: {
     authType: 'AAD'
     category: 'CognitiveSearch'
@@ -110,6 +119,9 @@ resource aiSearchProjectConnection 'Microsoft.CognitiveServices/accounts/project
 resource bingSearchConnection 'Microsoft.CognitiveServices/accounts/connections@2025-10-01-preview' = {
   parent: foundry
   name: '${name}-bingsearchconnection'
+  dependsOn: [
+    aiSearchProjectConnection
+  ]
   properties: {
     authType: 'ApiKey'
     category: 'GroundingWithBingSearch'
@@ -129,7 +141,10 @@ resource bingSearchConnection 'Microsoft.CognitiveServices/accounts/connections@
 #disable-next-line BCP081
 resource bingSearchProjectConnection 'Microsoft.CognitiveServices/accounts/projects/connections@2025-10-01-preview' = {
   parent: project
-  name: '${name}-bingsearchconnection'
+  name: '${name}-bingsearchconnection-project'
+  dependsOn: [
+    bingSearchConnection
+  ]
   properties: {
     authType: 'ApiKey'
     category: 'GroundingWithBingSearch'

@@ -12,7 +12,7 @@
     "benefits": "Ben assessing REQ-20261113-DEMO05: BDBN validity (SIS reg 6.17A), SIS dependants and tax dependency",
     "benefitsResult": "Ben: BDBN is binding ✓ — pay Robert 50% and Lily 50%; adult children are not tax dependants, so the taxable component is withheld at 17%",
     "payment": "Penny prepares two death benefit payments for REQ-20261113-DEMO05 — $243,100 gross each",
-    "paymentResult": "Death benefit PAID after Teams approval — $217,477.26 net each to Robert and Lily ($25,622.74 withheld from each)",
+    "paymentResult": "Death benefit PAID after Team Leader approval in Teams — $217,477.26 net each to Robert and Lily ($25,622.74 withheld from each)",
     "comms": "Cara sends condolence letters to Robert and Lily with a plain-English tax explanation and their IDR and AFCA rights — case closed"
   },
   "preBenefits": [
@@ -47,7 +47,7 @@
     {"at": "Benefits & Eligibility Assessor", "action": "benefits-process", "narration": "Ben: BDBN signed 18 Mar 2024 before two adult non-beneficiary witnesses ✓, valid until 18 Mar 2027 ✓, Robert 50% and Lily 50% — both SIS dependants ✓. It is binding: the trustee must pay as nominated.", "duration": 2.5},
     {"at": "Investment Analyst", "action": "investment-review", "narration": "Ivy redeems Mei's pension portfolio to cash and notes that the final amounts depend on market movements until the units are sold.", "duration": 2.5},
     {"at": "Benefits & Eligibility Assessor", "action": "benefits-handoff", "narration": "Ben hands the case to Payments with the 50/50 beneficiary split."},
-    {"at": "Payments Officer", "action": "payment", "narration": "Penny calculates each payment: gross $243,100 — tax-free $92,378, taxable $150,722, 17% withheld ($25,622.74) — and pays $217,477.26 to each child after Teams approval.", "duration": 2.5, "outcome": "approved"},
+    {"at": "Payments Officer", "action": "payment", "narration": "Penny calculates each payment: gross $243,100 — tax-free $92,378, taxable $150,722, 17% withheld ($25,622.74) — and pays $217,477.26 to each child once Theo approves the Microsoft Teams card (every death benefit needs Team Leader approval).", "duration": 2.5, "outcome": "approved"},
     {"at": "Client Communications Specialist", "action": "comms-notify", "narration": "Cara sends Robert and Lily gentle condolence letters explaining the tax, the timeline and their complaint rights (IDR, then AFCA).", "duration": 2.5}
   ],
   "result": {

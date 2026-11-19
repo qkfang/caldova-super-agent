@@ -12,34 +12,33 @@ import { PALETTES } from "./characterPalettes";
 import {
   NeighbourhoodAmbient,
   buildCarMeshes,
-  buildFireTruckMeshes,
   buildVanMeshes,
   buildJeepMeshes,
-  buildTowTruckMeshes,
   makeCalmGlowIncident,
-  makeLuggageIncident,
-  makeRearEndIncident,
-  makeSmokeIncident,
+  makeCelebrationIncident,
+  makeHardshipCloudIncident,
+  makeIdentityAlertIncident,
+  makeRetirementIncident,
 } from "./neighbourhoodAmbient";
 import type { ScenarioId } from "./personaData";
 import { VoxelCharacter } from "./voxelCharacter";
 
 /**
- * Build the voxel "Claims Neighbourhood" scene as described in
- * `docs/theme_neighhood.md`.
+ * Build the voxel Melbourne neighbourhood around Caldova Wealth — Client
+ * Operations, as described in `docs/theme_neighhood.md`.
  *
- * The neighbourhood is the **starting point** of every claim. It contains
- * five incident zones, each tied to an insurance product:
+ * The neighbourhood is the **starting point** of every request. It contains
+ * five life-event zones, one per scripted client scenario:
  *
- *   - Residential street       — home insurance (burst pipe)
- *   - Main road / intersection — motor insurance (rear-end accident)
- *   - High street              — small-business insurance (café fire)
- *   - Travel hub               — travel insurance (lost luggage)
- *   - Quiet suburb home        — life insurance (bereavement)
+ *   - Docklands — new job (Priya: new account & super consolidation)
+ *   - Airport   — overseas trip (Grace: identity-takeover attempt)
+ *   - Oakleigh  — retirement (George: account-based pension)
+ *   - Lygon St  — café closed (Tom: financial hardship release)
+ *   - Box Hill  — family home (Robert: death benefit)
  *
- * The Zava Insurance Claims Office sits at the centre as the visual anchor. Roads
- * connect every zone to the office door so customers can be seen "heading
- * to the office".
+ * The Caldova Wealth — Client Operations building sits at the centre as the
+ * visual anchor. Roads connect every zone to the office door so clients
+ * can be seen "heading to the office".
  *
  * The function is intentionally side-effect-only: it adds meshes to the
  * provided `scene`. All pieces are parented to a single root TransformNode
@@ -47,29 +46,29 @@ import { VoxelCharacter } from "./voxelCharacter";
  */
 /**
  * Anchor points exported alongside the neighbourhood scene so the
- * scenario runner can place the customer voxel character at the right
- * incident zone, focus the camera there, and walk them along the path
+ * scenario runner can place the client voxel character at the right
+ * life-event zone, focus the camera there, and walk them along the path
  * toward the office front door.
  */
 export interface IncidentZones {
   /** Position in front of the office door (where the route ends). */
   officeDoor: Vector3;
-  /** Per-scenario incident anchor (where the customer spawns). */
-  home: Vector3;
-  motor: Vector3;
-  business: Vector3;
-  travel: Vector3;
-  life: Vector3;
+  /** Per-scenario life-event anchor (where the client spawns). */
+  onboarding: Vector3;
+  protection: Vector3;
+  retirement: Vector3;
+  hardship: Vector3;
+  bereavement: Vector3;
 }
 
 export interface NeighbourhoodResult {
   root: TransformNode;
   zones: IncidentZones;
-  /** Per-frame tick — drives ambient cars/people/pets and active incidents. */
+  /** Per-frame tick — drives ambient cars/people/pets and active life events. */
   update(dtSec: number): void;
-  /** Play the scripted incident animation for the given scenario. */
+  /** Play the scripted life-event animation for the given scenario. */
   playIncident(id: ScenarioId): void;
-  /** Stop any in-flight incident animation (e.g. on cancel). */
+  /** Stop any in-flight life-event animation (e.g. on cancel). */
   clearIncident(): void;
 }
 
@@ -155,8 +154,8 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
   // side-road tarmac.
   for (let x = -38; x <= 38; x += 4) {
     if (Math.abs(x) < 4) continue; // skip intersection
-    if (x > -28 && x < -24) continue; // Cedar Way crossing
-    if (x > 31 && x < 35) continue; // Oak Drive crossing
+    if (x > -28 && x < -24) continue; // Flinders Lane crossing
+    if (x > 31 && x < 35) continue; // Toorak Rd crossing
     const dash = MeshBuilder.CreateBox(
       `nh_dash_h_${x}`,
       { width: 1.6, height: 0.02, depth: 0.18 },
@@ -168,8 +167,8 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
   }
   for (let z = -38; z <= 38; z += 4) {
     if (Math.abs(z) < 4) continue;
-    if (z > -12 && z < -8) continue; // Birch Lane crossing
-    if (z > 18 && z < 22) continue; // Maple Crescent crossing
+    if (z > -12 && z < -8) continue; // Collins St crossing
+    if (z > 18 && z < 22) continue; // Glenferrie Rd crossing
     const dash = MeshBuilder.CreateBox(
       `nh_dash_v_${z}`,
       { width: 0.18, height: 0.02, depth: 1.6 },
@@ -217,10 +216,10 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
   };
 
   /**
-   * Build a properly-modelled static voxel vehicle (sedan or jeep) with
-   * cabin, windscreen and four wheels — reusing the same mesh recipes as
-   * the ambient traffic so static "highlight" cars (motor collision pair,
-   * rental car, parked family car, investigator's sedan) read as real
+   * Build a properly-modelled static voxel vehicle (sedan, jeep or van)
+   * with cabin, windscreen and wheels — reusing the same mesh recipes as
+   * the ambient traffic so parked cars (Docklands kerbside, the family
+   * car in Box Hill, the apartment resident's sedan) read as real
    * vehicles instead of plain coloured boxes.
    *
    * The ambient builders model the car along local +Z. `rotY` rotates the
@@ -229,7 +228,7 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
    */
   const makeStaticVehicle = (
     name: string,
-    kind: "car" | "jeep" | "firetruck" | "van" | "towtruck",
+    kind: "car" | "jeep" | "van",
     pos: Vector3,
     rotY: number,
     bodyHex: string,
@@ -241,12 +240,8 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
     node.rotation.y = rotY;
     if (kind === "jeep") {
       buildJeepMeshes(scene, node, bodyHex, topHex);
-    } else if (kind === "firetruck") {
-      buildFireTruckMeshes(scene, node, bodyHex, topHex);
     } else if (kind === "van") {
       buildVanMeshes(scene, node, bodyHex, topHex);
-    } else if (kind === "towtruck") {
-      buildTowTruckMeshes(scene, node, bodyHex, topHex);
     } else {
       buildCarMeshes(scene, node, bodyHex, topHex);
     }
@@ -517,7 +512,23 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
     }
   };
 
-  // A small wooden street sign at the corner of an intersection.
+  // Shrink a bold font until `text` fits within `maxWidth` texture pixels.
+  const fitFont = (
+    ctx: CanvasRenderingContext2D,
+    text: string,
+    maxWidth: number,
+    startPx: number,
+    minPx = 24,
+  ): void => {
+    let px = startPx;
+    ctx.font = `bold ${px}px sans-serif`;
+    while (ctx.measureText(text).width > maxWidth && px > minPx) {
+      px -= 2;
+      ctx.font = `bold ${px}px sans-serif`;
+    }
+  };
+
+  // A small street-name sign at the corner of an intersection.
   const makeStreetSign = (
     x: number,
     z: number,
@@ -549,7 +560,7 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
     c.fillStyle = color;
     c.fillRect(0, 0, 512, 96);
     c.fillStyle = "#ffffff";
-    c.font = "bold 48px sans-serif";
+    fitFont(c, text, 470, 48);
     c.textBaseline = "middle";
     c.textAlign = "center";
     c.fillText(text, 256, 50);
@@ -820,13 +831,13 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
   // Small voxel person — used so the streets feel alive. We don't animate
   // them; the office scene has the live agent simulation. Here they're
   // built with the **same** `VoxelCharacter` class the office uses, so a
-  // customer in the neighbourhood looks identical to the same persona
+  // client in the neighbourhood looks identical to the same persona
   // when they arrive at the office reception. `paletteKey` selects one
-  // of the entries in `PALETTES` (e.g. "customerHome", "intakeOfficer").
+  // of the entries in `PALETTES` (e.g. "customerRetirement", "onboardingOfficer").
   const makePerson = (
     x: number,
     z: number,
-    paletteKey: keyof typeof PALETTES = "customerHome",
+    paletteKey: keyof typeof PALETTES = "cityCommuter",
     faceTowards?: { x: number; z: number },
   ): void => {
     const palette = PALETTES[paletteKey];
@@ -839,12 +850,14 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
     }
   };
 
-  // Incident marker — a floating "!" bubble above an incident.
+  // Life-event marker — a floating glyph bubble above each zone. Only the
+  // identity-takeover alert carries a "!" — the other life events are
+  // milestones, not alarms.
   const makeIncidentMarker = (
     x: number,
     y: number,
     z: number,
-    icon: "water" | "car" | "fire" | "luggage" | "heart" | "fraud",
+    icon: "briefcase" | "shield" | "party" | "handshake" | "heart",
   ): void => {
     const bubble = MeshBuilder.CreateBox(
       `nh_marker_${x}_${z}`,
@@ -852,10 +865,6 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
       scene,
     );
     bubble.position = new Vector3(x, y, z);
-    const bubbleMat = new StandardMaterial(`nh_marker_mat_${x}_${z}`, scene);
-    bubbleMat.diffuseColor = Color3.FromHexString("#fff5d6");
-    bubbleMat.emissiveColor = Color3.FromHexString("#ffd166");
-    bubble.material = bubbleMat;
     attach(bubble);
 
     const tex = new DynamicTexture(
@@ -868,24 +877,25 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
     ctx.fillStyle = "#fff5d6";
     ctx.fillRect(0, 0, 128, 128);
 
-    const symbols: Record<typeof icon, { color: string; glyph: string }> = {
-      water: { color: "#3a8fd6", glyph: "💧" },
-      car: { color: "#c44a3a", glyph: "🚗" },
-      fire: { color: "#e07a2c", glyph: "🔥" },
-      luggage: { color: "#8a5a2a", glyph: "🧳" },
+    const symbols: Record<typeof icon, { color: string; glyph: string; alert?: boolean }> = {
+      briefcase: { color: "#3a8fd6", glyph: "💼" },
+      shield: { color: "#d9534f", glyph: "🛡️", alert: true },
+      party: { color: "#e8a33d", glyph: "🎉" },
+      handshake: { color: "#e07a2c", glyph: "🤝" },
       heart: { color: "#c2566f", glyph: "♥" },
-      fraud: { color: "#5c4a8a", glyph: "🔍" },
     };
     const sym = symbols[icon];
     ctx.fillStyle = sym.color;
     ctx.font = "bold 96px sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText(sym.glyph, 64, 70);
-    // exclamation mark above
-    ctx.fillStyle = "#1c2230";
-    ctx.font = "bold 38px sans-serif";
-    ctx.fillText("!", 64, 22);
+    ctx.fillText(sym.glyph, 64, sym.alert ? 70 : 66);
+    if (sym.alert) {
+      // exclamation mark above
+      ctx.fillStyle = "#1c2230";
+      ctx.font = "bold 38px sans-serif";
+      ctx.fillText("!", 64, 22);
+    }
     tex.update();
 
     const faceMat = new StandardMaterial(`nh_marker_face_${x}_${z}`, scene);
@@ -969,24 +979,11 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
     attach(pole);
   };
 
-  // A subtle dashed path line tracing a customer's route from an incident
-  // zone toward the Zava Insurance Claims Office. Disabled — the small
-  // cream tiles were reading as scattered debris on the roads.
-  const makePathLine = (
-    _name: string,
-    _from: { x: number; z: number },
-    _to: { x: number; z: number },
-    _color = "#f0d985",
-  ): void => {
-    // intentionally empty
-  };
-
   // ----- Construction-pack-style prop builders -----
   // These are original procedural voxel meshes inspired by the look of
-  // generic MagicaVoxel construction packs (chunky steel poles, striped
-  // barriers, traffic cones, timber/brick stacks, cement mixer, small
-  // crane). They give the scene a builder/repair vibe to match scenarios
-  // 3 (home rebuild) and 4 (cafe rebuild).
+  // generic MagicaVoxel construction packs (striped barriers, traffic
+  // cones, timber/brick stacks, cement mixer, tipper truck). They dress the
+  // builder's yard and the roadworks on the east side of town.
 
   // Striped traffic barrier (white body with red ends).
   const makeBarrier = (x: number, z: number, rotY = 0): void => {
@@ -1119,95 +1116,6 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
     makeBox(`nh_mixer_handle_${x}_${z}`, 0.1, 0.7, 0.1, new Vector3(x - 0.6, 0.6, z), "#3a3a3a");
   };
 
-  // Scaffolding frame around (cx, cz) with given footprint width/depth.
-  // Builds two storeys of horizontal rails plus corner poles and a plank
-  // walkway on the upper level.
-  const makeScaffold = (
-    cx: number,
-    cz: number,
-    width: number,
-    depth: number,
-  ): void => {
-    const halfW = width / 2;
-    const halfD = depth / 2;
-    const poleMat = "#9aa0a8";
-    const railMat = "#b8b0a0";
-    const plankMat = "#c98a4a";
-    const height = 4.0;
-    // Vertical poles at corners + midpoints
-    const poleXs = [-halfW, 0, halfW];
-    const poleZs = [-halfD, halfD];
-    for (const px of poleXs) {
-      for (const pz of poleZs) {
-        const pole = MeshBuilder.CreateBox(
-          `nh_scaff_pole_${cx}_${cz}_${px}_${pz}`,
-          { width: 0.15, height, depth: 0.15 },
-          scene,
-        );
-        pole.position = new Vector3(cx + px, height / 2, cz + pz);
-        pole.material = mat("scaffPole", poleMat);
-        attach(pole);
-      }
-    }
-    // Horizontal rails (front and back) at two heights
-    for (const railY of [1.6, 3.2]) {
-      for (const pz of poleZs) {
-        const rail = MeshBuilder.CreateBox(
-          `nh_scaff_rail_${cx}_${cz}_${railY}_${pz}`,
-          { width: width + 0.15, height: 0.1, depth: 0.1 },
-          scene,
-        );
-        rail.position = new Vector3(cx, railY, cz + pz);
-        rail.material = mat("scaffRail", railMat);
-        attach(rail);
-      }
-    }
-    // Plank walkway on the front face at mid level
-    const plank = MeshBuilder.CreateBox(
-      `nh_scaff_plank_${cx}_${cz}`,
-      { width: width + 0.05, height: 0.08, depth: 0.5 },
-      scene,
-    );
-    plank.position = new Vector3(cx, 2.0, cz - halfD);
-    plank.material = mat("scaffPlank", plankMat);
-    attach(plank);
-  };
-
-  // Small fixed-base voxel crane: tower + horizontal jib + counterweight.
-  const makeCrane = (cx: number, cz: number): void => {
-    // Base pad
-    makeBox(`nh_crane_pad_${cx}_${cz}`, 1.6, 0.2, 1.6, new Vector3(cx, 0.1, cz), "#5a5d65");
-    // Tower (stacked segments for a lattice-y feel)
-    for (let i = 0; i < 4; i++) {
-      makeBox(
-        `nh_crane_seg_${cx}_${cz}_${i}`,
-        0.6,
-        1.6,
-        0.6,
-        new Vector3(cx, 1.0 + i * 1.6, cz),
-        i % 2 === 0 ? "#ffd166" : "#e8b85a",
-      );
-    }
-    // Cab at top
-    makeBox(`nh_crane_cab_${cx}_${cz}`, 1.0, 0.7, 0.9, new Vector3(cx, 7.7, cz), "#3a3a3a");
-    // Horizontal jib (forward arm)
-    makeBox(`nh_crane_jib_${cx}_${cz}`, 5.0, 0.25, 0.4, new Vector3(cx + 1.8, 8.05, cz), "#ffd166");
-    // Short counter-jib
-    makeBox(
-      `nh_crane_cjib_${cx}_${cz}`,
-      1.6,
-      0.25,
-      0.4,
-      new Vector3(cx - 1.4, 8.05, cz),
-      "#ffd166",
-    );
-    // Counterweight
-    makeBox(`nh_crane_cw_${cx}_${cz}`, 0.8, 0.6, 0.6, new Vector3(cx - 2.0, 7.95, cz), "#1c2230");
-    // Hook line
-    makeBox(`nh_crane_line_${cx}_${cz}`, 0.06, 2.4, 0.06, new Vector3(cx + 3.6, 6.8, cz), "#1c2230");
-    makeBox(`nh_crane_hook_${cx}_${cz}`, 0.3, 0.3, 0.3, new Vector3(cx + 3.6, 5.5, cz), "#3a3a3a");
-  };
-
   // Builder's tipper truck — cab + open tipping bin with a load of gravel.
   const makeBuilderTruck = (x: number, z: number): void => {
     makeBox(`nh_btruck_chassis_${x}_${z}`, 3.4, 0.3, 1.4, new Vector3(x, 0.35, z), "#1c2230");
@@ -1235,14 +1143,6 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
         "#1c2230",
       );
     }
-  };
-
-  // Skip / construction dumpster.
-  const makeSkip = (x: number, z: number): void => {
-    makeBox(`nh_skip_body_${x}_${z}`, 2.6, 0.9, 1.4, new Vector3(x, 0.5, z), "#e07a2c");
-    makeBox(`nh_skip_inner_${x}_${z}`, 2.4, 0.85, 1.25, new Vector3(x, 0.55, z), "#3a3a3a");
-    // Rubble inside
-    makeBox(`nh_skip_rubble_${x}_${z}`, 2.2, 0.25, 1.1, new Vector3(x, 0.85, z), "#a23a2c");
   };
 
   // ----- Side streets, sidewalks, and crossings -----
@@ -1290,38 +1190,36 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
     }
   };
 
-  // Maple Crescent — east-west residential street running through the
-  // northern half, in front of the home-claims zone. Extended west across
-  // the main vertical road (now reaches x≈-14) so the upper neighbourhood
-  // is no longer split in two by the previous gap at x=0..6. Stops short
-  // of the travel hub terminal (x≈-16) so it doesn't slice through that
-  // building.
+  // Glenferrie Rd — east-west residential street running through the
+  // northern half, in front of George's place in Oakleigh. Extended west
+  // across the main vertical road (now reaches x≈-14) so the upper
+  // neighbourhood is no longer split in two. Stops short of the airport
+  // terminal (x≈-16) so it doesn't slice through that building.
   makeRoad("nh_road_maple", 48, 3.5, new Vector3(10, 0.05, 20));
   sideRoadDash("nh_dash_maple", "x", 20, -12, 32);
-  // Side kerbs (sidewalks) along Maple Crescent.
+  // Side kerbs (sidewalks) along Glenferrie Rd.
   makeKerb("nh_kerb_maple_n", 48, 0.9, new Vector3(10, 0.07, 22.2));
   makeKerb("nh_kerb_maple_s", 48, 0.9, new Vector3(10, 0.07, 17.8));
 
-  // Birch Lane — east-west street serving the southern apartment / civic
-  // area. Sits between the central road and the apartment block. Extended
-  // east to x≈38 so it now bridges Elm Court (x=22) and Oak Drive (x=33)
-  // — previously the eastern half was disconnected, leaving a gap south
-  // of the Northside Smash Repairs garage / Builder's Yard area.
+  // Collins St — the long east-west tram street across the south of the
+  // map, between the central road and Lygon St. Tram tracks run down the
+  // middle instead of a painted centre line.
   makeRoad("nh_road_birch", 66, 3.5, new Vector3(5, 0.05, -10));
-  sideRoadDash("nh_dash_birch", "x", -10, -26, 36);
+  makeBox("nh_tram_rail_n", 66, 0.03, 0.08, new Vector3(5, 0.095, -9.6), "#8a8d94");
+  makeBox("nh_tram_rail_s", 66, 0.03, 0.08, new Vector3(5, 0.095, -10.4), "#8a8d94");
   makeKerb("nh_kerb_birch_n", 66, 0.9, new Vector3(5, 0.07, -7.8));
   makeKerb("nh_kerb_birch_s", 66, 0.9, new Vector3(5, 0.07, -12.2));
 
-  // Oak Drive — north-south street on the east side, connecting Maple
-  // Crescent to the main road. Placed at x=33 so it sits clear of the
-  // Northside Smash Repairs garage at x≈26-29.
+  // Toorak Rd — north-south street on the east side, connecting
+  // Glenferrie Rd to the main road. Placed at x=33 so it sits clear of the
+  // Docklands fintech HQ at x≈23-29.
   makeRoad("nh_road_oak", 3.5, 28, new Vector3(33, 0.05, 8));
   sideRoadDash("nh_dash_oak", "z", 33, -6, 22);
   makeKerb("nh_kerb_oak_e", 0.9, 28, new Vector3(35.2, 0.07, 8));
   makeKerb("nh_kerb_oak_w", 0.9, 28, new Vector3(30.8, 0.07, 8));
 
-  // Cedar Way — short north-south street west of the office, linking the
-  // travel hub area to the main road.
+  // Flinders Lane — short north-south street west of the office, linking
+  // the airport to the main road.
   makeRoad("nh_road_cedar", 3.5, 22, new Vector3(-26, 0.05, 8));
   sideRoadDash("nh_dash_cedar", "z", -26, -2, 18);
   makeKerb("nh_kerb_cedar_e", 0.9, 22, new Vector3(-23.8, 0.07, 8));
@@ -1344,43 +1242,40 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
   // stripe pads were reading as odd boxes against the asphalt.
 
   // Street name signs at the corners of the new streets.
-  makeStreetSign(7.0, 22.5, "MAPLE CRESCENT", "#3a8fd6");
-  makeStreetSign(7.0, -12.5, "BIRCH LANE", "#5a8a4a");
-  makeStreetSign(36.5, 6.0, "OAK DRIVE", "#c44a3a");
-  makeStreetSign(-29.5, 6.0, "CEDAR WAY", "#7a4f9c");
+  makeStreetSign(7.0, 22.5, "GLENFERRIE RD", "#3a8fd6");
+  makeStreetSign(7.0, -12.5, "COLLINS ST", "#5a8a4a");
+  makeStreetSign(36.5, 6.0, "TOORAK RD", "#c44a3a");
+  makeStreetSign(-29.5, 6.0, "FLINDERS LANE", "#7a4f9c");
 
-  // Willow Avenue — new south-side east-west connector at z=-22. Threads
-  // between the south-west mid-rise cluster, the apartment block, and
-  // the Builder's Yard so those outlying lots are no longer dead-ended.
+  // Chapel St — south-side east-west connector at z=-22. Threads between
+  // the south-west mid-rise cluster, the apartment block, and the
+  // builder's yard so those outlying lots are no longer dead-ended.
   makeRoad("nh_road_willow", 48, 3.5, new Vector3(8, 0.05, -22));
   sideRoadDash("nh_dash_willow", "x", -22, -14, 30);
   makeKerb("nh_kerb_willow_n", 48, 0.9, new Vector3(8, 0.07, -19.8));
   makeKerb("nh_kerb_willow_s", 48, 0.9, new Vector3(8, 0.07, -24.2));
-  makeStreetSign(-15.0, -19.0, "WILLOW AVENUE", "#5a8a4a");
+  makeStreetSign(-15.0, -19.0, "CHAPEL ST", "#5a8a4a");
 
-  // Elm Court — short north-south spur at x=22 linking the east end of
-  // Birch Lane (z=-10) to Willow Avenue (z=-22). Routes traffic from
-  // the main grid down to the Builder's Yard end of town.
+  // Swan St — short north-south spur at x=22 linking Collins St (z=-10)
+  // to Chapel St (z=-22), down to the builder's yard end of town.
   makeRoad("nh_road_elm", 3.5, 14, new Vector3(22, 0.05, -16));
   sideRoadDash("nh_dash_elm", "z", 22, -22, -10);
   makeKerb("nh_kerb_elm_e", 0.9, 14, new Vector3(24.2, 0.07, -16));
   makeKerb("nh_kerb_elm_w", 0.9, 14, new Vector3(19.8, 0.07, -16));
-  makeStreetSign(25.0, -10.5, "ELM COURT", "#7a4a3a");
+  makeStreetSign(24.6, -12.0, "SWAN ST", "#7a4a3a");
 
-  // Pine Court — short north-south spur at x=-10 linking Birch Lane
-  // (z=-10) down to the apartment block / Willow Avenue (z=-22) so the
-  // contents-claim apartment is a proper street address rather than
-  // sitting on grass.
+  // Lygon St — short north-south spur at x=-10 linking Collins St (z=-10)
+  // down to Chapel St (z=-22), past Tom's old café.
   makeRoad("nh_road_pine", 3.5, 12, new Vector3(-10, 0.05, -16));
   sideRoadDash("nh_dash_pine", "z", -10, -22, -10);
   makeKerb("nh_kerb_pine_e", 0.9, 12, new Vector3(-7.8, 0.07, -16));
   makeKerb("nh_kerb_pine_w", 0.9, 12, new Vector3(-12.2, 0.07, -16));
-  makeStreetSign(-13.0, -10.5, "PINE COURT", "#3a5fb0");
+  makeStreetSign(-12.4, -12.0, "LYGON ST", "#3a5fb0");
 
   // Extra suburban houses lining the new streets — these use the full
   // makeSuburbanHouse recipe so the grid reads as a real neighbourhood
   // rather than scattered boxes.
-  // Maple Crescent (north side, facing south onto the street). The
+  // Glenferrie Rd (north side, facing south onto the street). The
   // centre Z is chosen so foundation/eaves sit clear of the north kerb
   // at z≈22.65 (kerb_maple_n centred at 22.2 with depth 0.9).
   makeSuburbanHouse("nh_maple_a", 12, 25.6, {
@@ -1396,12 +1291,11 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
     wall: "#f0d6b0", roof: "#5a6a7c", chimney: true, fence: true,
     mailbox: true, sidewalkZ: 22.8, storeys: 1,
   });
-  // (The previous "Maple back row" silhouettes used to sit on z=17.6 but
-  // that band overlaps both the south kerb of Maple Crescent and the
-  // back of the residential zone 1 houses at z=14, so the row has been
-  // removed in favour of clean grass between the two streets.)
+  // (A previous back row of silhouettes used to sit on z=17.6 but that
+  // band overlaps both the south kerb of Glenferrie Rd and the back of the
+  // Oakleigh houses at z=14, so it was removed in favour of clean grass.)
 
-  // Birch Lane (north side, facing south). Houses are now placed clear
+  // Collins St (north side, facing south). Houses are now placed clear
   // of the north kerb (kerb_birch_n covers z≈-7.35..-8.25) so the
   // foundation and front step sit on grass / sidewalk rather than the
   // road surface.
@@ -1414,7 +1308,7 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
     mailbox: true, sidewalkZ: -7.2, storeys: 1,
   });
 
-  // Oak Drive (east side, facing west — built as a custom rotated frame).
+  // Toorak Rd (east side, facing west — built as a custom rotated frame).
   // ox is chosen so the foundation (width 4.6) starts east of the east
   // kerb (kerb_oak_e covers x≈34.75..35.65) — the front step lands on
   // the sidewalk rather than overlapping the kerb stripe.
@@ -1437,14 +1331,14 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
     makeMailbox(35.6, oz - 1.6);
   }
 
-  // ----- Zava Insurance Claims Office (central anchor) -----
+  // ----- Caldova Wealth — Client Operations (central anchor) -----
   // The office sits just north-west of the roundabout so the front door
   // faces the central crossroads.
   const officeRoot = new TransformNode("nh_office_root", scene);
   officeRoot.parent = root;
   // Shifted slightly west (was -7) so the right-hand wall clears the
   // central north-south asphalt (which spans x=-2.5..2.5). Keeps the
-  // front door facing the roundabout for the customer walk-in path.
+  // front door facing the roundabout for the client walk-in path.
   officeRoot.position = new Vector3(-10, 0, 8);
 
   const officeBase = MeshBuilder.CreateBox(
@@ -1510,10 +1404,26 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
   sctx.fillStyle = "#1c2230";
   sctx.font = "bold 110px sans-serif";
   sctx.textBaseline = "middle";
-  sctx.fillText("Z", 70, 105);
+  sctx.textAlign = "center";
+  sctx.fillText("C", 90, 106);
+  sctx.textAlign = "left";
+  // "CALDOVA" in bold white with "Wealth" in the brand amber, shrunk
+  // together if needed so the pair always fits beside the logo tile.
+  let brandPx = 92;
+  const brandWidth = (): number => {
+    sctx.font = `bold ${brandPx}px sans-serif`;
+    const w1 = sctx.measureText("CALDOVA ").width;
+    sctx.font = `600 ${Math.round(brandPx * 0.85)}px sans-serif`;
+    return w1 + sctx.measureText("Wealth").width;
+  };
+  while (brandWidth() > 790 && brandPx > 50) brandPx -= 2;
   sctx.fillStyle = "#ffffff";
-  sctx.font = "bold 90px sans-serif";
-  sctx.fillText("ZAVA Claims", 200, 110);
+  sctx.font = `bold ${brandPx}px sans-serif`;
+  sctx.fillText("CALDOVA", 196, 110);
+  const caldovaWidth = sctx.measureText("CALDOVA ").width;
+  sctx.fillStyle = "#ffd166";
+  sctx.font = `600 ${Math.round(brandPx * 0.85)}px sans-serif`;
+  sctx.fillText("Wealth", 196 + caldovaWidth, 112);
   signTex.update();
 
   const signMat = new StandardMaterial("nh_office_sign_mat", scene);
@@ -1578,39 +1488,63 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
   attach(path);
 
   // Office label
-  makeLabel(-10, 13, "Zava Insurance Claims Office", "#2a3a5c");
+  makeLabel(-10, 13, "Caldova Wealth — Client Operations", "#2a3a5c");
 
-  // ----- Captures: scenery meshes referenced by incident animations -----
+  // ----- Captures: scenery referenced by the life-event animations -----
   // These are populated as each zone is built below, then handed to the
   // ambient controller at the very end so each scenario can replay its
-  // "story of the accident" animation when started.
-  //
-  // The home zone uses the always-on `addBustedPipeline` voxel scene
-  // (dirt mound + broken pipe stubs + perimeter cones + pulsing geyser),
-  // so we only need to capture its centre here and register it with the
-  // ambient controller after construction.
-  let homeBurstCenter: [number, number] | null = null;
-  let motorLeadCar: TransformNode[] = [];
-  let motorRearCar: TransformNode[] = [];
-  let motorContact: Vector3 | null = null;
-  let cafeSmokeMeshes: Mesh[] = [];
-  let cafeFlameMeshes: Mesh[] = [];
-  let cafeFlameMats: StandardMaterial[] = [];
-  let cafeFlickerAt: Vector3 | null = null;
-  let travelSuitcase: Mesh | null = null;
-  let travelTrolleyTop: Vector3 | null = null;
-  let travelLostRest: Vector3 | null = null;
-  let lifeHomeCenter: Vector3 | null = null;
+  // life-event animation when started.
+  let retirementBanner: Mesh | null = null;
+  let retirementConfettiAt: Vector3 | null = null;
+  const retirementBalloons: Mesh[] = [];
+  let newJobConfettiAt: Vector3 | null = null;
+  let cafeCloudAt: Vector3 | null = null;
+  let cafeFrontAt: Vector3 | null = null;
+  let graceAlertAt: Vector3 | null = null;
+  let familyHomeCenter: Vector3 | null = null;
 
-  // ----- Zone 1: Residential Street — Home Insurance (burst pipe) -----
-  // North-east quadrant
+  // A flat box sign with centred, auto-fitted text on its front face.
+  const makeTextSign = (
+    name: string,
+    w: number,
+    h: number,
+    pos: Vector3,
+    text: string,
+    opts: { bg: string; fg: string; texW?: number; texH?: number; fontPx?: number },
+  ): Mesh => {
+    const sign = MeshBuilder.CreateBox(name, { width: w, height: h, depth: 0.08 }, scene);
+    sign.position = pos;
+    attach(sign);
+    const texW = opts.texW ?? 512;
+    const texH = opts.texH ?? 96;
+    const tex = new DynamicTexture(`${name}_tex`, { width: texW, height: texH }, scene, false);
+    const c = tex.getContext() as CanvasRenderingContext2D;
+    c.fillStyle = opts.bg;
+    c.fillRect(0, 0, texW, texH);
+    c.fillStyle = opts.fg;
+    fitFont(c, text, texW * 0.9, opts.fontPx ?? Math.round(texH * 0.55));
+    c.textAlign = "center";
+    c.textBaseline = "middle";
+    c.fillText(text, texW / 2, texH / 2 + 2);
+    tex.update();
+    const m = new StandardMaterial(`${name}_mat`, scene);
+    m.diffuseTexture = tex;
+    m.emissiveColor = new Color3(0.5, 0.5, 0.5);
+    m.specularColor = new Color3(0, 0, 0);
+    sign.material = m;
+    return sign;
+  };
+
+  // ----- Zone 1: Oakleigh — Retirement (George) -----
+  // North-east quadrant. George's family home is dressed for his
+  // retirement: a "Happy Retirement" banner across the front wall and
+  // balloons tied to the front fence.
   {
     const zx = 16;
     const zz = 14;
 
-    // House 1 (the burst-pipe house) — replaces the diamond-roof box with
-    // a full suburban look: foundation, mullioned windows, chimney,
-    // pitched gable roof, picket fence, front path.
+    // George's house — full suburban look: foundation, mullioned windows,
+    // chimney, pitched gable roof, picket fence, front path.
     makeBox("nh_home_h1_found", 5.4, 0.4, 4.4, new Vector3(zx, 0.2, zz), "#9a8f7a");
     makeBox("nh_home_h1_base", 5, 2.6, 4, new Vector3(zx, 1.7, zz), "#e7c8a0");
     makeBox(
@@ -1634,16 +1568,79 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
     makePicketFence(zx - 3.0, zx - 1.2, zz - 5.6);
     makePicketFence(zx + 1.2, zx + 3.0, zz - 5.6);
     makeMailbox(zx + 2.6, zz - 5.3);
-    // Plumber van out front
-    makeBox("nh_van_body", 2.6, 1.2, 1.4, new Vector3(zx + 3.6, 0.7, zz - 4.5), "#3a8fd6");
-    makeBox("nh_van_roof", 2.4, 0.6, 1.3, new Vector3(zx + 3.2, 1.55, zz - 4.5), "#3a8fd6");
-    makeBox("nh_van_window", 1.0, 0.5, 1.3, new Vector3(zx + 4.3, 1.05, zz - 4.5), "#cfe7ff");
-    // Burst water main in the front yard. The dirt mound, broken pipe
-    // stubs, perimeter traffic cones, wet patch and pulsing geyser are
-    // all built by `ambient.addBustedPipeline` below — we only record
-    // its centre here so the rest of the home zone can be laid out
-    // around it.
-    homeBurstCenter = [zx - 0.5, zz - 3.5];
+
+    // "HAPPY RETIREMENT, GEORGE!" banner across the front wall, between
+    // the windows and the eaves, with a strip of bunting along the top.
+    const banner = MeshBuilder.CreateBox(
+      "nh_retire_banner",
+      { width: 4.6, height: 0.55, depth: 0.06 },
+      scene,
+    );
+    banner.position = new Vector3(zx, 2.55, zz - 2.12);
+    attach(banner);
+    const btex = new DynamicTexture(
+      "nh_retire_banner_tex",
+      { width: 1024, height: 124 },
+      scene,
+      false,
+    );
+    const bctx = btex.getContext() as CanvasRenderingContext2D;
+    bctx.fillStyle = "#ffd166";
+    bctx.fillRect(0, 0, 1024, 124);
+    const flagColors = ["#d9534f", "#3a8fd6", "#10b981", "#ffffff", "#a855f7"];
+    for (let i = 0; i < 16; i++) {
+      bctx.fillStyle = flagColors[i % flagColors.length];
+      bctx.beginPath();
+      bctx.moveTo(i * 64, 0);
+      bctx.lineTo(i * 64 + 64, 0);
+      bctx.lineTo(i * 64 + 32, 26);
+      bctx.closePath();
+      bctx.fill();
+    }
+    bctx.fillStyle = "#1c2230";
+    const bannerText = "HAPPY RETIREMENT, GEORGE!";
+    fitFont(bctx, bannerText, 960, 64, 36);
+    bctx.textAlign = "center";
+    bctx.textBaseline = "middle";
+    bctx.fillText(bannerText, 512, 76);
+    btex.update();
+    const bmat = new StandardMaterial("nh_retire_banner_mat", scene);
+    bmat.diffuseTexture = btex;
+    bmat.emissiveColor = new Color3(0.5, 0.5, 0.5);
+    bmat.specularColor = new Color3(0, 0, 0);
+    banner.material = bmat;
+    retirementBanner = banner;
+    retirementConfettiAt = new Vector3(zx, 3.2, zz - 3.4);
+
+    // Balloon bunches tied to the gate posts — they bob in the breeze
+    // (animated once the ambient controller exists, below).
+    const balloonColors = ["#d9534f", "#ffd166", "#3a8fd6", "#ffffff", "#e8a33d", "#10b981"];
+    let bi = 0;
+    for (const bx of [zx - 1.2, zx + 1.2]) {
+      for (let k = 0; k < 3; k++) {
+        const ox = (k - 1) * 0.34;
+        const top = 1.9 + (k % 2) * 0.35;
+        makeBox(
+          `nh_balloon_string_${bi}`,
+          0.03,
+          top - 0.5,
+          0.03,
+          new Vector3(bx + ox * 0.5, 0.5 + (top - 0.5) / 2, zz - 5.6),
+          "#f4f0e6",
+        );
+        retirementBalloons.push(
+          makeBox(
+            `nh_balloon_${bi}`,
+            0.42,
+            0.5,
+            0.42,
+            new Vector3(bx + ox, top + 0.2, zz - 5.6),
+            balloonColors[bi % balloonColors.length],
+          ),
+        );
+        bi++;
+      }
+    }
 
     // Neighbouring house — also gets a real gable roof + chimney.
     makeBox("nh_home_h2_found", 4.6, 0.4, 4.0, new Vector3(zx + 8, 0.2, zz), "#9a8f7a");
@@ -1671,159 +1668,82 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
     makeTree(zx + 5.5, zz + 2.5);
     makeTree(zx + 11, zz - 2);
 
-    // Customer (Michael)
-    makePerson(zx - 1, zz - 5, "customerHome", { x: -10, z: 4 });
+    // George on his front path.
+    makePerson(zx - 0.2, zz - 4.6, "customerRetirement", { x: -10, z: 4 });
 
-    // Water-extraction & drying gear staged out front — supports the
-    // emergency make-safe story (scenario 3, supplier coordination step).
-    makeBox("nh_dry_van_body", 2.4, 1.2, 1.3, new Vector3(zx - 5, 0.7, zz - 4.5), "#e8e8e8");
-    makeBox("nh_dry_van_cab", 1.2, 0.9, 1.25, new Vector3(zx - 6, 1.45, zz - 4.5), "#cfcfcf");
-    makeBox("nh_dry_van_stripe", 2.5, 0.18, 1.32, new Vector3(zx - 5, 0.85, zz - 4.5), "#3a8fd6");
-    // Floor blower / dehumidifier sitting in the driveway
-    makeBox("nh_dry_blower", 0.7, 0.55, 0.7, new Vector3(zx + 0.6, 0.32, zz - 3.2), "#ffd166");
-    makeBox("nh_dry_blower_grill", 0.5, 0.4, 0.05, new Vector3(zx + 0.6, 0.35, zz - 2.85), "#3a3a3a");
+    // Party marker over the house (🎉)
+    makeIncidentMarker(zx, 5.2, zz, "party");
 
-    // Builder rebuild kit: scaffolding hugging the side of the house, a
-    // skip on the verge for the ripped-out cabinetry, and a cement mixer
-    // for the new floor base — straight from the construction-pack vibe.
-    makeScaffold(zx + 2.6, zz, 2.4, 4.4);
-    makeSkip(zx - 4.5, zz + 1.5);
-    makeCementMixer(zx + 4, zz + 2.5);
-    // (The busted-pipeline scene below already draws four perimeter
-    // cones around the burst, so no extra kerb cones are needed here.)
-
-    // Incident marker over house 1
-    makeIncidentMarker(zx, 5.2, zz, "water");
-
-    // Route from house to office front door
-    makePathLine(
-      "nh_path_home",
-      { x: zx - 2, z: zz - 4 },
-      { x: -10, z: 4 },
-    );
-
-    makeLabel(zx + 4, zz + 4, "Home Claims (Michael)", "#3a8fd6");
+    makeLabel(zx + 4, zz + 4, "Oakleigh — Retirement (George)", "#e8a33d");
   }
 
-  // ----- Zone 2: Main Road / Intersection — Motor Insurance -----
-  // East side, on the main road
+  // ----- Zone 2: Docklands — New Job (Priya) -----
+  // East side, on the main road: Priya's new employer, a glassy fintech
+  // office, with everyday cars parked along the kerb.
   {
     const zx = 22;
     const zz = 0;
 
-    // Two cars touching bumpers — modelled as proper voxel sedans
-    // (chassis + cabin + windscreen + wheels) so they read as real cars
-    // instead of plain coloured boxes. The ambient car builder models the
-    // car along local +Z, so we rotate by π/2 to lay the long axis along
-    // the east-west main road.
-    const car1 = makeStaticVehicle(
-      "nh_car1",
+    // Two cars parked well apart along the south kerb — just street life.
+    // The ambient car builder models the car along local +Z, so we rotate
+    // by π/2 to lay the long axis along the east-west main road.
+    makeStaticVehicle(
+      "nh_dock_car1",
       "car",
-      new Vector3(zx, 0, zz - 0.8),
+      new Vector3(zx - 2, 0, zz - 1.9),
       Math.PI / 2,
       "#c44a3a",
       "#a23a2c",
     );
-    const car2 = makeStaticVehicle(
-      "nh_car2",
+    makeStaticVehicle(
+      "nh_dock_car2",
       "car",
-      new Vector3(zx + 3, 0, zz - 0.8),
+      new Vector3(zx + 5.5, 0, zz - 1.9),
       Math.PI / 2,
       "#3a6dc4",
       "#2a55a0",
     );
 
-    motorLeadCar = [car1];
-    motorRearCar = [car2];
-    motorContact = new Vector3(zx + 1.4, 1.0, zz - 0.8);
-
-    // Hazard triangle (small red pyramid via rotated box)
-    makeBox("nh_hazard", 0.4, 0.5, 0.05, new Vector3(zx + 1.4, 0.3, zz - 1.8), "#e84b3a");
-
-    // Tow truck approaching from the east — modelled as a proper voxel
-    // flatbed tow truck (cab + tray + boom + hook) so it reads as a real
-    // vehicle instead of a plain yellow box. Cab faces west (-X) toward
-    // the collision, so we rotate by -π/2 from the local +Z forward.
-    makeStaticVehicle(
-      "nh_tow",
-      "towtruck",
-      new Vector3(zx + 8, 0, zz - 0.8),
-      -Math.PI / 2,
-      "#ffd166",
-      "#ffb347",
-    );
-
-    // Driver standing nearby (Aisha)
-    makePerson(zx + 1.2, zz + 1.2, "customerMotor", { x: -10, z: 4 });
-
-    // Northside Smash Repairs garage — supports the supplier coordination
-    // step in scenario 1 (motor collision).
+    // Docklands fintech HQ — a three-storey office with glass bands on the
+    // street and east faces, an entrance canopy and a big name sign.
     const gx = zx + 4;
     const gz = zz + 8;
-    makeBox("nh_garage_base", 6.0, 2.6, 4.4, new Vector3(gx, 1.3, gz), "#d8d2c0");
-    makeBox("nh_garage_roof", 6.4, 0.4, 4.8, new Vector3(gx, 2.7, gz), "#3a3a3a");
-    // Roller door
-    makeBox("nh_garage_door", 2.6, 2.0, 0.12, new Vector3(gx - 1.2, 1.0, gz - 2.25), "#9aa0a8");
-    // Garage sign
-    const garageSign = MeshBuilder.CreateBox(
-      "nh_garage_sign",
-      { width: 4.6, height: 0.6, depth: 0.1 },
-      scene,
-    );
-    garageSign.position = new Vector3(gx + 0.6, 3.0, gz - 2.25);
-    const gtex = new DynamicTexture(
-      "nh_garage_sign_tex",
-      { width: 512, height: 96 },
-      scene,
-      false,
-    );
-    const gctx = gtex.getContext() as CanvasRenderingContext2D;
-    gctx.fillStyle = "#1c2230";
-    gctx.fillRect(0, 0, 512, 96);
-    gctx.fillStyle = "#ffd166";
-    gctx.font = "bold 38px sans-serif";
-    gctx.textBaseline = "middle";
-    gctx.textAlign = "center";
-    gctx.fillText("NORTHSIDE SMASH REPAIRS", 256, 50);
-    gtex.update();
-    const gmat = new StandardMaterial("nh_garage_sign_mat", scene);
-    gmat.diffuseTexture = gtex;
-    gmat.emissiveColor = new Color3(0.55, 0.55, 0.55);
-    gmat.specularColor = new Color3(0, 0, 0);
-    garageSign.material = gmat;
-    attach(garageSign);
-    // Courtesy / rental car waiting on the forecourt — modelled as a
-    // proper voxel jeep so it reads as a real vehicle.
-    makeStaticVehicle(
-      "nh_rental",
-      "jeep",
-      new Vector3(gx - 3.2, 0, gz + 1.5),
-      0,
-      "#5fa657",
-      "#4a8a4a",
-    );
-    makeBox("nh_rental_label", 1.2, 0.3, 0.06, new Vector3(gx - 3.2, 1.65, gz + 0.85), "#ffd166");
-
-    // Incident marker
-    makeIncidentMarker(zx + 1.5, 3.4, zz - 0.8, "car");
-
-    // Path from collision to office
-    makePathLine(
-      "nh_path_motor",
-      { x: zx, z: zz + 1 },
-      { x: -6, z: -2 },
+    makeBox("nh_hq_base", 6.0, 5.2, 4.4, new Vector3(gx, 2.6, gz), "#dfe7ee");
+    makeBox("nh_hq_roof", 6.4, 0.35, 4.8, new Vector3(gx, 5.375, gz), "#2a3a5c");
+    for (const gy of [2.4, 3.9]) {
+      makeBox(`nh_hq_glassS_${gy}`, 5.4, 0.8, 0.08, new Vector3(gx, gy, gz - 2.24), "#7fb6e3");
+      makeBox(`nh_hq_glassE_${gy}`, 0.08, 0.8, 3.8, new Vector3(gx + 3.04, gy, gz), "#7fb6e3");
+    }
+    makeBox("nh_hq_lobby", 2.6, 1.3, 0.08, new Vector3(gx + 1.4, 0.95, gz - 2.24), "#9fcbe8");
+    makeBox("nh_hq_door", 1.4, 1.7, 0.12, new Vector3(gx - 1.4, 0.85, gz - 2.26), "#2a3a5c");
+    makeBox("nh_hq_canopy", 2.2, 0.12, 1.0, new Vector3(gx - 1.4, 1.85, gz - 2.7), "#2a3a5c");
+    makeTextSign(
+      "nh_hq_sign",
+      5.4,
+      0.6,
+      new Vector3(gx, 4.75, gz - 2.28),
+      "DOCKLANDS FINTECH HQ",
+      { bg: "#1c2230", fg: "#6ec1ff", texW: 1024, texH: 112, fontPx: 64 },
     );
 
-    makeLabel(zx + 3, zz + 4, "Motor Claims (Aisha)", "#c44a3a");
+    // Priya outside her new office.
+    makePerson(zx + 4.6, zz + 4.6, "customerOnboarding", { x: -10, z: 4 });
+    newJobConfettiAt = new Vector3(zx + 2.5, 2.4, zz + 4.6);
+
+    // Briefcase marker (💼)
+    makeIncidentMarker(zx + 1.2, 3.4, zz + 4.8, "briefcase");
+
+    makeLabel(zx + 3, zz + 4, "Docklands — New Job (Priya)", "#3a8fd6");
   }
 
-  // ----- Zone 3: High Street — Small Business Insurance (café fire) -----
-  // South-west quadrant
+  // ----- Zone 3: Lygon St — Café Closed (Tom) -----
+  // South-west quadrant: a row of three shopfronts. Tom's café in the
+  // middle has closed — windows papered over, a CLOSED sign on the door and
+  // a FOR LEASE board out front.
   {
     const zx = -18;
     const zz = -14;
 
-    // Row of three shop fronts
     const shops: Array<[string, string]> = [
       ["#e7c8a0", "BAKERY"],
       ["#cfe1f0", "TOM'S CAFÉ"],
@@ -1832,160 +1752,95 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
     for (let i = 0; i < shops.length; i++) {
       const [color, label] = shops[i];
       const sx = zx + i * 4.4;
+      const closed = i === 1;
       makeBox(`nh_shop_base_${i}`, 4.0, 2.6, 3.6, new Vector3(sx, 1.3, zz), color);
-      makeBox(`nh_shop_awning_${i}`, 4.2, 0.2, 1.0, new Vector3(sx, 2.3, zz - 2.0), "#3a5fb0");
+      makeBox(
+        `nh_shop_awning_${i}`,
+        4.2,
+        0.2,
+        1.0,
+        new Vector3(sx, 2.3, zz - 2.0),
+        closed ? "#8a8f98" : "#3a5fb0",
+      );
       makeBox(`nh_shop_door_${i}`, 0.9, 1.6, 0.12, new Vector3(sx, 0.8, zz - 1.85), "#5a3a22");
-      makeBox(`nh_shop_win_${i}`, 2.6, 1.0, 0.1, new Vector3(sx, 1.7, zz - 1.85), "#cfe7ff");
-
-      // Sign text
-      const sign = MeshBuilder.CreateBox(
-        `nh_shop_sign_${i}`,
-        { width: 3.6, height: 0.5, depth: 0.08 },
-        scene,
+      makeBox(
+        `nh_shop_win_${i}`,
+        2.6,
+        1.0,
+        0.1,
+        new Vector3(sx, 1.7, zz - 1.85),
+        closed ? "#d8cfb8" : "#cfe7ff",
       );
-      sign.position = new Vector3(sx, 2.7, zz - 1.85);
-      const tex = new DynamicTexture(
-        `nh_shop_sign_tex_${i}`,
-        { width: 512, height: 96 },
-        scene,
-        false,
-      );
-      const c = tex.getContext() as CanvasRenderingContext2D;
-      c.fillStyle = "#1c2230";
-      c.fillRect(0, 0, 512, 96);
-      c.fillStyle = "#ffd166";
-      c.font = "bold 56px sans-serif";
-      c.textBaseline = "middle";
-      c.textAlign = "center";
-      c.fillText(label, 256, 50);
-      tex.update();
-      const m = new StandardMaterial(`nh_shop_sign_mat_${i}`, scene);
-      m.diffuseTexture = tex;
-      m.emissiveColor = new Color3(0.5, 0.5, 0.5);
-      m.specularColor = new Color3(0, 0, 0);
-      sign.material = m;
-      attach(sign);
+      makeTextSign(`nh_shop_sign_${i}`, 3.6, 0.5, new Vector3(sx, 2.7, zz - 1.85), label, {
+        bg: "#1c2230",
+        fg: closed ? "#b8bec6" : "#ffd166",
+        fontPx: 56,
+      });
     }
 
-    // Smoke wisps over Tom's café (middle shop)
     const cafeX = zx + 4.4;
-    const smokeMeshes: Mesh[] = [];
-    for (const [dx, dy, sz] of [
-      [-0.4, 4.4, 1.0],
-      [0.6, 5.0, 1.2],
-      [-0.2, 5.6, 0.9],
-    ] as Array<[number, number, number]>) {
-      const wisp = makeBox(
-        `nh_smoke_${dx}_${dy}`,
-        sz,
-        sz * 0.9,
-        sz,
-        new Vector3(cafeX + dx, dy, zz),
-        "#9aa0a8",
-      );
-      smokeMeshes.push(wisp);
+    // "CLOSED" sign hanging on the café door.
+    makeTextSign("nh_closed_sign", 0.9, 0.4, new Vector3(cafeX, 1.4, zz - 1.95), "CLOSED", {
+      bg: "#c44a3a",
+      fg: "#ffffff",
+      texW: 256,
+      texH: 112,
+      fontPx: 64,
+    });
+
+    // "FOR LEASE" agent's board on two posts at the kerb.
+    const leaseX = cafeX + 1.5;
+    const leaseZ = zz - 3.0;
+    for (const dx of [-0.55, 0.55]) {
+      makeBox(`nh_lease_post_${dx}`, 0.08, 1.3, 0.08, new Vector3(leaseX + dx, 0.65, leaseZ + 0.05), "#5a5d65");
     }
-    cafeSmokeMeshes = smokeMeshes;
-    cafeFlickerAt = new Vector3(cafeX, 1.0, zz - 1.79);
-
-    // Voxel rooftop fire — three stacked emissive blocks (red base,
-    // orange middle, yellow tip) sitting on the café roof under the
-    // smoke column. Animated continuously by the ambient controller so
-    // the café always reads as "actively on fire" while the scene is
-    // rendered. The Mesh + Material refs are captured so the flicker
-    // loop below can drive scale.y / emissive intensity.
-    const cafeRoofTop = 2.6; // top of nh_shop_base box (centre 1.3 + half 1.3)
-    const flameDefs: Array<[number, number, number, number, string, string]> = [
-      // [width, height, depth, dy(centre offset above roof), diffuseHex, emissiveHex]
-      [0.9, 0.5, 0.9, 0.25, "#c63a1a", "#e84b1a"], // red base
-      [0.65, 0.6, 0.65, 0.78, "#e07a2c", "#ff8a30"], // orange middle
-      [0.4, 0.55, 0.4, 1.32, "#ffd166", "#ffe080"], // yellow tip
-    ];
-    const flameMeshes: Mesh[] = [];
-    const flameMats: StandardMaterial[] = [];
-    for (let fi = 0; fi < flameDefs.length; fi++) {
-      const [fw, fh, fd, fdy, hex, emHex] = flameDefs[fi];
-      const flame = MeshBuilder.CreateBox(
-        `nh_cafe_flame_${fi}`,
-        { width: fw, height: fh, depth: fd },
-        scene,
-      );
-      flame.position = new Vector3(cafeX, cafeRoofTop + fdy, zz);
-      const fm = new StandardMaterial(`nh_cafe_flame_mat_${fi}`, scene);
-      fm.diffuseColor = Color3.FromHexString(hex);
-      fm.emissiveColor = Color3.FromHexString(emHex);
-      fm.specularColor = new Color3(0, 0, 0);
-      flame.material = fm;
-      attach(flame);
-      flameMeshes.push(flame);
-      flameMats.push(fm);
-    }
-    cafeFlameMeshes = flameMeshes;
-    cafeFlameMats = flameMats;
-
-    // "Closed" sign
-    makeBox("nh_closed_sign", 0.9, 0.4, 0.06, new Vector3(cafeX, 1.4, zz - 1.95), "#c44a3a");
-
-    // Fire truck nearby — proper voxel fire truck (cab + tank + ladder
-    // + light bar + wheels) so it reads as a real vehicle. Long axis
-    // runs along the road (east-west); cab faces west (−X) so we rotate
-    // by −π/2 from the local +Z forward orientation.
-    makeStaticVehicle(
-      "nh_fire",
-      "firetruck",
-      new Vector3(zx + 4.0, 0, zz - 5),
-      -Math.PI / 2,
-      "#e84b3a",
-      "#c44a3a",
+    const lease = MeshBuilder.CreateBox(
+      "nh_lease_board",
+      { width: 1.5, height: 0.9, depth: 0.06 },
+      scene,
     );
+    lease.position = new Vector3(leaseX, 1.5, leaseZ);
+    attach(lease);
+    const ltex = new DynamicTexture("nh_lease_board_tex", { width: 384, height: 230 }, scene, false);
+    const lctx = ltex.getContext() as CanvasRenderingContext2D;
+    lctx.fillStyle = "#ffffff";
+    lctx.fillRect(0, 0, 384, 230);
+    lctx.fillStyle = "#e07a2c";
+    lctx.fillRect(0, 0, 384, 120);
+    lctx.textAlign = "center";
+    lctx.textBaseline = "middle";
+    lctx.fillStyle = "#ffffff";
+    fitFont(lctx, "FOR LEASE", 350, 72);
+    lctx.fillText("FOR LEASE", 192, 64);
+    lctx.fillStyle = "#1c2230";
+    fitFont(lctx, "Lygon St shopfront", 340, 36, 20);
+    lctx.fillText("Lygon St shopfront", 192, 172);
+    ltex.update();
+    const lmat = new StandardMaterial("nh_lease_board_mat", scene);
+    lmat.diffuseTexture = ltex;
+    lmat.emissiveColor = new Color3(0.5, 0.5, 0.5);
+    lmat.specularColor = new Color3(0, 0, 0);
+    lease.material = lmat;
 
-    // Customer (Tom)
-    makePerson(cafeX - 1.5, zz - 4.5, "customerBusiness", { x: -10, z: 4 });
+    // A couple of street trees along the footpath.
+    makeTree(zx - 2.6, zz - 3.4, 0.75);
+    makeTree(zx + 11.2, zz - 3.4, 0.75);
 
-    // Cordon cones around the cafe entrance — fire scene under investigation
-    makeCone(cafeX - 2.4, zz - 3.4);
-    makeCone(cafeX - 0.8, zz - 3.4);
-    makeCone(cafeX + 0.8, zz - 3.4);
-    makeCone(cafeX + 2.4, zz - 3.4);
-    // Builder rebuild props for the cafe (scenario 4): a small crane lifting
-    // ceiling materials, a skip for fire-damaged joinery, and a stack of
-    // timber for the rebuild.
-    makeCrane(cafeX - 20, zz + 2);
-    makeSkip(cafeX - 6, zz - 4.5);
-    makeTimberStack(cafeX + 2.5, zz - 4.5);
-    makeBarrier(cafeX, zz - 4.0);
+    // Tom outside his old café.
+    makePerson(cafeX - 1.5, zz - 4.5, "customerHardship", { x: -10, z: 4 });
+    cafeCloudAt = new Vector3(cafeX, 4.4, zz);
+    cafeFrontAt = new Vector3(cafeX, 0, zz - 3.4);
 
-    // Forensic electrician van — supports scenario 4 (cause investigation).
-    // Proper voxel van (cab + cargo box + windscreen + side door + wheels).
-    // Cab faces east (+X) so we rotate by +π/2 from the local +Z forward.
-    makeStaticVehicle(
-      "nh_elec",
-      "van",
-      new Vector3(cafeX + 5.5, 0, zz - 5),
-      Math.PI / 2,
-      "#2a55a0",
-      "#1f3f78",
-    );
-    makeBox("nh_elec_stripe", 2.7, 0.18, 1.32, new Vector3(cafeX + 5.5, 0.85, zz - 5), "#ffd166");
+    // Handshake marker (🤝)
+    makeIncidentMarker(cafeX, 3.4, zz, "handshake");
 
-    // Incident marker
-    makeIncidentMarker(cafeX, 3.4, zz, "fire");
-
-    // Path from cafe to office
-    makePathLine(
-      "nh_path_business",
-      { x: cafeX, z: zz - 4 },
-      { x: -10, z: 4 },
-    );
-
-    makeLabel(zx + 4, zz - 5.5, "Business Claims (Tom)", "#e07a2c");
+    makeLabel(zx + 4, zz - 5.5, "Lygon St — Café Closed (Tom)", "#e07a2c");
   }
 
-  // ----- Zone 4: Travel Hub — Travel Insurance (lost luggage) -----
-  // Far north-west corner — pushed all the way west onto the open grass
-  // beside the back-left skyline tower, so the blue terminal stands clear
-  // of the Zava Insurance office and reads as the western "edge" of the
-  // neighbourhood. Sits west of Cedar Way (kerb at x≈-28.65).
+  // ----- Zone 4: Airport — Overseas Trip (Grace) -----
+  // Far north-west corner — the airport Grace flew out of for her trip
+  // through Italy, pushed onto the open grass beside the back-left skyline
+  // tower. Sits west of Flinders Lane (kerb at x≈-28.65).
   {
     const zx = -32;
     const zz = 18;
@@ -1997,33 +1852,11 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
     makeBox("nh_term_door", 1.6, 1.8, 0.15, new Vector3(zx + 2.5, 0.9, zz - 2.55), "#3a5fb0");
 
     // Terminal sign
-    const tsign = MeshBuilder.CreateBox(
-      "nh_term_sign",
-      { width: 6, height: 0.7, depth: 0.1 },
-      scene,
-    );
-    tsign.position = new Vector3(zx, 3.55, zz - 2.6);
-    const ttex = new DynamicTexture(
-      "nh_term_sign_tex",
-      { width: 512, height: 96 },
-      scene,
-      false,
-    );
-    const tc = ttex.getContext() as CanvasRenderingContext2D;
-    tc.fillStyle = "#1c2230";
-    tc.fillRect(0, 0, 512, 96);
-    tc.fillStyle = "#ffffff";
-    tc.font = "bold 54px sans-serif";
-    tc.textBaseline = "middle";
-    tc.textAlign = "center";
-    tc.fillText("✈  TRAVEL HUB", 256, 50);
-    ttex.update();
-    const tmat = new StandardMaterial("nh_term_sign_mat", scene);
-    tmat.diffuseTexture = ttex;
-    tmat.emissiveColor = new Color3(0.5, 0.5, 0.5);
-    tmat.specularColor = new Color3(0, 0, 0);
-    tsign.material = tmat;
-    attach(tsign);
+    makeTextSign("nh_term_sign", 6, 0.7, new Vector3(zx, 3.55, zz - 2.6), "✈  MELBOURNE AIRPORT", {
+      bg: "#1c2230",
+      fg: "#ffffff",
+      fontPx: 54,
+    });
 
     // Tarmac
     makeBox("nh_tarmac", 12, 0.05, 5, new Vector3(zx - 1, 0.07, zz - 4), "#5a5d65");
@@ -2035,46 +1868,33 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
     makeBox("nh_plane_tail", 0.6, 1.0, 0.2, new Vector3(zx + 0.8, 1.0, zz - 4), "#3a5fb0");
     makeBox("nh_plane_wing", 0.8, 0.15, 3.2, new Vector3(zx - 1, 0.7, zz - 4), "#dcdcdc");
 
-    // Luggage trolley with one missing suitcase
+    // Baggage trolley stacked with suitcases, ready for departure
     makeBox("nh_lug_trolley", 2.4, 0.3, 1.0, new Vector3(zx + 2, 0.25, zz - 1.5), "#7a7a7a");
-    makeBox("nh_lug_case1", 0.8, 0.5, 0.6, new Vector3(zx + 2.6, 0.7, zz - 1.5), "#b03a6f");
-    makeBox("nh_lug_case2", 0.8, 0.5, 0.6, new Vector3(zx + 1.4, 0.7, zz - 1.5), "#3a6dc4");
-    // (third spot intentionally empty)
+    makeBox("nh_lug_case1", 0.8, 0.5, 0.6, new Vector3(zx + 2.8, 0.65, zz - 1.5), "#b03a6f");
+    makeBox("nh_lug_case2", 0.8, 0.5, 0.6, new Vector3(zx + 2.0, 0.65, zz - 1.5), "#3a6dc4");
+    makeBox("nh_lug_case3", 0.8, 0.5, 0.6, new Vector3(zx + 1.2, 0.65, zz - 1.5), "#5a8a4a");
 
-    // Lone suitcase further away — the missing one's mate
-    const lostCase = makeBox("nh_lug_lost", 0.7, 0.4, 0.5, new Vector3(zx - 5, 0.3, zz - 2), "#5a8a4a");
-    travelSuitcase = lostCase;
-    // Trolley top is the position the suitcase "starts on" before
-    // tumbling off in the incident animation.
-    travelTrolleyTop = new Vector3(zx + 2, 1.0, zz - 1.5);
-    travelLostRest = new Vector3(zx - 5, 0.3, zz - 2);
+    // Grace with her phone, about to fly out
+    makePerson(zx + 1, zz - 0.5, "customerProtection", { x: -10, z: 4 });
+    graceAlertAt = new Vector3(zx + 1, 0, zz - 0.5);
 
-    // Worried traveller (Grace) on phone
-    makePerson(zx + 1, zz - 0.5, "customerTravel", { x: -10, z: 4 });
+    // Shield marker (🛡️) — her account is being protected
+    makeIncidentMarker(zx + 2, 2.4, zz - 1.5, "shield");
 
-    makeIncidentMarker(zx + 2, 2.4, zz - 1.5, "luggage");
-
-    // Path from travel hub to office
-    makePathLine(
-      "nh_path_travel",
-      { x: zx - 2, z: zz + 1 },
-      { x: -7, z: 4 },
-    );
-
-    // Pushed south-east of the relocated travel terminal so the label
-    // sits on open grass between the hub and the main road, instead of
-    // running off the western edge of the map.
-    makeLabel(zx + 2, zz - 12, "Travel Claims (Grace)", "#3a5fb0");
+    // Pushed south-east of the terminal so the label sits on open grass
+    // between the airport and the main road, instead of running off the
+    // western edge of the map.
+    makeLabel(zx + 2, zz - 12, "Airport — Overseas Trip (Grace)", "#d9534f");
   }
 
-  // ----- Zone 5: Quiet Suburb Home — Life Insurance -----
-  // South-east quadrant — handled with calm tone
+  // ----- Zone 5: Box Hill — Family Home (Robert) -----
+  // South-east quadrant — handled with a calm, respectful tone.
   {
     const zx = 16;
     const zz = -16;
-    lifeHomeCenter = new Vector3(zx, 0.1, zz);
+    familyHomeCenter = new Vector3(zx, 0.1, zz);
 
-    // Calm house, set apart — full suburban detail with a slate gable
+    // The family home, set apart — full suburban detail with a slate gable
     // roof, a chimney, mullioned windows, and a soft front path.
     makeBox("nh_life_found", 5.0, 0.4, 4.4, new Vector3(zx, 0.2, zz), "#9a8f7a");
     makeBox("nh_life_base", 4.6, 2.6, 4, new Vector3(zx, 1.7, zz), "#f0e6d2");
@@ -2122,38 +1942,25 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
     makeTree(zx + 4, zz - 3);
     makeTree(zx - 6, zz + 3, 0.9);
 
-    // A small condolence wreath at the door — gentle, no alarm symbols.
+    // A small remembrance wreath at the door — gentle, no alarm symbols.
     makeBox("nh_life_wreath_outer", 0.7, 0.7, 0.08, new Vector3(zx, 1.6, zz - 2.1), "#5fa657");
     makeBox("nh_life_wreath_inner", 0.4, 0.4, 0.06, new Vector3(zx, 1.6, zz - 2.08), "#fff8e6");
     makeBox("nh_life_wreath_ribbon", 0.18, 0.55, 0.06, new Vector3(zx, 1.25, zz - 2.08), "#c2566f");
 
-    // Beneficiary (Robert) walking calmly down the path
-    makePerson(zx - 2.5, zz - 4, "customerLife", { x: -10, z: 4 });
+    // Robert walking calmly down the path
+    makePerson(zx - 2.5, zz - 4, "customerBereavement", { x: -10, z: 4 });
 
     // Soft heart marker (gentle)
     makeIncidentMarker(zx, 4.6, zz, "heart");
 
-    // Path from family home to office (calm, soft tone)
-    makePathLine(
-      "nh_path_life",
-      { x: zx - 2, z: zz - 3 },
-      { x: -6, z: 4 },
-      "#e8d6cf",
-    );
-
-    makeLabel(zx, zz + 5, "Life Claims (Robert)", "#c2566f");
+    makeLabel(zx, zz + 5, "Box Hill — Family Home (Robert)", "#6e7a8a");
   }
 
-  // ----- Zone 6: Apartment Block — Contents / Suspected Theft -----
-  // South side — featured incident from scenario 2 (Jordan Pierce). The
-  // claim is under fraud review, so the visual stays calm: a small
-  // apartment block with a forced front door, police tape, and an
-  // investigator's magnifier marker rather than alarm symbols.
+  // ----- Apartment block (south-west corner) -----
+  // A three-storey walk-up on the far left edge of the map — everyday
+  // residential scenery that keeps the corner from reading as empty while
+  // leaving the foreground clear toward the central roundabout.
   {
-    // Relocated to the far left edge of the map so the foreground reads
-    // cleanly into the central roundabout / Zava Insurance office without
-    // being blocked by a tall apartment block. The block now sits in the
-    // south-west corner just south of the downtown mid-rise cluster.
     const zx = -32;
     const zz = -28;
 
@@ -2178,29 +1985,12 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
       }
     }
 
-    // Forced / ajar front door (the alleged break-in point)
-    const door = MeshBuilder.CreateBox(
-      "nh_apt_door",
-      { width: 1.0, height: 1.8, depth: 0.16 },
-      scene,
-    );
-    door.position = new Vector3(zx, 0.95, zz - 2.55);
-    door.rotation.y = -0.35; // ajar
-    door.material = mat("aptDoor", "#5a3a22");
-    attach(door);
-    // Splintered door frame highlight
-    makeBox("nh_apt_door_frame", 0.18, 1.9, 0.18, new Vector3(zx + 0.55, 0.95, zz - 2.55), "#3a2a18");
+    // Front door
+    makeBox("nh_apt_door", 1.0, 1.8, 0.16, new Vector3(zx, 0.95, zz - 2.55), "#5a3a22");
 
-    // "POLICE" tape across the doorway (two thin strips)
-    makeBox("nh_apt_tape1", 2.0, 0.12, 0.04, new Vector3(zx, 1.5, zz - 2.45), "#ffd166");
-    makeBox("nh_apt_tape2", 2.0, 0.12, 0.04, new Vector3(zx, 0.9, zz - 2.45), "#ffd166");
-
-    // A small police evidence marker / cone on the stoop
-    makeBox("nh_apt_evidence", 0.3, 0.5, 0.3, new Vector3(zx + 1.2, 0.27, zz - 2.85), "#3a6dc4");
-
-    // Investigator's car parked out front — proper voxel sedan.
+    // A resident's car parked out front — proper voxel sedan.
     makeStaticVehicle(
-      "nh_inv",
+      "nh_apt_car",
       "car",
       new Vector3(zx + 5, 0, zz - 3.5),
       0,
@@ -2208,24 +1998,9 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
       "#1c2230",
     );
 
-    // Claimant (Jordan) standing on the path with arms out — body language
-    // is left to the viewer's imagination; he's just a small voxel figure.
-    makePerson(zx - 1.5, zz - 4, "customerContents", { x: -10, z: 4 });
-
     // Trees / planter beside the building
     makeTree(zx - 5, zz - 1, 0.9);
     makeTree(zx + 5.5, zz + 2, 0.9);
-
-    // Investigator marker (magnifier) — calm, not alarming
-    makeIncidentMarker(zx, 9.2, zz, "fraud");
-
-    // Path from apartment to office (broken / dashed already; this zone
-    // is "under review" so the path goes via the central road).
-    makePathLine(
-      "nh_path_apt",
-      { x: zx + 2, z: zz - 3 },
-      { x: -6, z: -4 },
-    );
   }
 
   // ----- Voxel-city downtown strip -----
@@ -2330,9 +2105,8 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
   makeTree(-24, -14, 0.85);
 
   // ----- Builder's Yard -----
-  // A small construction-supplies depot on the eastern edge — visually
-  // ties the construction-pack-style props together and reinforces the
-  // "claims lead to repairs" narrative.
+  // A small construction-supplies depot on the eastern edge — everyday
+  // scenery that ties the construction-pack-style props together.
   {
     const yx = 32;
     const yz = -18;
@@ -2422,7 +2196,7 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
     makeBench(px + 1.5, pz - 3.6);
   }
 
-  // South-central playground — between Pine Court and Elm Court on Willow Ave
+  // South-central playground — between Lygon St and Swan St on Chapel St
   {
     const px = 6;
     const pz = -28;
@@ -2436,7 +2210,7 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
   }
 
   // North-back river — winding strip along the back of the map between the
-  // travel hub and the Maple Crescent skyline. Pure scenery; no road
+  // airport and the Glenferrie Rd skyline. Pure scenery; no road
   // crossings (it sits behind the houses).
   {
     const riverY = 0.05;
@@ -2474,7 +2248,7 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
   }
 
   // Small western pocket park — fills empty grass between the relocated
-  // mid-rises and Cedar Way.
+  // mid-rises and Flinders Lane.
   {
     const px = -32;
     const pz = -2;
@@ -2510,13 +2284,13 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
     sidewalkZ: number;
     fenceColor?: string;
   }> = [
-    // West side, between Cedar Way and the main road.
+    // West side, between Flinders Lane and the main road.
     { cx: -22, cz: 6, wall: "#e7c8a0", roof: "#7a4a3a", sidewalkZ: 4.4 },
     // West side, south of the main road. Centre Z is well clear of the
     // main south kerb (z≈-3.4) so the foundation no longer sits in the
     // road asphalt.
     { cx: -22, cz: -5.5, wall: "#f0d6b0", roof: "#5a6a7c", sidewalkZ: -3.6 },
-    // North-east, on Maple Crescent (a two-storey home). Centre Z lifted
+    // North-east, on Glenferrie Rd (a two-storey home). Centre Z lifted
     // so the foundation sits clear of the north kerb at z≈22.65.
     { cx: 4, cz: 25.6, wall: "#cfe1f0", roof: "#3a5fb0", sidewalkZ: 22.8,
       storeys: 2, fenceColor: "#e7d8c0" },
@@ -2538,7 +2312,7 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
   const lampMat = mat("lamp", "#3a3a3a");
   const lampHead = mat("lampHead", "#fff5d6");
   const lampPositions: Array<[number, number]> = [
-    // Lamp in front of the Zava Claims office shifted left by 10 units
+    // Lamp in front of the Caldova office shifted left by 10 units
     // so it no longer sits directly in front of the entrance/sign.
     [-22, 3],
     [12, 3],
@@ -2586,49 +2360,48 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
     makeTree(tx, tz, 0.85);
   }
 
-  // Decorative customer trail: a few people on streets heading to office -----
-  // The Zava Insurance Claims Office building sits at world (-10, 0, 8) with
-  // its south-facing entrance at z≈4. Trail figures face that doorway so the
-  // visual reads as "everyone heading into the Zava Claims building".
+  // Decorative trail: Caldova staff out and about, heading to the office ---
+  // The Caldova Wealth — Client Operations building sits at world (-10, 0, 8)
+  // with its south-facing entrance at z≈4. Trail figures face that doorway
+  // so the visual reads as "everyone heading into the Caldova building".
   const office = { x: -10, z: 4 };
-  makePerson(0, -10, "intakeOfficer", office);
-  makePerson(8, -2, "supplierCoord", office);
-  makePerson(-3, 6, "claimsAssessor", office);
-  makePerson(-2, -3, "lossAdjuster", office);
-  // Extra figures along the new side streets to make the suburb feel lived-in.
+  makePerson(-4.2, -7, "onboardingOfficer", office);
+  makePerson(8, -2, "transfersCoord", office);
+  makePerson(-3, 6, "benefitsAssessor", office);
+  makePerson(-2, -3, "investmentAnalyst", office);
+  // Extra figures along the side streets to make the suburb feel lived-in.
   makePerson(18, 20, "commsSpecialist", office);
-  makePerson(26, 16, "settlementOfficer", office);
-  makePerson(-12, -19, "fraudInvestigator", office);
+  makePerson(26, 16, "paymentsOfficer", office);
+  makePerson(-12, -19, "finCrimeInvestigator", office);
   makePerson(30, 6, "teamLeader", office);
 
   const zones: IncidentZones = {
-    // Office front door — the Zava Insurance Claims Office building sits at
-    // world (-10, 0, 8) with its south-facing entrance at z≈4. Routing the
-    // customer to (-10, 0, 5) puts them at the doorway threshold, so the
-    // last walk segment visibly carries them up the office walkway and INTO
-    // the Zava Claims building before the scene fades to the office.
+    // Office front door — the Caldova Wealth — Client Operations building
+    // sits at world (-10, 0, 8) with its south-facing entrance at z≈4.
+    // Routing the client to (-10, 0, 5) puts them at the doorway threshold,
+    // so the last walk segment visibly carries them up the office walkway
+    // and INTO the building before the scene fades to the office.
     officeDoor: new Vector3(-10, 0, 5),
-    // Each zone anchor is the spot where the customer voxel character
-    // begins their walk toward the office. These match the (zx, zz) used
-    // when placing the incident scenery (offset slightly so the spawn
-    // sits on the kerb rather than inside a house).
-    home: new Vector3(16 - 2, 0, 14 - 4),
-    motor: new Vector3(22 + 1.5, 0, 0 - 2),
-    business: new Vector3(-18 + 1, 0, -14 + 2),
-    travel: new Vector3(-32 + 8, 0, 18 - 4),
-    life: new Vector3(16 - 1, 0, -16 + 2),
+    // Each zone anchor is where the client voxel character begins their
+    // walk toward the office — on a path or forecourt beside the life-event
+    // scenery rather than inside a building.
+    onboarding: new Vector3(24.5, 0, 4.4),
+    protection: new Vector3(-32 + 8, 0, 18 - 4),
+    retirement: new Vector3(16 - 2, 0, 14 - 4),
+    hardship: new Vector3(-18 + 1, 0, -14 + 2),
+    bereavement: new Vector3(16 - 1, 0, -16 + 2),
   };
 
-  // ----- Ambient life: cars, pedestrians, pets, and incident animations -----
+  // ----- Ambient life: trams, cars, pedestrians, pets, and life events -----
   // Mirrors the "always animated" feel of the office scene, where staff and
-  // customers are constantly moving around. Routes are picked to avoid the
-  // static incident scenery (parked cars, smashed bumpers, plumber van etc.).
+  // clients are constantly moving around. Routes are picked to avoid the
+  // static scenery (parked cars, street signs, shopfront boards etc.).
   const ambient = new NeighbourhoodAmbient(scene, root);
 
   // Cars looping along the side streets. Each route gets a different
   // vehicle type so the neighbourhood reads as a real mixed-traffic
   // street rather than a row of identical sedans.
-  // Maple Crescent (z=20) — runs east-west; lanes at z=19 (eastbound) and z=21 (westbound).
+  // Glenferrie Rd (z=20) — runs east-west; lanes at z=19 (eastbound) and z=21 (westbound).
   ambient.addCar(
     "maple_e",
     [
@@ -2645,17 +2418,17 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
     ],
     { type: "mini", bodyColor: "#c188d4", topColor: "#3a3a3a", speed: 4.0 },
   );
-  // Birch Lane (z=-10) — east-west. Eastbound lane only to keep clear of the
-  // apartment block / café approach.
+  // Collins St (z=-10) — a green-and-gold Melbourne tram glides along the
+  // tracks down the middle of the street.
   ambient.addCar(
-    "birch_e",
+    "collins_tram",
     [
-      [-26, -11],
-      [6, -11],
+      [-27, -10],
+      [37, -10],
     ],
-    { type: "sedan", bodyColor: "#ffd166", topColor: "#c4a14a", speed: 4.2 },
+    { type: "tram", bodyColor: "#2f7d3a", topColor: "#e8b84a", speed: 3.2 },
   );
-  // Oak Drive (x=33) — north-south, avoiding the motor incident at x=22.
+  // Toorak Rd (x=33) — north-south on the east side of town.
   ambient.addCar(
     "oak_n",
     [
@@ -2664,7 +2437,7 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
     ],
     { type: "jeep", bodyColor: "#3a8fd6", topColor: "#1f5fa0", speed: 4.0 },
   );
-  // Cedar Way (x=-26) — north-south on the west side.
+  // Flinders Lane (x=-26) — north-south on the west side.
   ambient.addCar(
     "cedar_s",
     [
@@ -2692,19 +2465,37 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
     { type: "scooter", bodyColor: "#e84b3a", topColor: "#f8d34a", speed: 3.2 },
   );
   ambient.addCar(
-    "birch_bike_w",
+    "collins_bike_w",
     [
-      [6, -9],
-      [-26, -9],
+      [6, -8.8],
+      [-26, -8.8],
     ],
     { type: "bicycle", bodyColor: "#4a8a4a", topColor: "#ffd166", speed: 2.4 },
+  );
+
+  // Delivery vans doing the rounds on Toorak Rd and Chapel St.
+  ambient.addCar(
+    "toorak_van",
+    [
+      [32, 20],
+      [32, -4],
+    ],
+    { type: "van", bodyColor: "#f4f0e6", topColor: "#d9534f", speed: 3.6 },
+  );
+  ambient.addCar(
+    "chapel_van",
+    [
+      [-15, -21.2],
+      [31, -21.2],
+    ],
+    { type: "van", bodyColor: "#ffd166", topColor: "#3a3a44", speed: 3.8 },
   );
 
   // Wandering pedestrians on sidewalks. Routes hug the kerbs so the
   // walkers stay clear of the road centres and the static personas.
   ambient.addPedestrian(
     "main_n_walker",
-    "customerContents",
+    "cityCommuter",
     [
       [-30, 3.4],
       [-10, 3.4],
@@ -2715,7 +2506,7 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
   );
   ambient.addPedestrian(
     "main_s_walker",
-    "customerHome",
+    "cityJogger",
     [
       [10, -3.4],
       [30, -3.4],
@@ -2726,7 +2517,7 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
   );
   ambient.addPedestrian(
     "maple_walker",
-    "customerBusiness",
+    "cityStudent",
     [
       [10, 17.4],
       [30, 17.4],
@@ -2735,7 +2526,7 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
   );
   ambient.addPedestrian(
     "vert_walker",
-    "customerTravel",
+    "parcelCourier",
     [
       [3.4, 14],
       [3.4, 28],
@@ -2746,7 +2537,7 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
   );
 
   // Friendly pets bumbling around grass patches well clear of the roads
-  // and incident scenery (corners of the map are mostly empty grass). A
+  // and life-event scenery (corners of the map are mostly empty grass). A
   // mix of dogs, cats, and a rabbit so the neighbourhood has more life.
   ambient.addPet(
     "nw_dog",
@@ -2806,120 +2597,51 @@ export function buildNeighbourhood(scene: Scene): NeighbourhoodResult {
     { bodyColor: "#f4d36a", wingColor: "#b89a3a", altitude: 10, speed: 7.0 },
   );
 
-  // Ambient roadworks: a busted water main on the grass verge between
-  // Cedar Way and the central north-south road, just north of Birch
-  // Lane. Continuously animated (water jet, droplets, pulsing wet
-  // patch) — purely scene dressing, not tied to any scenario.
-  ambient.addBustedPipeline("birch_main", [-12, -6]);
-
-  // Home Claims (Michael) burst pipe — same voxel busted-pipeline scene
-  // staged in the front yard of house 1 so the cause of the kitchen
-  // water damage is visible at a glance: dirt mound + snapped pipe
-  // stubs + four perimeter cones + pulsing geyser + recycling droplets.
-  if (homeBurstCenter) {
-    ambient.addBustedPipeline("home_burst", homeBurstCenter);
-  }
-
-  // Register per-scenario incident animations. (The home zone uses the
-  // always-on busted-pipeline scene above instead of a one-shot jet,
-  // so no per-scenario animation is needed for "home".)
-  if (motorLeadCar.length && motorRearCar.length && motorContact) {
-    ambient.registerIncident(
-      "motor",
-      makeRearEndIncident(scene, root, motorLeadCar, motorRearCar, motorContact),
-    );
-  }
-  if (cafeSmokeMeshes.length && cafeFlickerAt) {
-    ambient.registerIncident(
-      "business",
-      makeSmokeIncident(scene, root, cafeSmokeMeshes, cafeFlickerAt),
-    );
-  }
-  // Continuous café rooftop fire: flame voxels flicker, smoke wisps
-  // rise and recycle on a loop, regardless of scenario state. The
-  // scripted "business" incident still pulses the door glow and
-  // additionally swells the smoke during the scenario beat (its update
-  // runs after movers, so it cleanly overrides for those 4.5 s).
-  if (cafeFlameMeshes.length && cafeSmokeMeshes.length) {
-    const flameBaseScales = cafeFlameMeshes.map((m) => m.scaling.clone());
-    const flameBaseY = cafeFlameMeshes.map((m) => m.position.y);
-    const flameEmBase = cafeFlameMats.map((m) => m.emissiveColor.clone());
-    const smokeBaseScales = cafeSmokeMeshes.map((m) => m.scaling.clone());
-    const smokeBaseX = cafeSmokeMeshes.map((m) => m.position.x);
-    const smokeBaseY = cafeSmokeMeshes.map((m) => m.position.y);
-    const smokeRoofY = 4.3; // just above the flame tip (which reaches ~y=4.2)
-    // Stagger the wisps so they don't all rise in sync.
-    const smokePhases = cafeSmokeMeshes.map((_, i) => i / cafeSmokeMeshes.length);
-    let fireT = 0;
+  // Retirement balloons on George's gate posts bob and sway gently in the
+  // breeze — always on, independent of any scenario.
+  if (retirementBalloons.length > 0) {
+    const balloonBase = retirementBalloons.map((b) => b.position.clone());
+    let breeze = 0;
     ambient.addAnimation((dt) => {
-      fireT += dt;
-      // Flame flicker: each block jitters at its own frequency so the
-      // tip dances faster than the base. Scale the height and pulse
-      // the emissive intensity for a live "ember" glow.
-      for (let i = 0; i < cafeFlameMeshes.length; i++) {
-        const m = cafeFlameMeshes[i];
-        const fmat = cafeFlameMats[i];
-        const f = 6 + i * 2.5;
-        const j1 = Math.sin(fireT * f + i * 1.7);
-        const j2 = Math.sin(fireT * (f * 0.5) + i * 0.9);
-        const yScale = Math.max(0.55, 1 + j1 * 0.18 + j2 * 0.08);
-        const xzScale = 1 + j2 * 0.06 - j1 * 0.04;
-        m.scaling.x = flameBaseScales[i].x * xzScale;
-        m.scaling.z = flameBaseScales[i].z * xzScale;
-        m.scaling.y = flameBaseScales[i].y * yScale;
-        // Lift slightly as the flame stretches so the base stays on the roof.
-        m.position.y =
-          flameBaseY[i] + flameBaseScales[i].y * (yScale - 1) * 0.5;
-        // Slight sway around vertical axis.
-        m.rotation.y = Math.sin(fireT * (f * 0.4) + i) * 0.12;
-        // Emissive flash — keeps the rooftop glowing warm.
-        const glow =
-          0.85 + 0.25 * Math.sin(fireT * 14 + i * 1.3) + 0.1 * j2;
-        fmat.emissiveColor = flameEmBase[i].scale(Math.max(0.6, glow));
-      }
-      // Smoke wisps: each wisp rides its own 0..1 phase, rising from
-      // just above the rooftop, expanding outward, and fading. When
-      // its phase wraps it respawns at the base — giving a continuous
-      // smoke column instead of three frozen blobs.
-      for (let i = 0; i < cafeSmokeMeshes.length; i++) {
-        smokePhases[i] += dt * 0.18;
-        if (smokePhases[i] >= 1) smokePhases[i] -= 1;
-        const p = smokePhases[i];
-        const m = cafeSmokeMeshes[i];
-        const topY = smokeBaseY[i] + 0.8;
-        m.position.y = smokeRoofY + (topY - smokeRoofY) * p;
-        // Sideways drift for organic feel.
-        const drift = Math.sin(fireT * 1.2 + i * 1.3) * 0.25;
-        m.position.x = smokeBaseX[i] + drift;
-        // Expand as it rises, with a small pulse from the fire below.
-        const grow = 0.5 + p * 1.0 + Math.sin(fireT * 4 + i) * 0.06;
-        m.scaling.x = smokeBaseScales[i].x * grow;
-        m.scaling.y = smokeBaseScales[i].y * grow;
-        m.scaling.z = smokeBaseScales[i].z * grow;
-        // Fade in at the bottom, ride at full alpha, fade out near top.
-        const mat = m.material as StandardMaterial | null;
-        if (mat) {
-          const fade =
-            p < 0.15
-              ? p / 0.15
-              : p > 0.7
-                ? Math.max(0, 1 - (p - 0.7) / 0.3)
-                : 1;
-          mat.alpha = fade;
-        }
+      breeze += dt;
+      for (let i = 0; i < retirementBalloons.length; i++) {
+        const b = retirementBalloons[i];
+        b.position.y = balloonBase[i].y + Math.sin(breeze * 1.8 + i * 1.3) * 0.06;
+        b.position.x = balloonBase[i].x + Math.sin(breeze * 1.1 + i) * 0.04;
+        b.rotation.z = Math.sin(breeze * 1.4 + i * 0.7) * 0.08;
       }
     });
   }
-  if (travelSuitcase && travelTrolleyTop && travelLostRest) {
+
+  // Register the per-scenario life-event animations.
+  if (newJobConfettiAt) {
     ambient.registerIncident(
-      "travel",
-      makeLuggageIncident(root, travelSuitcase, travelTrolleyTop, travelLostRest),
+      "onboarding",
+      makeCelebrationIncident(scene, root, newJobConfettiAt),
     );
   }
-  if (lifeHomeCenter) {
+  if (graceAlertAt) {
     ambient.registerIncident(
-      "life",
-      makeCalmGlowIncident(scene, root, lifeHomeCenter),
+      "protection",
+      makeIdentityAlertIncident(scene, root, graceAlertAt),
+    );
+  }
+  if (retirementBanner && retirementConfettiAt) {
+    ambient.registerIncident(
+      "retirement",
+      makeRetirementIncident(scene, root, retirementBanner, retirementConfettiAt),
+    );
+  }
+  if (cafeCloudAt && cafeFrontAt) {
+    ambient.registerIncident(
+      "hardship",
+      makeHardshipCloudIncident(scene, root, cafeCloudAt, cafeFrontAt),
+    );
+  }
+  if (familyHomeCenter) {
+    ambient.registerIncident(
+      "bereavement",
+      makeCalmGlowIncident(scene, root, familyHomeCenter),
     );
   }
 

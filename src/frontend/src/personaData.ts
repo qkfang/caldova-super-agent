@@ -344,7 +344,7 @@ export const CUSTOMER_PERSONAS: CustomerPersona[] = [
       "She is busy with the new job — she doesn’t want paperwork bouncing back, or to lose anything valuable when her old funds close.",
     personality: "Busy, organised, and wants it done digitally.",
     typical_line:
-      "I’ve got three super accounts from old jobs — I just want one, set up properly.",
+      "I’ve got super scattered across old jobs — I just want one account, set up properly.",
     palette: "customerOnboarding",
     request_type: "New account & consolidation",
     amount_min: 95000,
@@ -357,7 +357,7 @@ export const CUSTOMER_PERSONAS: CustomerPersona[] = [
     situation:
       "Travelling in Italy — someone is trying to move her super while she’s away.",
     situation_long:
-      "Grace (63) is a retired school principal from Williamstown with $612,400 in Caldova Super (Select). She left Melbourne Airport on 18 October for a long-planned trip through Italy and has a travel notice on file. While she is away, someone using her identity has changed her contact details and asked to roll her entire balance to a brand-new SMSF.",
+      "Grace (63) is a retired school principal from Williamstown and a direct member (no adviser) with $612,400 in Caldova Super (Select). She left Melbourne Airport on 18 October for a long-planned trip through Italy and has a travel notice on file. While she is away, someone using her identity has changed her contact details and asked to roll her entire balance to a brand-new SMSF.",
     need: [
       "Her $612,400 kept safe",
       "To be contacted on the number she already trusts",

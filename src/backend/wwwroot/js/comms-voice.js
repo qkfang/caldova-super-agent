@@ -1,13 +1,21 @@
-// Customer Communications page — Voice chat tab (real-time speech-to-speech).
-// Externalised so init runs reliably on Blazor enhanced navigation.
+// Client Communications page — Voice chat tab (talk to Cara).
+// Loaded as a permanent script from App.razor so init runs reliably on full
+// page load AND on Blazor enhanced navigation.
 
-    // Voice chat tab — real-time speech-to-speech via Azure AI Foundry
-    // Voice Live API. The backend at /communications/voice-live proxies a
-    // bearer-authenticated WebSocket to the Customer Communications
-    // Foundry agent (Cara). The browser captures 24 kHz mono PCM16 from
-    // the mic and plays returned PCM16 audio chunks back through the Web
-    // Audio API. Server-side VAD on the Voice Live side decides when Cara
-    // replies, so the user can talk naturally and even barge in.
+    // Two ways to talk to Cara:
+    //  1. Real-time speech-to-speech via the Azure AI Foundry Voice Live API.
+    //     The backend at /communications/voice-live proxies a
+    //     bearer-authenticated WebSocket to Cara's voice agent
+    //     (client-communications-voice-agent). The browser captures 24 kHz
+    //     mono PCM16 from the mic and plays returned PCM16 audio chunks back
+    //     through the Web Audio API. Server-side VAD on the Voice Live side
+    //     decides when Cara replies, so the caller can talk naturally and
+    //     even barge in.
+    //  2. Typed chat (and the suggested opening lines) whenever no Voice Live
+    //     call is connected: POST /communications/voice returns a short
+    //     spoken-style reply — from the live voice agent when Foundry is
+    //     configured, otherwise a deterministic case-aware reply — which the
+    //     browser reads aloud with the Web Speech API.
     (function () {
         function initVoice() {
             const root = document.querySelector('.voice-panel');
@@ -15,7 +23,7 @@
             root.dataset.wired = '1';
 
             const $ = sel => root.querySelector(sel);
-            const claimSelect = $('#voice-claim-select');
+            const caseSelect = $('#voice-case-select');
             const refreshBtn = $('#voice-refresh-btn');
             const micBtn = $('#voice-mic-btn');
             const micLabel = micBtn.querySelector('.voice-mic-label');
@@ -25,10 +33,13 @@
             const sendBtn = $('#voice-text-send');
             const ttsToggle = $('#voice-tts-toggle');
             const transcriptEl = $('#voice-transcript');
+            const promptChips = Array.from(root.querySelectorAll('.voice-chip'));
 
             const SAMPLE_RATE = 24000;
             const FRAME_MS = 50;
             const FRAME_SAMPLES = (SAMPLE_RATE * FRAME_MS) / 1000;
+            // Azure neural voice used for Cara on Voice Live calls.
+            const VOICE_LIVE_VOICE = 'en-US-Ava:DragonHDLatestNeural';
 
             const waveBars = Array.from(wave.querySelectorAll('span'));
 
@@ -49,13 +60,20 @@
             let caraTranscriptEl = null;
             let caraSpeaking = false;
             let greetingSent = false;
+            // Typed-chat state: the live voice agent chains turns via the
+            // previous Foundry response id; reset whenever the caller changes.
+            let previousResponseId = null;
+            let typedBusy = false;
 
-            function escapeHtml(s) {
-                return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
-            }
             function setStatus(text, isError) {
                 statusEl.textContent = text;
                 statusEl.classList.toggle('error', !!isError);
+            }
+            function idleStatus() {
+                setStatus(voiceEnabled
+                    ? 'Idle. Press the mic to start a live call with Cara — or type below.'
+                    : 'Voice Live isn\'t configured on this server (set AZURE_AI_PROJECT_ENDPOINT for real-time voice). You can still talk to Cara by typing or tapping an opening line — replies are read aloud when Speak replies is on.',
+                    false);
             }
             function clearEmpty() {
                 const empty = transcriptEl.querySelector('.voice-empty');
@@ -64,14 +82,16 @@
             function appendMessage(role, text) {
                 clearEmpty();
                 const div = document.createElement('div');
-                div.className = 'voice-msg ' + (role === 'user' ? 'user' : 'cara');
-                const roleSpan = document.createElement('span');
-                roleSpan.className = 'voice-msg-role';
-                roleSpan.textContent = role === 'user' ? 'You' : 'Cara';
+                div.className = 'voice-msg ' + (role === 'user' ? 'user' : role === 'system' ? 'system' : 'cara');
+                if (role !== 'system') {
+                    const roleSpan = document.createElement('span');
+                    roleSpan.className = 'voice-msg-role';
+                    roleSpan.textContent = role === 'user' ? 'You' : 'Cara';
+                    div.appendChild(roleSpan);
+                }
                 const textSpan = document.createElement('span');
                 textSpan.className = 'voice-msg-text';
                 textSpan.textContent = text;
-                div.appendChild(roleSpan);
                 div.appendChild(textSpan);
                 transcriptEl.appendChild(div);
                 transcriptEl.scrollTop = transcriptEl.scrollHeight;
@@ -128,38 +148,40 @@
                     micBtn.classList.add('disabled');
                     micBtn.disabled = true;
                     micLabel.textContent = 'Mic unavailable';
-                    setStatus('Voice Live is not configured on the server. Set AZURE_AI_PROJECT_ENDPOINT to enable real-time voice. You can still type below once connected.', true);
-                } else {
-                    setStatus('Idle. Press the mic to start a live conversation with Cara.');
                 }
+                idleStatus();
             }
 
-            async function loadClaims() {
-                claimSelect.disabled = true;
-                claimSelect.innerHTML = '<option value="">Loading claims…</option>';
+            async function loadCases() {
+                caseSelect.disabled = true;
+                caseSelect.innerHTML = '<option value="">Loading cases…</option>';
+                const noContext = '<option value="">No case — a new caller</option>';
                 try {
-                    const res = await fetch('/communications/claims');
+                    const res = await fetch('/communications/cases');
                     if (!res.ok) throw new Error('HTTP ' + res.status);
-                    const claims = await res.json();
-                    const opts = ['<option value="">No claim context — open conversation</option>']
-                        .concat(claims.map(c => '<option value="' + escapeHtml(c.claimNumber) + '">' +
-                            escapeHtml(c.claimNumber) + ' · ' + escapeHtml(c.customerName) + ' · ' + escapeHtml(c.claimType) +
-                            '</option>'));
-                    claimSelect.innerHTML = opts.join('');
-                    claimSelect.disabled = false;
+                    const cases = await res.json();
+                    caseSelect.innerHTML = [noContext]
+                        .concat(cases.map(c => '<option value="' + escapeHtml(c.caseNumber) + '">' +
+                            escapeHtml(c.clientName) + ' · ' + escapeHtml(c.caseNumber) + ' · ' + escapeHtml(c.requestType) +
+                            '</option>'))
+                        .join('');
                 } catch (_) {
-                    claimSelect.innerHTML = '<option value="">No claim context — open conversation</option>';
-                    claimSelect.disabled = false;
+                    caseSelect.innerHTML = noContext;
                 }
+                caseSelect.disabled = false;
             }
 
-            async function loadClaimDetail(claimNumber) {
-                if (!claimNumber) return null;
+            async function loadCaseDetail(caseNumber) {
+                if (!caseNumber) return null;
                 try {
-                    const res = await fetch('/communications/claims/' + encodeURIComponent(claimNumber));
+                    const res = await fetch('/communications/cases/' + encodeURIComponent(caseNumber));
                     if (!res.ok) return null;
                     return await res.json();
                 } catch (_) { return null; }
+            }
+
+            function escapeHtml(s) {
+                return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
             }
 
             function floatToPcm16(f32) {
@@ -269,8 +291,8 @@
                 // ScriptProcessor only fires onaudioprocess while it's
                 // connected to the audio graph's destination. Route
                 // through a muted GainNode so we don't feed the mic back
-                // into the speakers (the model's own voice is handled by
-                // the playback context).
+                // into the speakers (Cara's own voice is handled by the
+                // playback context).
                 const muteSink = micCtx.createGain();
                 muteSink.gain.value = 0;
                 scriptNode.connect(muteSink);
@@ -344,7 +366,7 @@
                     case 'session.updated':
                         setStatus('Connected. Speak naturally — Cara is listening.');
                         // Trigger a proactive greeting on the first
-                        // session.updated so the user immediately hears
+                        // session.updated so the caller immediately hears
                         // Cara and we get end-to-end audio confirmation
                         // even if local VAD has trouble detecting their
                         // first utterance. Mirrors the official agent
@@ -362,7 +384,7 @@
                                     item: {
                                         type: 'message',
                                         role: 'user',
-                                        content: [{ type: 'input_text', text: 'Please greet me as Cara from the Zava Claims customer communications team and ask how you can help today. Keep it short and warm.' }]
+                                        content: [{ type: 'input_text', text: 'Please greet me as Cara from the Caldova Wealth client communications team and ask how you can help today. Keep it short and warm.' }]
                                     }
                                 }));
                                 ws.send(JSON.stringify({ type: 'response.create' }));
@@ -419,12 +441,30 @@
                 }
             }
 
+            function caseContextText(c) {
+                const adviser = (!c.adviserName || /^\s*none/i.test(c.adviserName))
+                    ? 'None (direct member)'
+                    : c.adviserName + (c.adviserPractice ? ' (' + c.adviserPractice + ')' : '');
+                return 'Context for this call (do not read this aloud unless asked). The caller has already been verified.\n' +
+                    'Case number: ' + (c.caseNumber || '') + '\n' +
+                    'Caller: ' + (c.clientName || '') + '\n' +
+                    'Member number: ' + (c.memberNumber || '') + '\n' +
+                    'Product: ' + (c.product || '') + '\n' +
+                    'Request type: ' + (c.requestType || '') + '\n' +
+                    'Received: ' + (c.receivedDate || '') + '\n' +
+                    'Adviser: ' + adviser + '\n' +
+                    'Request: ' + (c.requestSummary || '') + '\n' +
+                    'Amount: ' + (c.amount || '') + '\n' +
+                    'Priority: ' + (c.priority || '') + (c.priorityReason ? ' — ' + c.priorityReason : '');
+            }
+
             async function connect() {
                 if (connected || connecting) return;
                 connecting = true;
+                stopSpeaking();
                 setStatus('Connecting to Voice Live…');
 
-                const claim = await loadClaimDetail(claimSelect.value);
+                const memberCase = await loadCaseDetail(caseSelect.value);
 
                 const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
                 const url = proto + '//' + location.host + '/communications/voice-live';
@@ -443,13 +483,13 @@
                     // Configure the Voice Live session — PCM16 24 kHz both
                     // ways, server VAD, noise suppression / echo
                     // cancellation. The "instructions" property is
-                    // intentionally omitted: when using a custom Foundry
-                    // agent (Cara) the agent already has its own
-                    // instructions configured server-side. We also do
-                    // NOT set input_audio_transcription here — the
-                    // Foundry agent runs its own transcription pipeline
-                    // and adding one client-side can cause the agent to
-                    // silently drop turns.
+                    // intentionally omitted: Cara's Foundry voice agent
+                    // already has its own instructions configured
+                    // server-side. We also do NOT set
+                    // input_audio_transcription here — the Foundry agent
+                    // runs its own transcription pipeline and adding one
+                    // client-side can cause the agent to silently drop
+                    // turns.
                     const sessionUpdate = {
                         type: 'session.update',
                         session: {
@@ -466,31 +506,21 @@
                                 silence_duration_ms: 500
                             },
                             voice: {
-                                name: 'en-US-Ava:DragonHDLatestNeural',
+                                name: VOICE_LIVE_VOICE,
                                 type: 'azure-standard'
                             }
                         }
                     };
                     try { ws.send(JSON.stringify(sessionUpdate)); } catch (_) {}
 
-                    if (claim) {
-                        const ctxText =
-                            'Context for this call (do not read this aloud unless asked):\n' +
-                            'Claim number: ' + (claim.claimNumber || '') + '\n' +
-                            'Customer: ' + (claim.customerName || '') + '\n' +
-                            'Policy: ' + (claim.policyNumber || '') + '\n' +
-                            'Claim type: ' + (claim.claimType || '') + '\n' +
-                            'Incident: ' + (claim.incidentDate || '') + ' · ' + (claim.incidentLocation || '') + '\n' +
-                            'Description: ' + (claim.incidentDescription || '') + '\n' +
-                            'Urgency: ' + (claim.urgency || '') + '\n' +
-                            'Stage: Lodged, awaiting Claims Assessment.';
+                    if (memberCase) {
                         try {
                             ws.send(JSON.stringify({
                                 type: 'conversation.item.create',
                                 item: {
                                     type: 'message',
                                     role: 'user',
-                                    content: [{ type: 'input_text', text: ctxText }]
+                                    content: [{ type: 'input_text', text: caseContextText(memberCase) }]
                                 }
                             }));
                         } catch (_) {}
@@ -501,7 +531,7 @@
                         startWaveLoop();
                         setStatus('Connected. Say hello — Cara can hear you.');
                     } catch (err) {
-                        setStatus('Could not access microphone: ' + (err.message || err) + '. You can still type below.', true);
+                        setStatus('Could not access the microphone: ' + (err.message || err) + '. You can still type below.', true);
                     }
                 };
 
@@ -515,7 +545,7 @@
 
                 ws.onerror = (e) => {
                     try { console.error('Voice Live WebSocket error', e); } catch (_) {}
-                    setStatus('Voice Live connection error. Please retry.', true);
+                    setStatus('Voice Live connection error. Please retry — or type to Cara below.', true);
                 };
 
                 ws.onclose = (e) => {
@@ -556,39 +586,122 @@
                     return;
                 }
                 if (!voiceEnabled) {
-                    setStatus('Voice Live is not configured on the server. You can still type below once connected.', true);
+                    idleStatus();
                     return;
                 }
                 try {
                     await connect();
                 } catch (err) {
-                    setStatus('Could not start call: ' + (err.message || err), true);
+                    setStatus('Could not start the call: ' + (err.message || err), true);
                     teardown();
+                }
+            }
+
+            // ── Typed chat fallback (and opening-line chips) ──────────────
+            function pickVoice() {
+                if (!('speechSynthesis' in window)) return null;
+                const voices = window.speechSynthesis.getVoices() || [];
+                return voices.find(v => /en-AU/i.test(v.lang) && /female|natasha|karen|catherine/i.test(v.name))
+                    || voices.find(v => /en-AU/i.test(v.lang))
+                    || voices.find(v => /^en/i.test(v.lang))
+                    || null;
+            }
+            function stopSpeaking() {
+                if ('speechSynthesis' in window) {
+                    try { window.speechSynthesis.cancel(); } catch (_) {}
+                }
+                micBtn.classList.remove('speaking');
+                if (!connected) wave.classList.remove('active', 'speaking');
+            }
+            function speak(text) {
+                if (!ttsToggle.checked || !('speechSynthesis' in window) || !text) return;
+                stopSpeaking();
+                const utterance = new SpeechSynthesisUtterance(text);
+                const voice = pickVoice();
+                if (voice) utterance.voice = voice;
+                utterance.lang = voice ? voice.lang : 'en-AU';
+                utterance.rate = 1.0;
+                utterance.onstart = () => {
+                    micBtn.classList.add('speaking');
+                    wave.classList.add('active', 'speaking');
+                };
+                const done = () => {
+                    micBtn.classList.remove('speaking');
+                    if (!connected) wave.classList.remove('active', 'speaking');
+                };
+                utterance.onend = done;
+                utterance.onerror = done;
+                window.speechSynthesis.speak(utterance);
+            }
+            function setTypedBusy(busy) {
+                typedBusy = busy;
+                sendBtn.disabled = busy;
+                promptChips.forEach(c => { c.disabled = busy; });
+            }
+
+            async function sendTyped(text) {
+                if (typedBusy) return;
+                appendMessage('user', text);
+                setTypedBusy(true);
+                setStatus('Cara is thinking…');
+                try {
+                    const res = await fetch('/communications/voice', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            message: text,
+                            caseNumber: caseSelect.value || null,
+                            previousResponseId: previousResponseId
+                        })
+                    });
+                    const data = await res.json().catch(() => ({}));
+                    if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+                    previousResponseId = data.responseId || previousResponseId;
+                    appendMessage('cara', data.reply || '');
+                    speak(data.reply || '');
+                    setStatus(data.agentUsed
+                        ? 'Cara (live Foundry voice agent) replied. Keep chatting, or start a live call with the mic.'
+                        : voiceEnabled
+                            ? 'Cara replied (scripted demo reply). Press the mic for a live Voice Live call.'
+                            : 'Cara replied (scripted demo reply — Foundry not configured). Keep chatting.');
+                } catch (err) {
+                    setStatus('Could not reach Cara: ' + (err.message || err), true);
+                } finally {
+                    setTypedBusy(false);
                 }
             }
 
             function sendText(text) {
                 if (!text) return;
-                if (!ws || ws.readyState !== WebSocket.OPEN) {
-                    setStatus('Start a call first to chat with Cara via Voice Live.', true);
+                if (ws && ws.readyState === WebSocket.OPEN) {
+                    appendMessage('user', text);
+                    try {
+                        ws.send(JSON.stringify({
+                            type: 'conversation.item.create',
+                            item: {
+                                type: 'message',
+                                role: 'user',
+                                content: [{ type: 'input_text', text }]
+                            }
+                        }));
+                        ws.send(JSON.stringify({ type: 'response.create' }));
+                        setStatus('Cara is thinking…');
+                    } catch (_) {}
                     return;
                 }
-                appendMessage('user', text);
-                try {
-                    ws.send(JSON.stringify({
-                        type: 'conversation.item.create',
-                        item: {
-                            type: 'message',
-                            role: 'user',
-                            content: [{ type: 'input_text', text }]
-                        }
-                    }));
-                    ws.send(JSON.stringify({ type: 'response.create' }));
-                } catch (_) {}
+                sendTyped(text);
             }
 
             micBtn.addEventListener('click', toggleMic);
-            refreshBtn.addEventListener('click', loadClaims);
+            refreshBtn.addEventListener('click', loadCases);
+            caseSelect.addEventListener('change', () => {
+                previousResponseId = null;
+                stopSpeaking();
+                const label = caseSelect.value
+                    ? 'Now speaking with ' + caseSelect.options[caseSelect.selectedIndex].text + ' (verified caller).'
+                    : 'Now speaking with a new caller (no case selected).';
+                appendMessage('system', label + (connected ? ' End and restart the call so Cara picks up the new context.' : ''));
+            });
             sendBtn.addEventListener('click', () => {
                 const v = textInput.value.trim();
                 if (!v) return;
@@ -601,9 +714,17 @@
                     sendBtn.click();
                 }
             });
+            ttsToggle.addEventListener('change', () => { if (!ttsToggle.checked) stopSpeaking(); });
+            promptChips.forEach(chip => {
+                chip.addEventListener('click', () => sendText(chip.dataset.prompt || chip.textContent.trim()));
+            });
+            // Some browsers load speech voices lazily — ask once up front.
+            if ('speechSynthesis' in window) {
+                try { window.speechSynthesis.getVoices(); } catch (_) {}
+            }
 
             probeConfig();
-            loadClaims();
+            loadCases();
         }
 
         initVoice();

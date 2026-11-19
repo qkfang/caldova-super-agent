@@ -1277,7 +1277,7 @@ export class NeighbourhoodAmbient {
         }
         if (pauseTimer > 0) {
           pauseTimer -= dt;
-          // Settle legs while paused.
+          // Rest legs while paused.
           legs.forEach((l, i) => (l.position.y = legBaseY[i]));
           return;
         }

@@ -3,15 +3,16 @@ using CaldovaSuper.App.Services;
 
 namespace CaldovaSuper.App.Api;
 
-internal record GroupChatStartRequest(string ClaimNumber);
+internal record GroupChatStartRequest(string CaseNumber);
 
 /// <summary>
-/// HTTP endpoints that back the new Team Leader Group Chat demo on
-/// <c>/agents/team-leader</c>. The Team Leader agent acts as a group-chat
-/// manager (modelled on <c>Microsoft.Agents.AI.Workflows.GroupChatManager</c>)
-/// and runs a conversation with the seven other claims-office specialist
-/// agents about a single claim, deciding which specialist speaks next and
-/// when the team has reached a conclusion.
+/// HTTP endpoints behind the "Group Chat" tab on <c>/agents/team-leader</c>.
+/// Theo (the Team Leader Agent) acts as the group-chat manager — modelled on
+/// <c>Microsoft.Agents.AI.Workflows.GroupChatManager</c> — and runs a
+/// discussion with the seven other operations specialists about a single
+/// Member Case, deciding who speaks next and when the team has a plan.
+/// When Foundry isn't configured the same endpoints stream a scripted replay
+/// built from the case facts, so the demo always completes.
 /// </summary>
 public static class TeamLeaderGroupChatApi
 {
@@ -20,8 +21,8 @@ public static class TeamLeaderGroupChatApi
         TeamLeaderGroupChatService service,
         ILogger logger)
     {
-        // Static metadata about the participants — used by the UI to render
-        // a roster before the discussion starts.
+        // Static roster — used by the UI to render the participants before
+        // the discussion starts.
         app.MapGet("/team-leader/groupchat/participants", () => Results.Ok(
             TeamLeaderGroupChatService.Participants.Select(p => new
             {
@@ -30,33 +31,28 @@ public static class TeamLeaderGroupChatApi
                 role = p.Role
             })));
 
-        // Start a new group-chat session for a claim. Returns the session id
+        // Start a new group-chat session for a case. Returns the session id
         // straight away; orchestration runs on a background task and turns
-        // are streamed via the /stream endpoint below.
+        // are streamed via the /stream endpoint below. `mode` is "live"
+        // (Foundry agents) or "scripted" (deterministic replay).
         app.MapPost("/team-leader/groupchat/start", (GroupChatStartRequest request) =>
         {
-            if (string.IsNullOrWhiteSpace(request.ClaimNumber))
-                return Results.BadRequest(new { error = "claimNumber is required" });
+            if (string.IsNullOrWhiteSpace(request.CaseNumber))
+                return Results.BadRequest(new { error = "caseNumber is required" });
 
-            if (!service.IsConfigured)
-                return Results.BadRequest(new
-                {
-                    error = "Team Leader Foundry agent is not configured. " +
-                            "Set AZURE_AI_PROJECT_ENDPOINT and AZURE_AI_MODEL_DEPLOYMENT_NAME to enable it."
-                });
+            var memberCase = service.GetCase(request.CaseNumber);
+            if (memberCase is null)
+                return Results.NotFound(new { error = $"case '{request.CaseNumber}' not found" });
 
-            var claim = service.GetClaim(request.ClaimNumber);
-            if (claim is null)
-                return Results.NotFound(new { error = $"claim '{request.ClaimNumber}' not found" });
+            logger.LogInformation("Team Leader group chat starting: caseNumber={CaseNumber}, live={Live}",
+                Sanitize(memberCase.CaseNumber), service.IsConfigured);
 
-            logger.LogInformation("Team Leader group chat starting: claimNumber={ClaimNumber}",
-                Sanitize(claim.ClaimNumber));
-
-            var session = service.StartSession(claim);
+            var session = service.StartSession(memberCase);
             return Results.Ok(new
             {
                 sessionId = session.Id,
-                claimNumber = session.ClaimNumber,
+                caseNumber = session.CaseNumber,
+                mode = session.Mode,
                 participants = TeamLeaderGroupChatService.Participants.Select(p => new
                 {
                     id = p.Id,
@@ -66,7 +62,7 @@ public static class TeamLeaderGroupChatApi
             });
         });
 
-        // Server-Sent-Events stream of turns for a given session. The browser
+        // Server-Sent Events stream of turns for a given session. The browser
         // connects with EventSource and renders each turn as it arrives.
         app.MapGet("/team-leader/groupchat/stream/{sessionId}", async (HttpContext ctx, string sessionId) =>
         {
