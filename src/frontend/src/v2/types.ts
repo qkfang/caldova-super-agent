@@ -19,7 +19,12 @@ export type InspectTarget =
   | { type: "brain" }
   | { type: "staff"; id: string }
   | { type: "agent"; id: string }
-  | { type: "infra"; id: InfraId };
+  | { type: "role"; id: string }
+  | { type: "infra"; id: InfraId }
+  | { type: "desk" }
+  | { type: "visitor" }
+  | { type: "party" }
+  | { type: "guest"; id: string };
 
 /** Metadata stamped on v2 click hitboxes. */
 export interface V2PickMetadata {
@@ -39,18 +44,19 @@ export interface Anchor {
 export interface Highlights {
   owner: boolean;
   brain: boolean;
+  /** The front desk on the dock. */
+  desk: boolean;
   staff: ReadonlySet<string>;
+  /** Agent bays, by staff id. */
   agents: ReadonlySet<string>;
+  /** Individual roles on the agent floor, by role id. */
+  roles: ReadonlySet<string>;
   infra: ReadonlySet<InfraId>;
+  /** The party on the roof. */
+  party: boolean;
+  /** Party guests, by guest id. */
+  guests: ReadonlySet<string>;
 }
-
-export const NO_HIGHLIGHTS: Highlights = {
-  owner: false,
-  brain: false,
-  staff: new Set(),
-  agents: new Set(),
-  infra: new Set(),
-};
 
 /** One level of the house as built by its level builder. */
 export interface LevelBuild {
@@ -58,7 +64,7 @@ export interface LevelBuild {
   root: TransformNode;
   /** The floating level tag beside the building. */
   tag: Mesh;
-  /** Keys: `owner`, `brain`, `staff:<id>`, `agent:<id>`, `infra:<id>`. */
+  /** Keys: `owner`, `brain`, `staff:<id>`, `agent:<id>`, `role:<id>`, `infra:<id>`, `iq`, `hub`. */
   anchors: Map<string, Anchor>;
   update(dt: number, t: number): void;
   setHighlights(h: Highlights): void;

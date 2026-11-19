@@ -649,10 +649,34 @@ export class VoxelCharacter {
 
   setWalking(walking: boolean): void {
     this.walking = walking;
-    if (!walking) {
+    if (walking) {
+      // A pose's sideways spread would otherwise carry into the stride.
+      this.armPivot(this.leftArm).rotation.z = 0;
+      this.armPivot(this.rightArm).rotation.z = 0;
+    } else {
       this.running = false;
       this.resetLimbs();
     }
+  }
+
+  /**
+   * Pose the arms while standing still: `left` and `right` raise each arm
+   * forward from the shoulder (0 is down by the side, π is straight up), and
+   * `spread` opens both out to the sides. Ignored while walking; walking
+   * resets the pose.
+   */
+  setArmPose(left: number, right: number, spread = 0): void {
+    if (this.walking) return;
+    const l = this.armPivot(this.leftArm);
+    const r = this.armPivot(this.rightArm);
+    l.rotation.x = -left;
+    r.rotation.x = -right;
+    l.rotation.z = spread;
+    r.rotation.z = -spread;
+  }
+
+  private armPivot(arm: Mesh): TransformNode {
+    return (arm as Mesh & { pivotNode: TransformNode }).pivotNode;
   }
 
   /**
@@ -826,6 +850,7 @@ export class VoxelCharacter {
     const reset = (mesh: Mesh) => {
       const pivot = (mesh as Mesh & { pivotNode: TransformNode }).pivotNode;
       pivot.rotation.x = 0;
+      pivot.rotation.z = 0;
     };
     reset(this.leftArm);
     reset(this.rightArm);

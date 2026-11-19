@@ -6,14 +6,18 @@
  * read from the top down:
  *   Level 3 · The Idea         Maya Ashworth, the business owner for both sides, and her idea
  *   Level 2 · The People       two small teams, one per side, with Theo leading both
- *   Level 1 · The Agents       one group of agents: dedicated to a side, or shared by both
+ *   Level 1 · The Agents       one group of agents, each with its specialised assistants (the roles):
+ *                              dedicated to a side, or shared by both
  *   Lower level · Engine Room  Microsoft IQ and the Azure services underneath
+ *   The dock                   the front desk, where visitors arrive by water taxi to sign
+ *   The roof                   a party for the customers, under a big CALDOVA WEALTH sign
  *
  * Staff, assistants and scenarios come from the v1 canon (personaData.ts,
  * stepGate.ts and scenarios/*.json). This file adds what v2 needs on top.
  */
-import type { VoxelCharacterPalette } from "../characterPalettes";
-import type { ScenarioId, StaffTeam } from "../personaData";
+import { PALETTES, type VoxelCharacterPalette } from "../characterPalettes";
+import { CUSTOMER_PERSONAS, STAFF_PERSONAS, type ScenarioId, type StaffTeam } from "../personaData";
+import { STAGE_CONFIG } from "../stepGate";
 
 export type LevelId = "idea" | "people" | "agents" | "engine";
 
@@ -288,6 +292,198 @@ export const AGENTS: Record<string, AgentInfo> = {
     signature: "foundry",
     signatureLine: "Runs the group chat that coordinates the other seven agents on one case.",
   },
+};
+
+/* ------------------------------------------------------------------------ */
+/* Level 1 — the roles: each agent and its two specialised assistants        */
+/* ------------------------------------------------------------------------ */
+
+export type RoleKind = "lead" | "assistant" | "voice";
+
+/** What a role's robot carries, so its job reads at a glance. */
+export type RoleProp =
+  | "beacon"
+  | "doc"
+  | "clipboard"
+  | "book"
+  | "stamp"
+  | "pie"
+  | "chart"
+  | "magnifier"
+  | "timeline"
+  | "globe"
+  | "parcel"
+  | "clock"
+  | "badge"
+  | "calculator"
+  | "lock"
+  | "envelope"
+  | "heart"
+  | "headset";
+
+export interface AgentRole {
+  /** `<staffId>:lead`, `<staffId>:1`, `<staffId>:2`, or `comms-1:voice`. */
+  id: string;
+  staffId: string;
+  kind: RoleKind;
+  /** Full name, such as "Agent Olivia #1 — Form Extraction". */
+  name: string;
+  /** Short name, such as "Form Extraction". */
+  short: string;
+  description: string;
+  prop: RoleProp;
+  /** What it is seen doing at its own bay. */
+  tasks: string[];
+}
+
+interface RoleExtra {
+  props: [RoleProp, RoleProp];
+  lead: string[];
+  tasks: [string[], string[]];
+}
+
+/** Props and everyday tasks for each agent's roles; names and descriptions come from stepGate.ts. */
+const ROLE_EXTRAS: Record<string, RoleExtra> = {
+  "onboarding-1": {
+    props: ["doc", "clipboard"],
+    lead: ["Opening a Member Case", "Setting the case priority", "Routing a case"],
+    tasks: [
+      ["Reading an application pack", "Extracting every field", "Filling in the Member Case"],
+      ["Running the NIGO checklist", "Chasing a missing TFN", "Checking signatures and ID"],
+    ],
+  },
+  "benefits-1": {
+    props: ["book", "stamp"],
+    lead: ["Drafting a recommendation", "Citing the trust deed", "Weighing the evidence"],
+    tasks: [
+      ["Testing a condition of release", "Checking cap space", "Working out a drawdown"],
+      ["Validating a BDBN", "Checking adviser fee consent", "Confirming SIS dependants"],
+    ],
+  },
+  "investments-1": {
+    props: ["pie", "chart"],
+    lead: ["Reviewing model portfolios", "Planning a cash bucket", "Building a client workbook"],
+    tasks: [
+      ["Checking fit with the SOA", "Matching the risk profile", "Planning redemptions"],
+      ["Comparing fees in dollars", "Charting returns and risk", "Updating the fee workbook"],
+    ],
+  },
+  "fincrime-1": {
+    props: ["magnifier", "timeline"],
+    lead: ["Scoring the case risk", "Recommending a call-back", "Screening PEP and sanctions"],
+    tasks: [
+      ["Scanning an ID document", "Checking for tampering", "Comparing security features"],
+      ["Building an activity timeline", "Flagging a new device", "Reviewing a change of details"],
+    ],
+  },
+  "transfers-1": {
+    props: ["globe", "parcel"],
+    lead: ["Tracking rollover SLAs", "Lodging a SuperStream rollover", "Chasing an external fund"],
+    tasks: [
+      ["Looking up a fund by USI", "Running an SMSF check", "Flagging lost insurance cover"],
+      ["Generating a rollover request", "Chasing a counterparty", "Checking the 3-day SLA"],
+    ],
+  },
+  "payments-1": {
+    props: ["calculator", "lock"],
+    lead: ["Preparing the payment run", "Investing a rollover", "Waiting for an approval"],
+    tasks: [
+      ["Splitting tax components", "Calculating PAYG", "Working out the net payment"],
+      ["Validating a payee BSB", "Checking authority limits", "Raising a Teams approval"],
+    ],
+  },
+  "comms-1": {
+    props: ["envelope", "heart"],
+    lead: ["Drafting an adviser update", "Sending an SMS", "Preparing a member letter"],
+    tasks: [
+      ["Writing in plain English", "Matching a letter to the outcome", "Drafting an adviser email"],
+      ["Checking the tone", "Adding IDR and AFCA rights", "Checking disclosures"],
+    ],
+  },
+  "lead-1": {
+    props: ["clock", "badge"],
+    lead: ["Running the group chat", "Coordinating the agents", "Summarising a case"],
+    tasks: [
+      ["Watching the SLA clocks", "Checking IDR deadlines", "Surfacing a case for Theo"],
+      ["Preparing an approval pack", "Sampling closed cases", "Flagging a vulnerable member"],
+    ],
+  },
+};
+
+function buildRoles(): AgentRole[] {
+  const roles: AgentRole[] = [];
+  for (const p of STAFF_PERSONAS) {
+    const extra = ROLE_EXTRAS[p.id];
+    const agent = AGENTS[p.id];
+    if (!extra || !agent) continue;
+    roles.push({
+      id: `${p.id}:lead`,
+      staffId: p.id,
+      kind: "lead",
+      name: p.agent_name,
+      short: p.agent_name,
+      description: p.agent_tagline,
+      prop: "beacon",
+      tasks: extra.lead,
+    });
+    const assistants = Object.values(STAGE_CONFIG).find((s) => s.role === p.role)?.agents ?? [];
+    assistants.slice(0, 2).forEach((a, i) => {
+      roles.push({
+        id: `${p.id}:${i + 1}`,
+        staffId: p.id,
+        kind: "assistant",
+        name: a.name,
+        short: a.name.split("—")[1]?.trim() ?? a.name,
+        description: a.description,
+        prop: extra.props[i],
+        tasks: extra.tasks[i],
+      });
+    });
+    if (agent.voiceId) {
+      roles.push({
+        id: `${p.id}:voice`,
+        staffId: p.id,
+        kind: "voice",
+        name: "Client Communications Voice Agent",
+        short: "Voice Agent",
+        description:
+          "Talks to members, clients and advisers about their case on Azure Voice Live, using only facts from the Member Case, and offers a call-back from a person for anything sensitive.",
+        prop: "headset",
+        tasks: ["Taking a member call", "Explaining next steps", "Offering a call-back"],
+      });
+    }
+  }
+  return roles;
+}
+
+/** Every role on the agent floor: 8 agents, their 16 assistants and Cara's voice agent. */
+export const ROLES: AgentRole[] = buildRoles();
+
+export function roleInfo(id: string): AgentRole | undefined {
+  return ROLES.find((r) => r.id === id);
+}
+
+export function rolesOf(staffId: string): AgentRole[] {
+  return ROLES.filter((r) => r.staffId === staffId);
+}
+
+/** The role that works the front desk on the dock. */
+export const DESK_ROLE = "onboarding-1:1";
+
+/**
+ * Who each agent hands work to (docs/foundry_agents.md, "Suggested Agent
+ * Handoff Rules"). Any agent can also escalate to Theo's, and Theo's agent
+ * coordinates the specialists on complex cases.
+ */
+export const HANDOFFS: Record<string, string[]> = {
+  "onboarding-1": ["benefits-1", "fincrime-1"],
+  "benefits-1": ["fincrime-1", "investments-1", "transfers-1"],
+  "investments-1": ["payments-1"],
+  "transfers-1": ["payments-1"],
+  "payments-1": ["comms-1"],
+  "fincrime-1": [],
+  "comms-1": [],
+  "lead-1": ["onboarding-1", "benefits-1", "payments-1", "fincrime-1"],
 };
 
 /* ------------------------------------------------------------------------ */
@@ -566,6 +762,17 @@ export function infraInfo(id: InfraId): InfraInfo {
   return i;
 }
 
+const INFRA_SHORT: Partial<Record<InfraId, string>> = {
+  teams: "Teams approvals",
+  content: "Content Understanding",
+  voice: "Voice Live",
+};
+
+/** A component's name, short enough for a chip: "Foundry IQ", "MCP server", "Teams approvals". */
+export function infraShort(id: InfraId): string {
+  return INFRA_SHORT[id] ?? infraInfo(id).name.split(" · ")[0];
+}
+
 /** Staff ids whose agents depend on a component ("all" and "platform" mean every agent). */
 export function agentsUsing(id: InfraId): string[] {
   const scope = infraInfo(id).scope;
@@ -573,3 +780,316 @@ export function agentsUsing(id: InfraId): string[] {
     .filter(([, a]) => scope !== "some" || a.uses.includes(id))
     .map(([staffId]) => staffId);
 }
+
+/* ------------------------------------------------------------------------ */
+/* The dock — visitors arrive by water taxi and sign at the front desk       */
+/* ------------------------------------------------------------------------ */
+
+export const FRONT_DESK = {
+  name: "The front desk",
+  summary:
+    "Members, clients and advisers arrive by water taxi. They sign in at the front desk on the dock and sign their application, policy or claim. The greeter welcomes them, and Olivia’s Form Extraction agent reads the signed form straight into a new Member Case.",
+  demo: "In the demo, requests arrive as adviser emails, forms and member requests. The dock is the storybook’s way of showing them coming in.",
+};
+
+/** How each finale member arrives at the front desk. */
+export interface Arrival {
+  /** The member signs, or someone signs in their name (the protection scenario). */
+  visitor: "member" | "impostor";
+  /** Painted on the paper they sign. */
+  doc: string;
+  /** Opening line of the finale's first step. */
+  line: string;
+}
+
+export const ARRIVALS: Record<ScenarioId, Arrival> = {
+  onboarding: {
+    visitor: "member",
+    doc: "Caldova Super application",
+    line: "Priya arrives by water taxi and signs at the front desk.",
+  },
+  protection: {
+    visitor: "impostor",
+    doc: "Rollover request · CS-1058220",
+    line: "Someone arrives by water taxi and signs at the front desk in Grace’s name. Grace is in Italy.",
+  },
+  retirement: {
+    visitor: "member",
+    doc: "Caldova Pension application",
+    line: "George arrives by water taxi to sign the pension application his adviser, Marcus Tan, has prepared.",
+  },
+  hardship: {
+    visitor: "member",
+    doc: "Hardship release application",
+    line: "Tom arrives by water taxi and signs at the front desk.",
+  },
+  bereavement: {
+    visitor: "member",
+    doc: "Death benefit claim",
+    line: "Robert arrives by water taxi with his mother’s paperwork, and signs at the front desk.",
+  },
+};
+
+/** Someone signing in another member's name: hooded, with dark glasses. */
+export const IMPOSTOR_PALETTE: VoxelCharacterPalette = {
+  skin: "#d6a982",
+  hair: "#2b2f36",
+  shirt: "#3a4150",
+  pants: "#1d2129",
+  shoes: "#14161a",
+  hairStyle: "hood",
+  glasses: true,
+};
+
+/** Everyday visitors who drop by the front desk between the finale's requests. */
+export interface DropIn {
+  id: string;
+  who: string;
+  side: SideId;
+  doc: string;
+  summary: string;
+  palette: VoxelCharacterPalette;
+}
+
+export const DROP_INS: DropIn[] = [
+  {
+    id: "new-member",
+    who: "A new member",
+    side: "super",
+    doc: "Caldova Super · insurance cover",
+    summary: "Joins Caldova Super and signs the policy for her insurance cover.",
+    palette: {
+      skin: "#e3b48f",
+      hair: "#4a2c1d",
+      shirt: "#14b8a6",
+      pants: "#334155",
+      shoes: "#1f2937",
+      accent: "#f8fafc",
+      hairStyle: "bun",
+    },
+  },
+  {
+    id: "new-client",
+    who: "A new client",
+    side: "wealth",
+    doc: "Caldova Wrap · account application",
+    summary: "Signs his Caldova Wrap account application, set up with his adviser.",
+    palette: {
+      skin: "#c48c64",
+      hair: "#cfcfd4",
+      shirt: "#1e3a5f",
+      pants: "#d6cfc2",
+      shoes: "#3a2a20",
+      hairStyle: "short",
+      facial: "stubble",
+      glasses: true,
+    },
+  },
+  {
+    id: "adviser",
+    who: "An adviser",
+    side: "wealth",
+    doc: "Managed Portfolio · client application",
+    summary: "Drops off a client’s Managed Portfolio application with the Statement of Advice.",
+    palette: {
+      skin: "#f1c7a1",
+      hair: "#6b4423",
+      shirt: "#334155",
+      pants: "#334155",
+      shoes: "#1a1a1a",
+      accent: "#c9a14a",
+      hairStyle: "short",
+    },
+  },
+];
+
+/* ------------------------------------------------------------------------ */
+/* The roof — a party for the customers                                      */
+/* ------------------------------------------------------------------------ */
+
+export const PARTY = {
+  name: "The rooftop celebration",
+  summary:
+    "Caldova Wealth throws a party on the roof for its members, clients and their advisers: the people the whole house works for.",
+  /** Printed on the front of the DJ booth. */
+  tagline: "Celebrating our members, clients and advisers",
+  guests: "George and Helen, Priya, the advisers Marcus Tan and Hannah Lewis, and members and clients from both sides",
+};
+
+/** The big marquee sign along the back of the roof. */
+export const PARTY_SIGN = "CALDOVA WEALTH";
+
+export interface PartyGuest {
+  id: string;
+  name: string;
+  /** Under the name on the card. */
+  role: string;
+  /** The card's one plain-English line. */
+  line: string;
+  /** The side they are with (advisers work with both). Not set for partners. */
+  side?: SideId;
+  palette: VoxelCharacterPalette;
+  /** Their request in the finale, if they have one. */
+  scenario?: ScenarioId;
+  /** The card action that replays it. */
+  story?: string;
+  /** A labelled fact for the card: their adviser, their client, or who they came with. */
+  with?: [label: string, names: string];
+  /** What they do at their home spot. */
+  home: string[];
+}
+
+const customerName = (id: ScenarioId): string => CUSTOMER_PERSONAS.find((c) => c.id === id)?.name ?? "";
+
+/**
+ * The guests are customers with happy news, and their advisers. The other
+ * finale members' stories (hardship, a scam, a death in the family) are not
+ * party stories, so they are not on the roof.
+ */
+export const PARTY_GUESTS: PartyGuest[] = [
+  {
+    id: "george",
+    name: customerName("retirement"),
+    role: "A Caldova Pension member",
+    line: "Just retired, and celebrating with Helen. His Caldova Pension now pays him every month.",
+    side: "super",
+    palette: PALETTES.customerRetirement,
+    scenario: "retirement",
+    story: "Watch his request ›",
+    with: ["Adviser", "Marcus Tan"],
+    home: ["Telling Marcus about retirement", "Chatting with Marcus and Helen"],
+  },
+  {
+    id: "helen",
+    name: "Helen",
+    role: "George’s wife",
+    line: "Here to celebrate George’s retirement. She is the reversionary beneficiary on his pension.",
+    palette: {
+      skin: "#ebc19c",
+      hair: "#d9c7a8",
+      shirt: "#e07a5f",
+      pants: "#e07a5f",
+      shoes: "#7a4b2a",
+      accent: "#f4d58d",
+      hairStyle: "long",
+      lowerBody: "dress",
+    },
+    with: ["Here with", "George"],
+    home: ["Chatting with George and Marcus", "Toasting George’s retirement"],
+  },
+  {
+    id: "priya",
+    name: customerName("onboarding"),
+    role: "A new Caldova Super member",
+    line: "New to Caldova Super, with her old super brought across into one account.",
+    side: "super",
+    palette: PALETTES.customerOnboarding,
+    scenario: "onboarding",
+    story: "Watch her request ›",
+    with: ["Adviser", "Hannah Lewis"],
+    home: ["Telling Hannah about her new job", "Catching up with Hannah"],
+  },
+  {
+    id: "hannah",
+    name: "Hannah Lewis",
+    role: "Adviser · Yarra Private Wealth",
+    line: "Priya’s adviser, here with her clients.",
+    side: "shared",
+    palette: {
+      skin: "#f2c9a8",
+      hair: "#9a3f1c",
+      shirt: "#1f2f4d",
+      pants: "#1f2f4d",
+      shoes: "#1a1a1a",
+      accent: "#c9a14a",
+      hairStyle: "long",
+      lowerBody: "skirt",
+    },
+    with: ["Client here", "Priya"],
+    home: ["Catching up with Priya", "Hearing about Priya’s new job"],
+  },
+  {
+    id: "marcus",
+    name: "Marcus Tan",
+    role: "Adviser · Bayside Financial Partners",
+    line: "George’s adviser, here to toast his retirement.",
+    side: "shared",
+    palette: {
+      skin: "#e5b98f",
+      hair: "#141414",
+      shirt: "#2f6f6a",
+      pants: "#2a2f3a",
+      shoes: "#3a2a20",
+      accent: "#f8fafc",
+      hairStyle: "short",
+      glasses: true,
+    },
+    with: ["Client here", "George"],
+    home: ["Catching up with George", "Talking retirement with George and Helen"],
+  },
+  {
+    id: "wrap",
+    name: "A Caldova Wrap client",
+    role: "A Wealth Management client",
+    line: "Invests through Caldova Wrap, with a portfolio set up by his adviser.",
+    side: "wealth",
+    palette: {
+      skin: "#7a4e33",
+      hair: "#1d1d1d",
+      shirt: "#c9a14a",
+      pants: "#2a3344",
+      shoes: "#1a1a1a",
+      hairStyle: "bald",
+      facial: "beard",
+    },
+    home: ["Relaxing in the lounge", "Chatting in the lounge"],
+  },
+  {
+    id: "portfolio",
+    name: "A Managed Portfolios client",
+    role: "A Wealth Management client",
+    line: "Her savings are invested in one of the Caldova Managed Portfolios.",
+    side: "wealth",
+    palette: {
+      skin: "#f3d1b5",
+      hair: "#b8862e",
+      shirt: "#9b6ad6",
+      pants: "#ece6da",
+      shoes: "#d9a03a",
+      accent: "#f8fafc",
+      hairStyle: "ponytail",
+    },
+    home: ["Chatting in the lounge", "Laughing on the beanbags"],
+  },
+  {
+    id: "member",
+    name: "A Caldova Super member",
+    role: "A Superannuation member",
+    line: "Has been with Caldova Super for most of his working life.",
+    side: "super",
+    palette: {
+      skin: "#e8b896",
+      hair: "#f0f0f0",
+      shirt: "#14b8a6",
+      pants: "#d6cfc2",
+      shoes: "#5a3a25",
+      accent: "#f8fafc",
+      hairStyle: "hat",
+      glasses: true,
+    },
+    home: ["Relaxing in the lounge", "Telling a story in the lounge"],
+  },
+];
+
+/** The DJ behind the decks. */
+export const PARTY_DJ_PALETTE: VoxelCharacterPalette = {
+  skin: "#a26f4c",
+  hair: "#111111",
+  shirt: "#111827",
+  pants: "#1f2937",
+  shoes: "#f4f0e6",
+  accent: "#5ce1ff",
+  hairStyle: "cap",
+  glasses: true,
+  shirtLogo: true,
+};

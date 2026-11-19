@@ -10,18 +10,26 @@
  */
 import { Color3, Mesh, MeshBuilder, TransformNode } from "@babylonjs/core";
 import { VoxelCharacter } from "../../voxelCharacter";
-import { Batch, Kit, rng } from "../kit";
+import { Batch, type Kit, rng } from "../kit";
 import { IDEA, OWNER, SIDES, levelInfo } from "../lakehouseData";
-import { CHARACTER_SCALE, FLOOR_Y, ROOF, ROOF_Y, SLABS, WALLS, faceAngle } from "../layout";
+import { CHARACTER_SCALE, CORE, FLOOR_Y, ROOF, ROOF_Y, SLABS, WALLS, faceAngle } from "../layout";
 import { buildShell } from "../shell";
 import type { Anchor, Highlights, LevelBuild } from "../types";
+import { SpotBook, Wanderer, type Outing, type Spot } from "../wander";
 
 const GOLD = Color3.FromHexString("#ffc35a");
+/** The line Maya walks along across her office, between the table and the desk. */
+const CZ = 1.4;
 
-export function buildIdeaLevel(kit: Kit): LevelBuild {
+export interface IdeaLevelBuild extends LevelBuild {
+  /** What Maya is doing right now, for the inspector. */
+  ownerTask(): string | null;
+}
+
+export function buildIdeaLevel(kit: Kit): IdeaLevelBuild {
   const scene = kit.scene;
   const root = new TransformNode("v2_lvl_idea", scene);
-  const batch = new Batch(kit, root, "idea");
+  const batch = new Batch(root, "idea");
   kit.useBatch(batch);
   const y = FLOOR_Y.idea;
   const info = levelInfo("idea");
@@ -32,26 +40,33 @@ export function buildIdeaLevel(kit: Kit): LevelBuild {
   const walnut = kit.mat("#ffffff", { texture: "walnut" });
   const white = kit.mat("#f4f1ea");
   const steel = kit.mat("#2b3240", { specular: 0.25 });
-  const railGlass = kit.mat("#cfefff", { alpha: 0.22, specular: 0.25 });
   const leaf = kit.mat("#5ea347");
   const leafDark = kit.mat("#3f7f3a");
   const pot = kit.mat("#d8d2c6");
   const { tag } = buildShell(kit, { root, level: info, floorY: y, slab: SLABS.idea, walls: WALLS.idea, floor: oak, back: cedar });
 
-  // Terrace and balcony decking outside the glass, with a glass balustrade.
+  // Terrace and balcony decking around the open office, with a steel rail (no glass) round the edge.
   kit.block(root, 14.5, y, -2, 12.9, 0.05, 21.9, cedar);
   kit.block(root, -6.5, y, -11.5, 28.9, 0.05, 2.9, cedar);
   const slab = SLABS.idea;
   const balustrade = (x0: number, x1: number, z0: number, z1: number): void => {
-    const w = Math.max(0.06, x1 - x0);
-    const d = Math.max(0.06, z1 - z0);
-    kit.block(root, (x0 + x1) / 2, y, (z0 + z1) / 2, w, 1.1, d, railGlass);
-    kit.block(root, (x0 + x1) / 2, y + 1.1, (z0 + z1) / 2, w + 0.06, 0.08, d + 0.06, steel);
+    const w = Math.max(0.08, x1 - x0);
+    const d = Math.max(0.08, z1 - z0);
+    const cx = (x0 + x1) / 2;
+    const cz = (z0 + z1) / 2;
+    kit.block(root, cx, y + 1.06, cz, w, 0.08, d, steel);
+    kit.block(root, cx, y + 0.55, cz, w, 0.05, d, steel);
+    const len = Math.max(w, d);
+    const n = Math.max(1, Math.round(len / 3));
+    for (let i = 0; i <= n; i++) {
+      const f = i / n;
+      kit.block(root, x0 + (x1 - x0) * f, y, z0 + (z1 - z0) * f, 0.1, 1.1, 0.1, steel);
+    }
   };
-  balustrade(slab.x0 + 0.1, slab.x1 - 0.1, slab.z0 + 0.1, slab.z0 + 0.16);
-  balustrade(slab.x1 - 0.16, slab.x1 - 0.1, slab.z0 + 0.1, slab.z1 - 0.1);
-  balustrade(slab.x0 + 0.1, slab.x0 + 0.16, slab.z0 + 0.1, slab.z1 - 0.1);
-  balustrade(slab.x0 + 0.1, slab.x1 - 0.1, slab.z1 - 0.16, slab.z1 - 0.1);
+  balustrade(slab.x0 + 0.12, slab.x1 - 0.12, slab.z0 + 0.12, slab.z0 + 0.12);
+  balustrade(slab.x1 - 0.12, slab.x1 - 0.12, slab.z0 + 0.12, slab.z1 - 0.12);
+  balustrade(slab.x0 + 0.12, slab.x0 + 0.12, slab.z0 + 0.12, slab.z1 - 0.12);
+  balustrade(slab.x0 + 0.12, slab.x1 - 0.12, slab.z1 - 0.12, slab.z1 - 0.12);
 
   const plant = (x: number, z: number, s = 1): void => {
     kit.block(root, x, y, z, 0.9 * s, 0.8 * s, 0.9 * s, pot);
@@ -66,18 +81,18 @@ export function buildIdeaLevel(kit: Kit): LevelBuild {
   kit.cyl(root, tableX, y + 1.0, tableZ, 4.8, 0.16, kit.mat("#f8f6f1", { specular: 0.3 }), { tess: 32 });
   const projector = MeshBuilder.CreateTorus("v2_projector", { diameter: 3.4, thickness: 0.12, tessellation: 40 }, scene);
   projector.position.set(tableX, y + 1.24, tableZ);
-  kit.finish(projector, root, kit.mat("#ffc35a", { unlit: true, glow: true }), true);
+  kit.finish(projector, root, kit.mat("#ffc35a", { unlit: true }), true);
   const beamMat = kit.mat("#ffd98a", { unlit: true, alpha: 0.09 });
   kit.cyl(root, tableX, y + 1.2, tableZ, 3.2, 1.0, beamMat, { top: 2.2, tess: 32, dynamic: true });
 
   const brain = new TransformNode("v2_brain", scene);
-  const brainBatch = new Batch(kit, brain, "brain");
+  const brainBatch = new Batch(brain, "brain");
   const prev = kit.useBatch(brainBatch);
   // One idea, two sides: a Wealth Management hemisphere and a Superannuation hemisphere, joined by what they share.
-  const hemisphere = (hexes: string[]) => hexes.map((hex) => kit.mat(hex, { emissive: 0.42, glow: true }));
+  const hemisphere = (hexes: string[]) => hexes.map((hex) => kit.mat(hex, { emissive: 0.42 }));
   const wealthMats = hemisphere(["#f2b84b", "#d99a2b", "#ffe1a1"]);
   const superMats = hemisphere(["#2dd4bf", "#14a796", "#a7f3e7"]);
-  const sharedMat = kit.mat(SIDES.shared.color, { emissive: 0.5, glow: true });
+  const sharedMat = kit.mat(SIDES.shared.color, { emissive: 0.5 });
   const s = 0.3;
   for (let i = -6; i <= 6; i++) {
     for (let j = -4; j <= 4; j++) {
@@ -101,7 +116,7 @@ export function buildIdeaLevel(kit: Kit): LevelBuild {
   kit.hitbox(root, tableX, y + 1.0, tableZ, 3.6, 3.6, 3.6, { type: "brain" });
 
   const sparks: Mesh[] = [];
-  const sparkMat = kit.mat("#fff4c2", { unlit: true, glow: true });
+  const sparkMat = kit.mat("#fff4c2", { unlit: true });
   for (let i = 0; i < 8; i++) {
     sparks.push(kit.block(brain, 0, 0, 0, 0.16, 0.16, 0.16, sparkMat, { dynamic: true }));
   }
@@ -116,7 +131,7 @@ export function buildIdeaLevel(kit: Kit): LevelBuild {
       width: 3.1,
       px: 420,
       pxHeight: 96,
-      bg: "rgba(20,16,40,0.82)",
+      bg: "rgba(20,16,40,0.94)",
     });
     m.billboardMode = Mesh.BILLBOARDMODE_ALL;
     const a = (i / IDEA.goals.length) * Math.PI * 2;
@@ -126,7 +141,7 @@ export function buildIdeaLevel(kit: Kit): LevelBuild {
 
   const brainRing = MeshBuilder.CreateTorus("v2_brainRing", { diameter: 6.2, thickness: 0.2, tessellation: 48 }, scene);
   brainRing.position.set(tableX, y + 0.12, tableZ);
-  kit.finish(brainRing, root, kit.mat("#ffc35a", { unlit: true, glow: true }), true);
+  kit.finish(brainRing, root, kit.mat("#ffc35a", { unlit: true }), true);
   brainRing.setEnabled(false);
 
   /* ---------------- Maya ---------------- */
@@ -236,7 +251,7 @@ export function buildIdeaLevel(kit: Kit): LevelBuild {
   kit.block(root, -15.4, y, -5.4, 2.0, 0.6, 1.4, walnut);
   kit.block(root, -15.4, y + 0.6, -5.2, 0.5, 0.06, 0.7, kit.mat("#ffffff"));
   kit.block(root, -19.2, y, -1.8, 0.14, 2.8, 0.14, steel);
-  kit.block(root, -19.2, y + 2.6, -1.8, 0.8, 0.5, 0.8, kit.mat("#ffe7b0", { unlit: true, glow: true }));
+  kit.block(root, -19.2, y + 2.6, -1.8, 0.8, 0.5, 0.8, kit.mat("#ffe7b0", { unlit: true }));
   plant(-19.2, 2.2, 1.1);
   plant(7.2, -9.2, 1.0);
   plant(7.2, 6.2, 1.2);
@@ -272,7 +287,7 @@ export function buildIdeaLevel(kit: Kit): LevelBuild {
   kit.block(root, 13.5, y, 5.8, 5.2, 0.7, 1.3, kit.mat("#b7c4b1"));
   kit.block(root, 13.5, y + 0.7, 6.4, 5.2, 0.8, 0.3, kit.mat("#b7c4b1"));
   kit.block(root, 13.5, y, 3.4, 2.4, 0.6, 1.3, kit.mat("#4b5563"));
-  kit.block(root, 13.5, y + 0.6, 3.4, 1.8, 0.12, 0.7, kit.mat("#ff9a3c", { unlit: true, glow: true }));
+  kit.block(root, 13.5, y + 0.6, 3.4, 1.8, 0.12, 0.7, kit.mat("#ff9a3c", { unlit: true }));
   // A telescope pointed at the lake.
   kit.block(root, 18.8, y, -11.4, 0.1, 1.5, 0.1, steel, { rotY: 0.4 });
   kit.block(root, 18.5, y, -11.1, 0.1, 1.5, 0.1, steel, { rotY: -0.4 });
@@ -296,6 +311,40 @@ export function buildIdeaLevel(kit: Kit): LevelBuild {
   kit.useBatch(null);
   batch.flush();
 
+  // Maya strolls between her table, the vision board, the bookshelf, her desk, Biscuit and the terrace.
+  const book = new SpotBook();
+  const mayaHome: Spot = { at: [-1.7, 0.3], face: mayaFacing, via: [[-1.7, CZ]] };
+  const mayaPlaces: Array<{ spot: Spot; task: string; where: string; weight: number }> = [
+    { spot: { at: [-4.2, 5.2], face: 0, via: [[-4.2, CZ]] }, task: "Reviewing the vision board", where: "the vision board", weight: 2 },
+    { spot: { at: [-11.6, 5.1], face: 0, via: [[-11.6, CZ]] }, task: "Picking out a book", where: "the bookshelf", weight: 1 },
+    { spot: { at: [5.7, 1.9], face: 0, via: [[5.7, CZ]] }, task: "Checking the North Star", where: "her desk", weight: 2 },
+    { spot: { at: [-7.9, -5.9], face: faceAngle(-1.3, -1.5), via: [[-7.9, CZ]] }, task: "Saying hello to Biscuit", where: "Biscuit", weight: 1 },
+    {
+      spot: { at: [17.3, -10.4], face: Math.PI, via: [[9.6, CZ], [9.6, -10.4]] },
+      task: "Watching the water taxi",
+      where: "the terrace",
+      weight: 2,
+    },
+  ];
+  const mayaWeight = mayaPlaces.reduce((s, p) => s + p.weight, 0);
+  const mayaWalker = new Wanderer({
+    body: { root: maya.root, walk: (on) => maya.setWalking(on) },
+    home: mayaHome,
+    homeName: "the table",
+    plan: (): Outing | null => {
+      let roll = r() * mayaWeight;
+      const place = mayaPlaces.find((p) => (roll -= p.weight) <= 0) ?? mayaPlaces[0];
+      return { spot: place.spot, task: place.task, where: place.where, dwell: 5 + r() * 4 };
+    },
+    homeTask: () => ["Thinking about both sides", "Planning the next quarter", "Reading the teams’ updates"][Math.floor(r() * 3)],
+    homeDwell: [12, 24],
+    speed: 2.0,
+    book,
+    rand: r,
+    bubble: kit.bubble(maya.root, 2.45, OWNER.color, CHARACTER_SCALE),
+    sway: 0.12,
+  });
+
   const anchors = new Map<string, Anchor>([
     ["owner", { node: maya.root, group: "idea", dy: 2.4 }],
     ["brain", { node: brain, group: "idea", dy: 0 }],
@@ -309,8 +358,8 @@ export function buildIdeaLevel(kit: Kit): LevelBuild {
     tag,
     anchors,
     update(dt: number, t: number): void {
+      mayaWalker.update(dt);
       maya.update(dt);
-      maya.root.rotation.y = mayaFacing + Math.sin(t * 0.5) * 0.12;
       const lit = highlight.brain || introT >= 0;
       if (introT >= 0) {
         introT += dt;
@@ -335,19 +384,27 @@ export function buildIdeaLevel(kit: Kit): LevelBuild {
     setHighlights(h: Highlights): void {
       highlight = { owner: h.owner, brain: h.brain };
       maya.setHighlight(h.owner, GOLD);
+      mayaWalker.hold(h.owner);
       brainRing.setEnabled(h.brain);
     },
     intro(): void {
       introT = 0;
     },
+    ownerTask(): string | null {
+      return mayaWalker.task;
+    },
   };
 }
 
-/** The roof: a green roof, a skylight over the brain and a solar array. */
+/**
+ * The roof: a green roof with solar panels and the lift up from below, and a
+ * skylight over the brain. Caldova's party for its customers fills the rest
+ * of it (the deck, the sign and the party are built in party.ts).
+ */
 export function buildRoof(kit: Kit): TransformNode {
   const scene = kit.scene;
   const root = new TransformNode("v2_roof", scene);
-  const batch = new Batch(kit, root, "roof");
+  const batch = new Batch(root, "roof");
   kit.useBatch(batch);
   const y = ROOF_Y;
   const w = ROOF.x1 - ROOF.x0;
@@ -356,10 +413,15 @@ export function buildRoof(kit: Kit): TransformNode {
   const cz = (ROOF.z0 + ROOF.z1) / 2;
   const concrete = kit.mat("#ffffff", { texture: "concrete" });
   kit.block(root, cx, y, cz, w, 0.5, d, concrete);
-  kit.block(root, cx, y + 0.15, ROOF.z0 - 0.05, w + 0.1, 0.14, 0.1, kit.mat("#ffc35a", { unlit: true, glow: true }));
-  kit.block(root, ROOF.x1 + 0.05, y + 0.15, cz, 0.1, 0.14, d + 0.1, kit.mat("#ffc35a", { unlit: true, glow: true }));
-  // Green roof on the left, a skylight over the brain, solar panels on the right.
+  kit.block(root, cx, y + 0.15, ROOF.z0 - 0.05, w + 0.1, 0.14, 0.1, kit.mat("#ffc35a", { unlit: true }));
+  kit.block(root, ROOF.x1 + 0.05, y + 0.15, cz, 0.1, 0.14, d + 0.1, kit.mat("#ffc35a", { unlit: true }));
+  // Green roof on the left, and a skylight over the brain: through the glass, the brain glows in
+  // Maya's office below, one half for each side and the shared bridge between them.
   kit.block(root, -15.5, y + 0.5, cz, 11.5, 0.18, d - 1.2, kit.mat("#ffffff", { texture: "grass" }));
+  kit.block(root, -5, y + 0.5, -2, 5.3, 0.03, 5.3, kit.mat("#2a2f3d"));
+  kit.block(root, -5.45, y + 0.53, -2, 0.75, 0.03, 1.5, kit.mat(SIDES.wealth.color, { unlit: true }));
+  kit.block(root, -4.55, y + 0.53, -2, 0.75, 0.03, 1.5, kit.mat(SIDES.super.color, { unlit: true }));
+  kit.block(root, -5, y + 0.53, -2, 0.16, 0.035, 1.1, kit.mat(SIDES.shared.color, { unlit: true }));
   kit.block(root, -5, y + 0.5, -2, 5.4, 0.1, 5.4, kit.mat("#cfefff", { alpha: 0.35, specular: 0.8 }));
   const steel = kit.mat("#2b3240", { specular: 0.25 });
   for (const [fx, fz, fw, fd] of [
@@ -370,18 +432,31 @@ export function buildRoof(kit: Kit): TransformNode {
   ] as const) {
     kit.block(root, fx, y + 0.5, fz, fw, 0.22, fd, steel);
   }
+  // Solar panels on low frames over the back of the green roof, clear of the lift.
   const panel = kit.mat("#1e3a8a", { specular: 0.7 });
   const frame = kit.mat("#cbd5e1");
-  for (let row = 0; row < 4; row++) {
-    for (let col = 0; col < 4; col++) {
-      const px = 0.4 + col * 2.2;
-      const pz = -9.2 + row * 3.6;
-      kit.block(root, px, y + 0.5, pz + 0.6, 0.1, 0.5, 0.1, frame);
-      const p = kit.block(root, px, y + 0.8, pz, 2.0, 0.08, 1.4, panel);
-      p.rotation.x = -0.32;
-    }
+  for (const [px, pz] of [
+    [-19.4, 1.9],
+    [-17.2, 1.9],
+    [-15.0, 1.9],
+    [-12.8, 1.9],
+    [-15.6, 5.3],
+    [-13.4, 5.3],
+    [-11.2, 5.3],
+  ] as const) {
+    kit.block(root, px, y + 0.68, pz + 0.6, 0.1, 0.42, 0.1, frame);
+    const p = kit.block(root, px, y + 0.98, pz, 2.0, 0.08, 1.4, panel);
+    p.rotation.x = -0.32;
   }
-  kit.block(root, -12, y + 0.5, 6.2, 1.6, 1.2, 1.6, kit.mat("#9aa6b8"));
+  // The lift comes up through the roof, so the guests can come up to the party.
+  const ccx = (CORE.x0 + CORE.x1) / 2;
+  const ccz = (CORE.z0 + CORE.z1) / 2;
+  kit.block(root, ccx, y + 0.5, ccz, CORE.x1 - CORE.x0, 2.9, CORE.z1 - CORE.z0, concrete);
+  kit.block(root, ccx, y + 3.4, ccz, CORE.x1 - CORE.x0 + 0.3, 0.16, CORE.z1 - CORE.z0 + 0.3, steel);
+  const door = kit.mat("#9aa6b8", { specular: 0.5 });
+  kit.block(root, CORE.x1 + 0.03, y + 0.68, ccz - 0.5, 0.06, 2.3, 0.98, door);
+  kit.block(root, CORE.x1 + 0.03, y + 0.68, ccz + 0.5, 0.06, 2.3, 0.98, door);
+  kit.block(root, CORE.x1 + 0.04, y + 2.98, ccz, 0.08, 0.14, 2.1, steel);
   kit.useBatch(null);
   batch.flush();
   return root;

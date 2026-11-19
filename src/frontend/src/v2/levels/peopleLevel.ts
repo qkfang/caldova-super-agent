@@ -2,79 +2,51 @@
  * Level 2 · The People — two small teams, one for each side of the
  * business, at standing desks: the Wealth Management Team on the left, the
  * Superannuation Team on the right, and Theo in the middle leading both.
- * Every desk sits directly above that person's agent pod on Level 1, so the
+ * Every desk sits directly above that person's agent bay on Level 1, so the
  * thread between a person and their agent runs straight down through the
- * floor. Both teams meet at the huddle table at the front.
+ * floor. Through the day people move about the floor: to the huddle table
+ * where both teams meet, the coffee bar, the printer and the team boards,
+ * and to each other's desks.
  */
 import { Color3, Mesh, MeshBuilder, TransformNode } from "@babylonjs/core";
 import { PALETTES } from "../../characterPalettes";
-import { STAFF_PERSONAS } from "../../personaData";
+import { STAFF_PERSONAS, findStaffById } from "../../personaData";
 import { VoxelCharacter } from "../../voxelCharacter";
-import { Batch, Kit } from "../kit";
+import { Batch, type Kit, rng } from "../kit";
 import { IDEA, SIDES, levelInfo } from "../lakehouseData";
 import { CENTRE_CELL, CHARACTER_SCALE, FLOOR_Y, SLABS, STATIONS, WALLS, WINGS } from "../layout";
 import { buildShell } from "../shell";
 import type { Anchor, Highlights, LevelBuild } from "../types";
+import { SpotBook, Wanderer, type Outing, type Pt, type Spot } from "../wander";
 
 const CORAL = Color3.FromHexString("#ff8f6b");
 const LEAD = "#6b7fb0";
+/** The aisle between the two rows of desks. */
+const CZ = -1.5;
 
-interface Leg {
-  x: number;
-  z: number;
-  pause: number;
-  face?: number;
+type Errand = "coffee" | "huddle" | "printer" | "process" | "wealthBoard" | "superBoard" | "lookout" | `visit:${string}`;
+
+/** Where each person likes to go, and how often (the visits are to their own teammates and Theo). */
+const ERRANDS: Record<string, Array<[Errand, number]>> = {
+  "onboarding-1": [["printer", 2], ["huddle", 2], ["coffee", 2], ["visit:benefits-1", 1], ["visit:lead-1", 1], ["visit:fincrime-1", 1], ["superBoard", 1], ["lookout", 1]],
+  "benefits-1": [["huddle", 2], ["superBoard", 2], ["coffee", 1], ["visit:onboarding-1", 1], ["visit:payments-1", 1], ["visit:investments-1", 1]],
+  "transfers-1": [["visit:payments-1", 2], ["coffee", 2], ["huddle", 1], ["superBoard", 1], ["lookout", 1]],
+  "payments-1": [["visit:lead-1", 2], ["coffee", 2], ["printer", 1], ["visit:transfers-1", 1], ["superBoard", 1]],
+  "investments-1": [["wealthBoard", 2], ["visit:comms-1", 1], ["visit:benefits-1", 1], ["huddle", 1], ["coffee", 1], ["lookout", 1]],
+  "comms-1": [["huddle", 2], ["visit:onboarding-1", 1], ["visit:investments-1", 1], ["visit:payments-1", 1], ["coffee", 1], ["wealthBoard", 1]],
+  "fincrime-1": [["visit:lead-1", 2], ["visit:onboarding-1", 1], ["printer", 1], ["lookout", 1], ["coffee", 1]],
+  "lead-1": [["huddle", 2], ["process", 2], ["visit:onboarding-1", 1], ["visit:benefits-1", 1], ["visit:investments-1", 1], ["visit:payments-1", 1], ["visit:comms-1", 1], ["coffee", 1], ["lookout", 1]],
+};
+
+export interface PeopleLevelBuild extends LevelBuild {
+  /** What a person is doing right now, for the inspector. */
+  task(id: string): string | null;
 }
 
-/** Walks a character round a loop of waypoints, pausing at some of them. */
-class Walker {
-  private i = 0;
-  private wait: number;
-
-  constructor(
-    private readonly ch: VoxelCharacter,
-    private readonly path: Leg[],
-  ) {
-    this.wait = path[0].pause;
-  }
-
-  update(dt: number): void {
-    const root = this.ch.root;
-    if (this.wait > 0) {
-      this.wait -= dt;
-      if (this.wait <= 0) {
-        this.i = (this.i + 1) % this.path.length;
-        this.ch.setWalking(true);
-      }
-      return;
-    }
-    const target = this.path[this.i];
-    const dx = target.x - root.position.x;
-    const dz = target.z - root.position.z;
-    const dist = Math.hypot(dx, dz);
-    const step = 2.2 * dt;
-    if (dist <= step) {
-      root.position.x = target.x;
-      root.position.z = target.z;
-      if (target.pause > 0) {
-        this.wait = target.pause;
-        this.ch.setWalking(false);
-        if (target.face !== undefined) root.rotation.y = target.face;
-      } else {
-        this.i = (this.i + 1) % this.path.length;
-      }
-      return;
-    }
-    root.position.x += (dx / dist) * step;
-    root.position.z += (dz / dist) * step;
-    root.rotation.y = Math.atan2(dx, dz);
-  }
-}
-
-export function buildPeopleLevel(kit: Kit): LevelBuild {
+export function buildPeopleLevel(kit: Kit): PeopleLevelBuild {
   const scene = kit.scene;
   const root = new TransformNode("v2_lvl_people", scene);
-  const batch = new Batch(kit, root, "people");
+  const batch = new Batch(root, "people");
   kit.useBatch(batch);
   const y = FLOOR_Y.people;
   const info = levelInfo("people");
@@ -87,7 +59,16 @@ export function buildPeopleLevel(kit: Kit): LevelBuild {
   const leaf = kit.mat("#5ea347");
   const leafDark = kit.mat("#3f7f3a");
   const pot = kit.mat("#d8d2c6");
-  const { tag } = buildShell(kit, { root, level: info, floorY: y, slab: SLABS.people, walls: WALLS.people, floor: oak, back: cedar });
+  const { tag } = buildShell(kit, {
+    root,
+    level: info,
+    floorY: y,
+    slab: SLABS.people,
+    walls: WALLS.people,
+    floor: oak,
+    back: cedar,
+    rail: true,
+  });
 
   /* ---------------- The two wings ---------------- */
   const rugZ0 = -10.2;
@@ -164,6 +145,7 @@ export function buildPeopleLevel(kit: Kit): LevelBuild {
   const dark = kit.mat("#1f2937");
   const paper = kit.mat("#ffffff");
   const characters = new Map<string, VoxelCharacter>();
+  const rings = new Map<string, Mesh>();
   const anchors = new Map<string, Anchor>();
   for (const p of STAFF_PERSONAS) {
     const st = STATIONS[p.id];
@@ -181,7 +163,7 @@ export function buildPeopleLevel(kit: Kit): LevelBuild {
       ],
       width: 3.0,
       px: 512,
-      bg: "rgba(10,18,34,0.8)",
+      bg: "rgba(10,18,34,0.94)",
       accent: p.color,
       bar: "top",
     });
@@ -241,6 +223,12 @@ export function buildPeopleLevel(kit: Kit): LevelBuild {
     ch.root.rotation.y = Math.PI;
     characters.set(p.id, ch);
     anchors.set(`staff:${p.id}`, { node: ch.root, group: "people", dy: 2.5 });
+    // The selection ring walks with the person.
+    const ring = MeshBuilder.CreateTorus(`v2_staffRing_${p.id}`, { diameter: 1.9, thickness: 0.11, tessellation: 40 }, scene);
+    ring.position.y = 0.08;
+    kit.finish(ring, ch.root, kit.mat("#ffe08a", { unlit: true }), true);
+    ring.setEnabled(false);
+    rings.set(p.id, ring);
   }
 
   /* ---------------- The huddle table, where both teams meet ---------------- */
@@ -250,13 +238,13 @@ export function buildPeopleLevel(kit: Kit): LevelBuild {
   kit.cyl(root, hx, y + 1.4, hz, 2.8, 0.12, white, { tess: 28 });
   const huddleRing = MeshBuilder.CreateTorus("v2_huddleRing", { diameter: 2.5, thickness: 0.06, tessellation: 36 }, scene);
   huddleRing.position.set(hx, y + 1.53, hz);
-  kit.finish(huddleRing, root, kit.mat(LEAD, { unlit: true, glow: true }));
+  kit.finish(huddleRing, root, kit.mat(LEAD, { unlit: true }));
   kit.block(root, hx + 0.6, y + 1.52, hz - 0.3, 0.7, 0.04, 0.5, dark, { rotY: 0.3 });
   for (const [sx, sz] of [[-1.9, -0.9], [1.9, -0.9], [-1.9, 1.0], [1.9, 1.0]] as const) {
     kit.cyl(root, hx + sx, y, hz + sz, 0.12, 0.95, steel, { tess: 8 });
     kit.cyl(root, hx + sx, y + 0.95, hz + sz, 0.75, 0.12, kit.mat(sx < 0 ? SIDES.wealth.color : SIDES.super.color), { tess: 12 });
   }
-  const huddleCase = kit.block(root, hx, y + 2.0, hz, 0.5, 0.5, 0.5, kit.mat("#ffc35a", { emissive: 0.55, glow: true }), {
+  const huddleCase = kit.block(root, hx, y + 2.0, hz, 0.5, 0.5, 0.5, kit.mat("#ffc35a", { emissive: 0.55 }), {
     dynamic: true,
   });
   const huddleTag = kit.label(root, {
@@ -264,7 +252,7 @@ export function buildPeopleLevel(kit: Kit): LevelBuild {
     width: 2.6,
     px: 420,
     pxHeight: 70,
-    bg: "rgba(10,18,34,0.8)",
+    bg: "rgba(10,18,34,0.94)",
   });
   huddleTag.billboardMode = Mesh.BILLBOARDMODE_Y;
   huddleTag.position.set(hx, y + 3.1, hz);
@@ -273,13 +261,18 @@ export function buildPeopleLevel(kit: Kit): LevelBuild {
   kit.block(root, 19.4, y, 1, 2.0, 1.5, 7.0, walnut);
   kit.block(root, 19.4, y + 1.5, 1, 2.3, 0.1, 7.3, white);
   kit.block(root, 19.7, y + 1.6, 3.4, 0.9, 1.1, 0.8, dark);
-  kit.block(root, 19.24, y + 2.1, 3.4, 0.06, 0.2, 0.4, kit.mat("#ffc35a", { unlit: true, glow: true }));
+  kit.block(root, 19.24, y + 2.1, 3.4, 0.06, 0.2, 0.4, kit.mat("#ffc35a", { unlit: true }));
   for (const z of [-1.4, 0.3]) {
     kit.cyl(root, 17.9, y, z, 0.14, 1.0, steel, { tess: 8 });
     kit.cyl(root, 17.9, y + 1.0, z, 0.75, 0.14, kit.mat("#ff8f6b"), { tess: 12 });
   }
   kit.block(root, -18.6, y, -2.4, 1.5, 0.8, 1.5, kit.mat("#ff8f6b"));
   kit.block(root, -18.8, y, -0.4, 1.5, 0.8, 1.5, kit.mat("#14b8a6"));
+  // The printer by the left wall, with a paper tray.
+  kit.block(root, -19.5, y, -6.6, 1.3, 1.1, 1.2, kit.mat("#e5e7eb"));
+  kit.block(root, -19.5, y + 1.1, -6.6, 1.1, 0.2, 1.0, kit.mat("#9ca3af"));
+  kit.block(root, -18.86, y + 0.8, -6.6, 0.14, 0.05, 0.7, kit.mat("#ffffff"));
+  kit.block(root, -19.0, y + 1.32, -6.9, 0.2, 0.06, 0.2, kit.mat("#34d399", { unlit: true }));
   for (const [x, z] of [[-20.2, -12.2], [20.2, -12.2], [20.2, 8.2], [-16, 8.2]] as const) {
     kit.block(root, x, y, z, 0.9, 0.8, 0.9, pot);
     kit.block(root, x, y + 0.8, z, 1.2, 1.1, 1.2, leaf);
@@ -287,7 +280,7 @@ export function buildPeopleLevel(kit: Kit): LevelBuild {
   }
 
   /* ---------------- The idea drops in (chapter intro) ---------------- */
-  const sparkMat = kit.mat("#ffd98a", { unlit: true, glow: true });
+  const sparkMat = kit.mat("#ffd98a", { unlit: true });
   const sparks: Mesh[] = STAFF_PERSONAS.map(() => {
     const m = kit.block(root, 0, 0, 0, 0.42, 0.42, 0.42, sparkMat, { dynamic: true });
     m.setEnabled(false);
@@ -297,30 +290,123 @@ export function buildPeopleLevel(kit: Kit): LevelBuild {
   kit.useBatch(null);
   batch.flush();
 
-  // Theo leaves his desk, checks in at the huddle table, then looks over each wing in turn.
-  const theo = characters.get("lead-1");
-  const lead = STATIONS["lead-1"];
-  const walker = theo
-    ? new Walker(theo, [
-        { x: lead.x, z: lead.z + 0.75, pause: 9, face: Math.PI },
-        { x: lead.x + 2.6, z: lead.z + 0.75, pause: 0 },
-        { x: lead.x + 2.6, z: 0.4, pause: 0 },
-        { x: hx, z: hz + 2.7, pause: 3.5, face: Math.PI },
-        { x: -4.4, z: -2.2, pause: 3, face: -Math.PI / 2 },
-        { x: 4.4, z: -2.2, pause: 3, face: Math.PI / 2 },
-        { x: lead.x + 2.6, z: 0.4, pause: 0 },
-        { x: lead.x + 2.6, z: lead.z + 0.75, pause: 0 },
-      ])
-    : null;
+  /* ---------------- Moving about the floor ---------------- */
+  const r = rng(47);
+  const pick = <T>(list: readonly T[]): T => list[Math.floor(r() * list.length)];
+  const between = (a: number, b: number): number => a + (b - a) * r();
+  const book = new SpotBook();
+  const homes = new Map<string, Spot>();
+  for (const p of STAFF_PERSONAS) {
+    const st = STATIONS[p.id];
+    if (!st) continue;
+    const at: Pt = [st.x, st.z + 0.75];
+    // Back-row people leave by the side of their desk nearer the middle.
+    const side = st.x > 0 ? -2.6 : 2.6;
+    const via: Pt[] = st.z < 0 ? [[st.x, CZ]] : [[st.x + side, CZ], [st.x + side, at[1]]];
+    homes.set(p.id, { at, face: Math.PI, via });
+  }
+  const spot = (at: Pt, face: number, via: Pt[], key: string): Spot => ({ at, face, via, key });
+  const toward = (from: Pt, to: Pt): number => Math.atan2(to[0] - from[0], to[1] - from[1]);
+  const places: Record<Exclude<Errand, `visit:${string}`>, { spots: Spot[]; where: string; tasks: string[] }> = {
+    coffee: {
+      spots: [spot([16.9, -0.4], Math.PI / 2, [[16.9, CZ]], "coffee:0"), spot([16.4, 1.3], Math.PI / 2, [[16.4, CZ]], "coffee:1")],
+      where: "the coffee bar",
+      tasks: ["Grabbing a flat white", "Coffee break"],
+    },
+    huddle: {
+      spots: [
+        spot([-2.7, -4.3], toward([-2.7, -4.3], [hx, hz]), [[-2.7, CZ]], "huddle:w"),
+        spot([2.7, -4.3], toward([2.7, -4.3], [hx, hz]), [[2.7, CZ]], "huddle:e"),
+        spot([0, -3.2], Math.PI, [[0, CZ]], "huddle:n"),
+      ],
+      where: "the huddle table",
+      tasks: ["Case huddle", "Talking through a case"],
+    },
+    printer: {
+      spots: [spot([-17.4, -6.6], -Math.PI / 2, [[-17.2, CZ]], "printer")],
+      where: "the printer",
+      tasks: ["Collecting printouts", "Printing a member pack"],
+    },
+    process: {
+      spots: [spot([-2.0, 7.4], 0, [[-3.75, CZ], [-3.75, 7.4]], "process")],
+      where: "the process board",
+      tasks: ["Checking the process board"],
+    },
+    wealthBoard: {
+      spots: [spot([-11.0, 7.4], 0, [[-11.25, CZ], [-11.25, 7.4]], "wealthBoard")],
+      where: "the team board",
+      tasks: ["Checking the team board"],
+    },
+    superBoard: {
+      spots: [spot([11.0, 7.4], 0, [[11.25, CZ], [11.25, 7.4]], "superBoard")],
+      where: "the team board",
+      tasks: ["Checking the team board"],
+    },
+    lookout: {
+      spots: [spot([-11.25, -12.0], Math.PI, [[-11.25, CZ]], "look:w"), spot([3.75, -12.0], Math.PI, [[3.75, CZ]], "look:e")],
+      where: "the rail",
+      tasks: ["Taking in the lake view", "A quick stretch"],
+    },
+  };
+  /** Standing beside a colleague's desk, on the side nearer the middle. */
+  const visitSpot = (id: string): Spot | null => {
+    const home = homes.get(id);
+    if (!home) return null;
+    const [x, z] = home.at;
+    const sx = x > 0 ? x - 2.4 : x < 0 ? x + 2.4 : -2.4;
+    const at: Pt = [sx, z + 0.35];
+    return spot(at, toward(at, home.at), [[sx, CZ]], `visit:${id}`);
+  };
+  const wanderers = new Map<string, Wanderer>();
+  for (const p of STAFF_PERSONAS) {
+    const ch = characters.get(p.id);
+    const home = homes.get(p.id);
+    if (!ch || !home) continue;
+    const errands = ERRANDS[p.id] ?? [];
+    const total = errands.reduce((s, [, w]) => s + w, 0);
+    const plan = (): Outing | null => {
+      let roll = r() * total;
+      const errand = errands.find(([, w]) => (roll -= w) <= 0)?.[0];
+      if (!errand) return null;
+      if (errand.startsWith("visit:")) {
+        const id = errand.slice(6);
+        const s = visitSpot(id);
+        const colleague = findStaffById(id);
+        // Only drop by when they're at their desk.
+        if (!s || !colleague || !wanderers.get(id)?.isHome) return null;
+        return { spot: s, task: pick([`Checking in with ${colleague.name}`, `A quick question for ${colleague.name}`]), where: `${colleague.name}’s desk`, dwell: between(4, 8) };
+      }
+      const place = places[errand as keyof typeof places];
+      const free = place.spots.filter((s) => book.free(s.key));
+      if (!free.length) return null;
+      return { spot: pick(free), task: pick(place.tasks), where: place.where, dwell: between(5, 9) };
+    };
+    wanderers.set(
+      p.id,
+      new Wanderer({
+        body: { root: ch.root, walk: (on) => ch.setWalking(on) },
+        home,
+        homeName: "the desk",
+        plan,
+        homeTask: () => pick(p.ambient),
+        homeDwell: [9, 22],
+        speed: 2.2,
+        book,
+        rand: r,
+        bubble: kit.bubble(ch.root, 2.45, p.color, CHARACTER_SCALE),
+        sway: 0.14,
+      }),
+    );
+  }
 
   let selected: ReadonlySet<string> = new Set();
   const flash = new Map<string, number>();
   let introT = -1;
   const ids = STAFF_PERSONAS.map((p) => p.id);
-  const phases = ids.map((_, i) => i * 1.3);
 
   const applyHighlight = (id: string): void => {
     characters.get(id)?.setHighlight(selected.has(id) || (flash.get(id) ?? 0) > 0, CORAL);
+    rings.get(id)?.setEnabled(selected.has(id));
   };
 
   return {
@@ -329,14 +415,14 @@ export function buildPeopleLevel(kit: Kit): LevelBuild {
     tag,
     anchors,
     update(dt: number, t: number): void {
-      walker?.update(dt);
       huddleCase.rotation.y = t * 0.9;
       huddleCase.position.y = y + 2.25 + Math.sin(t * 1.7) * 0.1;
-      ids.forEach((id, i) => {
+      for (const id of selected) rings.get(id)?.scaling.setAll(1 + Math.sin(t * 5) * 0.06);
+      ids.forEach((id) => {
         const ch = characters.get(id);
         if (!ch) return;
+        wanderers.get(id)?.update(dt);
         ch.update(dt);
-        if (id !== "lead-1") ch.root.rotation.y = Math.PI + Math.sin(t * 0.6 + phases[i]) * 0.14;
         const f = flash.get(id);
         if (f !== undefined) {
           const left = f - dt;
@@ -375,9 +461,14 @@ export function buildPeopleLevel(kit: Kit): LevelBuild {
     setHighlights(h: Highlights): void {
       selected = h.staff;
       ids.forEach(applyHighlight);
+      // Someone selected, or working on the finale's request, heads back to their desk.
+      for (const [id, w] of wanderers) w.hold(selected.has(id));
     },
     intro(): void {
       introT = 0;
+    },
+    task(id: string): string | null {
+      return wanderers.get(id)?.task ?? null;
     },
   };
 }

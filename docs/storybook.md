@@ -48,28 +48,29 @@ Cara and Felix sit with the Wealth Management Team (as in v1). Their work, commu
 
 Caldova Wealth works from a casual, futuristic lakehouse on the edge of Melbourne. The whole scene is a floating voxel diorama, like the v1 office, with an island of grass, earth and stone layers and a lake carved into its front.
 
-- **The house:** three storeys of timber, glass and white concrete, stacked with deep cantilevers.
-  - The facade facing the lake and the right-hand side are glass.
+- **The house:** three storeys of timber, steel and white concrete, stacked with deep cantilevers.
+  - There is no glass facade. The floors are open to the lake and the right-hand side, with slim steel rails along the edges, so every level reads clearly from outside.
   - The back walls are cedar slats, and the left wall holds a concrete lift core with a floor number lit above the lift doors on every level.
 - **Two sides, left and right:** on every floor the Wealth Management side is on the left, the Superannuation side is on the right, and what both sides share is in the middle.
 - **Edge lights:** each floor slab has a glowing edge strip in that level's accent colour: gold for the idea, coral for the people, cyan for the agents and violet for the engine room.
-- **The roof:** a green roof, a skylight over the brain and a solar array.
+- **The roof:** a party deck for Caldova's customers under a big glowing CALDOVA WEALTH sign (see [The Roof](#the-roof-a-party-for-the-customers)), beside a green roof with solar panels and the lift up from below, and a skylight over the brain.
 - **Outside:**
-  - A cedar deck on stilts over the water, with a fire pit, chairs and string lights.
-  - A jetty with lanterns, a rowboat and a kayak.
+  - A cedar deck on stilts over the water, with a fire pit, chairs, string lights and a timber rail.
+  - **The front desk** on the deck, under a white canopy, where visitors sign in (see [The Dock](#the-dock-and-the-front-desk)).
+  - A jetty with lanterns, a rowboat, a kayak and a WATER TAXI stop.
   - Pines and autumn trees, and a sandy beach with an umbrella.
   - A gravel driveway with an EV at its charger, and a delivery drone circling the roof.
 - **Under the waterline:** the engine room is sunk into the island behind a glass wall onto the lake, so fish swim past the servers.
 - **Sky:** a golden-hour gradient. It dims to dusk when the story goes down to the engine room.
 
 ```
-             ┌──────────── roof · green roof · skylight · solar ────────────┐
+             ┌───── roof · CALDOVA WEALTH sign · the party · green roof ─────┐
   LEVEL 3    │  THE IDEA    Maya's office · the brain (one half for each side) │  terrace
              ├───────────────────────────────────────────────────────────────┤
   LEVEL 2    │  WEALTH MANAGEMENT TEAM  │ Theo │  SUPERANNUATION TEAM         │
              │  Ivy · Cara · Felix      │ lead │  Olivia · Ben · Rory · Penny │
              ├───────────────────────────────────────────────────────────────┤
-  LEVEL 1    │  DEDICATED · WEALTH │ SHARED BY BOTH SIDES │ DEDICATED · SUPER │ deck ═══ jetty
+  LEVEL 1    │  DEDICATED · WEALTH │ SHARED BY BOTH SIDES │ DEDICATED · SUPER │ deck · front desk ═══ jetty · water taxi
  ~~~~~~~~~~~~│~~~~~~~~~~~~~~~~~~~~~~~~~ waterline ~~~~~~~~~~~~~~~~~~~~~~~~~~~│~~~~~~~~~~~~
   LOWER      │  MICROSOFT IQ deck: Work IQ · Fabric IQ · Foundry IQ · Web IQ   │  lake
   LEVEL      │  Microsoft Foundry at the core · Azure services all around    │
@@ -87,6 +88,7 @@ Maya is new in v2. She is the business owner for **both sides** of Caldova: Weal
 - **Personality:** curious, practical and people-first.
 - **Typical line:** "If a member has to chase us, we've already let them down."
 - **Look:** smart-casual for the lakehouse: a cream knit, slate trousers, a Caldova-gold scarf, glasses and long dark hair.
+- **In her office** she moves between the vision board, the bookshelf, the North Star dashboard on her desk, Biscuit's bed and the terrace telescope, where she watches the water taxi come in.
 
 **The idea** is the demo's product message, held in the brain above her table:
 
@@ -119,9 +121,16 @@ The same eight staff as v1, at standing desks, arranged as two wings with Theo b
 - **In the middle,** Theo leads both teams from a desk on a lilac rug, with a huddle table in front where both teams meet.
 - **Right wing, the Superannuation Team** on a teal rug: Olivia (Onboarding & Requests), Ben (Benefits & Eligibility), Rory (Transfers & Rollovers) and Penny (Payments).
 
+Nobody is stuck at a desk. Each person heads off on errands as they work and then comes back: a coffee, the printer, the huddle table, the process board, their wing's board, a look at the lake, or a quick question at a colleague's desk (only if the colleague is there). A speech bubble says what they are doing, and their card shows it too.
+
 ### The Agents (Level 1)
 
-Each person's **Microsoft Foundry agent** sits in a pod directly under their desk, with its two specialised assistants as small voxel robots. The assistants are named in `stepGate.ts` and [foundry_agents.md](foundry_agents.md). The floor is one group of agents in three zones, and each pod's frame glows in the colour of its side.
+Each person's **Microsoft Foundry agent** has a bay directly under their desk. The agent and each of its two specialised assistants (named in `stepGate.ts` and [foundry_agents.md](foundry_agents.md)) is its own voxel robot, so the floor has **25 roles**: 8 agents, 16 assistants and Cara's voice agent.
+
+- **The agent** is the big robot, with a glowing sash in its side's colour.
+- **Each assistant** carries a prop for its job: Form Extraction a document, NIGO Checklist a clipboard, Eligibility Rules a rule book, Nominations & Consent a stamp, Portfolio Fit a pie chart, Fee Comparison a bar chart, ID Authenticity a magnifier, Risk Timeline a timeline, Fund Lookup & SVS a globe, Rollover Requests a parcel, Benefit Calculator a calculator, Payment Controls a padlock, Letters & Updates an envelope, Tone & Compliance a heart, SLA & Escalations a clock and Approvals & Quality a badge. The voice agent wears a headset.
+
+The floor is one group of agents in three zones, and each bay's frame glows in the colour of its side.
 
 | Zone | Person | Foundry agent | What makes it different |
 |---|---|---|---|
@@ -134,7 +143,17 @@ Each person's **Microsoft Foundry agent** sits in a pod directly under their des
 | Dedicated · Super | Rory | `transfers-rollovers-agent` | MCP tools: look up funds, verify SMSFs, generate the transfer request PDF |
 | Dedicated · Super | Penny | `payments-agent` | MCP tools for benefits and limits, then a Microsoft Teams approval |
 
-All eight run on Microsoft Foundry and share the Microsoft IQ layer through the `CaldovaAgent` base class. At the front of the shared zone is the **Member Case**: the one record every agent reads from and writes to, wired to every pod.
+All eight run on Microsoft Foundry and share the Microsoft IQ layer through the `CaldovaAgent` base class. At the front of the shared zone is the **Member Case**: the one record every agent reads from and writes to, wired to every bay.
+
+**The roles move about the floor as they work**, then go back to their bays. A speech bubble says what each one is doing:
+
+- to the **Member Case** hub, to read and update the case
+- to the **Foundry uplink** in the middle of the floor, where a beam rises to the engine room while they call the model
+- to the **MCP tool bench** at the back, for the roles whose agents use MCP tools (Ivy's, Rory's and Penny's)
+- to the bay they hand work to, following the [handoff rules](foundry_agents.md#suggested-agent-handoff-rules): Onboarding hands to Benefits & Eligibility or Financial Crime; Benefits & Eligibility to Financial Crime, the Investment Analyst or Transfers & Rollovers; the Investment Analyst and Transfers & Rollovers to Payments; and Payments to Client Communications. Any agent can escalate to Theo's, and Theo's agent coordinates the rest.
+- out to the lakeside, to watch the boats
+
+Olivia's **Form Extraction** assistant also works the front desk on the dock: it walks out whenever a visitor is on the way, and reads the form they sign.
 
 ### The Engine Room (Lower Level)
 
@@ -165,6 +184,56 @@ The engine room has two tiers. Each component is a voxel machine with a sign, wi
 | APP SERVICE | Two Linux web apps | The frontend (Node 20) and the backend (.NET 10: agent console, APIs, Member Case store, MCP endpoint) | Platform |
 | APP INSIGHTS | Application Insights and Log Analytics | Telemetry from both web apps | Platform |
 
+### The Dock and the Front Desk
+
+![The dock: George signs at the front desk while Olivia's Form Extraction agent reads the form](res/storybook/v2-dock.jpg)
+
+Out front, the house meets the people it serves. Members, clients and advisers arrive by **water taxi**, a small electric boat that pulls in at the WATER TAXI stop at the end of the jetty. They walk up the jetty to **the front desk** on the deck ("FRONT DESK · Welcome to Caldova"), where **the greeter** welcomes them and they sign their application, policy or claim.
+
+1. The water taxi sails in, and the visitor steps onto the jetty.
+2. Olivia's **Form Extraction** agent walks out from its bay to the desk.
+3. The visitor signs. The form gets a SIGNED stamp, the agent scans it, and a note reads "Signed · sent to Onboarding": the form becomes a new Member Case.
+4. The visitor walks back to the water taxi and sails home.
+
+| Who comes by | Side | Signs |
+|---|---|---|
+| Four of the five finale members: Priya, George, Tom and Robert | Superannuation | Their application or claim (see the [finale](#finale--one-request-top-to-bottom)) |
+| For the fifth, someone hooded, in dark glasses, signing in Grace's name | Superannuation | A rollover request for Grace's account, while Grace is in Italy |
+| A new member | Superannuation | Caldova Super, and the policy for her insurance cover |
+| A new client | Wealth Management | A Caldova Wrap account application, set up with his adviser |
+| An adviser | Wealth Management | A Managed Portfolio application for a client |
+
+Whenever the finale isn't playing, the everyday visitors keep coming, one water taxi at a time.
+
+> **In this demo**, requests arrive as adviser emails, forms and member requests. The dock is the storybook's way of showing them coming in.
+
+### The Roof: a Party for the Customers
+
+![The roof: Caldova's party for its customers, under the CALDOVA WEALTH sign](res/storybook/v2-party.jpg)
+
+Up on the roof, Caldova Wealth throws a party for the people the whole house works for: its members, clients and their advisers. It is the first thing viewers see on the cover, before the story goes down through the house.
+
+- **The sign:** CALDOVA WEALTH in big glowing gold voxel letters on a navy board along the back of the roof, framed by chasing marquee bulbs on a steel frame. Fireworks go up behind it every so often.
+- **The party deck:** timber decking with string lights from the front posts up to the sign, and bunting in the party colours (the two sides' gold and teal, the shared lilac, and the levels' coral and cyan).
+  - **The DJ booth**, with turntables, speakers that kick on the beat, a lighting truss and a banner: "Celebrating our members, clients and advisers".
+  - **The dance floor**, with tiles that change colour on the beat and a confetti cannon at each front corner.
+  - **The bar**, two cocktail tables and balloons.
+- **The green roof:** George's retirement cake ("Happy retirement, George!"), a lounge of beanbags, the solar panels and the lift that brings the guests up.
+- **The skylight** looks down on the brain glowing in Maya's office.
+
+| Guest | Who they are |
+|---|---|
+| George and Helen | George has just retired, and his Caldova Pension now pays him every month. Helen is his reversionary beneficiary. |
+| Priya | New to Caldova Super, with her old super brought across into one account |
+| Marcus Tan and Hannah Lewis | The advisers, Bayside Financial Partners and Yarra Private Wealth, here with their clients |
+| A Caldova Wrap client, a Managed Portfolios client and a Caldova Super member | Members and clients from both sides |
+
+The guests come and go like everyone else in the house. They dance, get a drink at the bar, try the cake, take in the view and peek down at the brain, and always come back to their table or the lounge. A speech bubble says what each is doing. Every so often the DJ calls a toast ("A toast to George's retirement!"): glasses go up, everyone says "Cheers!", and the confetti cannons fire.
+
+The guests are the customers with happy news. The finale's other requests (a hardship release, a scam and a death benefit) are not party stories, so Grace, Tom and Robert are not on the roof. When the finale plays George's or Priya's request, they leave the party and go down to the dock to sign.
+
+- **Interaction:** Click the sign, the dance floor, the DJ booth, the bar, the cake or the lounge for the party's card: what it is, who is there and what is happening now. "Take a closer look" flies the camera to the roof. Click a guest for their card. George's and Priya's cards end with "Watch his request ›" or "Watch her request ›", which replays it in the finale.
+
 ---
 
 ## How to Read the Storybook
@@ -176,7 +245,7 @@ The storybook has a cover, four chapters (one per level) and a finale. Each chap
 | **Begin the story ›** on the cover | Opens Chapter 1 |
 | **Next › / ‹ Back**, the page dots, or the **arrow keys** | Turn the page; down and right go deeper |
 | **The lift** on the right (⌂, 3, 2, 1, B, ⇅) | Jumps to any level; the display shows the floor and the direction of travel |
-| **Click** a person, the brain, an agent pod or a machine | Opens its card, lights it up and draws its thread through the house |
+| **Click** a person, the brain, an agent or one of its assistants, a machine, the front desk or a visitor | Opens its card, lights it up and draws its thread through the house |
 | **Card actions** such as "Follow Cara down to the agent ↓" | Move along the thread to the level below or above |
 | **Esc**, or clicking empty space | Closes the card |
 | **–** on the page card | Hides the storybook so the viewer can explore freely; **📖 Open the storybook** brings it back |
@@ -193,8 +262,8 @@ Every page has a deep link, for example `/v2/?page=people`. The address bar upda
 
 ![Cover](res/storybook/v2-cover.jpg)
 
-- **Scene:** The whole lakehouse at golden hour, with the camera slowly circling until the viewer touches it. The level tags float beside the house, and the gold and teal wings show through the glass.
-- **Narration:** "Caldova Wealth is a wealth management business built for the agentic era. It has two sides, Wealth Management and Superannuation, and runs both from a lakehouse on the edge of Melbourne. Read it from the top down: the owner's idea, two small teams, one group of AI agents that supports both and, under the waterline, Microsoft IQ and the Azure services that power it all."
+- **Scene:** The whole lakehouse at golden hour, with the camera slowly circling until the viewer touches it. The level tags float beside the house, the open floors show the gold and teal wings, a water taxi brings a visitor to the front desk on the dock, and the customers' party is in full swing on the roof under the CALDOVA WEALTH sign.
+- **Narration:** "Caldova Wealth is a wealth management business built for the agentic era. It has two sides, Wealth Management and Superannuation, and runs both from a lakehouse on the edge of Melbourne. Read it from the top down: the owner's idea, two small teams, one group of AI agents that supports both and, under the waterline, Microsoft IQ and the Azure services that power it all. Out front, members and clients arrive by water taxi and sign in at the front desk on the dock. Up on the roof, Caldova throws a party for them."
 - **Interaction:** "Begin the story ›" or "Explore freely". The cover lists the four levels with their colours.
 
 ### Chapter 1 — Level 3 · The Idea
@@ -205,11 +274,11 @@ Every page has a deep link, for example `/v2/?page=people`. The address bar upda
   - Maya stands by a round white table. Above it floats a voxel brain with **one hemisphere for each side**: gold for Wealth Management and teal for Superannuation, joined by a lilac bridge for what they share. Four goal tiles orbit it: CLEARER, FASTER, CONSISTENT, PEOPLE APPROVE.
   - On the back wall is a vision board: "The idea · a wealth business for the agentic era · Wealth Team in a Day", with three panels (Wealth Management, One group of agents, Superannuation) and "Grounded in Microsoft IQ on Azure · agents recommend, people approve". There is also a bookshelf, and Maya's desk has a North Star dashboard.
   - In the lounge corner are a sofa and a floor lamp, and Biscuit the office dog is asleep on her bed.
-  - Outside are the balcony and a terrace with loungers, an umbrella, a fire table and a telescope pointed at the lake.
+  - Outside are the balcony and a terrace with loungers, an umbrella, a fire table and a telescope pointed at the lake. Maya moves about her office as she works, and stops at the telescope to watch the water taxi come in.
 - **Narration:** "This is Maya Ashworth's office. Maya is Caldova's managing director and the business owner for both sides: Wealth Management (Caldova Wrap and the managed portfolios) and Superannuation (Caldova Super and Caldova Pension). Her idea for the agentic era: run each side with a small expert team, supported by one group of AI agents that are dedicated where the work is specialised and shared where it isn't. People still approve every decision that matters. The brain above her table holds the idea, one half for each side."
 - **Interaction:**
   - **The brain:** its card shows the idea, the two sides with their products and teams, the one group of agents, the four goals, the lifecycle and the guardrails. Gold threads drop from the brain to every person on Level 2.
-  - **Maya:** her profile card, including her two sides.
+  - **Maya:** her card: her role, her two sides, the goals she sets and what she is doing now.
 - **Intro beat:** the brain lights up and spins faster.
 
 ### Chapter 2 — Level 2 · The People
@@ -221,11 +290,13 @@ Every page has a deep link, for example `/v2/?page=people`. The address bar upda
   - **Right wing:** the Superannuation Team on a teal rug, under a SUPERANNUATION sign (Caldova Super · Caldova Pension).
   - **In the middle:** Theo ("leading both teams") on a lilac rug, below the ONE PROCESS FOR BOTH SIDES board. In front of him is the huddle table, with gold stools on the wealth side and teal stools on the super side ("both teams meet here").
   - Every standing desk has a name panel in the department colour and a prop that says something about the role: Ivy's bar chart, Cara's headset, Felix's magnifier, Theo's dashboard, Olivia's inbox tray, Ben's rule books, Rory's globe and Penny's calculator.
-  - There is a coffee bar on the right and beanbags by the lift. Theo walks to the huddle table, looks over each wing in turn, and goes back to his desk.
-- **Narration:** "One floor down, the idea becomes two small teams. On the left, the Wealth Management Team: Ivy runs the model portfolios, while Cara and Felix handle client communications and financial crime for both sides. On the right, the Superannuation Team: Olivia, Ben, Rory and Penny. Theo sits between them and leads both teams. People talk to members, clients and advisers, weigh the evidence and make the calls, and both sides follow one lifecycle: Request, Verify, Assess, Action, Confirm."
-- **Interaction:** Click a person to open their card. It shows:
-  - their role, team, responsibilities and typical line
-  - their agent one floor down, and whether that agent is dedicated to a side or shared by both
+  - There is a coffee bar on the right, a printer by the left wall and beanbags by the lift.
+  - People come and go from their desks as they work: Penny grabs a flat white, Olivia collects printouts, Ben talks a case through at the huddle table, and Theo drops by Cara's desk with a quick question. A speech bubble says what each is doing.
+- **Narration:** "One floor down, the idea becomes two small teams. On the left, the Wealth Management Team: Ivy runs the model portfolios, while Cara and Felix handle client communications and financial crime for both sides. On the right, the Superannuation Team: Olivia, Ben, Rory and Penny. Theo sits between them and leads both teams. People talk to members, clients and advisers, weigh the evidence and make the calls, and both sides follow one lifecycle: Request, Verify, Assess, Action, Confirm. Nobody is stuck at a desk: they meet at the huddle table, check the process board and drop by each other's desks."
+- **Interaction:** Click a person to open their card. It is kept short:
+  - their role in one line, as in [characters.md](characters.md)
+  - their team, and their agent one floor down with its side: dedicated to one side or shared by both
+  - **Now:** what they are doing right now, which updates while the card is open
 
   "Follow {name} down to the agent ↓" opens Chapter 3 with that agent selected. "Open the agent page ↗" opens the backend's `/agents/{id}` walkthrough.
 - **Intro beat:** "The idea drops in": gold sparks fall from where the brain sits above and land on each desk, and each person lights up as their spark arrives.
@@ -236,20 +307,21 @@ Every page has a deep link, for example `/v2/?page=people`. The address bar upda
 
 ![Level 1: The agents](res/storybook/v2-agents.jpg)
 
-- **Scene:** Level 2 lifts away to reveal a dark glass floor with a glowing grid, split into three tinted zones by dashed lines and lettered at the front: DEDICATED · WEALTH (gold), SHARED BY BOTH SIDES (lilac) and DEDICATED · SUPER (teal).
-  - Under every desk is a coloured pod with that person's two assistants (voxel robots). The pod's frame glows in its side's colour.
-  - Each pod has a holo panel showing the agent's name, its side, its Foundry agent id, and "2 assistants · works for {name}".
-  - The **Member Case** hub glows at the front of the shared zone, wired to every pod by circuit traces that carry data packets out and back.
-  - Theo's pod has a floating **group chat** ring, and Cara's has a **voice agent** equaliser.
-  - The back wall by the lift reads "ONE GROUP OF AGENTS · Dedicated to one side, or shared by both".
-- **Narration:** "Under the desks is one group of Microsoft Foundry agents that supports both teams. Each person has an agent with two specialised assistants, and Cara also has a voice agent. Some agents are dedicated to one side: four on the Super side, and the Investment Analyst on the Wealth side. Financial Crime, Client Communications and the Team Leader agent are shared by both. They all work on one Member Case, and a person always decides."
-- **Interaction:** Click a pod to open its card. It shows:
-  - its side and why it is dedicated or shared
-  - the Foundry agent id and both assistants
-  - what makes it different, and what it runs on in the engine room
+- **Scene:** Level 2 lifts away to reveal a dark floor with a glowing grid, split into three tinted zones by dashed lines and lettered at the front: DEDICATED · WEALTH (gold), SHARED BY BOTH SIDES (lilac) and DEDICATED · SUPER (teal).
+  - Under every desk is a coloured bay for that person's agent and its two assistants, each a voxel robot. The bay's frame glows in its side's colour.
+  - Each bay has a holo panel showing the agent's name, its side, its Foundry agent id, its two assistants and "works for {name}".
+  - The **Member Case** hub glows at the front of the shared zone, wired to every bay by circuit traces that carry data packets out and back.
+  - Behind the hub is the **Foundry uplink**, a violet ring that beams up whenever a robot is calling the model. At the back, by the lift, is the **MCP tool bench** with four coloured terminals.
+  - Theo's bay has a floating **group chat** ring, and Cara's has a **voice agent** equaliser.
+  - The back wall by the lift reads "ONE GROUP OF AGENTS · Each agent with its specialised roles".
+  - The robots come and go from their bays as they work (see [The Agents](#the-agents-level-1)), each with a speech bubble saying what it is doing.
+- **Narration:** "Under the desks is one group of Microsoft Foundry agents that supports both teams. Each person has an agent, and each agent has two specialised assistants: 25 roles in all, counting Cara's voice agent. They move about as they work, between their bays, the Member Case hub, the Foundry uplink and the MCP tool bench. Some agents are dedicated to one side: four on the Super side, and the Investment Analyst on the Wealth side. Financial Crime, Client Communications and the Team Leader agent are shared by both. They hand work to each other on one Member Case, and a person always decides."
+- **Interaction:** Click a robot or its bay to open its card. Cards are kept short:
+  - **An agent** (the big robot, or its bay): what it does in one line; its side, its assistants, who it hands off to, what it runs on in the engine room, and what it is doing now. Threads drop to those components. "Back up to {name} ↑" or "What powers it ↓".
+  - **An assistant or the voice agent:** what it does in one line; its side, the person it works for, and what it is doing now. The Form Extraction card adds that it reads every signed form at the front desk. "Meet the {agent}" or "Up to {name} ↑".
 
-  The pod's ring lights and threads drop to those components. "Back up to {name} ↑" or "What powers it ↓".
-- **Intro beat:** the pods power up one after another.
+  ![Clicking one of Ben's assistants: Nominations & Consent, and what it is doing right now](res/storybook/v2-role.jpg)
+- **Intro beat:** the bays power up one after another.
 
 ### Chapter 4 — Lower Level · The Engine Room
 
@@ -279,19 +351,19 @@ Every page has a deep link, for example `/v2/?page=people`. The address bar upda
 
 ![Finale: the house pulled apart, with a request travelling through it](res/storybook/v2-finale.jpg)
 
-- **Scene:** The house pulls apart into an exploded view, with all four levels stacked with gaps between them. Threads show the whole house as one tree: gold from the brain to every person, coral from each person to their agent, violet from each agent to Microsoft Foundry.
-- **Narration:** "Now watch a real member request travel through the house. Each step starts with a person, dips down to their agent and the engine room, and comes back up for a human decision. These are Super requests: they use the Super side's agents and the shared ones, and call in the Wealth side's Investment Analyst when they need an investment view. The result rises to Maya's floor."
+- **Scene:** The finale opens at the dock with the house together. The member's water taxi pulls in, they walk up the jetty and sign at the front desk, and Olivia's Form Extraction agent comes out to read the form (see [The Dock](#the-dock-and-the-front-desk)). Once it is signed, the request glows above the desk, and the house pulls apart into an exploded view as the request sets off: all four levels stacked with gaps between them. Threads show the whole house as one tree: gold from the brain to every person, coral from each person to their agent, violet from each agent to Microsoft Foundry.
+- **Narration:** "Now watch a real member request travel through the house. It starts at the dock: the member arrives by water taxi and signs at the front desk, and Olivia's Form Extraction agent comes out to read the form. Then the house pulls apart. Each step starts with a person, dips down to their agent and the engine room, and comes back up for a human decision. These are Super requests: they use the Super side's agents and the shared ones, and call in the Wealth side's Investment Analyst when they need an investment view. The result rises to Maya's floor."
 - **The trace:** a glowing orb carries one member's request through the house. The steps come from the v1 scenario beats in `src/frontend/src/scenarios/*.json`, so both versions tell the same five stories. All five are Superannuation member requests.
-  1. **Arrival:** the request flies in over the lake to Olivia's desk.
+  1. **Arrival:** the member arrives by water taxi and signs at the front desk: Priya her application, George the pension application his adviser has prepared, Tom his hardship application and Robert his mother's death benefit claim. In Grace's story, someone else signs a rollover request in her name while she is in Italy. When the form is signed, the orb appears above the desk.
   2. **Each step:** the orb stops at the person (Level 2), drops to their agent (Level 1), and dips to the engine-room component that agent leans on. It then comes back up to the person, who decides. A handover is just a short stop.
   3. **Result:** the orb rises to the brain on Level 3 with the outcome.
 - **Panel:**
   - the member chips: Priya, Grace, George, Tom and Robert (George by default)
-  - the current step, with a chip for its side, for example "Step 3 of 9 · Ben · Benefits & Eligibility · DEDICATED · SUPER · Ben → Benefits & Eligibility Agent → Foundry IQ · wealth_knowledge"
-  - the narration, and **Pause**, **Next step** and **x1/x2/x4** controls
+  - the current step, with a chip for its side, for example "Step 1 of 9 · George Papadopoulos · arrives by water taxi · SUPERANNUATION REQUEST · George Papadopoulos → Front desk → Form Extraction agent", then "Step 3 of 9 · Ben · Benefits & Eligibility · DEDICATED · SUPER · Ben → Benefits & Eligibility Agent → Foundry IQ · wealth_knowledge"
+  - the narration, and **Pause**, **Next step** and **x1/x2/x4** controls. They work during the arrival too: Pause holds the water taxi, and Next step skips ahead to the signature.
 
   The chip reads "Superannuation request" on arrival, "Dedicated · Super" or "Shared · both sides" for each step, and "Dedicated · Wealth · called in" when Ivy's agent joins a Super request.
-- **Interaction:** Pick a member to replay their request. "Back to the cover ↺" starts the storybook again.
+- **Interaction:** Pick a member to replay their request: the house comes back together at the dock for their arrival. "Back to the cover ↺" starts the storybook again.
 
 ---
 
@@ -303,23 +375,30 @@ Every card ends with actions that move along the same thread, so viewers can tra
 |---|---|---|---|
 | Maya | Maya and the brain | — | See her idea · Meet the team ↓ |
 | The brain | The brain | Brain → every person | Meet the team ↓ · Meet Maya |
-| A person | The person, their pod, and their engine-room dependencies | Person → agent → components | Follow them down ↓ · Open the agent page ↗ |
-| An agent pod | The pod, its person, and its dependencies | Person → agent → components | Back up ↑ · What powers it ↓ · Open the agent page ↗ |
+| A person | The person, their bay, and their engine-room dependencies | Person → agent → components | Follow them down ↓ · Open the agent page ↗ |
+| An agent (or its bay) | The bay, its person, and its dependencies | Person → agent → components | Back up ↑ · What powers it ↓ · Open the agent page ↗ |
+| An assistant or the voice agent | The robot, its person, and Microsoft Foundry | Person → assistant → Microsoft Foundry | Meet the agent · Up to the person ↑ |
 | A component | The component and every agent that uses it | Component → agents → people | Back up to the agents ↑ |
+| The front desk, or the greeter | The desk, the Form Extraction agent and Olivia | Desk → Form Extraction agent → Olivia | Who is signing · Meet the Form Extraction agent · Up to Olivia ↑ |
+| A visitor | The same as the front desk | The same as the front desk | The front desk |
+| The party (its sign, dance floor, DJ booth, bar, cake or lounge) | Every guest and the DJ | — | Take a closer look · Meet George |
+| A party guest | The guest | — | Watch his or her request › (George and Priya) · The celebration |
 
-Only the level being read is clickable, so a click never lands on something hidden under a floor.
+Only the level being read is clickable, so a click never lands on something hidden under a floor. The dock is out front, so it stays clickable whenever it is showing, and the party is clickable whenever the roof is in place.
 
 ---
 
 ## Visual Direction
 
 - Voxel and isometric, like v1: a miniature diorama with a high three-quarter camera.
-- **Casual and futuristic:** warm timber, glass and white concrete, glowing edge strips, holograms, a drone and an EV charger. It should never feel like a data centre brochure.
+- **Casual and futuristic:** warm timber, steel and white concrete, open floors with slim rails (no glass facade), glowing edge strips, holograms, a water taxi, a drone and an EV charger. It should never feel like a data centre brochure.
+- **Sharp, not hazy:** no bloom, halos or glass in the way. Lit parts (signs, screens and edge strips) are flat bright colours on solid backings, and the scene draws at the screen's full resolution, so every label reads cleanly. On a window narrower than 16:9, the view widens instead of cropping the sides.
+- **Alive, not busy:** people and robots move about their floors at an easy pace and always come back to their desks and bays. A speech bubble says what each is doing.
 - **One accent per level:** Idea `#ffc35a` (gold) · People `#ff8f6b` (coral) · Agents `#5ce1ff` (cyan) · Engine Room `#a78bfa` (violet).
-- **One colour per side**, used for rugs, signs, zones, pod frames and badges: Wealth Management `#c9a14a` (gold) · Superannuation `#14b8a6` (teal) · Shared by both `#8b9cf7` (lilac). These match the v1 team colours. Department colours stay as in v1.
+- **One colour per side**, used for rugs, signs, zones, bay frames, sashes and badges: Wealth Management `#c9a14a` (gold) · Superannuation `#14b8a6` (teal) · Shared by both `#8b9cf7` (lilac). These match the v1 team colours. Department colours stay as in v1.
 - **Two tiers underground:** Microsoft IQ `#e879f9` (fuchsia) on the raised deck, and Azure services `#60a5fa` (blue) around it.
-- **Readable at a glance:** every desk, pod and machine carries a sign, and each card says what the thing is in plain English before any technical detail.
-- **Avoid:** real company logos, readable personal or financial details, anything suggesting agents decide on their own, and claiming the demo uses an IQ component it doesn't.
+- **Readable at a glance:** every desk, bay and machine carries a sign, every assistant carries a prop for its job, and each card says what the thing is in plain English before any technical detail. Cards for Maya, people, agents, assistants and visitors stay short: one line, then a few labelled facts, including what they are doing now.
+- **Avoid:** real company logos, readable personal or financial details, anything suggesting agents decide on their own, and claiming the demo uses an IQ component it doesn't. The dock and the rooftop party are storybook devices: say so wherever they could be mistaken for features of the demo.
 
 ---
 
@@ -327,9 +406,12 @@ Only the level being read is clickable, so a click never lands on something hidd
 
 | What | Where |
 |---|---|
-| Page text, camera shots and stack modes | `src/frontend/src/v2/storyData.ts` (mirrors this document) |
-| The two sides, Maya, the idea, each agent's side, the IQ tier and Azure services | `src/frontend/src/v2/lakehouseData.ts` |
-| Desk positions, wings (Level 2) and zones (Level 1) | `src/frontend/src/v2/layout.ts` |
+| Page text, camera shots (including the finale's dock shot) and stack modes | `src/frontend/src/v2/storyData.ts` (mirrors this document) |
+| The two sides, Maya, the idea, each agent's side, the roles and their props and tasks, the handoff rules, the IQ tier and Azure services | `src/frontend/src/v2/lakehouseData.ts` |
+| The front desk, the finale members' arrivals, the everyday visitors | `src/frontend/src/v2/lakehouseData.ts` (data) and `dock.ts` (the dock, greeter, water taxi and visit) |
+| The party on the roof: its guests and the sign's text | `src/frontend/src/v2/lakehouseData.ts` (data) and `party.ts` (the deck, sign, DJ, dance floor, toasts and fireworks) |
+| Walking: where people, Maya and the robots go on errands, and their speech bubbles | `src/frontend/src/v2/wander.ts` (walking) and `levels/*.ts` (each floor's errands) |
+| Desk positions, wings (Level 2), zones (Level 1) and the front desk | `src/frontend/src/v2/layout.ts` |
 | Staff, teams, assistants and clients | Shared with v1: `personaData.ts`, `stepGate.ts`, `characterPalettes.ts` |
 | The finale's steps | Shared with v1: `scenarios/*.json` |
 | Levels and the house | `src/frontend/src/v2/levels/*.ts`, `shell.ts`, `exterior.ts` |

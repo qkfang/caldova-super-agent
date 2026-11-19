@@ -160,10 +160,10 @@ At `/v2`, the same team is shown as a storybook you read from the top of a lakeh
 
 - **Level 3** is business owner Maya Ashworth's office and her idea, "the brain", with one half for each side.
 - **Level 2** holds two small teams: the Wealth Management Team and the Superannuation Team, with Theo leading both.
-- **Level 1** has one group of Microsoft Foundry agents that supports both teams. Some agents are dedicated to a side and some are shared by both.
+- **Level 1** has one group of Microsoft Foundry agents that supports both teams. Some agents are dedicated to a side and some are shared by both. Each agent and each of its specialised assistants is its own robot: 25 roles in all.
 - **The engine room**, under the waterline, holds Microsoft IQ (Work IQ, Fabric IQ, Foundry IQ and Web IQ) on a raised deck, with the Azure services around it.
 
-Each chapter opens up one level. The finale pulls the house apart to trace a member request from top to bottom. See [docs/storybook.md](docs/storybook.md).
+People and agents move about their floors as they work. Out front, members and clients arrive by water taxi and sign at the front desk on the dock. Up on the roof, Caldova throws a party for them under a big CALDOVA WEALTH sign. Each chapter opens up one level. The finale starts at the dock, then pulls the house apart to trace a member request from top to bottom. See [docs/storybook.md](docs/storybook.md).
 
 ![Frontend v2: the Lakehouse storybook](docs/res/storybook/v2-finale.jpg)
 

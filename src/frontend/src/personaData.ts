@@ -45,6 +45,8 @@ export interface StaffPersona {
   department: string;
   /** Human-readable role/duties summary (one line). */
   role_short: string;
+  /** The role in one short sentence, as in docs/characters.md ("**Role:**"), for compact cards. */
+  role_line: string;
   palette: PaletteKey;
   /** Swatch color used in the agents panel (department accent). */
   color: string;
@@ -112,6 +114,7 @@ export const STAFF_PERSONAS: StaffPersona[] = [
     department: "Onboarding & Requests",
     role_short:
       "The front door of the Superannuation Team — every new account, pension, withdrawal, rollover and death notification starts with Olivia, whether it comes from a member or an adviser.",
+    role_line: "The front door for every application and member request.",
     palette: "onboardingOfficer",
     color: "#0ea5e9",
     personality: "Calm, meticulous and welcoming.",
@@ -144,6 +147,7 @@ export const STAFF_PERSONAS: StaffPersona[] = [
     department: "Benefits & Eligibility",
     role_short:
       "The Superannuation Team’s technical specialist — applies the trust deed, PDS and super law to every request, and recommends approve, partial or decline.",
+    role_line: "Applies the trust deed, PDS and super law to each request.",
     palette: "benefitsAssessor",
     color: "#6366f1",
     personality: "Analytical, fair and precise.",
@@ -176,6 +180,7 @@ export const STAFF_PERSONAS: StaffPersona[] = [
     department: "Investment Solutions",
     role_short:
       "The Wealth Management Team’s portfolio specialist — owns the model-portfolio menu and makes sure every portfolio still fits the client’s Statement of Advice.",
+    role_line: "Works in the Investment Solutions team and owns the model portfolio menu.",
     palette: "investmentAnalyst",
     color: "#f59e0b",
     personality: "Curious, data-driven and plain-speaking.",
@@ -208,6 +213,7 @@ export const STAFF_PERSONAS: StaffPersona[] = [
     department: "Financial Crime",
     role_short:
       "The risk and compliance partner for both teams — protects members and clients from fraud, scams and identity takeover, and runs AML/CTF checks.",
+    role_line: "Protects members from fraud, scams and identity takeover, and looks after AML/CTF obligations.",
     palette: "finCrimeInvestigator",
     color: "#ef4444",
     personality: "Observant, sceptical and discreet — never accusatory.",
@@ -240,6 +246,7 @@ export const STAFF_PERSONAS: StaffPersona[] = [
     department: "Transfers & Rollovers",
     role_short:
       "The Superannuation Team’s rollover specialist — moves money between Caldova and the outside world: SuperStream rollovers, SMSFs, in-specie transfers and the ATO.",
+    role_line: "Moves money between Caldova and the outside world.",
     palette: "transfersCoord",
     color: "#10b981",
     personality: "Organised, persistent and counterparty-savvy.",
@@ -272,6 +279,7 @@ export const STAFF_PERSONAS: StaffPersona[] = [
     department: "Payments",
     role_short:
       "The Superannuation Team’s pensions and payments officer — releases money correctly: lump sums, pension payments, death benefits, hardship payments and rollovers out.",
+    role_line: "Releases money correctly.",
     palette: "paymentsOfficer",
     color: "#a855f7",
     personality: "Precise, transparent and unflappable.",
@@ -304,6 +312,7 @@ export const STAFF_PERSONAS: StaffPersona[] = [
     department: "Client Communications",
     role_short:
       "The client and adviser relationship voice of the Wealth Management Team — clear updates, letters and calls in plain English, for super members and wealth clients alike.",
+    role_line: "Talks to members and advisers.",
     palette: "commsSpecialist",
     color: "#ec4899",
     personality: "Warm, clear and empathetic.",
@@ -335,6 +344,7 @@ export const STAFF_PERSONAS: StaffPersona[] = [
     department: "Team Leader Office",
     role_short:
       "Leads both the Superannuation and Wealth Management teams from the corner office — workload, SLAs, IDR clocks, approvals, quality and vulnerable members.",
+    role_line: "Runs the operations floor.",
     palette: "teamLeader",
     color: "#14b8a6",
     personality: "Decisive, supportive and commercially aware.",

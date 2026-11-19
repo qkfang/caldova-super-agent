@@ -7,7 +7,7 @@
  *    threads between the levels, read at once (the finale).
  */
 import type { AbstractMesh, TransformNode } from "@babylonjs/core";
-import type { GroupId, StackMode } from "./types";
+import type { Anchor, GroupId, StackMode } from "./types";
 
 /** Top to bottom. */
 export const GROUP_ORDER: GroupId[] = ["roof", "idea", "people", "agents", "engine"];
@@ -58,6 +58,17 @@ export class LevelStack {
   /** Current fade (0–1) of a group. */
   alpha(id: GroupId): number {
     return this.groups.get(id)?.alpha ?? 1;
+  }
+
+  /**
+   * How far an anchor's level is lifted out of the way right now: 0 while the level is in view,
+   * or when the anchor doesn't move with a level (the dock). Beams use it to keep an end where
+   * its level would be while that level is lifted away.
+   */
+  liftOf(a: Anchor): number {
+    const g = this.groups.get(a.group);
+    if (!g || g.alpha >= 0.999 || !a.node.isDescendantOf(g.root)) return 0;
+    return g.offset;
   }
 
   setMode(mode: StackMode): void {

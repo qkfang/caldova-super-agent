@@ -5,15 +5,18 @@
  *   pixel-noise texture (grass, timber, stone…) that tiles in world units.
  * - `block()` / `cyl()` build primitives that sit on a floor (y is the bottom).
  * - `label()` paints text onto a DynamicTexture plane for signs and tags.
+ * - `bubble()` floats a small speech bubble over a walker to say what it is doing.
  * - `hitbox()` adds an invisible click target for the inspector.
  * - `Batch` merges static decor by material, so each level costs only a
  *   handful of draw calls. Anything that animates is built with
  *   `{ dynamic: true }` (or outside a batch) and stays a separate mesh.
+ * - No glow or bloom: "lit" parts (signs, screens, edge strips) are plain unlit
+ *   colours, and text textures use anisotropic filtering, so everything stays
+ *   sharp and readable at any angle.
  */
 import {
   Color3,
   DynamicTexture,
-  GlowLayer,
   Mesh,
   MeshBuilder,
   Scene,
@@ -45,8 +48,8 @@ export interface MatOptions {
   unlit?: boolean;
   /** Specular strength (0–1). */
   specular?: number;
-  /** Add meshes using this material to the glow layer. */
-  glow?: boolean;
+  /** A material of its own, outside the cache, for colours that change at runtime. */
+  unique?: boolean;
 }
 
 export interface BlockOptions {
@@ -86,6 +89,8 @@ type Ctx2D = CanvasRenderingContext2D;
 
 const SANS = '"Segoe UI", system-ui, -apple-system, sans-serif';
 const SERIF = '"Iowan Old Style", "Palatino Linotype", Georgia, serif';
+/** Keeps signs and floor lettering sharp when seen at a glancing angle. */
+const TEXT_ANISOTROPY = 16;
 
 /** Deterministic PRNG so the procedural textures and props are the same on every load. */
 export function rng(seed: number): () => number {
@@ -155,10 +160,7 @@ function roundRect(ctx: Ctx2D, x: number, y: number, w: number, h: number, r: nu
 }
 
 export class Kit {
-  /** Set by main before any level is built so glowing meshes can be registered. */
-  glowLayer: GlowLayer | null = null;
   private readonly mats = new Map<string, StandardMaterial>();
-  private readonly glowMats = new Set<StandardMaterial>();
   private readonly textures = new Map<TextureKey, Texture>();
   private batch: Batch | null = null;
   private counter = 0;
@@ -170,16 +172,6 @@ export class Kit {
     const prev = this.batch;
     this.batch = batch;
     return prev;
-  }
-
-  isGlowMaterial(m: StandardMaterial): boolean {
-    return this.glowMats.has(m);
-  }
-
-  /** Register a mesh with the glow layer when its material glows. */
-  track(mesh: Mesh): void {
-    const m = mesh.material as StandardMaterial | null;
-    if (m && this.glowMats.has(m)) this.glowLayer?.addIncludedOnlyMesh(mesh);
   }
 
   texture(key: TextureKey): Texture {
@@ -209,11 +201,10 @@ export class Kit {
       o.texture ?? "",
       o.unlit ? 1 : 0,
       o.specular ?? 0,
-      o.glow ? 1 : 0,
     ].join("|");
-    const hit = this.mats.get(key);
+    const hit = o.unique ? undefined : this.mats.get(key);
     if (hit) return hit;
-    const m = new StandardMaterial(`v2mat_${this.mats.size}`, this.scene);
+    const m = new StandardMaterial(o.unique ? `v2mat_u${this.counter++}` : `v2mat_${this.mats.size}`, this.scene);
     const c = Color3.FromHexString(hex);
     m.diffuseColor = c;
     m.specularColor = Color3.White().scale(o.specular ?? 0.04);
@@ -228,8 +219,7 @@ export class Kit {
       m.alpha = o.alpha;
       m.disableDepthWrite = true;
     }
-    if (o.glow) this.glowMats.add(m);
-    this.mats.set(key, m);
+    if (!o.unique) this.mats.set(key, m);
     return m;
   }
 
@@ -291,13 +281,12 @@ export class Kit {
     return this.finish(m, parent, mat, o.dynamic);
   }
 
-  /** Register a mesh built elsewhere (torus, disc…) with the parent, batch and glow layer. */
+  /** Register a mesh built elsewhere (torus, disc…) with the parent and batch. */
   finish(m: Mesh, parent: TransformNode | null, mat: StandardMaterial, dynamic = false): Mesh {
     m.material = mat;
     m.parent = parent;
     m.isPickable = false;
     if (this.batch && !dynamic) this.batch.add(m);
-    else this.track(m);
     return m;
   }
 
@@ -331,6 +320,7 @@ export class Kit {
     const id = this.counter++;
     const tex = new DynamicTexture(`${name}_tex${id}`, { width: px, height: pxH }, this.scene, true);
     tex.hasAlpha = true;
+    tex.anisotropicFilteringLevel = TEXT_ANISOTROPY;
     const ctx = tex.getContext() as unknown as Ctx2D;
     ctx.clearRect(0, 0, px, pxH);
     const bar = spec.bar ?? (spec.accent ? "left" : "none");
@@ -389,6 +379,7 @@ export class Kit {
     paint: (ctx: Ctx2D, w: number, h: number) => void,
   ): DynamicTexture {
     const tex = new DynamicTexture(`${name}${this.counter++}`, { width, height }, this.scene, true);
+    tex.anisotropicFilteringLevel = TEXT_ANISOTROPY;
     paint(tex.getContext() as unknown as Ctx2D, width, height);
     tex.update(true);
     return tex;
@@ -408,6 +399,103 @@ export class Kit {
     }
     return m;
   }
+
+  /**
+   * A speech bubble floating `y` above a walker, sized in world units whatever
+   * the walker's own scale. Hidden until `say()` is called.
+   */
+  bubble(parent: TransformNode, y: number, accent: string, parentScale = 1): Bubble {
+    const id = this.counter++;
+    const tex = new DynamicTexture(`v2bubble_tex${id}`, { width: BUBBLE_PX, height: BUBBLE_PX_H }, this.scene, true);
+    tex.hasAlpha = true;
+    tex.anisotropicFilteringLevel = TEXT_ANISOTROPY;
+    // Upload the blank texture now: a DynamicTexture isn't ready until its first update, and
+    // the scene waits for every mesh, hidden bubbles included, before it reports ready.
+    tex.getContext().clearRect(0, 0, BUBBLE_PX, BUBBLE_PX_H);
+    tex.update(true);
+    const mat = new StandardMaterial(`v2bubble_mat${id}`, this.scene);
+    mat.diffuseTexture = tex;
+    mat.useAlphaFromDiffuseTexture = true;
+    mat.emissiveColor = Color3.White();
+    mat.disableLighting = true;
+    mat.specularColor = Color3.Black();
+    mat.backFaceCulling = false;
+    const width = 2.8;
+    const plane = MeshBuilder.CreatePlane(
+      `v2bubble${id}`,
+      { width, height: width * (BUBBLE_PX_H / BUBBLE_PX) },
+      this.scene,
+    );
+    plane.material = mat;
+    plane.parent = parent;
+    plane.isPickable = false;
+    plane.billboardMode = Mesh.BILLBOARDMODE_ALL;
+    plane.position.y = y;
+    plane.scaling.setAll(1 / parentScale);
+    plane.isVisible = false;
+    return new Bubble(plane, tex, accent);
+  }
+}
+
+const BUBBLE_PX = 512;
+const BUBBLE_PX_H = 104;
+
+/** A speech bubble that floats over a walker and says what it is doing. */
+export class Bubble {
+  private text = "";
+
+  constructor(
+    readonly mesh: Mesh,
+    private readonly tex: DynamicTexture,
+    private readonly accent: string,
+  ) {}
+
+  say(text: string): void {
+    if (text !== this.text) {
+      this.text = text;
+      this.paint();
+    }
+    this.mesh.isVisible = true;
+  }
+
+  hide(): void {
+    this.mesh.isVisible = false;
+  }
+
+  private paint(): void {
+    const ctx = this.tex.getContext() as unknown as Ctx2D;
+    const w = BUBBLE_PX;
+    const body = 84;
+    ctx.clearRect(0, 0, w, BUBBLE_PX_H);
+    // Shrink long lines until they fit.
+    let size = 34;
+    ctx.font = `600 ${size}px ${SANS}`;
+    while (size > 20 && ctx.measureText(this.text).width > w - 96) {
+      size -= 2;
+      ctx.font = `600 ${size}px ${SANS}`;
+    }
+    const tw = Math.min(w - 96, ctx.measureText(this.text).width);
+    const bw = tw + 78;
+    const x0 = (w - bw) / 2;
+    ctx.fillStyle = "rgba(255,255,255,0.95)";
+    roundRect(ctx, x0, 4, bw, body - 8, 30);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(w / 2 - 12, body - 6);
+    ctx.lineTo(w / 2 + 12, body - 6);
+    ctx.lineTo(w / 2, BUBBLE_PX_H - 4);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = this.accent;
+    ctx.beginPath();
+    ctx.arc(x0 + 30, body / 2, 9, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#172033";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+    ctx.fillText(this.text, x0 + 50, body / 2 + 1, w - 96);
+    this.tex.update(true);
+  }
 }
 
 /**
@@ -419,7 +507,6 @@ export class Batch {
   private readonly groups = new Map<StandardMaterial, Mesh[]>();
 
   constructor(
-    private readonly kit: Kit,
     private readonly parent: TransformNode,
     private readonly name: string,
   ) {}
@@ -439,20 +526,21 @@ export class Batch {
     for (const [mat, list] of this.groups) {
       // Opaque decor blocks clicks, so nothing hidden behind a floor or wall can be picked.
       const blocker = mat.alpha >= 1;
+      let mesh: Mesh;
       if (list.length === 1) {
-        list[0].isPickable = blocker;
-        this.kit.track(list[0]);
-        out.push(list[0]);
-        continue;
+        // Keep the world transform while moving it under the batch's group, as merging would.
+        mesh = list[0];
+        if (mesh.parent !== this.parent) mesh.setParent(this.parent);
+      } else {
+        const merged = Mesh.MergeMeshes(list, true, true);
+        if (!merged) continue;
+        mesh = merged;
+        mesh.name = `${this.name}_m${i++}`;
+        mesh.material = mat;
+        mesh.parent = this.parent;
       }
-      const merged = Mesh.MergeMeshes(list, true, true);
-      if (!merged) continue;
-      merged.name = `${this.name}_m${i++}`;
-      merged.material = mat;
-      merged.parent = this.parent;
-      merged.isPickable = blocker;
-      this.kit.track(merged);
-      out.push(merged);
+      mesh.isPickable = blocker;
+      out.push(mesh);
     }
     this.groups.clear();
     return out;

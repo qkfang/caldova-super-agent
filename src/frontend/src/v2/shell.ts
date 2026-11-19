@@ -1,8 +1,9 @@
 /**
  * The building shell shared by every level: floor slab with a glowing edge
- * strip in the level's accent, glass curtain walls on the lake and right
- * sides, solid timber and concrete walls at the back and left, the lift
- * core, and the floating level tag.
+ * strip in the level's accent, solid timber and concrete walls at the back
+ * and left, open sides onto the lake and the right (no glass, so nothing
+ * blurs the view in) with a slim corner column and, on raised floors, a
+ * steel guard rail, the lift core, and the floating level tag.
  */
 import { Mesh, StandardMaterial, TransformNode } from "@babylonjs/core";
 import type { Kit } from "./kit";
@@ -21,10 +22,10 @@ export interface ShellSpec {
   floor: StandardMaterial;
   /** Inside finish of the back wall. */
   back: StandardMaterial;
-  /** Glass sides (default front and right); the others are solid. */
-  glass?: Side[];
-  /** Sides with no wall at all. */
+  /** Sides with no wall (default: the lake side and the right). */
   open?: Side[];
+  /** A steel guard rail along the open sides, for raised floors. */
+  rail?: boolean;
   core?: boolean;
   height?: number;
   /** Where the floating level tag goes (default: beside the slab's front-left corner). */
@@ -36,8 +37,7 @@ export function buildShell(kit: Kit, s: ShellSpec): { tag: Mesh } {
   const h = s.height ?? STOREY;
   const concrete = kit.mat("#ffffff", { texture: "concrete" });
   const steel = kit.mat("#2b3240", { specular: 0.25 });
-  const glass = kit.mat("#bfe6ff", { alpha: 0.2, specular: 0.25 });
-  const led = kit.mat(level.accent, { unlit: true, glow: true });
+  const led = kit.mat(level.accent, { unlit: true });
 
   // Slab, floor finish and the glowing edge strip.
   const sw = slab.x1 - slab.x0;
@@ -51,49 +51,39 @@ export function buildShell(kit: Kit, s: ShellSpec): { tag: Mesh } {
   kit.block(root, slab.x1 + 0.04, ledY, scz, 0.08, 0.12, sd + 0.12, led);
   kit.block(root, slab.x0 - 0.04, ledY, scz, 0.08, 0.12, sd + 0.12, led);
 
-  // Walls.
-  const glassSides = new Set<Side>(s.glass ?? ["front", "right"]);
-  const open = new Set<Side>(s.open ?? []);
+  // Walls: solid at the back and left, open to the lake and the right.
+  const open = new Set<Side>(s.open ?? ["front", "right"]);
   const ww = walls.x1 - walls.x0;
   const wd = walls.z1 - walls.z0;
   const wcx = (walls.x0 + walls.x1) / 2;
   const wcz = (walls.z0 + walls.z1) / 2;
   const t = 0.3;
+  if (!open.has("back")) kit.block(root, wcx, y, walls.z1 - t / 2, ww, h, t, s.back);
+  if (!open.has("left")) kit.block(root, walls.x0 + t / 2, y, wcz, t, h, wd, concrete);
+  if (!open.has("front")) kit.block(root, wcx, y, walls.z0 + t / 2, ww, h, t, concrete);
+  if (!open.has("right")) kit.block(root, walls.x1 - t / 2, y, wcz, t, h, wd, concrete);
+  // A slim column holds up the open corner.
+  if (open.has("front") && open.has("right")) kit.block(root, walls.x1 - 0.2, y, walls.z0 + 0.2, 0.32, h, 0.32, steel);
 
-  const glassAlongX = (z: number): void => {
-    kit.block(root, wcx, y + 0.12, z, ww, h - 0.24, 0.08, glass);
-    kit.block(root, wcx, y, z, ww, 0.14, 0.18, steel);
-    kit.block(root, wcx, y + h - 0.14, z, ww, 0.14, 0.18, steel);
-    const n = Math.max(1, Math.round(ww / 4));
-    for (let i = 0; i <= n; i++) {
-      kit.block(root, walls.x0 + (ww * i) / n, y, z, 0.14, h, 0.16, steel);
+  if (s.rail) {
+    const posts = (n: number, at: (f: number) => [number, number]): void => {
+      for (let i = 0; i <= n; i++) {
+        const [px, pz] = at(i / n);
+        kit.block(root, px, y, pz, 0.1, 1.1, 0.1, steel);
+      }
+    };
+    if (open.has("front")) {
+      const z = walls.z0 + 0.12;
+      kit.block(root, wcx, y + 1.08, z, ww, 0.08, 0.1, steel);
+      kit.block(root, wcx, y + 0.55, z, ww, 0.05, 0.05, steel);
+      posts(Math.round(ww / 3), (f) => [walls.x0 + ww * f, z]);
     }
-  };
-  const glassAlongZ = (x: number): void => {
-    kit.block(root, x, y + 0.12, wcz, 0.08, h - 0.24, wd, glass);
-    kit.block(root, x, y, wcz, 0.18, 0.14, wd, steel);
-    kit.block(root, x, y + h - 0.14, wcz, 0.18, 0.14, wd, steel);
-    const n = Math.max(1, Math.round(wd / 4));
-    for (let i = 0; i <= n; i++) {
-      kit.block(root, x, y, walls.z0 + (wd * i) / n, 0.16, h, 0.14, steel);
+    if (open.has("right")) {
+      const x = walls.x1 - 0.12;
+      kit.block(root, x, y + 1.08, wcz, 0.1, 0.08, wd, steel);
+      kit.block(root, x, y + 0.55, wcz, 0.05, 0.05, wd, steel);
+      posts(Math.round(wd / 3), (f) => [x, walls.z0 + wd * f]);
     }
-  };
-
-  if (!open.has("back")) {
-    if (glassSides.has("back")) glassAlongX(walls.z1);
-    else kit.block(root, wcx, y, walls.z1 - t / 2, ww, h, t, s.back);
-  }
-  if (!open.has("left")) {
-    if (glassSides.has("left")) glassAlongZ(walls.x0);
-    else kit.block(root, walls.x0 + t / 2, y, wcz, t, h, wd, concrete);
-  }
-  if (!open.has("front")) {
-    if (glassSides.has("front")) glassAlongX(walls.z0);
-    else kit.block(root, wcx, y, walls.z0 + t / 2, ww, h, t, concrete);
-  }
-  if (!open.has("right")) {
-    if (glassSides.has("right")) glassAlongZ(walls.x1);
-    else kit.block(root, walls.x1 - t / 2, y, wcz, t, h, wd, concrete);
   }
 
   // Lift core with doors facing into the room and the floor number above them.
@@ -126,12 +116,13 @@ export function buildShell(kit: Kit, s: ShellSpec): { tag: Mesh } {
     ],
     width: 8.4,
     px: 640,
-    bg: "rgba(12,20,36,0.88)",
+    bg: "rgba(12,20,36,0.94)",
     accent: level.accent,
     bar: "top",
     billboard: true,
   });
+  // Just in front of the slab's front-left corner, so the side wall never cuts across it.
   if (s.tagAt) tag.position.set(...s.tagAt);
-  else tag.position.set(slab.x0 - 5.2, y + 2.6, slab.z0 + 4);
+  else tag.position.set(slab.x0 - 5.2, y + 2.6, slab.z0 - 1);
   return { tag };
 }

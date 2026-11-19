@@ -117,7 +117,7 @@ const WORK_TILES: Paint[] = [
 export function buildEngineLevel(kit: Kit): LevelBuild {
   const scene = kit.scene;
   const root = new TransformNode("v2_lvl_engine", scene);
-  const batch = new Batch(kit, root, "engine");
+  const batch = new Batch(root, "engine");
   kit.useBatch(batch);
   const y = FLOOR_Y.engine;
   const yd = y + DECK.h;
@@ -161,31 +161,29 @@ export function buildEngineLevel(kit: Kit): LevelBuild {
     walls: WALLS.engine,
     floor: floorMat,
     back: kit.mat("#ffffff", { texture: "concrete" }),
-    glass: [],
     open: ["front"],
     height,
     tagAt: [-25.8, y + 2.8, -16.5],
   });
 
-  // The glass wall onto the lake.
+  // The frameless glass wall onto the lake: kept faint and matte so the room stays crisp.
   const concrete = kit.mat("#ffffff", { texture: "concrete" });
   const steel = kit.mat("#2b3240", { specular: 0.25 });
   const fz = (SLABS.engine.z0 + WALLS.engine.z0) / 2 - 0.2;
   kit.block(root, 0, y, fz, 40.8, 0.4, 0.4, concrete);
-  kit.block(root, 0, y + 0.4, fz, 40, 4.6, 0.12, kit.mat("#9fe3ff", { alpha: 0.16, specular: 0.8 }));
+  kit.block(root, 0, y + 0.4, fz, 40, 4.6, 0.12, kit.mat("#9fe3ff", { alpha: 0.1, specular: 0.15 }));
   kit.block(root, 0, y + 5.0, fz, 40.8, height - 5.0, 0.4, concrete);
-  for (let x = -20; x <= 20; x += 5) kit.block(root, x, y + 0.4, fz, 0.16, 4.6, 0.2, steel);
 
   const darkSteel = kit.mat("#1e2433", { specular: 0.3 });
   const rack = kit.mat("#1b2030", { specular: 0.2 });
   const walnut = kit.mat("#ffffff", { texture: "walnut" });
-  const violet = kit.mat("#a78bfa", { unlit: true, glow: true });
-  const glowOf = (id: InfraId): StandardMaterial => kit.mat(infraInfo(id).color, { unlit: true, glow: true });
+  const violet = kit.mat("#a78bfa", { unlit: true });
+  const glowOf = (id: InfraId): StandardMaterial => kit.mat(infraInfo(id).color, { unlit: true });
 
   // Blinking LEDs: four merged groups toggled in turn.
-  const ledBatch = new Batch(kit, root, "engine_leds");
+  const ledBatch = new Batch(root, "engine_leds");
   const ledMats = ["#34d399", "#5ce1ff", "#fbbf24", "#34d399"].map((hex, i) =>
-    kit.mat(hex, { unlit: true, glow: true, specular: 0.01 * (i + 1) }),
+    kit.mat(hex, { unlit: true, specular: 0.01 * (i + 1) }),
   );
   const led = (x: number, ly: number, z: number, w = 0.14, h = 0.1, d = 0.05): void => {
     const prev = kit.useBatch(ledBatch);
@@ -215,7 +213,7 @@ export function buildEngineLevel(kit: Kit): LevelBuild {
   const deckX = (DECK.x0 + DECK.x1) / 2;
   const deckZ = (DECK.z0 + DECK.z1) / 2;
   kit.block(root, deckX, y, deckZ, deckW, DECK.h, deckD, deckMat, { tile: 1.5 });
-  const deckEdge = kit.mat(iqColor, { unlit: true, glow: true });
+  const deckEdge = kit.mat(iqColor, { unlit: true });
   kit.block(root, deckX, y + DECK.h - 0.16, DECK.z0 - 0.03, deckW + 0.06, 0.14, 0.06, deckEdge);
   kit.block(root, DECK.x0 - 0.03, y + DECK.h - 0.16, deckZ, 0.06, 0.14, deckD, deckEdge);
   kit.block(root, DECK.x1 + 0.03, y + DECK.h - 0.16, deckZ, 0.06, 0.14, deckD, deckEdge);
@@ -227,7 +225,7 @@ export function buildEngineLevel(kit: Kit): LevelBuild {
     ],
     width: 4.0,
     px: 640,
-    bg: "rgba(10,14,30,0.86)",
+    bg: "rgba(10,14,30,0.94)",
     accent: iqColor,
     bar: "top",
   });
@@ -240,7 +238,7 @@ export function buildEngineLevel(kit: Kit): LevelBuild {
     ],
     width: 6.0,
     px: 768,
-    bg: "rgba(10,14,30,0.86)",
+    bg: "rgba(10,14,30,0.94)",
     accent: TIERS.azure.color,
     bar: "top",
   });
@@ -268,7 +266,7 @@ export function buildEngineLevel(kit: Kit): LevelBuild {
       ],
       width: comp.id === "foundry" ? 6.0 : 4.6,
       px: 560,
-      bg: "rgba(10,14,30,0.84)",
+      bg: "rgba(10,14,30,0.94)",
       accent: comp.color,
       bar: "top",
     });
@@ -278,11 +276,16 @@ export function buildEngineLevel(kit: Kit): LevelBuild {
     const ringD = Math.max(p.w, p.d) + 1.6;
     const ring = MeshBuilder.CreateTorus(`v2_infraRing_${comp.id}`, { diameter: ringD, thickness: 0.16, tessellation: 40 }, scene);
     ring.position.set(p.x, base + 0.12, p.z);
-    kit.finish(ring, root, kit.mat(GOLD, { unlit: true, glow: true }), true);
+    kit.finish(ring, root, kit.mat(GOLD, { unlit: true }), true);
     ring.setEnabled(false);
     rings.set(comp.id, ring);
     kit.hitbox(root, p.x, base, p.z, Math.max(1.6, p.w), p.h, Math.max(1.6, p.d), { type: "infra", id: comp.id });
   }
+  // Beams to Microsoft IQ as a whole land on the deck, just under its sign.
+  const iqHub = new TransformNode("v2_iqHub", scene);
+  iqHub.parent = root;
+  iqHub.position.set(0, yd, 5.2);
+  anchors.set("iq", { node: iqHub, group: "engine", dy: 1.3 });
 
   const at = (id: InfraId): Place => PLACES[id];
 
@@ -296,11 +299,11 @@ export function buildEngineLevel(kit: Kit): LevelBuild {
     kit.finish(inlay, root, violet);
     kit.cyl(root, p.x, y + 0.4, p.z, 3.0, 4.0, kit.mat("#d9ccff", { alpha: 0.16, specular: 0.8 }), { tess: 24, dynamic: true });
     kit.cyl(root, p.x, y + 4.4, p.z, 3.3, 0.3, darkSteel, { tess: 32 });
-    const core = kit.cyl(node, 0, 0.6, 0, 1.3, 3.4, kit.mat("#b39cff", { unlit: true, glow: true }), { tess: 16, dynamic: true });
+    const core = kit.cyl(node, 0, 0.6, 0, 1.3, 3.4, kit.mat("#b39cff", { unlit: true }), { tess: 16, dynamic: true });
     const coreRings = [1.3, 2.3, 3.3].map((ry, i) => {
       const ring = MeshBuilder.CreateTorus(`v2_coreRing${i}`, { diameter: i === 1 ? 2.7 : 2.3, thickness: 0.09, tessellation: 40 }, scene);
       ring.position.y = ry;
-      kit.finish(ring, node, kit.mat("#e9d5ff", { unlit: true, glow: true }), true);
+      kit.finish(ring, node, kit.mat("#e9d5ff", { unlit: true }), true);
       return ring;
     });
     kit.cyl(root, p.x, y + 4.7, p.z, 1.0, height - 4.7, kit.mat("#c4b5fd", { unlit: true, alpha: 0.28 }), { tess: 16, dynamic: true });
@@ -353,10 +356,10 @@ export function buildEngineLevel(kit: Kit): LevelBuild {
     kit.block(root, p.x, yd + 3.4, p.z, 3.1, 0.2, 2.9, darkSteel);
     // Entities (nodes) and their relationships (edges), built at the origin then parented.
     const lattice = new TransformNode("v2_fabricLattice", scene);
-    const lb = new Batch(kit, lattice, "fabric_lattice");
+    const lb = new Batch(lattice, "fabric_lattice");
     const prev = kit.useBatch(lb);
-    const entity = kit.mat(infraInfo("fabriciq").color, { emissive: 0.6, glow: true });
-    const hub = kit.mat("#f0fdf4", { emissive: 0.7, glow: true });
+    const entity = kit.mat(infraInfo("fabriciq").color, { emissive: 0.6 });
+    const hub = kit.mat("#f0fdf4", { emissive: 0.7 });
     const edge = kit.mat("#d1fae5", { emissive: 0.45 });
     const s = 0.64;
     for (let i = -1; i <= 1; i++) {
@@ -395,7 +398,7 @@ export function buildEngineLevel(kit: Kit): LevelBuild {
         }
       }
     }
-    const scan = kit.block(nodes.get("foundryiq")!, 0, 0.1, -0.78, 0.1, 3.7, 0.05, kit.mat("#ede9fe", { unlit: true, glow: true }), {
+    const scan = kit.block(nodes.get("foundryiq")!, 0, 0.1, -0.78, 0.1, 3.7, 0.05, kit.mat("#ede9fe", { unlit: true }), {
       dynamic: true,
     });
     spinners.push((t) => {
@@ -411,9 +414,9 @@ export function buildEngineLevel(kit: Kit): LevelBuild {
     kit.cyl(root, p.x, yd + 0.3, p.z - 0.5, 0.5, 0.35, steel, { tess: 10 });
     kit.cyl(root, p.x, yd, p.z + 0.55, 0.3, height - DECK.h, steel, { tess: 8 });
     const globe = new TransformNode("v2_webGlobe", scene);
-    const gb = new Batch(kit, globe, "web_globe");
+    const gb = new Batch(globe, "web_globe");
     const prev = kit.useBatch(gb);
-    const sea = kit.mat(infraInfo("webiq").color, { emissive: 0.5, glow: true });
+    const sea = kit.mat(infraInfo("webiq").color, { emissive: 0.5 });
     const land = kit.mat("#e0f2fe", { emissive: 0.5 });
     const gs = 0.22;
     for (let i = -4; i <= 4; i++) {
@@ -440,7 +443,7 @@ export function buildEngineLevel(kit: Kit): LevelBuild {
     dish.position.set(0, 3.7, 0.55);
     const cone = kit.cyl(dish, 0, -0.3, 0, 0.3, 0.6, kit.mat("#e5e7eb", { specular: 0.4 }), { top: 2.2, tess: 20, dynamic: true });
     cone.rotation.x = -0.9;
-    const blink = kit.block(node, 0, 4.65, 0.55, 0.28, 0.28, 0.28, kit.mat("#ef4444", { unlit: true, glow: true }), { dynamic: true });
+    const blink = kit.block(node, 0, 4.65, 0.55, 0.28, 0.28, 0.28, kit.mat("#ef4444", { unlit: true }), { dynamic: true });
     spinners.push((t) => {
       globe.rotation.y = t * 0.5;
       web.rotation.z = t * 0.8;
@@ -473,7 +476,7 @@ export function buildEngineLevel(kit: Kit): LevelBuild {
   {
     const p = at("identity");
     const node = nodes.get("identity")!;
-    const yellow = kit.mat("#facc15", { unlit: true, glow: true });
+    const yellow = kit.mat("#facc15", { unlit: true });
     for (const side of [-1, 1]) {
       kit.block(root, p.x + side * 1.3, y, p.z, 0.5, 2.9, 0.9, steel);
       kit.block(root, p.x + side * 1.3, y + 0.3, p.z - 0.47, 0.1, 2.3, 0.05, yellow);
@@ -482,7 +485,7 @@ export function buildEngineLevel(kit: Kit): LevelBuild {
     const key = new TransformNode("v2_key", scene);
     key.parent = node;
     key.position.y = 1.6;
-    const gold = kit.mat("#fde68a", { emissive: 0.6, glow: true });
+    const gold = kit.mat("#fde68a", { emissive: 0.6 });
     const bow = MeshBuilder.CreateTorus("v2_keyBow", { diameter: 0.7, thickness: 0.16, tessellation: 20 }, scene);
     bow.rotation.x = Math.PI / 2;
     bow.position.x = -0.5;
@@ -492,7 +495,7 @@ export function buildEngineLevel(kit: Kit): LevelBuild {
     kit.block(key, 0.35, -0.26, 0, 0.12, 0.2, 0.14, gold, { dynamic: true });
     kit.block(root, p.x + 2.05, y, p.z - 0.3, 0.2, 1.3, 0.2, steel);
     kit.block(root, p.x + 2.05, y + 1.3, p.z - 0.3, 0.4, 0.5, 0.16, darkSteel);
-    kit.block(root, p.x + 2.05, y + 1.45, p.z - 0.4, 0.24, 0.2, 0.04, kit.mat("#34d399", { unlit: true, glow: true }));
+    kit.block(root, p.x + 2.05, y + 1.45, p.z - 0.4, 0.24, 0.2, 0.04, kit.mat("#34d399", { unlit: true }));
     spinners.push((t) => {
       key.rotation.y = t * 1.2;
       key.position.y = 1.6 + Math.sin(t * 2) * 0.12;
@@ -542,7 +545,7 @@ export function buildEngineLevel(kit: Kit): LevelBuild {
   {
     const p = at("storage");
     const crate = kit.mat("#0f766e");
-    const band = kit.mat("#34d399", { unlit: true, glow: true });
+    const band = kit.mat("#34d399", { unlit: true });
     for (const [cx, cy, cz, s] of [
       [-1.0, 0, 0.2, 1.4],
       [0.6, 0, -0.1, 1.4],
@@ -620,7 +623,7 @@ export function buildEngineLevel(kit: Kit): LevelBuild {
       for (let row = 0; row < 2; row++) {
         const tx = p.x - 1.55 + i * 1.03;
         kit.block(root, tx, y + 0.9 + row * 1.25, p.z - 0.3, 0.6, 0.75, 0.45, kit.mat(toolColors[i]));
-        kit.block(root, tx, y + 1.15 + row * 1.25, p.z - 0.54, 0.34, 0.2, 0.06, kit.mat(toolColors[i], { unlit: true, glow: true }));
+        kit.block(root, tx, y + 1.15 + row * 1.25, p.z - 0.54, 0.34, 0.2, 0.06, kit.mat(toolColors[i], { unlit: true }));
       }
     }
   }
@@ -675,7 +678,7 @@ export function buildEngineLevel(kit: Kit): LevelBuild {
     pop.position.set(p.x - 0.6, y + 2.0, p.z - 0.45);
     kit.finish(pop, root, steel);
     const bars: Mesh[] = [];
-    const barMat = kit.mat("#f472b6", { unlit: true, glow: true });
+    const barMat = kit.mat("#f472b6", { unlit: true });
     for (let i = 0; i < 6; i++) {
       bars.push(kit.block(node, 0.3 + i * 0.25, 0.05, 0, 0.16, 1, 0.16, barMat, { dynamic: true }));
     }
@@ -712,8 +715,8 @@ export function buildEngineLevel(kit: Kit): LevelBuild {
   kit.block(root, 0, y + 0.01, DECK.z0 - 0.04, 0.3, DECK.h, 0.04, iqMat);
   kit.block(root, 0, y + 0.01, (DECK.z0 + FOUNDRY_BACK) / 2, 0.3, 0.04, DECK.z0 - FOUNDRY_BACK, iqMat);
 
-  const busPulse = kit.mat("#f5f3ff", { unlit: true, glow: true });
-  const iqPulse = kit.mat("#fdf4ff", { unlit: true, glow: true });
+  const busPulse = kit.mat("#f5f3ff", { unlit: true });
+  const iqPulse = kit.mat("#fdf4ff", { unlit: true });
   const pulses: Pulse[] = [];
   const addPulse = (path: Vector3[], mat: StandardMaterial): void => {
     let length = 0;

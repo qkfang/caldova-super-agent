@@ -99,6 +99,9 @@ export const ZONES = {
   super: { x0: 3.75, x1: 19.6 },
 } as const;
 
+/** The front desk on the dock (the Level 1 deck), where visitors sign in. */
+export const DOCK_DESK = { x: 2.6, z: -16.0 };
+
 /** The floating island and the lake carved into its front. */
 export const ISLAND = { x0: -46, x1: 46, z0: -34, z1: 30, bottom: -12 };
 export const LAKE = { z0: -34, z1: -12.9, waterY: -0.6, bedY: -7 };

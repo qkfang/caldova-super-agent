@@ -53,14 +53,19 @@ era with two sides, Wealth Management and Superannuation:
   above the table as a voxel brain (one half for each side).
 - **Level 2 · The People** holds two small teams: Wealth Management on the left and
   Superannuation on the right, with Theo leading both from the middle.
-- **Level 1 · The Agents** is one group of Microsoft Foundry agents, with a pod under every desk,
-  in three zones: dedicated to Wealth, shared by both sides, and dedicated to Super.
+- **Level 1 · The Agents** is one group of Microsoft Foundry agents, with a bay under every desk,
+  in three zones: dedicated to Wealth, shared by both sides, and dedicated to Super. Each agent
+  and each of its two specialised assistants is its own robot (25 roles, with Cara's voice agent).
 - **The Engine Room** sits under the waterline. Microsoft IQ (Work IQ, Fabric IQ, Foundry IQ and
   Web IQ) stands on a raised deck behind Microsoft Foundry, with the Azure services around it.
 
-Each chapter lifts the levels above it out of the way. Clicking anything follows its thread up or
-down the house. The finale pulls the house apart and traces one of the five scenarios from top
-to bottom. The story, the cast and every page are in [docs/storybook.md](../../docs/storybook.md).
+People and agents walk about their floors on errands, with a speech bubble saying what each is
+doing. Out front, visitors arrive by water taxi and sign at the front desk on the dock, and up on
+the roof Caldova throws a party for its customers under a big CALDOVA WEALTH sign. Each
+chapter lifts the levels above it out of the way. Clicking anything follows its thread up or
+down the house. The finale starts at the dock with the member signing, then pulls the house apart
+and traces one of the five scenarios from top to bottom. The story, the cast and every page are
+in [docs/storybook.md](../../docs/storybook.md).
 Pages have deep links (`/v2/?page=idea|people|agents|engine|finale`).
 
 v2 is a second Vite page (`v2/index.html`, listed in `vite.config.ts`). It reuses the v1 cast,
@@ -216,14 +221,17 @@ src/frontend
     └── v2/                     # The Lakehouse storybook (docs/storybook.md)
         ├── main.ts             # Bootstrap, camera, picking, selection threads, page wiring
         ├── storyData.ts        # Storybook pages: text, camera shots, stack modes
-        ├── lakehouseData.ts    # The two sides, the business owner, the idea, agent sides, Microsoft IQ and Azure components
+        ├── lakehouseData.ts    # The two sides, the business owner, the idea, agent sides and roles, handoffs, the front desk and its visitors, Microsoft IQ and Azure components
         ├── storybook.ts        # Cover, page card, lift panel, inspector, trace panel, keyboard
-        ├── inspector.ts        # Card content for the owner, brain, people, agents and components
+        ├── inspector.ts        # Card content for the owner, brain, people, agents, roles, components, the front desk and visitors
         ├── levelStack.ts       # House / focus / exploded arrangements of the levels
         ├── threads.ts          # Glowing threads between levels
-        ├── requestTrace.ts     # Finale: a scenario's request travelling through the house
+        ├── requestTrace.ts     # Finale: a scenario's request, from the front desk through the house
+        ├── wander.ts           # Walking: errands for people, Maya and the agents' roles, with speech bubbles
+        ├── dock.ts             # The dock: front desk, greeter, water taxi and visitors who sign there
+        ├── party.ts            # The roof: the customers' party, the CALDOVA WEALTH sign, DJ, toasts and fireworks
         ├── exterior.ts         # Floating island, lake, deck, jetty, trees, boats, clouds, drone
-        ├── shell.ts            # Shared floor slab, walls, lift core and level tag
+        ├── shell.ts            # Shared floor slab, walls, steel rails, lift core and level tag
         ├── kit.ts              # Voxel kit: materials, textures, blocks, labels, batching
         ├── layout.ts           # World layout: floor heights, footprints, desk/pod stations, wings and zones
         ├── types.ts

@@ -1,11 +1,13 @@
 /**
  * The finale: one member request travelling through the whole house.
  *
- * Each step starts with a person on Level 2, dips down to their agent on
- * Level 1 and the engine-room component that agent leans on, then comes
- * back up for the human decision. The result rises to the brain on Level 3,
- * where Maya's idea is measured. Steps come from the v1 scenario beats in
- * scenarios/*.json, so both versions tell the same five stories.
+ * It starts at the dock: the member arrives by water taxi and signs at the
+ * front desk (dock.ts). Once the form is signed, the request appears at the
+ * desk and sets off. Each step starts with a person on Level 2, dips down to
+ * their agent on Level 1 and the engine-room component that agent leans on,
+ * then comes back up for the human decision. The result rises to the brain
+ * on Level 3, where Maya's idea is measured. Steps come from the v1 scenario
+ * beats in scenarios/*.json, so both versions tell the same five stories.
  */
 import { Mesh, TransformNode, Vector3 } from "@babylonjs/core";
 import {
@@ -16,8 +18,9 @@ import {
   type StaffRole,
 } from "../personaData";
 import { getScenario } from "../scenarios";
+import type { Dock } from "./dock";
 import type { Kit } from "./kit";
-import { AGENTS, SCENARIO_SIDE, SIDES, infraInfo, sideBadge, type InfraId, type SideId } from "./lakehouseData";
+import { AGENTS, ARRIVALS, SCENARIO_SIDE, SIDES, infraInfo, sideBadge, type InfraId, type SideId } from "./lakehouseData";
 import type { Anchor } from "./types";
 
 export interface TraceFocus {
@@ -25,6 +28,7 @@ export interface TraceFocus {
   agent?: string;
   infra?: InfraId[];
   brain?: boolean;
+  desk?: boolean;
 }
 
 export interface TraceStep {
@@ -42,6 +46,8 @@ export interface TraceStep {
 export interface TraceHooks {
   step(step: TraceStep): void;
   focus(f: TraceFocus | null): void;
+  /** "dock": the house together, looking at the dock. "trace": the house pulled apart for the request. */
+  stage(stage: "dock" | "trace"): void;
   done(): void;
 }
 
@@ -56,7 +62,11 @@ interface Waypoint {
   offset?: Vector3;
   dwell: number;
   first?: boolean;
+  /** Wait here, with the request hidden, until the visitor at the front desk has signed. */
+  gate?: boolean;
   enter?: () => void;
+  /** Called as the request moves on from here. */
+  leave?: () => void;
 }
 
 const ROLES = new Set<string>(STAFF_PERSONAS.map((p) => p.role));
@@ -97,6 +107,9 @@ export class RequestTrace {
   private finished = false;
   private readonly target = new Vector3();
   private requestSide: SideId = "super";
+  private scenario: ScenarioId = "retirement";
+  /** Announces the first step as soon as the member's water taxi sets off. */
+  private arrival: (() => void) | null = null;
   paused = false;
   speed = 1;
 
@@ -104,14 +117,15 @@ export class RequestTrace {
     private readonly kit: Kit,
     private readonly resolve: (key: string) => Anchor | undefined,
     private readonly hooks: TraceHooks,
+    private readonly dock: Dock,
   ) {
     const scene = kit.scene;
     this.orb = new TransformNode("v2_traceOrb", scene);
-    this.core = kit.block(this.orb, 0, -0.8, 0, 1.6, 1.6, 1.6, kit.mat("#ffd98a", { unlit: true, glow: true }), {
+    this.core = kit.block(this.orb, 0, -0.8, 0, 1.6, 1.6, 1.6, kit.mat("#ffd98a", { unlit: true }), {
       dynamic: true,
     });
-    kit.block(this.orb, 0, -0.5, 0, 1.0, 1.0, 1.0, kit.mat("#ffffff", { unlit: true, glow: true }), { dynamic: true });
-    const trailMat = kit.mat("#ffc35a", { unlit: true, glow: true });
+    kit.block(this.orb, 0, -0.5, 0, 1.0, 1.0, 1.0, kit.mat("#ffffff", { unlit: true }), { dynamic: true });
+    const trailMat = kit.mat("#ffc35a", { unlit: true });
     for (let i = 0; i < 30; i++) {
       const m = kit.block(null, 0, 0, 0, 0.7, 0.7, 0.7, trailMat, { dynamic: true });
       m.setEnabled(false);
@@ -129,10 +143,12 @@ export class RequestTrace {
   }
 
   start(id: ScenarioId): void {
+    this.scenario = id;
     const stops = buildStops(id);
     const customer = CUSTOMER_PERSONAS.find((c) => c.id === id);
     this.requestSide = SCENARIO_SIDE[id];
     this.waypoints = [];
+    this.arrival = null;
     stops.forEach((stop, index) => this.addStop(stop, index, stops.length, customer?.name ?? "", customer?.color ?? "#ffc35a"));
     this.wp = 0;
     this.dwell = 0;
@@ -140,10 +156,17 @@ export class RequestTrace {
     this.finished = false;
     this.running = true;
     this.paused = false;
-    // The request flies in over the lake.
-    this.orb.position.set(14, 48, -64);
-    this.orb.setEnabled(true);
-    this.hooks.focus(null);
+    // The request appears at the front desk once the member has signed.
+    this.orb.setEnabled(false);
+    for (const m of this.trail) m.setEnabled(false);
+    this.dock.arrive(id);
+    this.hooks.stage("dock");
+    this.announceArrival();
+  }
+
+  /** Step 1 is told while the member is still on the water, before the request exists. */
+  private announceArrival(): void {
+    this.arrival?.();
   }
 
   stop(): void {
@@ -151,19 +174,29 @@ export class RequestTrace {
     this.finished = false;
     this.orb.setEnabled(false);
     for (const m of this.trail) m.setEnabled(false);
+    this.dock.ambient();
     this.hooks.focus(null);
   }
 
   /** Jump ahead to the next step. */
   skip(): void {
     if (!this.running || this.finished) return;
+    if (this.waypoints[this.wp]?.gate && !this.arrived) {
+      this.dock.fastForward();
+      return;
+    }
     for (let i = this.wp + 1; i < this.waypoints.length; i++) {
       if (this.waypoints[i].first) {
-        this.wp = i;
-        this.arrived = false;
+        this.moveTo(i);
         return;
       }
     }
+  }
+
+  private moveTo(i: number): void {
+    this.waypoints[this.wp]?.leave?.();
+    this.wp = i;
+    this.arrived = false;
   }
 
   update(dt: number): void {
@@ -177,6 +210,18 @@ export class RequestTrace {
     this.orb.rotation.y += dt * 2.4;
     this.orb.rotation.x += dt * 1.3;
     this.core.scaling.setAll(1 + Math.sin(performance.now() / 160) * 0.08);
+    const gate = this.waypoints[this.wp];
+    if (gate?.gate && !this.arrived) {
+      // The dock plays the arrival at the finale's speed, and holds still when paused.
+      this.dock.timeScale = this.paused ? 0 : this.speed;
+      if (!this.dock.signed) return;
+      this.targetOf(gate, this.orb.position);
+      this.orb.setEnabled(true);
+      this.arrived = true;
+      this.dwell = gate.dwell;
+      gate.enter?.();
+      return;
+    }
     if (this.paused || this.finished) {
       if (this.finished) this.follow(this.waypoints[this.waypoints.length - 1]);
       return;
@@ -219,8 +264,7 @@ export class RequestTrace {
       this.hooks.done();
       return;
     }
-    this.wp++;
-    this.arrived = false;
+    this.moveTo(this.wp + 1);
   }
 
   private follow(w: Waypoint | undefined): void {
@@ -251,20 +295,31 @@ export class RequestTrace {
       this.hooks.step({ index, total, kind: stop.kind, who, route, text: stop.text, color, side });
 
     if (stop.kind === "arrive") {
-      const olivia = this.resolve("staff:onboarding-1");
+      const arrival = ARRIVALS[this.scenario];
       const side = SIDES[this.requestSide];
+      const impostor = arrival.visitor === "impostor";
+      const visitor = impostor ? "Someone" : member;
+      const who = impostor ? `Someone · signing in ${member.split(" ")[0]}’s name` : `${member} · arrives by water taxi`;
+      this.arrival = () => {
+        this.hooks.focus({ desk: true });
+        this.hooks.step({
+          index,
+          total,
+          kind: "arrive",
+          who,
+          route: [visitor, "Front desk", "Form Extraction agent"],
+          text: `${arrival.line} ${stop.text}`,
+          color: memberColor,
+          side: { label: `${side.name} request`, color: side.color },
+        });
+      };
       this.waypoints.push({
-        anchor: olivia,
-        offset: new Vector3(0, 3, -15),
-        dwell: read,
+        anchor: this.resolve("desk"),
+        dwell: 1.8,
         first: true,
-        enter: () => {
-          this.hooks.focus(null);
-          announce(`${member} · a new request`, [member, side.team], memberColor, {
-            label: `${side.name} request`,
-            color: side.color,
-          });
-        },
+        gate: true,
+        // Signed: the request glows over the desk a moment, then the house pulls apart as it sets off.
+        leave: () => this.hooks.stage("trace"),
       });
       return;
     }

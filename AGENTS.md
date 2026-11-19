@@ -215,7 +215,7 @@ When you generate code, content, UI components, or documentation for this demo, 
 - [docs/theme_office.md](docs/theme_office.md): the voxel operations office, with its departments, layout, labels and visual direction.
 - [docs/theme_neighhood.md](docs/theme_neighhood.md): the voxel Melbourne neighbourhood where life events trigger requests.
 - [docs/agent-demo.md](docs/agent-demo.md): the presenter click-path and 10-minute golden path.
-- [docs/storybook.md](docs/storybook.md): the v2 Lakehouse storybook at `/v2`. Caldova is shown as a wealth business for the agentic era with two sides, Wealth Management and Superannuation. The house is read from the top down: the business owner's idea, two small teams, one group of agents (dedicated to a side or shared by both), and Microsoft IQ and the Azure services in the engine room. The doc covers the new business owner character and every page.
+- [docs/storybook.md](docs/storybook.md): the v2 Lakehouse storybook at `/v2`. Caldova is shown as a wealth business for the agentic era with two sides, Wealth Management and Superannuation. The house is read from the top down: the business owner's idea, two small teams, one group of agents (dedicated to a side or shared by both, with each agent's specialised assistants as their own roles), and Microsoft IQ and the Azure services in the engine room. Out front, visitors arrive by water taxi and sign at the front desk on the dock, and on the roof Caldova throws a party for its customers. The doc covers the new business owner character and every page.
 - Scenarios:
   - [docs/scenario-1-new-client-onboarding.md](docs/scenario-1-new-client-onboarding.md) (Priya)
   - [docs/scenario-2-account-takeover.md](docs/scenario-2-account-takeover.md) (Grace)

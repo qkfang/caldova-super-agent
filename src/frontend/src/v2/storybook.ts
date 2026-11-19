@@ -45,6 +45,7 @@ export class Storybook {
   private index = 0;
   private collapsed = false;
   private actions: InspectorAction[] = [];
+  private links: InspectorAction[] = [];
   private trace: TraceState | null = null;
   private readonly cover = byId<HTMLElement>("v2-cover");
   private readonly card = byId<HTMLElement>("v2-page");
@@ -61,8 +62,8 @@ export class Storybook {
       const el = (e.target as HTMLElement).closest<HTMLElement>("[data-insp]");
       if (!el) return;
       if (el.dataset.insp === "close") this.hooks.closeInspector();
-      else if (el.dataset.insp === "act") {
-        const a = this.actions[Number(el.dataset.i)];
+      else if (el.dataset.insp === "act" || el.dataset.insp === "link") {
+        const a = (el.dataset.insp === "act" ? this.actions : this.links)[Number(el.dataset.i)];
         if (a) this.hooks.action(a);
       }
     });
@@ -113,6 +114,7 @@ export class Storybook {
 
   showInspector(view: InspectorView): void {
     this.actions = view.actions;
+    this.links = view.links;
     this.inspector.style.setProperty("--accent", view.accent);
     const buttons = view.actions
       .map((a, i) => {
@@ -134,6 +136,13 @@ export class Storybook {
   hideInspector(): void {
     this.inspector.classList.add("hidden");
     document.body.classList.remove("inspecting");
+  }
+
+  /** Refresh the open card's live "Now" line without re-rendering it. */
+  setInspectorNow(text: string | null): void {
+    if (!text || this.inspector.classList.contains("hidden")) return;
+    const el = this.inspector.querySelector<HTMLElement>("[data-now]");
+    if (el && el.textContent !== text) el.textContent = text;
   }
 
   showTooltip(text: string, x: number, y: number): void {

@@ -5,6 +5,7 @@
  * clouds below the island and a delivery drone over the roof).
  */
 import {
+  type AbstractMesh,
   Mesh,
   MeshBuilder,
   StandardMaterial,
@@ -15,6 +16,10 @@ import { Batch, Kit, rng } from "./kit";
 import { FLOOR_Y, ISLAND, LAKE, PIT, ROOF_Y } from "./layout";
 
 export interface Exterior {
+  /** The deck and jetty group, which the dock builds on. */
+  deck: TransformNode;
+  /** Whether the deck is showing (it hides when the story looks into the engine room). */
+  readonly deckVisible: boolean;
   update(dt: number, t: number): void;
   /** Fade the deck and jetty out (they hide the front of the engine room) or back in. */
   setDeckVisible(visible: boolean): void;
@@ -34,7 +39,7 @@ interface Swimmer {
 export function buildExterior(kit: Kit): Exterior {
   const scene = kit.scene;
   const root = new TransformNode("v2_exterior", scene);
-  const batch = new Batch(kit, root, "exterior");
+  const batch = new Batch(root, "exterior");
   kit.useBatch(batch);
   const r = rng(20261119);
 
@@ -47,10 +52,9 @@ export function buildExterior(kit: Kit): Exterior {
   const cedar = kit.mat("#ffffff", { texture: "cedar" });
   const darkTimber = kit.mat("#4a3426");
   const steel = kit.mat("#2b3240", { specular: 0.25 });
-  const railGlass = kit.mat("#cfefff", { alpha: 0.22, specular: 0.25 });
   const white = kit.mat("#f4f1ea");
   const bark = kit.mat("#6b4a2f");
-  const warmGlow = kit.mat("#ffd27a", { unlit: true, glow: true });
+  const warmGlow = kit.mat("#ffd27a", { unlit: true });
 
   /* ---------------- Island ---------------- */
   const land = (x0: number, x1: number, z0: number, z1: number, top = grass, bottom: number = ISLAND.bottom): void => {
@@ -85,10 +89,13 @@ export function buildExterior(kit: Kit): Exterior {
 
   /* ---------------- Water ---------------- */
   const water = kit.mat("#3c9fca", { alpha: 0.52, specular: 0.7 });
-  kit.block(root, 0, LAKE.bedY, lakeCz, ISLAND.x1 - ISLAND.x0 - 0.1, LAKE.waterY - LAKE.bedY, lakeD - 0.05, water, {
+  const lake = kit.block(root, 0, LAKE.bedY, lakeCz, ISLAND.x1 - ISLAND.x0 - 0.1, LAKE.waterY - LAKE.bedY, lakeD - 0.05, water, {
     dynamic: true,
     name: "v2_water",
   });
+  // The lake draws before every other see-through mesh, so signs and tags below the waterline
+  // (the engine room's level tag) stay sharp instead of being tinted by the water.
+  lake.alphaIndex = 0;
   const rippleTex = kit.canvas("v2_ripples", 256, 256, (ctx, w, h) => {
     ctx.clearRect(0, 0, w, h);
     const rr = rng(77);
@@ -108,6 +115,7 @@ export function buildExterior(kit: Kit): Exterior {
   surface.material = surfaceMat;
   surface.isPickable = false;
   surface.parent = root;
+  surface.alphaIndex = 1;
 
   // Lily pads, reeds and shore rocks.
   const pad = kit.mat("#4f9a45");
@@ -141,21 +149,27 @@ export function buildExterior(kit: Kit): Exterior {
   // The deck has its own group so it can fade away when the story looks into the engine room.
   const deck = new TransformNode("v2_deck", scene);
   deck.parent = root;
-  const deckBatch = new Batch(kit, deck, "deck");
+  const deckBatch = new Batch(deck, "deck");
   kit.useBatch(deckBatch);
   const deckTop = FLOOR_Y.agents;
   kit.block(root, -6, deckTop - 0.4, -16.2, 24, 0.4, 6.6, cedar);
   for (const x of [-17.6, -12, -6, 0, 5.6]) {
     for (const z of [-19.2, -16.2]) kit.cyl(root, x, LAKE.bedY, z, 0.5, deckTop - 0.4 - LAKE.bedY, darkTimber, { tess: 8 });
   }
-  const rail = (x0: number, x1: number, z: number): void => {
-    kit.block(root, (x0 + x1) / 2, deckTop, z, x1 - x0, 1.0, 0.06, railGlass);
-    kit.block(root, (x0 + x1) / 2, deckTop + 1.0, z, x1 - x0, 0.08, 0.14, steel);
+  // Timber post-and-rail along the deck edge (no glass), open where the jetty meets it.
+  const rail = (x0: number, x1: number, z0: number, z1: number): void => {
+    const len = Math.max(x1 - x0, z1 - z0);
+    const alongX = x1 - x0 >= z1 - z0;
+    kit.block(root, (x0 + x1) / 2, deckTop + 1.0, (z0 + z1) / 2, alongX ? len : 0.14, 0.1, alongX ? 0.14 : len, cedar);
+    const n = Math.max(1, Math.round(len / 2));
+    for (let i = 0; i <= n; i++) {
+      const f = i / n;
+      kit.block(root, x0 + (x1 - x0) * f, deckTop, z0 + (z1 - z0) * f, 0.14, 1.0, 0.14, darkTimber);
+    }
   };
-  rail(-18, -3.3, -19.45);
-  rail(-0.7, 6, -19.45);
-  kit.block(root, -17.95, deckTop, -16.2, 0.06, 1.0, 6.6, railGlass);
-  kit.block(root, -17.95, deckTop + 1.0, -16.2, 0.14, 0.08, 6.6, steel);
+  rail(-18, -3.3, -19.45, -19.45);
+  rail(-0.7, 6, -19.45, -19.45);
+  rail(-17.95, -17.95, -19.45, -12.95);
 
   kit.block(root, -2, deckTop - 0.32, -25.3, 2.2, 0.3, 11.6, cedar);
   for (let z = -20.5; z >= -31; z -= 2.6) {
@@ -174,7 +188,7 @@ export function buildExterior(kit: Kit): Exterior {
   const fireX = -11;
   const fireZ = -16.2;
   kit.cyl(root, fireX, deckTop, fireZ, 1.9, 0.5, kit.mat("#6b7280"), { tess: 10 });
-  const embers = kit.cyl(deck, fireX, deckTop, fireZ, 1.3, 0.56, kit.mat("#ff7a1a", { unlit: true, glow: true }), {
+  const embers = kit.cyl(deck, fireX, deckTop, fireZ, 1.3, 0.56, kit.mat("#ff7a1a", { unlit: true, unique: true }), {
     tess: 10,
     dynamic: true,
   });
@@ -225,8 +239,8 @@ export function buildExterior(kit: Kit): Exterior {
   kit.block(kayak, 0, 0, 0, 0.75, 0.34, 3.6, kit.mat("#f97316"), { dynamic: true });
   kit.block(kayak, 0, 0.3, 0.1, 0.5, 0.1, 0.9, kit.mat("#1f2937"), { dynamic: true });
   kit.block(kayak, 0, 0.42, 0.1, 2.6, 0.06, 0.12, kit.mat("#e5e7eb"), { dynamic: true });
-  kayak.position.set(3.2, LAKE.waterY - 0.12, -23.5);
-  kayak.rotation.y = 0.7;
+  kayak.position.set(9.5, LAKE.waterY - 0.12, -25.5);
+  kayak.rotation.y = 1.15;
 
   /* ---------------- Trees, beach and lawn ---------------- */
   const pineA = kit.mat("#2f6b3f");
@@ -291,7 +305,7 @@ export function buildExterior(kit: Kit): Exterior {
   kit.block(car, 0, 0.35, 0, 4.4, 0.95, 2.0, carBody);
   kit.block(car, 0.2, 1.3, 0, 2.6, 0.8, 1.84, kit.mat("#1b2a44", { specular: 0.6 }));
   kit.block(car, 0, 0.3, 0, 4.5, 0.12, 2.04, kit.mat("#14b8a6"));
-  kit.block(car, -2.22, 0.75, 0, 0.06, 0.16, 1.6, kit.mat("#bff6ff", { unlit: true, glow: true }));
+  kit.block(car, -2.22, 0.75, 0, 0.06, 0.16, 1.6, kit.mat("#bff6ff", { unlit: true }));
   for (const [x, z] of [[-1.4, -1.02], [1.4, -1.02], [-1.4, 1.02], [1.4, 1.02]] as const) {
     const wheel = MeshBuilder.CreateCylinder("v2_wheel", { diameter: 0.9, height: 0.36, tessellation: 12 }, scene);
     wheel.rotation.x = Math.PI / 2;
@@ -299,13 +313,20 @@ export function buildExterior(kit: Kit): Exterior {
     kit.finish(wheel, car, kit.mat("#1a1a1f"));
   }
   kit.block(root, 28.4, 0.06, 7.6, 0.5, 1.7, 0.4, white);
-  kit.block(root, 28.4, 1.1, 7.38, 0.36, 0.36, 0.06, kit.mat("#34d399", { unlit: true, glow: true }));
+  kit.block(root, 28.4, 1.1, 7.38, 0.36, 0.36, 0.06, kit.mat("#34d399", { unlit: true }));
   kit.block(root, 29.4, 0.06, 6.9, 2.0, 0.08, 0.1, kit.mat("#1f2937"));
 
   kit.useBatch(null);
   batch.flush();
   deckBatch.flush();
-  const deckMeshes = deck.getChildMeshes(false);
+  // Meshes added to the deck later (the dock) are picked up the next time it fades,
+  // and each mesh's own visibility (0 for click targets) is kept.
+  const baseVisibility = new WeakMap<AbstractMesh, number>();
+  let deckMeshes: AbstractMesh[] = [];
+  const collectDeck = (): void => {
+    deckMeshes = deck.getChildMeshes(false);
+    for (const m of deckMeshes) if (!baseVisibility.has(m)) baseVisibility.set(m, m.visibility);
+  };
   let deckAlpha = 1;
   let deckTarget = 1;
 
@@ -358,21 +379,26 @@ export function buildExterior(kit: Kit): Exterior {
   for (const [x, z] of [[0.8, 0.8], [-0.8, 0.8], [0.8, -0.8], [-0.8, -0.8]] as const) {
     rotors.push(kit.block(drone, x, 0.12, z, 0.9, 0.03, 0.12, kit.mat("#e5e7eb"), { dynamic: true }));
   }
-  const droneLight = kit.mat("#5ce1ff", { unlit: true, glow: true });
+  const droneLight = kit.mat("#5ce1ff", { unlit: true });
   kit.block(drone, 0, -0.06, 0.48, 0.3, 0.1, 0.06, droneLight, { dynamic: true });
 
   const embersMat = embers.material as StandardMaterial;
 
   return {
+    deck,
+    get deckVisible(): boolean {
+      return deckTarget > 0;
+    },
     setDeckVisible(visible: boolean): void {
       deckTarget = visible ? 1 : 0;
+      collectDeck();
       if (visible) deck.setEnabled(true);
     },
     update(dt: number, t: number): void {
       if (deckAlpha !== deckTarget) {
         deckAlpha += (deckTarget - deckAlpha) * (1 - Math.exp(-dt * 5));
         if (Math.abs(deckTarget - deckAlpha) < 0.01) deckAlpha = deckTarget;
-        for (const m of deckMeshes) m.visibility = deckAlpha;
+        for (const m of deckMeshes) m.visibility = (baseVisibility.get(m) ?? 1) * deckAlpha;
         deck.setEnabled(deckAlpha > 0.01);
       }
       rippleTex.uOffset = (rippleTex.uOffset + dt * 0.012) % 1;
