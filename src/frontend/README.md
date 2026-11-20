@@ -52,8 +52,9 @@ npm run build
 npm run preview
 ```
 
-The **Open the agent page ↗** links on the people and agent cards point at the companion Blazor
-site in `src/backend` (`/agents/{route id}`). Its base URL comes from `VITE_APP_BASE_URL`, set in
+The **Open the agent page ↗** links point at the companion Blazor site in `src/backend`
+(`/agents/{route id}`) and open in a new tab. They sit at the bottom of the people cards and under
+the name on the agent, assistant and voice-agent cards. Their base URL comes from `VITE_APP_BASE_URL`, set in
 a local `.env` or `.env.local` (both git-ignored), or by `.github/workflows/21_deploy_frontend.yml`
 for deployments. Without it, the cards leave those links out.
 

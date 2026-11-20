@@ -343,6 +343,7 @@ Every page has a deep link, for example `/?page=people`. The address bar updates
 - **Interaction:** Click a robot or its bay to open its card. Cards are kept short:
   - **An agent** (the big robot, or its bay): what it does in one line, who it hands off to and what it is doing now, then **Across the house**: its person above, its side and assistants, and what it runs on in the engine room. Beams drop to those components. "Back up to {name} ↑" or "What powers it ↓".
   - **An assistant or the voice agent:** what it does in one line and what it is doing now, then the same **Across the house**, with this assistant marked. The Form Extraction card adds that it reads every signed form at the front desk. "Meet the {agent}" or "Up to {name} ↑".
+  - **Open the agent page ↗**, under the name on all of these cards, opens the agent's own page in the backend agent console in a new tab. An assistant's or the voice agent's card opens the page of the agent it works for.
 
   ![Clicking one of Ben's assistants: Nominations & Consent, what it is doing right now, and where it sits across the house](res/storybook/v2-role.jpg)
 - **Intro beat:** the bays power up one after another.
@@ -419,8 +420,8 @@ Amelia's card starts on the dock instead: the front desk (⚓) with Amelia lit, 
 | Maya | Maya and the brain | Brain → every person | See her idea · Meet the team ↓ |
 | The brain | The brain | Brain → every person | Meet the team ↓ · Meet Maya |
 | A person | The person, their bay, and their engine-room dependencies | Person → agent → Microsoft IQ and each Azure service | Follow them down ↓ · Open the agent page ↗ |
-| An agent (or its bay) | The bay, its person, and its dependencies | Person → agent → Microsoft IQ and each Azure service | Back up ↑ · What powers it ↓ · Open the agent page ↗ |
-| An assistant or the voice agent | The robot, its person, and Microsoft Foundry | Person → assistant → Microsoft Foundry | Meet the agent · Up to the person ↑ |
+| An agent (or its bay) | The bay, its person, and its dependencies | Person → agent → Microsoft IQ and each Azure service | Open the agent page ↗ (under its name) · Back up ↑ · What powers it ↓ |
+| An assistant or the voice agent | The robot, its person, and Microsoft Foundry | Person → assistant → Microsoft Foundry | Open the agent page ↗ (under its name) · Meet the agent · Up to the person ↑ |
 | A component | The component and every agent that uses it | Component → each agent that uses it (→ its person, when only a few do) | Back up to the agents ↑ |
 | The front desk, or the greeter | The desk, the greeter, Amelia, the Form Extraction agent and Olivia | Desk → Form Extraction agent → Olivia | Who is signing · Meet Amelia · Meet the Form Extraction agent · Up to Olivia ↑ |
 | A visitor | The same as the front desk | The same as the front desk | The front desk · Meet Amelia |

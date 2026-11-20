@@ -290,10 +290,11 @@ function levelLine(id: LevelId, place?: string): string {
   return `<div class="insp-level" style="--c:${l.accent}">${esc(text)}</div>`;
 }
 
-function head(avatar: string, level: LevelId, title: string, subtitle: string, place?: string): string {
+/** The card's head. `link` is HTML for a link under the subtitle (see agentPageLink). */
+function head(avatar: string, level: LevelId, title: string, subtitle: string, place?: string, link = ""): string {
   return `<header class="insp-head">
     <div class="insp-avatar">${avatar}</div>
-    <div>${levelLine(level, place)}<h3>${esc(title)}</h3><div class="insp-role">${esc(subtitle)}</div></div>
+    <div>${levelLine(level, place)}<h3>${esc(title)}</h3><div class="insp-role">${esc(subtitle)}</div>${link}</div>
   </header>`;
 }
 
@@ -333,6 +334,14 @@ function partySvg(): string {
 function agentHref(staffId: string): string | undefined {
   const p = findStaffById(staffId);
   return APP_BASE_URL && p ? `${APP_BASE_URL}/agents/${p.app_agent_id}` : undefined;
+}
+
+/** "Open the agent page ↗" under the name on the agent floor's cards: the agent's own backend page, in a new tab. */
+function agentPageLink(staffId: string): string {
+  const href = agentHref(staffId);
+  const p = findStaffById(staffId);
+  if (!href || !p) return "";
+  return `<a class="btn insp-open" href="${esc(href)}" target="_blank" rel="noopener" title="Opens the ${esc(p.agent_name)} page in a new tab">Open the agent page ↗</a>`;
 }
 
 /** "Ivy, Felix and Cara" */
@@ -434,7 +443,7 @@ function card(target: InspectTarget, link: Linker, live?: Live): Omit<InspectorV
       const handsTo = HANDOFFS[target.id] ?? [];
       return {
         accent: p.color,
-        html: `${head(robotSvg(p.color), "agents", p.agent_name, `Works for ${p.name}, who decides`)}
+        html: `${head(robotSvg(p.color), "agents", p.agent_name, `Works for ${p.name}, who decides`, undefined, agentPageLink(p.id))}
           <p class="insp-lede">${esc(p.agent_tagline)}</p>
           ${facts([
             [target.id === "lead-1" ? "Coordinates" : "Hands off to", agentNames(handsTo)],
@@ -444,7 +453,6 @@ function card(target: InspectTarget, link: Linker, live?: Live): Omit<InspectorV
         actions: [
           { label: `Back up to ${p.name} ↑`, page: "people", select: { type: "staff", id: p.id } },
           { label: "What powers it ↓", page: "engine", select: { type: "agent", id: p.id }, primary: true },
-          ...(agentHref(p.id) ? [{ label: "Open the agent page ↗", href: agentHref(p.id) }] : []),
         ],
       };
     }
@@ -455,7 +463,7 @@ function card(target: InspectTarget, link: Linker, live?: Live): Omit<InspectorV
       if (!role || !p || !agent) break;
       return {
         accent: p.color,
-        html: `${head(robotSvg(p.color), "agents", role.short, role.kind === "voice" ? `The voice of the ${p.agent_name}` : `Assistant to the ${p.agent_name}`)}
+        html: `${head(robotSvg(p.color), "agents", role.short, role.kind === "voice" ? `The voice of the ${p.agent_name}` : `Assistant to the ${p.agent_name}`, undefined, agentPageLink(p.id))}
           <p class="insp-lede">${esc(role.description)}</p>
           ${facts([
             ["Also", role.id === DESK_ROLE ? esc("Reads every signed form at the front desk") : ""],

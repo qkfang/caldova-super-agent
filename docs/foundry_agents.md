@@ -795,7 +795,7 @@ The `team-leader-agent` shows the floor for the five demo cases:
 
 # UI Mapping to the Lakehouse
 
-In the Lakehouse storybook ([storybook.md](storybook.md)), every person's card on Level 2 and every agent's card on Level 1 has an **Open the agent page ↗** link to that agent's page (`/agents/{route id}`).
+In the Lakehouse storybook ([storybook.md](storybook.md)), every person's card on Level 2 and every agent's, assistant's and voice agent's card on Level 1 has an **Open the agent page ↗** link that opens that agent's page (`/agents/{route id}`) in a new tab. On Level 1 it sits right under the name.
 
 | Agent page | Shows |
 |---|---|
