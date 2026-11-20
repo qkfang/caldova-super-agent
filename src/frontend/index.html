@@ -1,138 +1,36 @@
 <!doctype html>
-<html lang="en">
+<html lang="en-AU">
   <head>
     <meta charset="UTF-8" />
-    <script>
-      // Static hosting (pm2 serve --spa) answers /v2 with this page; send it on to the v2 storybook.
-      if (/^\/v2\/?$/.test(location.pathname)) location.replace("/v2/index.html" + location.search + location.hash);
-    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>Wealth Team in a Day — Caldova Wealth</title>
-    <link rel="stylesheet" href="/src/styles.css" />
+    <title>The Lakehouse — Wealth Team in a Day · Caldova Wealth</title>
+    <link rel="stylesheet" href="/src/v2/v2.css" />
   </head>
-  <body>
-    <canvas id="renderCanvas" touch-action="none"></canvas>
-    <div id="scene-fade" class="scene-fade hidden" aria-hidden="true"></div>
-    <header id="topbar">
-      <div class="brand">
+  <body data-page="cover">
+    <div class="v2-sky" aria-hidden="true"></div>
+    <canvas id="v2Canvas" touch-action="none" aria-label="The Caldova Wealth lakehouse, a voxel building with four levels"></canvas>
+    <div id="v2-callouts" class="v2-callouts"></div>
+
+    <header class="v2-top">
+      <a class="v2-brand" href="/v2/index.html" title="Back to the cover">
         <span class="logo">C</span>
-        <div>
-          <h1>Caldova Wealth</h1>
-          <p>Wealth Team in a Day</p>
-        </div>
-      </div>
-      <div class="scene-toggle" role="tablist" aria-label="Scene view">
-        <button type="button" data-scene="office" class="active" role="tab">Office</button>
-        <button type="button" data-scene="neighbourhood" role="tab">Neighbourhood</button>
-      </div>
-      <div class="metrics">
-        <div><span id="metric-submitted">0</span><label>Received</label></div>
-        <div><span id="metric-processing">0</span><label>In&nbsp;flight</label></div>
-        <div><span id="metric-approved">0</span><label>Completed</label></div>
-        <div><span id="metric-rejected">0</span><label>Declined</label></div>
-      </div>
-      <button
-        id="left-nav-toggle"
-        type="button"
-        class="left-nav-toggle"
-        aria-label="Hide AI Agents panel for full page view"
-        aria-pressed="false"
-        title="Full page view (hide AI Agents panel)"
-      >
-        <svg
-          class="icon-expand"
-          width="18"
-          height="18"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-        >
-          <polyline points="4 9 4 4 9 4"></polyline>
-          <polyline points="20 9 20 4 15 4"></polyline>
-          <polyline points="4 15 4 20 9 20"></polyline>
-          <polyline points="20 15 20 20 15 20"></polyline>
-        </svg>
-        <svg
-          class="icon-collapse"
-          width="18"
-          height="18"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-        >
-          <polyline points="9 4 4 4 4 9"></polyline>
-          <polyline points="15 4 20 4 20 9"></polyline>
-          <polyline points="9 20 4 20 4 15"></polyline>
-          <polyline points="15 20 20 20 20 15"></polyline>
-        </svg>
-      </button>
+        <span class="v2-brand-text"><strong>Caldova Wealth</strong><small>Wealth Team in a Day · The Lakehouse</small></span>
+      </a>
+      <nav class="v2-links" aria-label="Other views">
+        <a class="v2-link" href="/" title="The original voxel operations office and neighbourhood">Classic office (v1)</a>
+      </nav>
     </header>
 
-    <div id="now-playing" class="now-playing hidden" role="status" aria-live="polite">
-      <div class="np-dot"></div>
-      <div class="np-text">
-        <div class="np-title"></div>
-        <div class="np-narration"></div>
-      </div>
-      <button type="button" class="np-close" aria-label="Cancel scenario">×</button>
-    </div>
+    <section id="v2-cover" class="v2-cover" aria-label="Storybook cover"></section>
+    <article id="v2-page" class="v2-page hidden" aria-live="polite"></article>
+    <nav id="v2-lift" class="v2-lift" aria-label="Lift: choose a level"></nav>
+    <nav id="v2-pan" class="v2-pan" aria-label="Move the view left or right"></nav>
+    <aside id="v2-inspector" class="v2-inspector hidden" aria-live="polite"></aside>
+    <button id="v2-pill" type="button" class="v2-pill hidden">📖 Open the storybook</button>
+    <div id="v2-tooltip" class="v2-tooltip hidden" role="tooltip"></div>
+    <div id="v2-loading" class="v2-loading" role="status"><span></span>Building the lakehouse…</div>
 
-    <aside id="agents-panel" class="collapsible">
-      <div class="panel-header">
-        <h2>AI Agents</h2>
-        <button
-          type="button"
-          class="panel-toggle"
-          data-target="agents-panel"
-          aria-label="Collapse AI Agents panel"
-          aria-expanded="true"
-        >−</button>
-      </div>
-      <div class="panel-body">
-        <ul id="agents-list"></ul>
-      </div>
-    </aside>
-
-    <aside id="log-panel" class="collapsible">
-      <div class="panel-header">
-        <h2>Activity</h2>
-        <button
-          type="button"
-          class="panel-toggle"
-          data-target="log-panel"
-          aria-label="Collapse Activity panel"
-          aria-expanded="true"
-        >−</button>
-      </div>
-      <div class="panel-body">
-        <ol id="log-list"></ol>
-      </div>
-    </aside>
-
-    <footer id="hint">
-      Drag to orbit · Scroll to zoom · Click on a character for their profile · <button id="spawn-btn">Submit a request</button>
-      <span
-        class="sim-speed"
-        role="group"
-        aria-label="Simulation speed"
-        title="Simulation speed"
-      >
-        <span class="sim-speed-label">Speed</span>
-        <button type="button" data-speed="1" class="active">x1</button>
-        <button type="button" data-speed="2">x2</button>
-        <button type="button" data-speed="5">x5</button>
-      </span>
-    </footer>
-
-    <script type="module" src="/src/main.ts"></script>
+    <script type="module" src="/src/v2/main.ts"></script>
   </body>
 </html>
