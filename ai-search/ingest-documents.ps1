@@ -17,7 +17,7 @@
 #      (REQ-yyyyMMdd-DEMOnn, now REQ-yyyyMMdd-OPSnnn), since an upload can only
 #      add or replace documents. Once they are gone this is a no-op.
 
-$SearchServiceName = "search-cs"   # Update to the aiSearchName output from main.bicep (search-<baseName>, e.g. search-cs)
+$SearchServiceName = "search-caldovacs"   # Update to the aiSearchName output from main.bicep (search-<baseName>, e.g. search-caldovacs)
 $IndexPrefix = "wealth"
 
 $ErrorActionPreference = "Stop"

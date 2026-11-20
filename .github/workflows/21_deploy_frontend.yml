@@ -33,7 +33,7 @@ jobs:
       - name: Build
         working-directory: src/frontend
         env:
-          VITE_APP_BASE_URL: https://app-cs-backend.azurewebsites.net
+          VITE_APP_BASE_URL: https://app-caldovacs-backend.azurewebsites.net
         run: npm run build
 
       - name: Stage static site for Azure App Service (Linux/Node)
@@ -49,5 +49,5 @@ jobs:
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-          app-name: app-cs-frontend
+          app-name: app-caldovacs-frontend
           package: ./publish

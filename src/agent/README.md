@@ -44,7 +44,7 @@ Set the following keys in `appsettings.json` (or as environment variables):
 
 | Key | Purpose |
 | --- | --- |
-| `AZURE_AI_PROJECT_ENDPOINT` | Microsoft Foundry project endpoint URL (e.g. `https://aif-cs.services.ai.azure.com/api/projects/aif-cs-project`) |
+| `AZURE_AI_PROJECT_ENDPOINT` | Microsoft Foundry project endpoint URL (e.g. `https://aif-caldovacs.services.ai.azure.com/api/projects/aif-caldovacs-project`) |
 | `AZURE_AI_MODEL_DEPLOYMENT_NAME` | Chat model deployment (e.g. `gpt-5.4`) |
 | `AZURE_TENANT_ID` | Optional tenant ID for `DefaultAzureCredential` |
 | `AZURE_AI_SEARCH_CONNECTION_ID` | Foundry connection ID for the Azure AI Search service |

@@ -10,9 +10,9 @@ This is a practical guide to running the demo live. It covers a **10-minute gold
 
 | Check | Detail |
 |---|---|
-| Backend running | <http://localhost:5212>, or the deployed `app-cs-backend` |
-| Frontend running | <http://localhost:5173>, or the deployed `app-cs-frontend` |
-| Azure | Signed in (`az login`) with access to the Foundry project (`aif-cs`), and the `wealth_knowledge` index built |
+| Backend running | <http://localhost:5212>, or the deployed `app-caldovacs-backend` |
+| Frontend running | <http://localhost:5173>, or the deployed `app-caldovacs-frontend` |
+| Azure | Signed in (`az login`) with access to the Foundry project (`aif-caldovacs`), and the `wealth_knowledge` index built |
 | Microsoft Teams | Open in the channel where Penny's approval cards arrive |
 | Microphone | Browser microphone permission allowed, for Cara's voice chat |
 | Tabs | One browser tab on the Lakehouse storybook (frontend), one on the backend console |

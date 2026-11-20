@@ -41,5 +41,5 @@ jobs:
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-          app-name: app-cs-backend
+          app-name: app-caldovacs-backend
           package: ${{ github.workspace }}/publish

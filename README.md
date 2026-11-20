@@ -111,7 +111,7 @@ Each staff role is a **Microsoft Foundry** agent. Every agent showcases at least
 - `AZURE_AI_SEARCH_INDEX_NAME`, set to `wealth_knowledge`
 - `AZURE_BING_CONNECTION_ID`
 
-The backend also uses `APP_MCP_URL`, the public base URL where Foundry reaches the backend's `/mcp` endpoint. When you run locally, point it at the deployed `app-cs-backend` or at a dev tunnel.
+The backend also uses `APP_MCP_URL`, the public base URL where Foundry reaches the backend's `/mcp` endpoint. When you run locally, point it at the deployed `app-caldovacs-backend` or at a dev tunnel.
 
 **Backend** (Blazor agent console and APIs, at <http://localhost:5212>):
 

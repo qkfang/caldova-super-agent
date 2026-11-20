@@ -125,7 +125,7 @@ Each file holds one JSON object, and its `id` must equal the file name without
 * PowerShell 7+ (`pwsh`).
 * Check the variables at the top of each script: `$SearchServiceName` must
   match the `aiSearchName` output of `main.bicep` (`search-<baseName>`, e.g.
-  `search-cs`), and `$FoundryEndpoint` in `setup-index.ps1` must match the
+  `search-caldovacs`), and `$FoundryEndpoint` in `setup-index.ps1` must match the
   `foundryAccountEndpoint` output.
 * Index fields can't be removed or renamed in place. If an index with these
   names already exists with a different schema, delete it before running

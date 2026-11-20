@@ -5,10 +5,10 @@
 #   wealth_rules      <- wealth_rules/*.json (product & rule documents)
 # Adapted from https://github.com/qkfang/quant-agent/blob/main/ai-search/setup-index.ps1.
 
-$SearchServiceName = "search-cs"            # Update to the aiSearchName output from main.bicep (search-<baseName>, e.g. search-cs)
+$SearchServiceName = "search-caldovacs"     # Update to the aiSearchName output from main.bicep (search-<baseName>, e.g. search-caldovacs)
 $ResourceGroupName = "rg-caldova-super"
 $IndexPrefix = "wealth"
-$FoundryEndpoint = "https://aif-cs.cognitiveservices.azure.com"  # Update to match foundryAccountEndpoint output
+$FoundryEndpoint = "https://aif-caldovacs.cognitiveservices.azure.com"  # Update to match foundryAccountEndpoint output
 
 $ErrorActionPreference = "Stop"
 
