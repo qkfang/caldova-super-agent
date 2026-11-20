@@ -15,7 +15,7 @@ This is a practical guide to running the demo live. It covers a **10-minute gold
 | Azure | Signed in (`az login`) with access to the Foundry project (`aif-cs`), and the `wealth_knowledge` index built |
 | Microsoft Teams | Open in the channel where Penny's approval cards arrive |
 | Microphone | Browser microphone permission allowed, for Cara's voice chat |
-| Tabs | One browser tab on the 3D office, one on the backend console |
+| Tabs | One browser tab on the Lakehouse storybook (frontend), one on the backend console |
 
 Every **engage** step on an agent page shows five tabs:
 
@@ -41,18 +41,18 @@ The table includes the backend's scenario pages (`/scenarios/{id}`). Each lists 
 
 ## The 10-Minute Golden Path
 
-This path follows **George's retirement** (scenario 3) from the neighbourhood to the team leader, then finishes with **Grace** (scenario 2) for financial crime.
+This path follows **George's retirement** (scenario 3) from the front desk to the team leader, then finishes with **Grace** (scenario 2) for financial crime.
 
 | Time | Where | Click | What to show | What to say |
 |---|---|---|---|---|
-| 0:00–1:00 | **3D office** (frontend) | Toggle **Neighbourhood** and point out the five life-event zones. In the scenario picker, run **3: Retirement (George)**, then toggle **Operations Office** | George's request travels from "Oakleigh — Retirement" to the lobby, then moves desk to desk: ONBOARDING → BENEFITS → INVESTMENTS → TRANSFERS → PAYMENTS → COMMS. **Completed** ticks up in the top bar | "Life happens out in the neighbourhood; requests are handled in here, by people with an AI agent at every desk." |
+| 0:00–1:00 | **The Lakehouse** (frontend) | Press **End** for the finale (George is the default member). Use **x2** or **Next step** to keep to time | George arrives by water taxi and signs at the front desk, where Amelia links him with the Onboarding Agent. The house pulls apart and his request travels person → agent → engine room and back up at each step: Olivia → Ben → Ivy → Rory → Penny → Cara. The result rises to Maya's idea on Level 3 | "Requests come in at the front desk. People make the decisions, with an AI agent under every desk and one engine room underneath." |
 | 1:00–2:00 | **Onboarding Agent** | Pick `pension-george` (Marcus Tan's email and pension application) → **Engage agent** | The auto-filled Member Case form, the NIGO checklist with nothing missing, the priority, and a case opened and routed | "Olivia's agent reads the adviser's email and form, so Olivia checks the work instead of keying it in." |
 | 2:00–3:00 | **Benefits & Eligibility** | Pick `REQ-20261109-OPS003` → review → **Engage** | Age 65 condition of release ✓. TBC $2.1m with $850,000 left ✓. Minimum $62,500, pro-rated to $38,870 ✓. $78,000 requested ✓. Reversionary ✓. Recommendation: approve. Then open the **Reference** tab | "Every line cites the rule it relies on. There are no invented numbers." |
 | 3:00–4:30 | **Investment Analyst** | `REQ-20261109-OPS003` → **Engage** → then ask in chat: "How long does the cash bucket last?" | A $156,000 cash bucket plus $1,094,000 in Balanced. The comparison table, Mermaid chart and Excel workbook. In **Agent Prompt & Tools**, the `analyzeFactSheet`, `compareModels` and `generateClientWorkbook` calls. The answer: 24 months of payments | "Ivy doesn't give advice. She gives Marcus the numbers, in dollars." |
 | 4:30–6:00 | **Payments** | `REQ-20261109-OPS003` → confirm the inputs → **Engage** → approve the card in **Teams** → return to the page | The authority-limit check finds the $1,250,000 commencement is $1m or more. The adaptive card appears in Teams. After approval, the release goes through, with $6,500 a month, tax-free | "The agent can't release money on its own. Theo approves in Teams, where he already works." |
 | 6:00–7:00 | **Client Communications** | `REQ-20261109-OPS003` → **Engage** → **Voice chat with Cara** → ask "When's my first pension payment?" | Cara's case summary. The welcome letter, the adviser update and the SMS. A spoken answer: 15 December, $6,500, tax-free | "Same facts, three audiences, and a voice when members want to talk." |
 | 7:00–8:00 | **Team Leader** | `REQ-20261109-OPS003` → **Engage** → open **Group chat** | Theo orchestrates the seven specialists on one case and ends with a consolidated plan | "This isn't one chatbot. It's a team, with a team leader." |
-| 8:00–10:00 | **Financial Crime** (Grace) | Optional: in the 3D office, run **2: Overseas Trip (Grace)**. Then go to the Financial Crime page → pick `REQ-20261106-OPS002` → scan documents → **Engage** | The tampered licence is flagged. The timeline runs from the details change to the Sydney login to the full-balance SMSF rollover. The SMSF verification mismatches and the risk is **HIGH**. The agent recommends a hold, a call-back on 0491 570 157 and an IDCARE referral. The SMR is a human decision | "$612,400 protected, and Grace is treated as the victim, not a suspect." |
+| 8:00–10:00 | **Financial Crime** (Grace) | Optional: in the Lakehouse finale, pick **Grace**. Then go to the Financial Crime page → pick `REQ-20261106-OPS002` → scan documents → **Engage** | The tampered licence is flagged. The timeline runs from the details change to the Sydney login to the full-balance SMSF rollover. The SMSF verification mismatches and the risk is **HIGH**. The agent recommends a hold, a call-back on 0491 570 157 and an IDCARE referral. The SMR is a human decision | "$612,400 protected, and Grace is treated as the victim, not a suspect." |
 
 The Onboarding demo creates a fresh `REQ-…` number. For the rest of the golden path, pick the seeded case `REQ-20261109-OPS003`.
 

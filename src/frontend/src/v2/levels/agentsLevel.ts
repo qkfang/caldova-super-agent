@@ -6,7 +6,7 @@
  * side, agents shared by both sides, and agents dedicated to the
  * Superannuation side. Each person's agent has a bay directly under their
  * desk on Level 2 and works there with its two specialised assistants
- * (named in stepGate.ts); Cara's bay also has her voice agent. Every role
+ * (named in agentStages.ts); Cara's bay also has her voice agent. Every role
  * is its own small voxel robot, carrying something that says what it does,
  * and the bay's frame glows in the colour of its side.
  *

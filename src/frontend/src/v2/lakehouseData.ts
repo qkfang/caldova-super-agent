@@ -1,5 +1,5 @@
 /**
- * Content for the v2 "Lakehouse" storybook (`/v2`, see docs/storybook.md).
+ * Content for the "Lakehouse" storybook, the frontend at `/` (see docs/storybook.md).
  *
  * Caldova Wealth is a wealth management business built for the agentic era.
  * It has two sides, Wealth Management and Superannuation, and the house is
@@ -12,12 +12,12 @@
  *   The dock                   the front desk, where visitors arrive by water taxi to sign
  *   The roof                   a party for the customers, under a big CALDOVA WEALTH sign
  *
- * Staff, assistants and scenarios come from the v1 canon (personaData.ts,
- * stepGate.ts and scenarios/*.json). This file adds what v2 needs on top.
+ * Staff, assistants and scenarios come from the shared canon (personaData.ts,
+ * agentStages.ts and scenarios/*.json). This file adds what the storybook needs on top.
  */
 import { PALETTES, type VoxelCharacterPalette } from "../characterPalettes";
 import { CUSTOMER_PERSONAS, STAFF_PERSONAS, type ScenarioId, type StaffTeam } from "../personaData";
-import { STAGE_CONFIG } from "../stepGate";
+import { STAGE_CONFIG } from "../agentStages";
 
 export type LevelId = "idea" | "people" | "agents" | "engine";
 
@@ -59,7 +59,7 @@ export interface SideInfo {
   blurb: string;
 }
 
-/** Colours match the v1 team accents (STAFF_TEAMS in personaData.ts). */
+/** Colours match the team accents (STAFF_TEAMS in personaData.ts). */
 export const SIDES: Record<SideId, SideInfo> = {
   wealth: {
     id: "wealth",
@@ -87,7 +87,7 @@ export const SIDES: Record<SideId, SideInfo> = {
   },
 };
 
-/** The side a person works on, from their v1 team (personaData.ts). */
+/** The side a person works on, from their team (personaData.ts). */
 export function teamSide(team: StaffTeam): SideId {
   if (team === "Superannuation Team") return "super";
   if (team === "Wealth Management Team") return "wealth";
@@ -99,7 +99,7 @@ export function sideBadge(side: SideId): string {
   return side === "shared" ? "Shared · both sides" : `Dedicated · ${side === "super" ? "Super" : "Wealth"}`;
 }
 
-/** The side each v1 scenario belongs to: all five are Superannuation member requests. */
+/** The side each scenario belongs to: all five are Superannuation member requests. */
 export const SCENARIO_SIDE: Record<ScenarioId, SideId> = {
   onboarding: "super",
   protection: "super",
@@ -342,7 +342,7 @@ interface RoleExtra {
   tasks: [string[], string[]];
 }
 
-/** Props and everyday tasks for each agent's roles; names and descriptions come from stepGate.ts. */
+/** Props and everyday tasks for each agent's roles; names and descriptions come from agentStages.ts. */
 const ROLE_EXTRAS: Record<string, RoleExtra> = {
   "onboarding-1": {
     props: ["doc", "clipboard"],

@@ -3,52 +3,21 @@
   "scenarioNumber": 5,
   "caseId": "REQ-20261113-OPS005",
   "customerId": "bereavement",
-  "incidentZone": "bereavement",
   "amount": 486200,
   "paidAmount": 486200,
-  "approveAtBenefits": true,
   "outcome": "approved",
-  "narrations": {
-    "benefits": "Ben assessing REQ-20261113-OPS005: BDBN validity (SIS reg 6.17A), SIS dependants and tax dependency",
-    "benefitsResult": "Ben: BDBN is binding ✓ — pay Robert 50% and Lily 50%; adult children are not tax dependants, so the taxable component is withheld at 17%",
-    "payment": "Penny prepares two death benefit payments for REQ-20261113-OPS005 — $243,100 gross each",
-    "paymentResult": "Death benefit PAID after Team Leader approval in Teams — $217,477.26 net each to Robert and Lily ($25,622.74 withheld from each)",
-    "comms": "Cara sends condolence letters to Robert and Lily with a plain-English tax explanation and their IDR and AFCA rights — case closed"
-  },
-  "preBenefits": [
-    {
-      "role": "Client Operations Team Leader",
-      "narration": "Theo takes ownership of the case for compassionate oversight — every message to the family is reviewed by a person.",
-      "duration": 2.5
-    },
-    {
-      "role": "Financial Crime Investigator",
-      "narration": "Felix checks the death certificate and both beneficiaries' IDs for authenticity — all genuine ✓.",
-      "duration": 2.5
-    }
-  ],
-  "postBenefits": [
-    {
-      "role": "Investment Analyst",
-      "narration": "Ivy redeems Mei's pension portfolio to cash and notes that the final amounts depend on market movements until the units are sold.",
-      "duration": 2.5
-    }
-  ],
   "beats": [
-    {"at": "customer", "action": "arrive-at-zone", "narration": "Robert's mother, Mei Chen, died on 12 October aged 81. From the family home in Box Hill, he gathers her paperwork for Caldova.", "duration": 2.0},
-    {"at": "customer", "action": "walk-to-office", "narration": "Robert's death notification and documents head to Caldova Client Operations, to be handled with care."},
-    {"at": "customer", "action": "enter-office", "narration": "Robert's documents arrive at Caldova Client Operations."},
     {"at": "customer", "action": "lodge-at-reception", "narration": "The death notification lands in the Onboarding inbox with a certified death certificate and IDs for Robert and his sister Lily."},
     {"at": "Onboarding & Requests Officer", "action": "onboarding-pickup", "narration": "Olivia's agent gently extracts the notification — Mei's pension CP-3019042 ($486,200), the death certificate and both children's IDs — and stops the pension payments."},
     {"at": "Onboarding & Requests Officer", "action": "onboarding-route", "narration": "Olivia opens case REQ-20261113-OPS005 and asks Theo to own it personally."},
-    {"at": "Client Operations Team Leader", "action": "team-leader-review", "narration": "Theo takes ownership of the case for compassionate oversight — every message to the family is reviewed by a person.", "duration": 2.5},
-    {"at": "Financial Crime Investigator", "action": "fincrime-review", "narration": "Felix checks the death certificate and both beneficiaries' IDs for authenticity — all genuine ✓.", "duration": 2.5},
+    {"at": "Client Operations Team Leader", "action": "team-leader-review", "narration": "Theo takes ownership of the case for compassionate oversight — every message to the family is reviewed by a person."},
+    {"at": "Financial Crime Investigator", "action": "fincrime-review", "narration": "Felix checks the death certificate and both beneficiaries' IDs for authenticity — all genuine ✓."},
     {"at": "Benefits & Eligibility Assessor", "action": "benefits-pickup", "narration": "Ben reviews Mei's binding death benefit nomination against SIS reg 6.17A and the trust deed."},
-    {"at": "Benefits & Eligibility Assessor", "action": "benefits-process", "narration": "Ben: BDBN signed 18 Mar 2024 before two adult non-beneficiary witnesses ✓, valid until 18 Mar 2027 ✓, Robert 50% and Lily 50% — both SIS dependants ✓. It is binding: the trustee must pay as nominated.", "duration": 2.5},
-    {"at": "Investment Analyst", "action": "investment-review", "narration": "Ivy redeems Mei's pension portfolio to cash and notes that the final amounts depend on market movements until the units are sold.", "duration": 2.5},
+    {"at": "Benefits & Eligibility Assessor", "action": "benefits-process", "narration": "Ben: BDBN signed 18 Mar 2024 before two adult non-beneficiary witnesses ✓, valid until 18 Mar 2027 ✓, Robert 50% and Lily 50% — both SIS dependants ✓. It is binding: the trustee must pay as nominated."},
+    {"at": "Investment Analyst", "action": "investment-review", "narration": "Ivy redeems Mei's pension portfolio to cash and notes that the final amounts depend on market movements until the units are sold."},
     {"at": "Benefits & Eligibility Assessor", "action": "benefits-handoff", "narration": "Ben hands the case to Payments with the 50/50 beneficiary split."},
-    {"at": "Payments Officer", "action": "payment", "narration": "Penny calculates each payment: gross $243,100 — tax-free $92,378, taxable $150,722, 17% withheld ($25,622.74) — and pays $217,477.26 to each child once Theo approves the Microsoft Teams card (every death benefit needs Team Leader approval).", "duration": 2.5, "outcome": "approved"},
-    {"at": "Client Communications Specialist", "action": "comms-notify", "narration": "Cara sends Robert and Lily gentle condolence letters explaining the tax, the timeline and their complaint rights (IDR, then AFCA).", "duration": 2.5}
+    {"at": "Payments Officer", "action": "payment", "narration": "Penny calculates each payment: gross $243,100 — tax-free $92,378, taxable $150,722, 17% withheld ($25,622.74) — and pays $217,477.26 to each child once Theo approves the Microsoft Teams card (every death benefit needs Team Leader approval)."},
+    {"at": "Client Communications Specialist", "action": "comms-notify", "narration": "Cara sends Robert and Lily gentle condolence letters explaining the tax, the timeline and their complaint rights (IDR, then AFCA)."}
   ],
   "result": {
     "status": "completed",
@@ -56,15 +25,5 @@
     "figure": "$486,200",
     "icon": "✅",
     "summary": "Outcome: COMPLETED — $486,200 paid 50/50 to Robert and Lily under Mei's binding nomination ($217,477.26 net each)"
-  },
-  "reset": {
-    "office": {
-      "snapStaffToDesks": true,
-      "clearQueues": true,
-      "removeUnscriptedCustomers": true
-    },
-    "neighbourhood": {
-      "incidentZone": "bereavement"
-    }
   }
 }

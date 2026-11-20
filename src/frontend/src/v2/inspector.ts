@@ -15,7 +15,7 @@
 import { renderCharacterFigureSvg } from "../characterFigure";
 import { PALETTES } from "../characterPalettes";
 import { CUSTOMER_PERSONAS, findStaffById, STAFF_PERSONAS, type ScenarioId, type StaffTeam } from "../personaData";
-import { APP_BASE_URL } from "../stepGate";
+import { APP_BASE_URL } from "../agentStages";
 import type { VisitorInfo } from "./dock";
 import {
   ADVISER,

@@ -580,7 +580,7 @@ Theo, the human team leader, approves:
 
 ## Option A: One Agent per Department
 
-Use this when the demo needs to match the voxel office visually. This is how the demo is built: each department page engages its own agent.
+Use this when the demo needs to match the lakehouse, where every person has an agent of their own. This is how the demo is built: each department page engages its own agent.
 
 | Department | Foundry agent id |
 |---|---|
@@ -793,53 +793,25 @@ The `team-leader-agent` shows the floor for the five demo cases:
 
 ---
 
-# UI Mapping to the Voxel Office
+# UI Mapping to the Lakehouse
 
-Each department in the voxel office can become a clickable room that links to its agent page (`/agents/{route id}`).
+In the Lakehouse storybook ([storybook.md](storybook.md)), every person's card on Level 2 and every agent's card on Level 1 has an **Open the agent page ↗** link to that agent's page (`/agents/{route id}`).
 
-## Lobby: SUPER SERVICES · WEALTH SERVICES · ADVISER DESK
+| Agent page | Shows |
+|---|---|
+| Onboarding (Olivia) | New requests, the extracted Member Case and the NIGO checklist |
+| Benefits & Eligibility (Ben) | The eligibility checklist with cited rules, and the recommendation |
+| Investment Analyst (Ivy) | Model comparisons, fees in dollars, income strategies and the workbook |
+| Financial Crime (Felix) | Risk indicators, the account-activity timeline and document verdicts |
+| Transfers & Rollovers (Rory) | Counterparties, rollovers in flight, service-level timers and lost-cover warnings |
+| Payments (Penny) | The benefit calculation and the Teams approval status |
+| Client Communications (Cara) | The message drafts and the voice chat with Cara |
+| Team Leader (Theo) | The floor dashboard, service-level and IDR clocks, approvals, and the multi-agent group chat on one case |
 
-Starts a new request ("Submit a request").
+Elsewhere in the house:
 
-## ONBOARDING (Olivia)
-
-Shows new requests, the extracted Member Case and the NIGO checklist.
-
-## BENEFITS (Ben)
-
-Shows the eligibility checklist with cited rules, and the recommendation.
-
-## INVESTMENTS (Ivy)
-
-Shows model comparisons, fees in dollars, income strategies and the workbook.
-
-## FINANCIAL CRIME (Felix)
-
-Shows risk indicators, the account-activity timeline and document verdicts.
-
-## TRANSFERS (Rory)
-
-Shows counterparties, rollovers in flight, service-level timers and lost-cover warnings.
-
-## PAYMENTS (Penny)
-
-Shows the benefit calculation and the Teams approval status.
-
-## COMMS (Cara)
-
-Shows the message drafts and the voice chat with Cara.
-
-## TEAM LEADER (Theo)
-
-Shows the floor dashboard, service-level and IDR clocks, and approvals.
-
-## Client Meeting Suites (Advice Suite · Case Conference)
-
-Shows the multi-agent group chat on one case.
-
-## Archive: Advice (SOA) · Member Files · Nominations · Closed Cases
-
-Represents the records and rules the agents cite from the `wealth_knowledge` index.
+- **The front desk on the dock** is where requests come in. Amelia's card links to the onboarding scenario (`/scenarios/new-client-onboarding`).
+- **The engine room** shows what the agents run on. Foundry IQ holds the `wealth_knowledge` index: the records and rules the agents cite.
 
 ---
 

@@ -6,8 +6,8 @@
  * desk and sets off. Each step starts with a person on Level 2, dips down to
  * their agent on Level 1 and the engine-room component that agent leans on,
  * then comes back up for the human decision. The result rises to the brain
- * on Level 3, where Maya's idea is measured. Steps come from the v1 scenario
- * beats in scenarios/*.json, so both versions tell the same five stories.
+ * on Level 3, where Maya's idea is measured. Steps come from the scenario
+ * beats in scenarios/*.json, which mirror docs/scenario-N-*.md.
  */
 import { Mesh, TransformNode, Vector3 } from "@babylonjs/core";
 import {

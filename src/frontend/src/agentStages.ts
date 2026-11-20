@@ -1,15 +1,9 @@
 /**
- * Step gate — a modal that pauses the scripted simulation at the start of
- * each major pipeline step (onboarding, benefits & eligibility, investment
- * review, financial crime, transfers & rollovers, team leader review,
- * payments, client communications).
- *
- * The popup names the staff member taking the case, lists the AI sub-agents
- * delegated under them (matching docs/foundry_agents.md), and offers:
- *  - Continue (proceed to this step manually),
- *  - Auto-play (skip the gate for the rest of the scenario).
- *
- * Auto-play can also be enabled up-front via the scenario picker.
+ * Each staff member's step in a request: its title, the staff role that
+ * owns it, the two specialised assistants of that person's agent (matching
+ * docs/foundry_agents.md) and the matching `src/backend` agent page. The
+ * lakehouse uses it for each agent's assistants on Level 1, and
+ * `APP_BASE_URL` for links to the agent pages.
  */
 import type { StaffRole } from "./personaData";
 
@@ -22,27 +16,6 @@ export type StageKey =
   | "consult:Client Operations Team Leader"
   | "payment"
   | "comms-notify";
-
-export interface StageInfo {
-  /** Short title shown in the popup header. */
-  title: string;
-  /** Step number relative to the scripted scenario (filled at runtime). */
-  stepNumber?: number;
-  /** Total step count (filled at runtime). */
-  totalSteps?: number;
-  /** Staff role label (e.g. "Onboarding & Requests Officer"). */
-  staffRole: StaffRole;
-  /** Staff persona name (e.g. "Olivia"). */
-  staffName: string;
-  /** Staff swatch color. */
-  staffColor: string;
-  /** Plain-English narration of what is about to happen. */
-  narration: string;
-  /** AI sub-agents delegated for this step. */
-  agents: { name: string; description: string }[];
-  /** Agent id used to deep-link the walkthrough page in the `src/backend` site. */
-  appAgentId: string;
-}
 
 /**
  * Base URL for the companion `src/backend` Blazor site that hosts the
@@ -208,157 +181,3 @@ export const STAGE_CONFIG: Record<
     ],
   },
 };
-
-/** Stages that should pop the step gate (in order they appear in scripts). */
-export const GATED_STAGES = new Set<StageKey>(
-  Object.keys(STAGE_CONFIG) as StageKey[],
-);
-
-export interface StepGateHooks {
-  /** Called when the user clicks Continue. */
-  onContinue(): void;
-  /** Called when the user clicks Auto-play (turns auto-play on for the run). */
-  onAutoPlay(): void;
-  /** Called when the user closes the gate (cancels the scenario). */
-  onCancel(): void;
-}
-
-/** UI controller for the step-gate modal. */
-export class StepGate {
-  private readonly overlay: HTMLDivElement;
-  private hooks: StepGateHooks | null = null;
-  private opened = false;
-
-  constructor() {
-    const overlay = document.createElement("div");
-    overlay.id = "step-gate-overlay";
-    overlay.className = "modal-overlay step-gate hidden";
-    overlay.setAttribute("role", "dialog");
-    overlay.setAttribute("aria-modal", "true");
-    overlay.setAttribute("aria-labelledby", "step-gate-title");
-    overlay.innerHTML = `
-      <div class="modal-card step-card" role="document">
-        <header>
-          <div class="step-header-left">
-            <div class="step-counter"></div>
-            <h2 id="step-gate-title"></h2>
-          </div>
-          <button class="close" aria-label="Cancel scenario">×</button>
-        </header>
-        <div class="step-staff">
-          <div class="step-staff-dot"></div>
-          <div>
-            <div class="step-staff-name"></div>
-            <div class="step-staff-role"></div>
-          </div>
-        </div>
-        <p class="step-narration"></p>
-        <div class="step-agents-label">AI sub-agents delegated to this step</div>
-        <ul class="step-agents-list"></ul>
-        <a class="step-walkthrough"
-           href="#"
-           target="_blank"
-           rel="noopener noreferrer">
-          See how this team uses these agents <span aria-hidden="true">↗</span>
-        </a>
-        <footer class="step-footer">
-          <button type="button" class="step-autoplay">▶ Auto-play rest</button>
-          <button type="button" class="step-continue">Continue</button>
-        </footer>
-      </div>
-    `;
-    document.body.appendChild(overlay);
-    this.overlay = overlay;
-
-    overlay
-      .querySelector(".step-continue")!
-      .addEventListener("click", () => this.handleContinue());
-    overlay
-      .querySelector(".step-autoplay")!
-      .addEventListener("click", () => this.handleAutoplay());
-    overlay
-      .querySelector(".close")!
-      .addEventListener("click", () => this.handleCancel());
-  }
-
-  open(info: StageInfo, hooks: StepGateHooks): void {
-    this.hooks = hooks;
-    this.opened = true;
-    const counter =
-      info.stepNumber && info.totalSteps
-        ? `Step ${info.stepNumber} of ${info.totalSteps}`
-        : "";
-    (this.overlay.querySelector(".step-counter") as HTMLElement).textContent =
-      counter;
-    (this.overlay.querySelector("#step-gate-title") as HTMLElement).textContent =
-      info.title;
-    (
-      this.overlay.querySelector(".step-staff-dot") as HTMLElement
-    ).style.background = info.staffColor;
-    (this.overlay.querySelector(".step-staff-name") as HTMLElement).textContent =
-      info.staffName;
-    (this.overlay.querySelector(".step-staff-role") as HTMLElement).textContent =
-      info.staffRole;
-    (this.overlay.querySelector(".step-narration") as HTMLElement).textContent =
-      info.narration;
-
-    const walkthrough = this.overlay.querySelector(
-      ".step-walkthrough",
-    ) as HTMLAnchorElement;
-    walkthrough.href = `${APP_BASE_URL}/agents/${encodeURIComponent(
-      info.appAgentId,
-    )}`;
-    walkthrough.title = `Open ${info.title} walkthrough in a new tab`;
-
-    const list = this.overlay.querySelector(
-      ".step-agents-list",
-    ) as HTMLUListElement;
-    list.innerHTML = "";
-    for (const a of info.agents) {
-      const li = document.createElement("li");
-      li.className = "step-agent";
-      li.innerHTML = `
-        <span class="bulb" aria-hidden="true">💡</span>
-        <div>
-          <div class="step-agent-name"></div>
-          <div class="step-agent-desc"></div>
-        </div>
-      `;
-      (li.querySelector(".step-agent-name") as HTMLElement).textContent = a.name;
-      (li.querySelector(".step-agent-desc") as HTMLElement).textContent =
-        a.description;
-      list.appendChild(li);
-    }
-
-    this.overlay.classList.remove("hidden");
-    (this.overlay.querySelector(".step-continue") as HTMLButtonElement).focus();
-  }
-
-  close(): void {
-    this.opened = false;
-    this.overlay.classList.add("hidden");
-    this.hooks = null;
-  }
-
-  isOpen(): boolean {
-    return this.opened;
-  }
-
-  private handleContinue(): void {
-    const h = this.hooks;
-    this.close();
-    h?.onContinue();
-  }
-
-  private handleAutoplay(): void {
-    const h = this.hooks;
-    this.close();
-    h?.onAutoPlay();
-  }
-
-  private handleCancel(): void {
-    const h = this.hooks;
-    this.close();
-    h?.onCancel();
-  }
-}

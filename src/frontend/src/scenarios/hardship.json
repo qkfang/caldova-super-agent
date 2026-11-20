@@ -3,45 +3,20 @@
   "scenarioNumber": 4,
   "caseId": "REQ-20261111-OPS004",
   "customerId": "hardship",
-  "incidentZone": "hardship",
   "amount": 15000,
   "paidAmount": 10000,
-  "approveAtBenefits": true,
   "outcome": "partial",
-  "narrations": {
-    "benefits": "Ben assessing REQ-20261111-OPS004: severe financial hardship — 26 weeks' income support, letter within 21 days, $1,000–$10,000 once in 12 months",
-    "benefitsResult": "Ben: criteria met ✓ — but $15,000 exceeds the $10,000 legal maximum; recommends a PARTIAL approval of $10,000 gross",
-    "payment": "Penny prepares the hardship payment for REQ-20261111-OPS004 — $10,000 gross at under-60 tax rates",
-    "paymentResult": "Partial payment RELEASED — $10,000 gross: $7,932 to Tom on Fri 13 Nov 2026, $2,068 PAYG remitted to the ATO",
-    "comms": "Cara sends Tom a plain-English outcome letter with free help (National Debt Helpline 1800 007 007, Moneysmart) — case closed"
-  },
-  "preBenefits": [],
-  "postBenefits": [
-    {
-      "role": "Client Operations Team Leader",
-      "narration": "Theo personally reviews the vulnerable-member case and approves a partial release of $10,000 gross.",
-      "duration": 2.5
-    },
-    {
-      "role": "Investment Analyst",
-      "narration": "Ivy plans the redemption — drawn from cash first, then Balanced model units — to keep selling to a minimum.",
-      "duration": 2.5
-    }
-  ],
   "beats": [
-    {"at": "customer", "action": "arrive-at-zone", "narration": "Tom's café on Lygon Street closed in mid-2025. After 31 weeks on JobSeeker he is behind on his mortgage and bills, and turns to his super.", "duration": 2.0},
-    {"at": "customer", "action": "walk-to-office", "narration": "Tom's severe financial hardship application heads to Caldova Client Operations."},
-    {"at": "customer", "action": "enter-office", "narration": "Tom's hardship application arrives at Caldova Client Operations."},
     {"at": "customer", "action": "lodge-at-reception", "narration": "The application lands in the Onboarding inbox: release $15,000 on severe financial hardship grounds, with a Services Australia letter and overdue notices attached."},
     {"at": "Onboarding & Requests Officer", "action": "onboarding-pickup", "narration": "Olivia's agent extracts the application and the Services Australia letter dated Mon 9 Nov 2026 — JobSeeker paid continuously since 6 April 2026."},
     {"at": "Onboarding & Requests Officer", "action": "onboarding-route", "narration": "Olivia opens case REQ-20261111-OPS004, flags Tom as a vulnerable member, and routes it to Benefits & Eligibility."},
     {"at": "Benefits & Eligibility Assessor", "action": "benefits-pickup", "narration": "Ben checks the severe financial hardship criteria and payment limits in the SIS Regulations and the trust deed."},
-    {"at": "Benefits & Eligibility Assessor", "action": "benefits-process", "narration": "Ben: 31 weeks of income support (26 needed) ✓, still receiving ✓, letter within 21 days ✓, no release in the last 12 months ✓ — but $10,000 is the legal maximum, so he recommends a partial approval.", "duration": 2.5},
-    {"at": "Client Operations Team Leader", "action": "team-leader-review", "narration": "Theo personally reviews the vulnerable-member case and approves a partial release of $10,000 gross.", "duration": 2.5},
-    {"at": "Investment Analyst", "action": "investment-review", "narration": "Ivy plans the redemption — drawn from cash first, then Balanced model units — to keep selling to a minimum.", "duration": 2.5},
+    {"at": "Benefits & Eligibility Assessor", "action": "benefits-process", "narration": "Ben: 31 weeks of income support (26 needed) ✓, still receiving ✓, letter within 21 days ✓, no release in the last 12 months ✓ — but $10,000 is the legal maximum, so he recommends a partial approval."},
+    {"at": "Client Operations Team Leader", "action": "team-leader-review", "narration": "Theo personally reviews the vulnerable-member case and approves a partial release of $10,000 gross."},
+    {"at": "Investment Analyst", "action": "investment-review", "narration": "Ivy plans the redemption — drawn from cash first, then Balanced model units — to keep selling to a minimum."},
     {"at": "Benefits & Eligibility Assessor", "action": "benefits-handoff", "narration": "Ben hands the approved partial release to Payments."},
-    {"at": "Payments Officer", "action": "payment", "narration": "Penny matches the payee name and BSB ✓ and splits the $10,000: tax-free $600, taxable $9,400, PAYG withheld $2,068 (22%) — $7,932 paid on Fri 13 Nov 2026.", "duration": 2.5, "outcome": "partial"},
-    {"at": "Client Communications Specialist", "action": "comms-notify", "narration": "Cara sends Tom a kind, plain-English letter: why $10,000 is the legal maximum, the tax, the impact on his retirement savings, and free help from the National Debt Helpline (1800 007 007) and Moneysmart.", "duration": 2.0}
+    {"at": "Payments Officer", "action": "payment", "narration": "Penny matches the payee name and BSB ✓ and splits the $10,000: tax-free $600, taxable $9,400, PAYG withheld $2,068 (22%) — $7,932 paid on Fri 13 Nov 2026."},
+    {"at": "Client Communications Specialist", "action": "comms-notify", "narration": "Cara sends Tom a kind, plain-English letter: why $10,000 is the legal maximum, the tax, the impact on his retirement savings, and free help from the National Debt Helpline (1800 007 007) and Moneysmart."}
   ],
   "result": {
     "status": "partially approved",
@@ -49,15 +24,5 @@
     "figure": "$7,932 net",
     "icon": "🟡",
     "summary": "Outcome: PARTIALLY APPROVED — $10,000 gross of the $15,000 requested; $7,932 paid after $2,068 PAYG withholding"
-  },
-  "reset": {
-    "office": {
-      "snapStaffToDesks": true,
-      "clearQueues": true,
-      "removeUnscriptedCustomers": true
-    },
-    "neighbourhood": {
-      "incidentZone": "hardship"
-    }
   }
 }

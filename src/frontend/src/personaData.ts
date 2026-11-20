@@ -3,7 +3,7 @@
  *
  * All persona-level facts (name, role/situation, personality, typical line,
  * scenario palette, request type & amount range) live here so that the
- * simulation, the profile-card UI, and the scenario picker never disagree.
+ * lakehouse's cast, its cards and the finale never disagree.
  *
  * Mirrors the Caldova Wealth canon (team in docs/foundry_agents.md and
  * docs/characters.md) and matches the palette keys defined in
@@ -25,9 +25,9 @@ export type StaffRole =
 
 /**
  * The two product teams that make up Caldova Client Operations, plus the
- * leadership that runs both. The office floor is organised by these teams:
- * the Superannuation wing sits at the front of the floor and the Wealth
- * Management wing behind it.
+ * leadership that runs both. Level 2 of the lakehouse is organised by these
+ * teams: the Wealth Management wing on the left, the Superannuation wing on
+ * the right, and Theo between them.
  */
 export type StaffTeam =
   | "Superannuation Team"
@@ -35,11 +35,11 @@ export type StaffTeam =
   | "Client Operations Leadership";
 
 export interface StaffPersona {
-  /** Stable id used for click hitboxes and HUD agent cards. */
+  /** Stable id used for click hitboxes and the lakehouse's anchors. */
   id: string;
   name: string;
   role: StaffRole;
-  /** Team the staff member belongs to (drives HUD grouping and office wing). */
+  /** Team the staff member belongs to (decides their side of the business and their wing on Level 2). */
   team: StaffTeam;
   /** Department name shown in the UI (e.g. "Benefits & Eligibility"). */
   department: string;
@@ -48,21 +48,19 @@ export interface StaffPersona {
   /** The role in one short sentence, as in docs/characters.md ("**Role:**"), for compact cards. */
   role_line: string;
   palette: PaletteKey;
-  /** Swatch color used in the agents panel (department accent). */
+  /** Accent colour for their desk, their agent's bay and their cards. */
   color: string;
   personality: string;
   /** Bullet list of "what they do". */
   responsibilities: string[];
-  /** Signature line for the profile card. */
+  /** Their signature line, as in docs/characters.md. */
   typical_line: string;
   /** Rotating status lines shown while the staff member is idle at their desk. */
   ambient: string[];
-  /** True for staff that participate in every case (the core pipeline). */
-  active_in_pipeline: boolean;
   /**
    * Id of the matching agent walkthrough page in the companion `src/backend`
    * Blazor site. Mirrors an Id in `src/backend/Models/AgentCatalog.cs` and is
-   * used to deep-link the profile card to `/agents/{app_agent_id}`.
+   * used to link to `/agents/{app_agent_id}`.
    */
   app_agent_id: string;
   /** Name of the AI agent working behind this staff member (as in the backend catalogue). */
@@ -71,7 +69,7 @@ export interface StaffPersona {
   agent_tagline: string;
 }
 
-// Order matches docs/scenario-N-*.md and scenarioNumbers.ts:
+// Order matches docs/scenario-N-*.md:
 //   1 onboarding, 2 protection, 3 retirement, 4 hardship, 5 bereavement.
 export type ScenarioId =
   | "onboarding"
@@ -83,9 +81,9 @@ export type ScenarioId =
 export interface CustomerPersona {
   id: ScenarioId;
   name: string;
-  /** Short summary used in scenario-picker cards. */
+  /** Short summary for cards. */
   situation: string;
-  /** Long-form narrative — used in the profile card and the banner. */
+  /** Long-form narrative. */
   situation_long: string;
   need: string[];
   concern: string;
@@ -94,10 +92,7 @@ export interface CustomerPersona {
   palette: PaletteKey;
   /** Headline request type (matches the backend RequestType values). */
   request_type: string;
-  /** Amount range used when this persona appears as an unscripted client. */
-  amount_min: number;
-  amount_max: number;
-  /** Scenario "color" used to tint the now-playing banner / log entries. */
+  /** Scenario colour, used for the member's chip in the finale. */
   color: string;
 }
 
@@ -134,7 +129,6 @@ export const STAFF_PERSONAS: StaffPersona[] = [
       "Logging adviser application packs",
       "Opening new Member Cases",
     ],
-    active_in_pipeline: true,
     app_agent_id: "onboarding",
     agent_name: "Onboarding Agent",
     agent_tagline: "Every application and request, set up right first time.",
@@ -167,7 +161,6 @@ export const STAFF_PERSONAS: StaffPersona[] = [
       "Calculating minimum drawdowns",
       "Testing transfer balance cap space",
     ],
-    active_in_pipeline: true,
     app_agent_id: "benefits-eligibility",
     agent_name: "Benefits & Eligibility Agent",
     agent_tagline: "Applies the trust deed, PDS and super law — and cites every rule.",
@@ -200,7 +193,6 @@ export const STAFF_PERSONAS: StaffPersona[] = [
       "Checking buy/sell spreads",
       "Updating the fee comparison workbook",
     ],
-    active_in_pipeline: false,
     app_agent_id: "investment-analyst",
     agent_name: "Investment Analyst Agent",
     agent_tagline: "Keeps portfolios on plan — and shows the fees in dollars.",
@@ -233,7 +225,6 @@ export const STAFF_PERSONAS: StaffPersona[] = [
       "Verifying ID document security features",
       "Reviewing SMSF rollover red flags",
     ],
-    active_in_pipeline: false,
     app_agent_id: "financial-crime",
     agent_name: "Financial Crime Agent",
     agent_tagline: "Protects members from fraud, scams and identity takeover.",
@@ -266,7 +257,6 @@ export const STAFF_PERSONAS: StaffPersona[] = [
       "Tracking rollover SLAs",
       "Lodging transfer balance account reports",
     ],
-    active_in_pipeline: false,
     app_agent_id: "transfers-rollovers",
     agent_name: "Transfers & Rollovers Agent",
     agent_tagline: "Moves money between funds safely — and on time.",
@@ -299,7 +289,6 @@ export const STAFF_PERSONAS: StaffPersona[] = [
       "Preparing the pension payment run",
       "Investing incoming rollovers",
     ],
-    active_in_pipeline: true,
     app_agent_id: "payments",
     agent_name: "Payments Agent",
     agent_tagline: "Gets the tax right, then waits for the human approval.",
@@ -331,7 +320,6 @@ export const STAFF_PERSONAS: StaffPersona[] = [
       "Returning a member call",
       "Sending an SMS confirmation",
     ],
-    active_in_pipeline: true,
     app_agent_id: "client-communications",
     agent_name: "Client Communications Agent",
     agent_tagline: "Plain-English updates for members and their advisers.",
@@ -343,7 +331,7 @@ export const STAFF_PERSONAS: StaffPersona[] = [
     team: "Client Operations Leadership",
     department: "Team Leader Office",
     role_short:
-      "Leads both the Superannuation and Wealth Management teams from the corner office — workload, SLAs, IDR clocks, approvals, quality and vulnerable members.",
+      "Leads both the Superannuation and Wealth Management teams from between them — workload, SLAs, IDR clocks, approvals, quality and vulnerable members.",
     role_line: "Runs the operations floor.",
     palette: "teamLeader",
     color: "#14b8a6",
@@ -364,7 +352,6 @@ export const STAFF_PERSONAS: StaffPersona[] = [
       "QA sampling closed cases",
       "Coaching the team",
     ],
-    active_in_pipeline: false,
     app_agent_id: "team-leader",
     agent_name: "Team Leader Agent",
     agent_tagline: "Watches the whole floor — SLAs, IDR clocks and approvals.",
@@ -376,7 +363,7 @@ export const STAFF_PERSONAS: StaffPersona[] = [
 /* ------------------------------------------------------------------------ */
 
 export const CUSTOMER_PERSONAS: CustomerPersona[] = [
-  // Order matches docs/scenario-N-*.md and scenarioNumbers.ts:
+  // Order matches docs/scenario-N-*.md:
   //   1. onboarding   2. protection   3. retirement   4. hardship   5. bereavement
   {
     id: "onboarding",
@@ -398,8 +385,6 @@ export const CUSTOMER_PERSONAS: CustomerPersona[] = [
       "I’ve got super scattered across old jobs — I just want one account, set up properly.",
     palette: "customerOnboarding",
     request_type: "New account & consolidation",
-    amount_min: 95000,
-    amount_max: 185000,
     color: "#3a8fd6",
   },
   {
@@ -421,8 +406,6 @@ export const CUSTOMER_PERSONAS: CustomerPersona[] = [
     typical_line: "I’m in Florence — I haven’t asked anyone to move my super!",
     palette: "customerProtection",
     request_type: "Rollover out to SMSF",
-    amount_min: 480000,
-    amount_max: 700000,
     color: "#d9534f",
   },
   {
@@ -444,8 +427,6 @@ export const CUSTOMER_PERSONAS: CustomerPersona[] = [
       "Forty years on the tools — I just want a steady income and to stop worrying.",
     palette: "customerRetirement",
     request_type: "Pension commencement",
-    amount_min: 900000,
-    amount_max: 1400000,
     color: "#e8a33d",
   },
   {
@@ -467,8 +448,6 @@ export const CUSTOMER_PERSONAS: CustomerPersona[] = [
       "I never thought I’d need to touch my super — I just need to catch up on the bills.",
     palette: "customerHardship",
     request_type: "Financial hardship release",
-    amount_min: 5000,
-    amount_max: 15000,
     color: "#e07a2c",
   },
   {
@@ -490,8 +469,6 @@ export const CUSTOMER_PERSONAS: CustomerPersona[] = [
       "Mum always said she’d sorted everything — I just want to do this right for her.",
     palette: "customerBereavement",
     request_type: "Death benefit (binding nomination)",
-    amount_min: 300000,
-    amount_max: 600000,
     color: "#6e7a8a",
   },
 ];
@@ -503,18 +480,12 @@ export const CUSTOMER_PERSONAS: CustomerPersona[] = [
 /* Helpers                                                                  */
 /* ------------------------------------------------------------------------ */
 
-/** Teams in display order, with the accent used for their office wing and HUD heading. */
+/** Teams in display order, with each team's accent colour. */
 export const STAFF_TEAMS: ReadonlyArray<{ name: StaffTeam; blurb: string; color: string }> = [
   { name: "Superannuation Team", blurb: "Member accounts, rollovers, pensions", color: "#14b8a6" },
   { name: "Wealth Management Team", blurb: "Advice, investments, risk, clients", color: "#c9a14a" },
   { name: "Client Operations Leadership", blurb: "Oversight of both teams", color: "#6b7fb0" },
 ];
-
-export function findCustomerPersona(id: ScenarioId): CustomerPersona {
-  const p = CUSTOMER_PERSONAS.find((x) => x.id === id);
-  if (!p) throw new Error(`Unknown scenario id: ${id}`);
-  return p;
-}
 
 export function findStaffByRole(role: StaffRole): StaffPersona {
   const p = STAFF_PERSONAS.find((x) => x.role === role);

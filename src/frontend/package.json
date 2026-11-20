@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Wealth Team in a Day — browser demo of the Caldova Wealth super & wealth client operations office staffed by AI agents (Babylon.js + voxel style).",
+  "description": "Wealth Team in a Day — the Caldova Wealth Lakehouse storybook: a voxel house of the idea, the people, the AI agents and the engine room (Babylon.js).",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",

@@ -33,7 +33,7 @@ const esc = (s: string): string => s.replace(/[&<>"']/g, (c) => ESCAPES[c]);
 
 function byId<T extends HTMLElement>(id: string): T {
   const el = document.getElementById(id);
-  if (!el) throw new Error(`#${id} is missing from v2/index.html`);
+  if (!el) throw new Error(`#${id} is missing from index.html`);
   return el as T;
 }
 

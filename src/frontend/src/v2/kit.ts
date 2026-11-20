@@ -1,5 +1,5 @@
 /**
- * Voxel construction kit for the v2 lakehouse.
+ * Voxel construction kit for the lakehouse.
  *
  * - `mat()` caches flat-shaded materials, optionally multiplied with a tiny
  *   pixel-noise texture (grass, timber, stone…) that tiles in world units.

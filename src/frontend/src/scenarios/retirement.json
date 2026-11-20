@@ -3,45 +3,20 @@
   "scenarioNumber": 3,
   "caseId": "REQ-20261109-OPS003",
   "customerId": "retirement",
-  "incidentZone": "retirement",
   "amount": 1250000,
   "paidAmount": 1250000,
-  "approveAtBenefits": true,
   "outcome": "approved",
-  "narrations": {
-    "benefits": "Ben assessing REQ-20261109-OPS003: age-65 condition of release, $2.1m transfer balance cap, 5% minimum drawdown, reversionary nomination",
-    "benefitsResult": "Ben: eligible ✓ — $850,000 of cap space remains, FY2026-27 minimum is $38,870 (227 of 365 days), Helen can be reversionary ✓",
-    "payment": "Penny prepares the commencement of pension CP-3077881 — $1,250,000, paying $6,500 a month",
-    "paymentResult": "Pension STARTED after Teams approval — $1,250,000 commencing 16 Nov 2026; first $6,500 payment on 15 Dec 2026",
-    "comms": "Cara sends George his welcome-to-retirement letter and confirms the pension details with Marcus Tan — case closed"
-  },
-  "preBenefits": [],
-  "postBenefits": [
-    {
-      "role": "Investment Analyst",
-      "narration": "Ivy builds the income strategy: a cash bucket of two years' payments ($156,000) in cash and term deposits, with the rest in the Balanced model — three strategies compared in a workbook.",
-      "duration": 3.0
-    },
-    {
-      "role": "Transfers & Rollovers Coordinator",
-      "narration": "Rory moves $1,250,000 from accumulation into the new pension account, leaving $34,600 in super, and lines up the transfer balance account report for the ATO.",
-      "duration": 2.5
-    }
-  ],
   "beats": [
-    {"at": "customer", "action": "arrive-at-zone", "narration": "George has hung up his tools after forty years as an electrical contractor in Oakleigh — time to turn his super into a retirement income.", "duration": 2.0},
-    {"at": "customer", "action": "walk-to-office", "narration": "George's pension application, lodged by his adviser Marcus Tan, heads to Caldova Client Operations."},
-    {"at": "customer", "action": "enter-office", "narration": "George's pension application arrives at Caldova Client Operations."},
     {"at": "customer", "action": "lodge-at-reception", "narration": "Marcus Tan's application lands in the Onboarding inbox: start a Caldova Pension with $1,250,000, paying $78,000 a year monthly, with Helen as reversionary beneficiary."},
     {"at": "Onboarding & Requests Officer", "action": "onboarding-pickup", "narration": "Olivia's agent extracts the commencement amount, income, payment frequency, reversionary nomination and bank details, then runs the NIGO checklist."},
     {"at": "Onboarding & Requests Officer", "action": "onboarding-route", "narration": "Olivia opens case REQ-20261109-OPS003 for new pension account CP-3077881 and routes it to Benefits & Eligibility."},
     {"at": "Benefits & Eligibility Assessor", "action": "benefits-pickup", "narration": "Ben checks the condition of release, the transfer balance cap, the minimum drawdown and the reversionary nomination."},
-    {"at": "Benefits & Eligibility Assessor", "action": "benefits-process", "narration": "Ben confirms George is 66 — condition of release met; $1.25m is within the $2.1m transfer balance cap; $78,000 a year is above the pro-rated $38,870 minimum, and Helen can be reversionary.", "duration": 2.5},
-    {"at": "Investment Analyst", "action": "investment-review", "narration": "Ivy builds the income strategy: a cash bucket of two years' payments ($156,000) in cash and term deposits, with the rest in the Balanced model — three strategies compared in a workbook.", "duration": 3.0},
-    {"at": "Transfers & Rollovers Coordinator", "action": "transfers-coordinate", "narration": "Rory moves $1,250,000 from accumulation into the new pension account, leaving $34,600 in super, and lines up the transfer balance account report for the ATO.", "duration": 2.5},
+    {"at": "Benefits & Eligibility Assessor", "action": "benefits-process", "narration": "Ben confirms George is 66 — condition of release met; $1.25m is within the $2.1m transfer balance cap; $78,000 a year is above the pro-rated $38,870 minimum, and Helen can be reversionary."},
+    {"at": "Investment Analyst", "action": "investment-review", "narration": "Ivy builds the income strategy: a cash bucket of two years' payments ($156,000) in cash and term deposits, with the rest in the Balanced model — three strategies compared in a workbook."},
+    {"at": "Transfers & Rollovers Coordinator", "action": "transfers-coordinate", "narration": "Rory moves $1,250,000 from accumulation into the new pension account, leaving $34,600 in super, and lines up the transfer balance account report for the ATO."},
     {"at": "Benefits & Eligibility Assessor", "action": "benefits-handoff", "narration": "Ben hands the case to Payments to commence the pension."},
-    {"at": "Payments Officer", "action": "payment", "narration": "Penny raises a Microsoft Teams approval card (commencements of $1m or more need sign-off), then commences the pension on 16 Nov 2026 — first $6,500 payment on 15 Dec 2026.", "duration": 2.5, "outcome": "approved"},
-    {"at": "Client Communications Specialist", "action": "comms-notify", "narration": "Cara sends George a warm \"welcome to retirement\" letter — his pension payments are tax-free from age 60 — and confirms everything with Marcus Tan.", "duration": 2.0}
+    {"at": "Payments Officer", "action": "payment", "narration": "Penny raises a Microsoft Teams approval card (commencements of $1m or more need sign-off), then commences the pension on 16 Nov 2026 — first $6,500 payment on 15 Dec 2026."},
+    {"at": "Client Communications Specialist", "action": "comms-notify", "narration": "Cara sends George a warm \"welcome to retirement\" letter — his pension payments are tax-free from age 60 — and confirms everything with Marcus Tan."}
   ],
   "result": {
     "status": "completed",
@@ -49,15 +24,5 @@
     "figure": "$6,500 a month",
     "icon": "✅",
     "summary": "Outcome: COMPLETED — $1,250,000 Caldova Pension commenced; $78,000 a year paid monthly, Helen as reversionary beneficiary"
-  },
-  "reset": {
-    "office": {
-      "snapStaffToDesks": true,
-      "clearQueues": true,
-      "removeUnscriptedCustomers": true
-    },
-    "neighbourhood": {
-      "incidentZone": "retirement"
-    }
   }
 }

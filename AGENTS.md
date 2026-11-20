@@ -23,15 +23,18 @@ For the industry background, see [docs/background.md](docs/background.md).
 
 ## Core Concept
 
-The demo uses an **operations office**, **Caldova Client Operations**, as its central visual and product metaphor.
+The demo shows Caldova Wealth as a voxel **lakehouse**: a casual, futuristic house on a lake on the edge of Melbourne, read from the top down.
 
-The office is a modern, voxel-style workplace seen from a bird's-eye view, with clearly separated departments. Each department is a real platform operations function. Each staff member is supported by an AI agent that drafts, checks, calculates, summarises and recommends. Humans approve.
+- **Level 3, the idea:** the business owner's office and her idea for running Caldova in the agentic era.
+- **Level 2, the people:** **Caldova Client Operations**, two small teams, one for each side of the business (Wealth Management and Superannuation), with one team leader between them. Each role is a real platform operations function.
+- **Level 1, the agents:** one group of AI agents that supports both teams. Each staff member is supported by an AI agent that drafts, checks, calculates, summarises and recommends. Humans approve.
+- **The engine room:** Microsoft IQ and the Azure services underneath.
 
-Every request follows one lifecycle, shown on the office's "Our Process" board:
+Out front, members, clients and advisers arrive by water taxi at the front desk on the dock, where requests come in. Every request follows one lifecycle:
 
 > **Request → Verify → Assess → Action → Confirm**
 
-For the full visual theme, office layout, departments, and atmosphere guidance, see [docs/theme_office.md](docs/theme_office.md). For the surrounding Melbourne neighbourhood, where life events trigger requests, see [docs/theme_neighhood.md](docs/theme_neighhood.md).
+For the setting, the cast, every page and the visual direction, see [docs/storybook.md](docs/storybook.md).
 
 ---
 
@@ -61,16 +64,16 @@ The demo should broadly follow this flow:
 
 The eight departments and their canonical names:
 
-| # | Department (UI) | Office sign | Staff and role | Agent | Route id | Foundry agent id |
-|---|---|---|---|---|---|---|
-| 1 | Onboarding & Requests | ONBOARDING | Olivia, Onboarding & Requests Officer | Onboarding Agent | `onboarding` | `onboarding-agent` |
-| 2 | Benefits & Eligibility | BENEFITS | Ben, Benefits & Eligibility Assessor | Benefits & Eligibility Agent | `benefits-eligibility` | `benefits-eligibility-agent` |
-| 3 | Investment Solutions | INVESTMENTS | Ivy, Investment Analyst | Investment Analyst Agent | `investment-analyst` | `investment-analyst-agent` |
-| 4 | Financial Crime | FINANCIAL CRIME | Felix, Financial Crime Investigator | Financial Crime Agent | `financial-crime` | `financial-crime-agent` |
-| 5 | Transfers & Rollovers | TRANSFERS | Rory, Transfers & Rollovers Coordinator | Transfers & Rollovers Agent | `transfers-rollovers` | `transfers-rollovers-agent` |
-| 6 | Payments | PAYMENTS | Penny, Payments Officer | Payments Agent | `payments` | `payments-agent` |
-| 7 | Client Communications | COMMS | Cara, Client Communications Specialist | Client Communications Agent | `client-communications` | `client-communications-agent` |
-| 8 | Team Leader Office | TEAM LEADER | Theo, Client Operations Team Leader | Team Leader Agent | `team-leader` | `team-leader-agent` |
+| # | Department (UI) | Staff and role | Agent | Route id | Foundry agent id |
+|---|---|---|---|---|---|
+| 1 | Onboarding & Requests | Olivia, Onboarding & Requests Officer | Onboarding Agent | `onboarding` | `onboarding-agent` |
+| 2 | Benefits & Eligibility | Ben, Benefits & Eligibility Assessor | Benefits & Eligibility Agent | `benefits-eligibility` | `benefits-eligibility-agent` |
+| 3 | Investment Solutions | Ivy, Investment Analyst | Investment Analyst Agent | `investment-analyst` | `investment-analyst-agent` |
+| 4 | Financial Crime | Felix, Financial Crime Investigator | Financial Crime Agent | `financial-crime` | `financial-crime-agent` |
+| 5 | Transfers & Rollovers | Rory, Transfers & Rollovers Coordinator | Transfers & Rollovers Agent | `transfers-rollovers` | `transfers-rollovers-agent` |
+| 6 | Payments | Penny, Payments Officer | Payments Agent | `payments` | `payments-agent` |
+| 7 | Client Communications | Cara, Client Communications Specialist | Client Communications Agent | `client-communications` | `client-communications-agent` |
+| 8 | Team Leader Office | Theo, Client Operations Team Leader | Team Leader Agent | `team-leader` | `team-leader-agent` |
 
 Cara also has a voice agent, `client-communications-voice-agent`, built on Voice Live. Theo runs a group chat that coordinates the other seven agents on one case.
 
@@ -151,7 +154,7 @@ When you generate code, content, UI components, or documentation for this demo, 
 
 **Metaphor and roles**
 
-- Preserve the operations-office metaphor (**Caldova Client Operations**) and keep the **Request → Verify → Assess → Action → Confirm** lifecycle visible.
+- Preserve the lakehouse metaphor (the idea, the people, the agents and the engine room, read from the top down), with **Caldova Client Operations** as the team, and keep the **Request → Verify → Assess → Action → Confirm** lifecycle visible.
 - Represent each AI agent as a specialised role that supports a named human staff member.
 - Show AI supporting, triaging, drafting, summarising, checking, calculating and recommending. Humans approve, override and finalise. Never make the system appear to replace human judgement.
 
@@ -196,7 +199,7 @@ When you generate code, content, UI components, or documentation for this demo, 
 
 **Presentation**
 
-- Keep visual elements aligned with the voxel, isometric office and neighbourhood themes in [docs/theme_office.md](docs/theme_office.md) and [docs/theme_neighhood.md](docs/theme_neighhood.md).
+- Keep visual elements aligned with the voxel lakehouse in [docs/storybook.md](docs/storybook.md): sharp and readable, one accent colour per level and one colour per side of the business.
 - Prefer structured layouts with departments, cards, panels, checklists or workflow stages.
 - Make the demo feel like an enterprise wealth-platform operations product, not a consumer chatbot.
 
@@ -213,10 +216,8 @@ When you generate code, content, UI components, or documentation for this demo, 
 - [docs/characters.md](docs/characters.md): staff and client character profiles, supporting AI agents, and dialogue.
 - [docs/process.md](docs/process.md): operations process detail and AI agent capabilities for each role.
 - [docs/foundry_agents.md](docs/foundry_agents.md): Foundry agent design, covering the Member Case, inputs, tools, outputs, handoffs and human approval.
-- [docs/theme_office.md](docs/theme_office.md): the voxel operations office, with its departments, layout, labels and visual direction.
-- [docs/theme_neighhood.md](docs/theme_neighhood.md): the voxel Melbourne neighbourhood where life events trigger requests.
 - [docs/agent-demo.md](docs/agent-demo.md): the presenter click-path and 10-minute golden path.
-- [docs/storybook.md](docs/storybook.md): the v2 Lakehouse storybook at `/v2`. Caldova is shown as a wealth business for the agentic era with two sides, Wealth Management and Superannuation. The house is read from the top down: the business owner's idea, two small teams, one group of agents (dedicated to a side or shared by both, with each agent's specialised assistants as their own roles), and Microsoft IQ and the Azure services in the engine room. Out front, visitors arrive by water taxi and sign at the front desk on the dock, where a Caldova financial adviser links them with the agents that get them started, and on the roof Caldova throws a party for its customers. The doc covers the new business owner and front-desk adviser characters and every page.
+- [docs/storybook.md](docs/storybook.md): the Lakehouse storybook, the frontend at `/`. Caldova is shown as a wealth business for the agentic era with two sides, Wealth Management and Superannuation. The house is read from the top down: the business owner's idea, two small teams, one group of agents (dedicated to a side or shared by both, with each agent's specialised assistants as their own roles), and Microsoft IQ and the Azure services in the engine room. Out front, visitors arrive by water taxi and sign at the front desk on the dock, where a Caldova financial adviser links them with the agents that get them started, and on the roof Caldova throws a party for its customers. The doc covers the setting, the business owner and front-desk adviser characters, the visual direction and every page.
 - Scenarios:
   - [docs/scenario-1-new-client-onboarding.md](docs/scenario-1-new-client-onboarding.md) (Priya)
   - [docs/scenario-2-account-takeover.md](docs/scenario-2-account-takeover.md) (Grace)
@@ -234,7 +235,7 @@ The demo is called **Wealth Team in a Day**. The fictional business it represent
 
 ## Summary
 
-**Wealth Team in a Day** presents a voxel-style **Caldova Wealth** operations office. Each department is represented by a specialised AI agent working alongside a named human. The purpose is to explain and visualise how AI can assist with:
+**Wealth Team in a Day** presents **Caldova Wealth** as a voxel lakehouse. Its operations team, **Caldova Client Operations**, works on one floor, and each staff member is supported by a specialised AI agent on the floor below. The purpose is to explain and visualise how AI can assist with:
 
 - onboarding and requests
 - benefits and eligibility

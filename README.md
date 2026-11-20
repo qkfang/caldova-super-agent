@@ -13,7 +13,7 @@ Inside **Caldova Client Operations**, each department has its own AI agent that 
 - client communications
 - team leadership
 
-See [AGENTS.md](AGENTS.md) for the demo overview, and the [docs/](docs/) folder for the industry background, characters, process, scenarios, visual themes and the v2 [storybook](docs/storybook.md).
+See [AGENTS.md](AGENTS.md) for the demo overview, and the [docs/](docs/) folder for the industry background, characters, process, scenarios and the Lakehouse [storybook](docs/storybook.md) behind the frontend.
 
 ---
 
@@ -119,7 +119,7 @@ The backend also uses `APP_MCP_URL`, the public base URL where Foundry reaches t
 dotnet run --project src/backend/cs-backend.csproj
 ```
 
-**Frontend** (voxel operations office and neighbourhood, at <http://localhost:5173>; the v2 Lakehouse storybook is at <http://localhost:5173/v2/>):
+**Frontend** (the voxel Lakehouse storybook, at <http://localhost:5173>):
 
 ```powershell
 cd src/frontend
@@ -148,15 +148,9 @@ The backend home page lists the eight agents in Caldova Client Operations. Each 
 
 ![Backend agent operations console](docs/res/app-backend.png)
 
-### Frontend: voxel operations office
+### Frontend: the Lakehouse storybook
 
-The frontend renders Caldova Client Operations as a voxel, isometric office next to a Melbourne neighbourhood. Life events send requests into the office: a new job, an overseas trip, a retirement, a closed café and a family loss. Each request moves between departments while the live activity feed shows what each agent is doing.
-
-![Frontend voxel operations office](docs/res/app-frontend.png)
-
-### Frontend v2: the Lakehouse storybook
-
-At `/v2`, the same team is shown as a storybook you read from the top of a lakehouse to the bottom. Caldova is a wealth business for the agentic era, with two sides: Wealth Management and Superannuation.
+The frontend shows the same team as a voxel storybook you read from the top of a lakehouse to the bottom. Caldova is a wealth business for the agentic era, with two sides: Wealth Management and Superannuation.
 
 - **Level 3** is business owner Maya Ashworth's office and her idea, "the brain", with one half for each side.
 - **Level 2** holds two small teams: the Wealth Management Team and the Superannuation Team, with Theo leading both.
@@ -165,13 +159,13 @@ At `/v2`, the same team is shown as a storybook you read from the top of a lakeh
 
 People and agents move about their floors as they work. Out front, members and clients arrive by water taxi and sign at the front desk on the dock. Up on the roof, Caldova throws a party for them under a big CALDOVA WEALTH sign. Each chapter opens up one level. The finale starts at the dock, then pulls the house apart to trace a member request from top to bottom. See [docs/storybook.md](docs/storybook.md).
 
-![Frontend v2: the Lakehouse storybook](docs/res/storybook/v2-finale.jpg)
+![Frontend: the Lakehouse storybook](docs/res/storybook/v2-finale.jpg)
 
 ---
 
 ## Contributing
 
-Contributions are very welcome! You could add or refine an agent, sharpen a scenario, polish the voxel office or neighbourhood, or fix a typo.
+Contributions are very welcome! You could add or refine an agent, sharpen a scenario, polish the voxel lakehouse, or fix a typo.
 
 Ways to contribute:
 

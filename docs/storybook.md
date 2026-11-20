@@ -1,10 +1,10 @@
-# Storybook — The Lakehouse (v2)
+# Storybook — The Lakehouse
 
 > Part of **Wealth Team in a Day** — the AI operations office demo for **Caldova Wealth**.
 
-The v2 frontend, served at **`/v2`**, tells the Wealth Team in a Day story as a storybook. Caldova Wealth is a wealth management business built for the agentic era. It has **two sides**, Wealth Management and Superannuation, with a **small team for each side** and **one group of AI agents** that supports both. Viewers read the story from the top of a house to the bottom: the business owner's idea, the two teams, the agents, and the Microsoft IQ and Azure services underneath.
+The frontend, served at **`/`**, tells the Wealth Team in a Day story as a storybook. Caldova Wealth is a wealth management business built for the agentic era. It has **two sides**, Wealth Management and Superannuation, with a **small team for each side** and **one group of AI agents** that supports both. Viewers read the story from the top of a house to the bottom: the business owner's idea, the two teams, the agents, and the Microsoft IQ and Azure services underneath.
 
-This document is the source of truth for v2: the setting, the cast, every page and how each page behaves. The page text in [`src/frontend/src/v2/storyData.ts`](../src/frontend/src/v2/storyData.ts) mirrors it, so change both together.
+This document is the source of truth for the frontend: the setting, the cast, every page and how each page behaves. The page text in [`src/frontend/src/v2/storyData.ts`](../src/frontend/src/v2/storyData.ts) mirrors it, so change both together.
 
 ![The Lakehouse: the cover of the storybook](res/storybook/v2-cover.jpg)
 
@@ -30,7 +30,7 @@ Each level hangs off the one above it:
 
 A thread runs through the whole house: **idea → person → agent → Microsoft IQ and Azure**. Whatever the viewer clicks, they can follow that thread up or down.
 
-v1, the operations office and Melbourne neighbourhood at `/`, shows the request lifecycle across departments. v2 shows the same team **in depth**: what sits above the people and what sits underneath them. Both use the same cast, agents and five scenarios.
+Both sides follow one request lifecycle, **Request → Verify → Assess → Action → Confirm**, shown on the process board on Level 2. The finale traces one request through it, from the front desk to the result.
 
 ### The Two Sides
 
@@ -40,13 +40,13 @@ v1, the operations office and Melbourne neighbourhood at `/`, shows the request 
 | **Superannuation** (teal `#14b8a6`) | Caldova Super · Caldova Pension | Superannuation Team: Olivia, Ben, Rory and Penny | Onboarding, Benefits & Eligibility, Transfers & Rollovers, and Payments agents |
 | **Shared by both** (lilac `#8b9cf7`) | Caldova Cash Account | Theo leads both teams | Financial Crime, Client Communications and Team Leader agents |
 
-Cara and Felix sit with the Wealth Management Team (as in v1). Their work, communications and financial crime, spans both sides, so their agents are **shared**. The Super side has the most specialised processes (super law, rollovers and benefit payments), so it has the most dedicated agents. When a Super request needs an investment view, the Super team **calls in** the Wealth side's Investment Analyst.
+Cara and Felix sit with the Wealth Management Team. Their work, communications and financial crime, spans both sides, so their agents are **shared**. The Super side has the most specialised processes (super law, rollovers and benefit payments), so it has the most dedicated agents. When a Super request needs an investment view, the Super team **calls in** the Wealth side's Investment Analyst.
 
 ---
 
 ## The Setting: A Futuristic Lakehouse
 
-Caldova Wealth works from a casual, futuristic lakehouse on the edge of Melbourne. The whole scene is a floating voxel diorama, like the v1 office, with an island of grass, earth and stone layers and a lake carved into its front.
+Caldova Wealth works from a casual, futuristic lakehouse on the edge of Melbourne. The whole scene is a floating voxel diorama, with an island of grass, earth and stone layers and a lake carved into its front.
 
 - **The house:** three storeys of timber, steel and white concrete, stacked with deep cantilevers.
   - There is no glass facade. The floors are open to the lake and the right-hand side, with slim steel rails along the edges, so every level reads clearly from outside.
@@ -83,7 +83,7 @@ Caldova Wealth works from a casual, futuristic lakehouse on the edge of Melbourn
 
 ### Maya Ashworth — Managing Director, Caldova Wealth (Business Owner)
 
-Maya is new in v2. She is the business owner for **both sides** of Caldova: Wealth Management and Superannuation. She sets the goals, decides where to invest, and holds the line on one rule: **people approve every decision that matters**. Like the staff, her name follows the role keyword: **M**aya, **M**anaging director. Her full profile is in [characters.md](characters.md#maya-ashworth--managing-director-business-owner).
+Maya is the business owner for **both sides** of Caldova: Wealth Management and Superannuation. She sets the goals, decides where to invest, and holds the line on one rule: **people approve every decision that matters**. Like the staff, her name follows the role keyword: **M**aya, **M**anaging director. Her full profile is in [characters.md](characters.md#maya-ashworth--managing-director-business-owner).
 
 - **Personality:** curious, practical and people-first.
 - **Typical line:** "If a member has to chase us, we've already let them down."
@@ -115,7 +115,7 @@ Agents never give personal financial advice.
 
 ### Amelia — Financial Adviser, the Front Desk
 
-Amelia is new in v2. She is Caldova's own financial adviser, and she works out front at the front desk on the dock. Like the staff, her name follows the role keyword: **A**melia, **A**dviser. She gives the advice, which agents never do, then links each new customer with the agents that get them started (see [The Dock](#the-dock-and-the-front-desk)). Her full profile is in [characters.md](characters.md#amelia--financial-adviser-front-desk).
+Amelia is Caldova's own financial adviser, and she works out front at the front desk on the dock. Like the staff, her name follows the role keyword: **A**melia, **A**dviser. She gives the advice, which agents never do, then links each new customer with the agents that get them started (see [The Dock](#the-dock-and-the-front-desk)). Her full profile is in [characters.md](characters.md#amelia--financial-adviser-front-desk).
 
 - **Personality:** warm, unhurried and clear.
 - **Typical line:** "Hi Priya! Hannah sent your pack ahead."
@@ -131,7 +131,7 @@ Amelia is new in v2. She is Caldova's own financial adviser, and she works out f
 
 ### The People (Level 2)
 
-The same eight staff as v1, at standing desks, arranged as two wings with Theo between them (see [characters.md](characters.md)):
+The eight staff work at standing desks, arranged as two wings with Theo between them (see [characters.md](characters.md)):
 
 - **Left wing, the Wealth Management Team** on a gold rug: Ivy (Investment Solutions), Cara (Client Communications) and Felix (Financial Crime).
 - **In the middle,** Theo leads both teams from a desk on a lilac rug, with a huddle table in front where both teams meet.
@@ -141,7 +141,7 @@ Nobody is stuck at a desk. Each person heads off on errands as they work and the
 
 ### The Agents (Level 1)
 
-Each person's **Microsoft Foundry agent** has a bay directly under their desk. The agent and each of its two specialised assistants (named in `stepGate.ts` and [foundry_agents.md](foundry_agents.md)) is its own voxel robot, so the floor has **25 roles**: 8 agents, 16 assistants and Cara's voice agent.
+Each person's **Microsoft Foundry agent** has a bay directly under their desk. The agent and each of its two specialised assistants (named in `agentStages.ts` and [foundry_agents.md](foundry_agents.md)) is its own voxel robot, so the floor has **25 roles**: 8 agents, 16 assistants and Cara's voice agent.
 
 - **The agent** is the big robot, with a glowing sash in its side's colour.
 - **Each assistant** carries a prop for its job: Form Extraction a document, NIGO Checklist a clipboard, Eligibility Rules a rule book, Nominations & Consent a stamp, Portfolio Fit a pie chart, Fee Comparison a bar chart, ID Authenticity a magnifier, Risk Timeline a timeline, Fund Lookup & SVS a globe, Rollover Requests a parcel, Benefit Calculator a calculator, Payment Controls a padlock, Letters & Updates an envelope, Tone & Compliance a heart, SLA & Escalations a clock and Approvals & Quality a badge. The voice agent wears a headset.
@@ -275,7 +275,7 @@ The storybook has a cover, four chapters (one per level) and a finale. Each chap
 | **Drag / scroll** | Orbit and zoom at any time |
 | **Home / End** | Cover / finale |
 
-Every page has a deep link, for example `/v2/?page=people`. The address bar updates as the viewer turns pages.
+Every page has a deep link, for example `/?page=people`. The address bar updates as the viewer turns pages.
 
 ---
 
@@ -377,7 +377,7 @@ Every page has a deep link, for example `/v2/?page=people`. The address bar upda
 
 - **Scene:** The finale opens at the dock with the house together. The member's water taxi pulls in, they walk up the jetty and sign at the front desk, Amelia links them with the Onboarding Agent, and Olivia's Form Extraction agent comes out to read the form (see [The Dock](#the-dock-and-the-front-desk)). Once it is signed, the request glows above the desk, and the house pulls apart into an exploded view as the request sets off: all four levels stacked with gaps between them. Threads show the whole house as one tree: gold from the brain to every person, coral from each person to their agent, violet from each agent to Microsoft Foundry.
 - **Narration:** "Now watch a real member request travel through the house. It starts at the dock: the member arrives by water taxi and signs at the front desk, where Amelia links them with the Onboarding Agent and Olivia's Form Extraction agent comes out to read the form. Then the house pulls apart. Each step starts with a person, dips down to their agent and the engine room, and comes back up for a human decision. These are Super requests: they use the Super side's agents and the shared ones, and call in the Wealth side's Investment Analyst when they need an investment view. The result rises to Maya's floor."
-- **The trace:** a glowing orb carries one member's request through the house. The steps come from the v1 scenario beats in `src/frontend/src/scenarios/*.json`, so both versions tell the same five stories. All five are Superannuation member requests.
+- **The trace:** a glowing orb carries one member's request through the house. The steps come from the scenario beats in `src/frontend/src/scenarios/*.json`, which mirror the five scenario documents. All five are Superannuation member requests.
   1. **Arrival:** the member arrives by water taxi, Amelia welcomes them, and they sign at the front desk: Priya her application, George the pension application his adviser has prepared, Tom his hardship application and Robert his mother's death benefit claim. In Grace's story, someone else signs a rollover request in her name while she is in Italy. Amelia links the request with the Onboarding Agent, and when the form is signed, the orb appears above the desk.
   2. **Each step:** the orb stops at the person (Level 2), drops to their agent (Level 1), and dips to the engine-room component that agent leans on. It then comes back up to the person, who decides. A handover is just a short stop.
   3. **Result:** the orb rises to the brain on Level 3 with the outcome.
@@ -434,12 +434,12 @@ Only the level being read is clickable, so a click never lands on something hidd
 
 ## Visual Direction
 
-- Voxel and isometric, like v1: a miniature diorama with a high three-quarter camera.
+- Voxel and isometric: a miniature diorama with a high three-quarter camera.
 - **Casual and futuristic:** warm timber, steel and white concrete, open floors with slim rails (no glass facade), glowing edge strips, holograms, a water taxi, a drone and an EV charger. It should never feel like a data centre brochure.
 - **Sharp, not hazy:** no bloom, halos or glass in the way. Lit parts (signs, screens and edge strips) are flat bright colours on solid backings, and the scene draws at the screen's full resolution, so every label reads cleanly. On a window narrower than 16:9, the view widens instead of cropping the sides.
 - **Alive, not busy:** people and robots move about their floors at an easy pace and always come back to their desks and bays. A speech bubble says what each is doing.
 - **One accent per level:** Idea `#ffc35a` (gold) · People `#ff8f6b` (coral) · Agents `#5ce1ff` (cyan) · Engine Room `#a78bfa` (violet).
-- **One colour per side**, used for rugs, signs, zones, bay frames, sashes and badges: Wealth Management `#c9a14a` (gold) · Superannuation `#14b8a6` (teal) · Shared by both `#8b9cf7` (lilac). These match the v1 team colours. Department colours stay as in v1. Large floor areas such as the Level 2 rugs use a muted mid-tone of the side's colour: pale colours wash out to white in the sunlight, and then the white desks and the people on them are hard to see.
+- **One colour per side**, used for rugs, signs, zones, bay frames, sashes and badges: Wealth Management `#c9a14a` (gold) · Superannuation `#14b8a6` (teal) · Shared by both `#8b9cf7` (lilac). These match the team colours in `personaData.ts`, and each department keeps its own colour. Large floor areas such as the Level 2 rugs use a muted mid-tone of the side's colour: pale colours wash out to white in the sunlight, and then the white desks and the people on them are hard to see.
 - **Two tiers underground:** Microsoft IQ `#e879f9` (fuchsia) on the raised deck, and Azure services `#60a5fa` (blue) around it.
 - **Readable at a glance:** every desk, bay and machine carries a sign, every assistant carries a prop for its job, and each card says what the thing is in plain English before any technical detail. Cards for Maya, Amelia, people, agents, assistants and visitors stay short: one line, then a few labelled facts, including what they are doing now. Any further detail goes into the card's Across the house cross-section, as names to click rather than more text.
 - **Words on screen:** never call anything a "demo". Say "scenario" or "use case" instead, for example the "In the scenarios" note on a card and "Open the onboarding scenario ↗".
@@ -447,7 +447,7 @@ Only the level being read is clickable, so a click never lands on something hidd
 
 ---
 
-## Keeping v2 in Sync
+## Keeping the Storybook in Sync
 
 | What | Where |
 |---|---|
@@ -457,12 +457,12 @@ Only the level being read is clickable, so a click never lands on something hidd
 | The party on the roof: its guests and the sign's text | `src/frontend/src/v2/lakehouseData.ts` (data) and `party.ts` (the deck, sign, DJ, dance floor, toasts and fireworks) |
 | Walking: where people, Maya and the robots go on errands, and their speech bubbles | `src/frontend/src/v2/wander.ts` (walking) and `levels/*.ts` (each floor's errands) |
 | Desk positions, wings (Level 2), zones (Level 1) and the front desk | `src/frontend/src/v2/layout.ts` |
-| Staff, teams, assistants and clients | Shared with v1: `personaData.ts`, `stepGate.ts`, `characterPalettes.ts` |
-| The finale's steps | Shared with v1: `scenarios/*.json` |
+| Staff, teams, assistants and clients | `src/frontend/src/personaData.ts`, `agentStages.ts` and `characterPalettes.ts` |
+| The finale's steps | `src/frontend/src/scenarios/*.json` (mirror the scenario documents) |
 | Levels and the house | `src/frontend/src/v2/levels/*.ts`, `shell.ts`, `exterior.ts` |
 | Cards, including their Across the house cross-section | `src/frontend/src/v2/inspector.ts` |
 | What a click lights up, and the beams it draws and labels, and Amelia's live beams | `src/frontend/src/v2/main.ts` (which beams), `threads.ts` (drawing them) and `callouts.ts` (their labels) |
 
-**To run it locally**, start the frontend with `npm run dev` in `src/frontend`, then open <http://localhost:5173/v2/>.
+**To run it locally**, start the frontend with `npm run dev` in `src/frontend`, then open <http://localhost:5173/>.
 
-**In production**, App Service serves the build with `pm2 serve --spa`, which answers `/v2` with the v1 `index.html`. A one-line guard at the top of that file forwards `/v2` and `/v2/` to `/v2/index.html`, keeping any `?page=` deep link.
+**In production**, App Service serves the build with `pm2 serve --spa`, which answers every path with `index.html`. Old `/v2` links still open the storybook, and the page tidies the address to `/`, keeping any `?page=` deep link.

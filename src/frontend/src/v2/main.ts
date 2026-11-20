@@ -1,5 +1,5 @@
 /**
- * v2 — "The Lakehouse" storybook, served at /v2 (see docs/storybook.md).
+ * "The Lakehouse" storybook, the frontend served at / (see docs/storybook.md).
  *
  * A futuristic, casual lakehouse for a wealth business with two sides,
  * read from the top down:
@@ -68,7 +68,7 @@ const RIGHT = new Vector3(1, 0, 0);
 
 function bootstrap(): void {
   const canvas = document.getElementById("v2Canvas") as HTMLCanvasElement | null;
-  if (!canvas) throw new Error("v2Canvas is missing from v2/index.html");
+  if (!canvas) throw new Error("v2Canvas is missing from index.html");
 
   // Render at the screen's own pixel density (capped at 2x) so signs and floor lettering stay
   // crisp on high-DPI screens instead of being upscaled.
@@ -672,6 +672,8 @@ function bootstrap(): void {
       }
     }
     const url = new URL(window.location.href);
+    // Old /v2 links land here too (the host answers any path with this page); tidy them to the root.
+    url.pathname = "/";
     if (page.id === "cover") url.searchParams.delete("page");
     else url.searchParams.set("page", page.id);
     history.replaceState(null, "", url);

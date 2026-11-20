@@ -3,15 +3,14 @@ import {
   ArcRotateCamera,
   CubicEase,
   EasingFunction,
-  TransformNode,
   Vector3,
 } from "@babylonjs/core";
 
 /**
- * Smoothly retargets an `ArcRotateCamera` to follow scripted scenario beats.
+ * Smoothly retargets an `ArcRotateCamera` for page turns and selections.
  *
  * Every camera move animates `target`, `radius`, `alpha`, `beta` together
- * with a cubic ease so beat transitions feel cinematic without fighting
+ * with a cubic ease so moves feel cinematic without fighting
  * the user's manual orbit input (we only animate on explicit calls).
  */
 export interface CameraFraming {
@@ -30,28 +29,7 @@ export interface CameraFraming {
 const FPS = 60;
 
 export class CameraDirector {
-  /** Snapshot of the camera's "home" framing — restored on releaseFocus. */
-  private readonly home: Required<Omit<CameraFraming, "durationSec">> & {
-    durationSec: number;
-  };
-
-  constructor(private readonly camera: ArcRotateCamera) {
-    this.home = {
-      target: camera.target.clone(),
-      radius: camera.radius,
-      alpha: camera.alpha,
-      beta: camera.beta,
-      durationSec: 1.2,
-    };
-  }
-
-  /** Update the snapshot of the home framing (e.g. after user customises). */
-  saveHome(): void {
-    this.home.target = this.camera.target.clone();
-    this.home.radius = this.camera.radius;
-    this.home.alpha = this.camera.alpha;
-    this.home.beta = this.camera.beta;
-  }
+  constructor(private readonly camera: ArcRotateCamera) {}
 
   /** Animate the camera to a new framing. */
   focus(framing: CameraFraming): void {
@@ -82,7 +60,7 @@ export class CameraDirector {
       this.camera.animations.push(anim);
     };
 
-    // Reset previous animations so a new beat overrides cleanly.
+    // Reset previous animations so a new move overrides cleanly.
     this.camera.animations = [];
 
     if (framing.target) {
@@ -119,29 +97,5 @@ export class CameraDirector {
     }
 
     this.camera.getScene().beginAnimation(this.camera, 0, frames, false);
-  }
-
-  /** Convenience: focus on a TransformNode's world position. */
-  focusNode(
-    node: TransformNode,
-    opts: Omit<CameraFraming, "target"> = {},
-  ): void {
-    // Use absolute world position so parented characters animate correctly.
-    node.computeWorldMatrix(true);
-    const pos = node.getAbsolutePosition().clone();
-    // Aim a touch above feet so the head sits in frame.
-    pos.y += 1.2;
-    this.focus({ ...opts, target: pos });
-  }
-
-  /** Animate back to the saved home framing. */
-  releaseFocus(durationSec = 1.4): void {
-    this.focus({
-      target: this.home.target.clone(),
-      radius: this.home.radius,
-      alpha: this.home.alpha,
-      beta: this.home.beta,
-      durationSec,
-    });
   }
 }

@@ -85,43 +85,43 @@ export const PALETTES: Record<string, VoxelCharacterPalette> = {
   },
 
   // ----- Staff (Caldova Client Operations team) -----
-  // Staff shirts are deliberately matched to each department's accent
-  // colour (see `cubicles` in officeScene.ts and the canon accents) so each
-  // role reads visually with their department zone at a glance.
-  // Olivia — Onboarding & Requests Officer (onboarding sky-blue cubicle)
+  // Staff shirts are deliberately matched to each person's accent colour
+  // (`color` in personaData.ts), so each role reads with their desk and
+  // their agent's bay at a glance.
+  // Olivia — Onboarding & Requests Officer (sky blue)
   onboardingOfficer: {
     skin: "#f3c79b", hair: "#3a2418", shirt: "#0ea5e9", pants: "#1e3a5f",
     shoes: "#1a1a1a", accent: "#ffd166", hairStyle: "ponytail",
     lowerBody: "dress",
   },
-  // Ben — Benefits & Eligibility Assessor (benefits indigo cubicle)
+  // Ben — Benefits & Eligibility Assessor (indigo)
   benefitsAssessor: {
     skin: "#e8b48a", hair: "#1a1a1a", shirt: "#6366f1", pants: "#2d3344",
     shoes: "#1a1a1a", accent: "#1c2230", hairStyle: "short", glasses: true,
     shirtLogo: true,
   },
-  // Ivy — Investment Analyst (investments amber cubicle); Wealth Management
+  // Ivy — Investment Analyst (amber); Wealth Management
   // Team look: tailored navy trousers with a gold-trimmed amber blouse.
   investmentAnalyst: {
     skin: "#d9a37e", hair: "#2d1a10", shirt: "#f59e0b", pants: "#1f2d4a",
     shoes: "#1a1a1a", accent: "#c9a14a", hairStyle: "bun",
   },
-  // Felix — Financial Crime Investigator (financial-crime red cubicle)
+  // Felix — Financial Crime Investigator (red)
   finCrimeInvestigator: {
     skin: "#e8b48a", hair: "#1a1a1a", shirt: "#ef4444", pants: "#1c2230",
     shoes: "#1a1a1a", accent: "#1c2230", hairStyle: "short", facial: "stubble",
   },
-  // Rory — Transfers & Rollovers Coordinator (transfers emerald cubicle)
+  // Rory — Transfers & Rollovers Coordinator (emerald)
   transfersCoord: {
     skin: "#f3c79b", hair: "#b5562a", shirt: "#10b981", pants: "#3a3a44",
     shoes: "#1a1a1a", accent: "#ffffff", hairStyle: "short", shirtLogo: true,
   },
-  // Penny — Payments Officer (payments purple cubicle)
+  // Penny — Payments Officer (purple)
   paymentsOfficer: {
     skin: "#f5d2b3", hair: "#6a3a1e", shirt: "#a855f7", pants: "#2a2440",
     shoes: "#1a1a1a", accent: "#ffd166", hairStyle: "long", lowerBody: "skirt",
   },
-  // Cara — Client Communications Specialist (comms pink cubicle); Wealth
+  // Cara — Client Communications Specialist (pink); Wealth
   // Management Team look: pink blouse with a navy skirt and gold accent.
   commsSpecialist: {
     skin: "#8d5a3b", hair: "#1a1410", shirt: "#ec4899", pants: "#1f2d4a",
@@ -134,41 +134,12 @@ export const PALETTES: Record<string, VoxelCharacterPalette> = {
     shirtLogo: true,
   },
 
-  // ----- Ambient lobby cast (visual-only background staff) -----
-  // Reception greeter — front-of-house in the lobby, smart navy dress,
-  // long hair, friendly accent scarf. Distinct from onboardingOfficer so
-  // the two read as different roles when visible together.
+  // ----- The greeter at the front desk on the dock -----
+  // Smart navy dress, long hair, friendly accent scarf. Distinct from
+  // onboardingOfficer so the two read as different roles when visible together.
   receptionGreeter: {
     skin: "#f0c8a4", hair: "#2a1a12", shirt: "#2a3a5c", pants: "#2a3a5c",
     shoes: "#1a1a1a", accent: "#ffd166", hairStyle: "long",
     lowerBody: "dress", shirtLogo: true,
-  },
-  // Cleaner — teal cleaner's smock, hair tied up in a bun, sturdy shoes.
-  cleaner: {
-    skin: "#e8b48a", hair: "#3a2418", shirt: "#2e8a6e", pants: "#3a3a44",
-    shoes: "#5a3a25", accent: "#ffd166", hairStyle: "bun",
-  },
-  // Parcel courier — brown delivery uniform, cap, short beard.
-  parcelCourier: {
-    skin: "#d9a37e", hair: "#3a2418", shirt: "#7a4f2a", pants: "#3a2a20",
-    shoes: "#1a1a1a", accent: "#ffb347", hairStyle: "cap", facial: "beard",
-    shirtLogo: true,
-  },
-
-  // ----- Ambient Melbourne street cast (neighbourhood pedestrians) -----
-  // CBD commuter — charcoal suit, glasses, red tie.
-  cityCommuter: {
-    skin: "#e8c69a", hair: "#2a2420", shirt: "#3a4150", pants: "#22252e",
-    shoes: "#1a1a1a", accent: "#c44a3a", hairStyle: "short", glasses: true,
-  },
-  // Uni student — oversized hoodie, hood up.
-  cityStudent: {
-    skin: "#c68e6a", hair: "#4a5a7a", shirt: "#4a5a7a", pants: "#2d3344",
-    shoes: "#f4f0e6", hairStyle: "hood",
-  },
-  // Weekend jogger — bright running top, cap, black shorts.
-  cityJogger: {
-    skin: "#f5d2b3", hair: "#c8a050", shirt: "#f59e0b", pants: "#1c1c22",
-    shoes: "#f4f0e6", accent: "#1c2230", hairStyle: "cap",
   },
 };

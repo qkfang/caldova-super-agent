@@ -328,7 +328,7 @@ Each person's AI agents share their first name and are numbered. In the running 
 
 ## Maya Ashworth — Managing Director (Business Owner)
 
-**Role:** The business owner for both sides of Caldova Wealth: Wealth Management (Caldova Wrap and the managed portfolios) and Superannuation (Caldova Super and Caldova Pension). Maya appears on Level 3 of the v2 Lakehouse storybook ([storybook.md](storybook.md)), next to her idea, "the brain". Her name follows the same rule as the staff: **M**aya, **M**anaging director.
+**Role:** The business owner for both sides of Caldova Wealth: Wealth Management (Caldova Wrap and the managed portfolios) and Superannuation (Caldova Super and Caldova Pension). Maya appears on Level 3 of the Lakehouse storybook ([storybook.md](storybook.md)), next to her idea, "the brain". Her name follows the same rule as the staff: **M**aya, **M**anaging director.
 
 **What she does:**
 
@@ -351,7 +351,7 @@ Maya isn't part of the day-to-day operations team and has no AI agent of her own
 
 ## Amelia — Financial Adviser (Front Desk)
 
-**Role:** Caldova's own financial adviser. In the v2 Lakehouse storybook she works out front at the front desk on the dock ([storybook.md](storybook.md#the-dock-and-the-front-desk)), and helps any customer get started on either side. Her name follows the same rule as the staff: **A**melia, **A**dviser.
+**Role:** Caldova's own financial adviser. In the Lakehouse storybook she works out front at the front desk on the dock ([storybook.md](storybook.md#the-dock-and-the-front-desk)), and helps any customer get started on either side. Her name follows the same rule as the staff: **A**melia, **A**dviser.
 
 **What she does:**
 

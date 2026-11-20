@@ -3,51 +3,21 @@
   "scenarioNumber": 2,
   "caseId": "REQ-20261106-OPS002",
   "customerId": "protection",
-  "incidentZone": "protection",
   "amount": 612400,
   "paidAmount": 0,
-  "approveAtBenefits": true,
   "outcome": "rejected",
-  "narrations": {
-    "benefits": "Ben assessing REQ-20261106-OPS002: full-balance rollover to an SMSF — ATO SMSF verification service (SVS) check required",
-    "benefitsResult": "Ben: SVS FAILED — Grace's TFN is not linked to the SMSF and the bank details and ESA don't match. Escalated to Financial Crime",
-    "payment": "Penny reviews REQ-20261106-OPS002 — outbound rollover of $612,400 on hold",
-    "paymentResult": "Request BLOCKED — REQ-20261106-OPS002 outbound rollover cancelled; no funds leave Grace's account",
-    "comms": "Cara reaches Grace on her previously verified number; credentials reset, IDCARE referral and reassurance letter sent — case closed"
-  },
-  "preBenefits": [],
-  "postBenefits": [
-    {
-      "role": "Financial Crime Investigator",
-      "narration": "Felix rates the risk HIGH: contact details changed about 93 hours (under 96) before a full-balance rollover request, a new device on a Sydney IP while Grace's travel notice says Italy, an SMSF registered 9 days ago, a tampered driver licence and a payee-name mismatch.",
-      "duration": 3.0
-    },
-    {
-      "role": "Transfers & Rollovers Coordinator",
-      "narration": "Rory holds the SuperStream rollover — the 3-business-day clock only runs once all required information is received — and cancels the request with the receiving fund.",
-      "duration": 2.5
-    },
-    {
-      "role": "Client Operations Team Leader",
-      "narration": "Theo approves the block, locks Grace's online access and refers the case for a suspicious matter report to AUSTRAC — a human decision, due within 3 business days.",
-      "duration": 2.5
-    }
-  ],
   "beats": [
-    {"at": "customer", "action": "arrive-at-zone", "narration": "Grace flew out of Melbourne Airport on 18 October for a long-planned trip through Italy — a travel notice is on file. Back home, someone has taken over her identity.", "duration": 2.0},
-    {"at": "customer", "action": "walk-to-office", "narration": "A request to roll Grace's entire $612,400 balance to a new SMSF heads to Caldova — lodged in her name, but not by her."},
-    {"at": "customer", "action": "enter-office", "narration": "The rollover request in Grace's name reaches Caldova Client Operations."},
     {"at": "customer", "action": "lodge-at-reception", "narration": "The request lands in the Onboarding inbox at 07:52 on Fri 6 Nov: roll over the full balance of member CS-1058220 to the \"GW Family Superannuation Fund\"."},
     {"at": "Onboarding & Requests Officer", "action": "onboarding-pickup", "narration": "Olivia's agent extracts the request — full balance to an SMSF, a driver licence attached, and contact details changed by phone on 2 November."},
     {"at": "Onboarding & Requests Officer", "action": "onboarding-route", "narration": "Olivia opens case REQ-20261106-OPS002 and routes it to Benefits & Eligibility to check the rollover rules."},
     {"at": "Benefits & Eligibility Assessor", "action": "benefits-pickup", "narration": "Ben checks the rollover against super law — any rollover to an SMSF must first pass the ATO SMSF verification service (SVS)."},
-    {"at": "Benefits & Eligibility Assessor", "action": "benefits-process", "narration": "SVS fails: the SMSF's ABN is registered, but Grace's TFN isn't linked to it and the bank details and ESA don't match. Ben escalates to Financial Crime.", "duration": 2.5},
-    {"at": "Financial Crime Investigator", "action": "fincrime-review", "narration": "Felix rates the risk HIGH: contact details changed about 93 hours (under 96) before a full-balance rollover request, a new device on a Sydney IP while Grace's travel notice says Italy, an SMSF registered 9 days ago, a tampered driver licence and a payee-name mismatch.", "duration": 3.0},
-    {"at": "Transfers & Rollovers Coordinator", "action": "transfers-coordinate", "narration": "Rory holds the SuperStream rollover — the 3-business-day clock only runs once all required information is received — and cancels the request with the receiving fund.", "duration": 2.5},
-    {"at": "Client Operations Team Leader", "action": "team-leader-review", "narration": "Theo approves the block, locks Grace's online access and refers the case for a suspicious matter report to AUSTRAC — a human decision, due within 3 business days.", "duration": 2.5},
+    {"at": "Benefits & Eligibility Assessor", "action": "benefits-process", "narration": "SVS fails: the SMSF's ABN is registered, but Grace's TFN isn't linked to it and the bank details and ESA don't match. Ben escalates to Financial Crime."},
+    {"at": "Financial Crime Investigator", "action": "fincrime-review", "narration": "Felix rates the risk HIGH: contact details changed about 93 hours (under 96) before a full-balance rollover request, a new device on a Sydney IP while Grace's travel notice says Italy, an SMSF registered 9 days ago, a tampered driver licence and a payee-name mismatch."},
+    {"at": "Transfers & Rollovers Coordinator", "action": "transfers-coordinate", "narration": "Rory holds the SuperStream rollover — the 3-business-day clock only runs once all required information is received — and cancels the request with the receiving fund."},
+    {"at": "Client Operations Team Leader", "action": "team-leader-review", "narration": "Theo approves the block, locks Grace's online access and refers the case for a suspicious matter report to AUSTRAC — a human decision, due within 3 business days."},
     {"at": "Benefits & Eligibility Assessor", "action": "benefits-handoff", "narration": "Ben passes the blocked case to Payments to make sure nothing can leave the account."},
-    {"at": "Payments Officer", "action": "payment", "narration": "Penny cancels the outbound rollover payment and confirms no funds leave Grace's account — the full $612,400 stays put.", "duration": 2.5, "outcome": "rejected"},
-    {"at": "Client Communications Specialist", "action": "comms-notify", "narration": "Cara calls Grace on her previously verified mobile (0491 570 157). Grace confirms she never asked — her credentials are reset and a reassurance letter follows.", "duration": 2.0}
+    {"at": "Payments Officer", "action": "payment", "narration": "Penny cancels the outbound rollover payment and confirms no funds leave Grace's account — the full $612,400 stays put."},
+    {"at": "Client Communications Specialist", "action": "comms-notify", "narration": "Cara calls Grace on her previously verified mobile (0491 570 157). Grace confirms she never asked — her credentials are reset and a reassurance letter follows."}
   ],
   "result": {
     "status": "blocked",
@@ -55,15 +25,5 @@
     "figure": "$612,400 protected",
     "icon": "🛡️",
     "summary": "Outcome: BLOCKED — fake SMSF rollover stopped; no funds left the account ($612,400 protected)"
-  },
-  "reset": {
-    "office": {
-      "snapStaffToDesks": true,
-      "clearQueues": true,
-      "removeUnscriptedCustomers": true
-    },
-    "neighbourhood": {
-      "incidentZone": "protection"
-    }
   }
 }

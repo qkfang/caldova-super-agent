@@ -1,5 +1,5 @@
 /**
- * World layout for the v2 lakehouse. One unit is roughly 0.6 m; the voxel
+ * World layout for the lakehouse. One unit is roughly 0.6 m; the voxel
  * characters stand about three units tall.
  *
  * Cross-section (front view, the lake is in front of the house):
@@ -68,7 +68,7 @@ export const CORE: Rect = { x0: -20, x1: -17, z0: 3.5, z1: 7 };
  *             |  Ivy   Cara / Felix    | lead | Olivia Ben / Rory Penny |
  *   Level 1   | Wealth |      Shared by both     |   Dedicated · Super  |
  *
- * Cara and Felix sit with the Wealth Management Team (v1 canon), but their
+ * Cara and Felix sit with the Wealth Management Team (personaData.ts), but their
  * agents serve both sides, so they sit in the shared zone with Theo's.
  */
 export const STATIONS: Record<string, { x: number; z: number }> = {
@@ -106,7 +106,7 @@ export const DOCK_DESK = { x: 2.6, z: -16.0 };
 export const ISLAND = { x0: -46, x1: 46, z0: -34, z1: 30, bottom: -12 };
 export const LAKE = { z0: -34, z1: -12.9, waterY: -0.6, bedY: -7 };
 
-/** Characters are drawn larger than life so they read from the orbit camera (as in v1). */
+/** Characters are drawn larger than life so they read from the orbit camera. */
 export const CHARACTER_SCALE = 1.5;
 
 /** Facing angle (rotation.y) for a voxel character so it looks along (dx, dz). */

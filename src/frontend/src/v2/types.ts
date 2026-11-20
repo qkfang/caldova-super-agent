@@ -1,5 +1,5 @@
 /**
- * Shared types for the v2 "Lakehouse" storybook (`/v2`, see docs/storybook.md).
+ * Shared types for the "Lakehouse" storybook (see docs/storybook.md).
  */
 import type { Mesh, TransformNode } from "@babylonjs/core";
 import type { InfraId, LevelId } from "./lakehouseData";

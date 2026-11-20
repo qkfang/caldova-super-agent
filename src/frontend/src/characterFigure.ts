@@ -1,12 +1,11 @@
 /**
  * Renders a tiny voxel-style character bust as an SVG string, mirroring the
- * look of the same persona in the 3D office (skin tone, hair color/style,
- * shirt color, optional glasses, facial hair, shirt logo). Used by the
- * agents-panel cards in the HUD and the floating profile card so the UI
- * picks up the same character "figure" theme as the office scene.
+ * look of the same persona in the lakehouse (skin tone, hair color/style,
+ * shirt color, optional glasses, facial hair, shirt logo). Used for the
+ * avatars on the lakehouse's inspector cards, so they match the 3D cast.
  */
 
-import type { VoxelCharacterPalette } from "./voxelCharacter";
+import type { VoxelCharacterPalette } from "./characterPalettes";
 
 export function renderCharacterFigureSvg(
   palette: VoxelCharacterPalette,
