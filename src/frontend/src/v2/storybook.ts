@@ -1,7 +1,8 @@
 /**
  * The v2 storybook HUD: the cover, the page card with each chapter's text
- * and navigation, the lift panel, the inspector card, the finale's request
- * trace panel and the hover tooltip. DOM only — main.ts drives the 3D.
+ * and navigation, the lift panel, the arrows that slide the view left or
+ * right, the inspector card, the finale's request trace panel and the hover
+ * tooltip. DOM only — main.ts drives the 3D.
  */
 import { CUSTOMER_PERSONAS, type ScenarioId } from "../personaData";
 import type { InspectorAction, InspectorView } from "./inspector";
@@ -13,6 +14,8 @@ export interface StorybookHooks {
   page(page: StoryPage, index: number): void;
   action(action: InspectorAction): void;
   closeInspector(): void;
+  /** An arrow is pressed (-1 left, 1 right) or let go (0). */
+  pan(dir: -1 | 0 | 1): void;
   scenario(id: ScenarioId): void;
   trace(cmd: "toggle" | "skip" | "speed" | "replay"): void;
 }
@@ -50,6 +53,7 @@ export class Storybook {
   private readonly cover = byId<HTMLElement>("v2-cover");
   private readonly card = byId<HTMLElement>("v2-page");
   private readonly lift = byId<HTMLElement>("v2-lift");
+  private readonly pan = byId<HTMLElement>("v2-pan");
   private readonly inspector = byId<HTMLElement>("v2-inspector");
   private readonly tooltip = byId<HTMLElement>("v2-tooltip");
   private readonly pill = byId<HTMLButtonElement>("v2-pill");
@@ -57,6 +61,7 @@ export class Storybook {
   constructor(private readonly hooks: StorybookHooks) {
     this.renderCover();
     this.renderLift();
+    this.renderPan();
     this.card.addEventListener("click", (e) => this.onCardClick(e));
     this.inspector.addEventListener("click", (e) => {
       const el = (e.target as HTMLElement).closest<HTMLElement>("[data-insp]");
@@ -203,9 +208,36 @@ export class Storybook {
     this.updateLift(0);
   }
 
+  /** Two arrows that slide the view left or right: a press moves a step, and holding keeps it moving. */
+  private renderPan(): void {
+    const arrow = (dir: -1 | 1, label: string, path: string): string =>
+      `<button type="button" class="pan-btn" data-pan="${dir}" title="${label}" aria-label="${label}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${path}"/></svg></button>`;
+    this.pan.innerHTML = arrow(-1, "Move the view left", "M14.5 5 7.5 12l7 7") + arrow(1, "Move the view right", "M9.5 5l7 7-7 7");
+    const button = (e: Event): HTMLElement | null => (e.target as HTMLElement).closest<HTMLElement>("[data-pan]");
+    this.pan.addEventListener("pointerdown", (e) => {
+      const b = button(e);
+      if (!b || e.button !== 0) return;
+      e.preventDefault();
+      // Keep hold of the pointer, so letting go anywhere stops the glide.
+      b.setPointerCapture(e.pointerId);
+      this.hooks.pan(Number(b.dataset.pan) as -1 | 1);
+    });
+    for (const type of ["pointerup", "pointercancel", "lostpointercapture"]) {
+      this.pan.addEventListener(type, () => this.hooks.pan(0));
+    }
+    // Enter or Space on an arrow moves one step (a mouse press is handled on pointerdown).
+    this.pan.addEventListener("click", (e) => {
+      const b = button(e);
+      if (!b || e.detail !== 0) return;
+      this.hooks.pan(Number(b.dataset.pan) as -1 | 1);
+      this.hooks.pan(0);
+    });
+  }
+
   private updateLift(from: number): void {
     const p = PAGES[this.index];
     this.lift.style.setProperty("--accent", p.accent);
+    this.pan.style.setProperty("--accent", p.accent);
     this.lift.querySelectorAll<HTMLElement>(".lift-btn").forEach((b) => {
       const on = Number(b.dataset.page) === this.index;
       b.classList.toggle("on", on);

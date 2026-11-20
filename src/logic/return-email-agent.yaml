@@ -6,7 +6,7 @@ instructions: |
     # Output
     - only output json response as below.
   {
-      "case_number": "REQ-20261103-DEMO01",
+      "case_number": "REQ-20261103-OPS001",
       "member_number": "CS-2049817",
       "client_name": "Priya Natarajan",
       "processed_status": true,

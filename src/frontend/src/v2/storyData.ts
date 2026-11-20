@@ -38,7 +38,7 @@ export const PAGES: StoryPage[] = [
     title: "One business, two sides, four levels",
     body: [
       "Caldova Wealth is a wealth management business built for the agentic era. It has two sides, Wealth Management and Superannuation, and runs both from a lakehouse on the edge of Melbourne.",
-      "Read it from the top down: the owner’s idea, two small teams, one group of AI agents that supports both and, under the waterline, Microsoft IQ and the Azure services that power it all. Out front, members and clients arrive by water taxi and sign in at the front desk on the dock. Up on the roof, Caldova throws a party for them.",
+      "Read it from the top down: the owner’s idea, two small teams, one group of AI agents that supports both and, under the waterline, Microsoft IQ and the Azure services that power it all. Out front, members and clients arrive by water taxi and sign in at the front desk on the dock, where Amelia, Caldova’s financial adviser, gets them started. Up on the roof, Caldova throws a party for them.",
     ],
     hint: "Drag to look around. Press Begin, or take the lift on the right.",
     accent: "#ffc35a",
@@ -100,7 +100,7 @@ export const PAGES: StoryPage[] = [
       "Below the waterline is the platform. Microsoft Foundry is the core: it runs every agent on the gpt-5.4 model. On the raised deck behind it is Microsoft IQ, the context layer every agent shares: Work IQ, Fabric IQ, Foundry IQ and Web IQ.",
       "Around them are the Azure services. Along the glass are the ones particular agents call: MCP tools, Teams approvals, Content Understanding and Voice Live. Behind, Entra ID, Key Vault, Storage, App Service and Application Insights keep it all secure, hosted and observable over HTTPS.",
     ],
-    hint: "Click a component to see which agents use it, how it is secured and what this demo runs today.",
+    hint: "Click a component to see which agents use it, how it is secured and how the scenarios use it today.",
     accent: "#a78bfa",
     mode: { kind: "focus", level: "engine" },
     shot: { target: [-2.6, -4.8, -4.6], radius: 44, alpha: -1.02, beta: 0.78 },
@@ -112,7 +112,7 @@ export const PAGES: StoryPage[] = [
     kicker: "From the dock, through all four levels",
     title: "One request, top to bottom",
     body: [
-      "Now watch a real member request travel through the house. It starts at the dock: the member arrives by water taxi and signs at the front desk, and Olivia’s Form Extraction agent comes out to read the form.",
+      "Now watch a real member request travel through the house. It starts at the dock: the member arrives by water taxi and signs at the front desk, where Amelia links them with the Onboarding Agent and Olivia’s Form Extraction agent comes out to read the form.",
       "Then the house pulls apart. Each step starts with a person, dips down to their agent and the engine room, and comes back up for a human decision. These are Super requests: they use the Super side’s agents and the shared ones, and call in the Wealth side’s Investment Analyst when they need an investment view. The result rises to Maya’s floor.",
     ],
     hint: "Pick a member to replay their request. Pause or skip at any time.",

@@ -63,11 +63,11 @@ All five scenarios use fictional people, practices and funds. The dates are in N
 
 | # | Scenario | Member | Case | Outcome |
 |---|---|---|---|---|
-| 1 | [New client onboarding & super consolidation](docs/scenario-1-new-client-onboarding.md) | Priya Natarajan | `REQ-20261103-DEMO01` | ✅ Completed: account opened, with the invalid nomination and the Death & TPD cover issue caught before any money moved |
-| 2 | [Identity takeover & fake SMSF rollover blocked](docs/scenario-2-account-takeover.md) | Grace Williams | `REQ-20261106-DEMO02` | 🛡️ Blocked: $612,400 protected |
-| 3 | [Retirement: starting an account-based pension](docs/scenario-3-retirement-pension.md) | George Papadopoulos | `REQ-20261109-DEMO03` | ✅ Completed: $1.25m pension started, approved in Teams |
-| 4 | [Financial hardship early release](docs/scenario-4-financial-hardship.md) | Tom Bradley | `REQ-20261111-DEMO04` | 🟡 Partially approved: $10,000 gross ($7,932 net), the legal maximum |
-| 5 | [Death benefit under a binding nomination](docs/scenario-5-death-benefit.md) | Robert Chen | `REQ-20261113-DEMO05` | ✅ Completed: benefit paid 50/50 to Robert and Lily |
+| 1 | [New client onboarding & super consolidation](docs/scenario-1-new-client-onboarding.md) | Priya Natarajan | `REQ-20261103-OPS001` | ✅ Completed: account opened, with the invalid nomination and the Death & TPD cover issue caught before any money moved |
+| 2 | [Identity takeover & fake SMSF rollover blocked](docs/scenario-2-account-takeover.md) | Grace Williams | `REQ-20261106-OPS002` | 🛡️ Blocked: $612,400 protected |
+| 3 | [Retirement: starting an account-based pension](docs/scenario-3-retirement-pension.md) | George Papadopoulos | `REQ-20261109-OPS003` | ✅ Completed: $1.25m pension started, approved in Teams |
+| 4 | [Financial hardship early release](docs/scenario-4-financial-hardship.md) | Tom Bradley | `REQ-20261111-OPS004` | 🟡 Partially approved: $10,000 gross ($7,932 net), the legal maximum |
+| 5 | [Death benefit under a binding nomination](docs/scenario-5-death-benefit.md) | Robert Chen | `REQ-20261113-OPS005` | ✅ Completed: benefit paid 50/50 to Robert and Lily |
 
 For a presenter walkthrough and the 10-minute golden path, see [docs/agent-demo.md](docs/agent-demo.md).
 

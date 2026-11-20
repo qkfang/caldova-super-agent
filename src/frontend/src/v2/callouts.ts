@@ -73,8 +73,11 @@ export class Callouts {
     this.items = specs.map((spec, i) => ({ spec, el: els[i], w: els[i].offsetWidth, h: els[i].offsetHeight }));
   }
 
-  /** Moves each chip beside its node; call once per frame, after the scene has rendered. */
-  update(): void {
+  /**
+   * Moves each chip beside its node; call once per frame, after the scene has rendered. A chip
+   * that would run under `avoid` (the open card) goes on the other side of its node.
+   */
+  update(avoid: DOMRect | null): void {
     if (!this.items.length) return;
     const engine = this.scene.getEngine();
     const camera = this.scene.activeCamera;
@@ -95,8 +98,13 @@ export class Callouts {
         const y = this.screen.y * k;
         on = this.screen.z > 0 && this.screen.z < 1 && x > -40 && x < vw + 40 && y > -40 && y < vh + 40;
         if (on) {
-          const right = x + GAP + item.w <= vw - 8;
-          placed.push({ item, x: right ? x + GAP : x - GAP - item.w, y: y - item.h / 2 });
+          const top = y - item.h / 2;
+          const under = (x0: number): boolean =>
+            !!avoid && x0 < avoid.right && x0 + item.w > avoid.left && top < avoid.bottom && top + item.h > avoid.top;
+          const rightX = x + GAP;
+          const leftX = x - GAP - item.w;
+          const fitsRight = rightX + item.w <= vw - 8 && !under(rightX);
+          placed.push({ item, x: fitsRight || under(leftX) ? rightX : leftX, y: top });
         }
       }
       if (!on) item.el.style.visibility = "hidden";

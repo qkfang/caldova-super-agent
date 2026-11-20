@@ -18,7 +18,7 @@ No one is accused. Humans make the block and suspicious matter report (SMR) deci
 
 | Item | Detail |
 |---|---|
-| Case number | `REQ-20261106-DEMO02` |
+| Case number | `REQ-20261106-OPS002` |
 | Request type | Rollover out to SMSF |
 | Received | Fri 6 Nov 2026, 07:52 |
 | Priority | Urgent |
@@ -60,7 +60,7 @@ No one is accused. Humans make the block and suspicious matter report (SMR) deci
 - On paper, every field is present.
 - Because this is a rollover to an SMSF, the case is tagged for **SMSF verification**.
 - It sets the priority to **Urgent**: a full-balance rollover to an SMSF.
-- It opens case `REQ-20261106-DEMO02` and routes it to Benefits & Eligibility.
+- It opens case `REQ-20261106-OPS002` and routes it to Benefits & Eligibility.
 
 ---
 

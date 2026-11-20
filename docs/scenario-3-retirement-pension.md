@@ -17,7 +17,7 @@ This is the **golden-path** scenario for the demo (see [agent-demo.md](agent-dem
 
 | Item | Detail |
 |---|---|
-| Case number | `REQ-20261109-DEMO03` |
+| Case number | `REQ-20261109-OPS003` |
 | Request type | Pension commencement |
 | Received | Mon 9 Nov 2026, from the adviser |
 | Priority | High |
@@ -61,7 +61,7 @@ After forty years as an electrical contractor, George has put down the tools. Wi
   - the nominated bank account for payments
 - NIGO checklist: nothing is missing.
 - It sets the priority to **High**: a pension commencement of $1 million or more, due to start on 16 Nov.
-- It opens case `REQ-20261109-DEMO03` and routes it to Benefits & Eligibility.
+- It opens case `REQ-20261109-OPS003` and routes it to Benefits & Eligibility.
 
 ---
 

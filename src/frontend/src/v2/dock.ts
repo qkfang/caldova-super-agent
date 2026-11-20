@@ -1,19 +1,22 @@
 /**
- * The dock: the front desk on the Level 1 deck, its greeter, and the
- * self-driving water taxi that brings members, clients and advisers across
- * the lake to sign their application, policy or claim.
+ * The dock: the front desk on the Level 1 deck, its greeter, Amelia the
+ * financial adviser, and the self-driving water taxi that brings members,
+ * clients and advisers across the lake to sign their application, policy or
+ * death benefit claim.
  *
- * Between the finale's requests, everyday visitors drop by. In the finale
- * the chosen member arrives first: they sign at the front desk, Olivia's
- * Form Extraction agent walks out to read the form, and the request sets
- * off through the house (see requestTrace.ts).
+ * Between the finale's requests, everyday visitors drop by. Amelia welcomes
+ * each one and, while they sign, links them with the agents that get them
+ * started: a gold beam runs from her to each agent's bay. In the finale the
+ * chosen member arrives first: they sign at the front desk, Olivia's Form
+ * Extraction agent walks out to read the form, and the request sets off
+ * through the house (see requestTrace.ts).
  */
-import { Color3, DynamicTexture, MeshBuilder, TransformNode } from "@babylonjs/core";
+import { Color3, DynamicTexture, MeshBuilder, Quaternion, TransformNode } from "@babylonjs/core";
 import { PALETTES, type VoxelCharacterPalette } from "../characterPalettes";
-import { CUSTOMER_PERSONAS, type ScenarioId } from "../personaData";
+import { CUSTOMER_PERSONAS, findStaffById, type ScenarioId } from "../personaData";
 import { VoxelCharacter } from "../voxelCharacter";
 import { Batch, type Bubble, type Kit, rng } from "./kit";
-import { ARRIVALS, DROP_INS, IMPOSTOR_PALETTE, SCENARIO_SIDE, SIDES, type SideId } from "./lakehouseData";
+import { ADVISER, ARRIVALS, DROP_INS, IMPOSTOR_PALETTE, SCENARIO_SIDE, SIDES, type SideId } from "./lakehouseData";
 import { CHARACTER_SCALE, DOCK_DESK, FLOOR_Y, LAKE } from "./layout";
 import type { Anchor, Highlights } from "./types";
 
@@ -36,6 +39,13 @@ const WALK_IN: Pt[] = [JETTY, [-1.4, -19.9], [-1.2, -18.6], [DOCK_DESK.x - 0.4, 
 const TAXI_SPEED = 4.6;
 const WALK_SPEED = 2.6;
 const GOLD = Color3.FromHexString("#ffc35a");
+/** Amelia stands out front of the counter: clear of its sign, the visitors' path and the agent's spot. */
+const AMELIA_AT: Pt = [DOCK_DESK.x + 1.9, DOCK_DESK.z - 2.0];
+/** She faces the jetty between visitors, and turns toward the visitor while she helps them. */
+const FACE_IDLE = Math.PI - 0.2;
+const FACE_HELP = Math.PI + 0.7;
+/** Seconds between the agents she links. */
+const LINK_EVERY = 1.6;
 
 type Phase =
   | "away"
@@ -70,6 +80,10 @@ interface Visitor {
   side: SideId;
   summary: string;
   scenario?: ScenarioId;
+  /** Amelia's welcome as they walk up. */
+  welcome: string;
+  /** The agents Amelia links them with while they sign, by staff id. */
+  links: readonly string[];
 }
 
 export interface VisitorInfo {
@@ -91,6 +105,8 @@ export interface DockHooks {
   releaseAgent(): void;
   /** The agent is standing at the desk, ready to read the signed form. */
   agentReady(): boolean;
+  /** Amelia has linked the visitor with these agents, by staff id (empty once they are on their way). */
+  link(staffIds: string[]): void;
 }
 
 export interface Dock {
@@ -110,6 +126,8 @@ export interface Dock {
   /** Freeze the dock while the deck is hidden. */
   setActive(on: boolean): void;
   visitor(): VisitorInfo | null;
+  /** What Amelia is doing right now, for her card. */
+  adviserTask(): string;
   setHighlights(h: Highlights): void;
 }
 
@@ -261,15 +279,51 @@ export function buildDock(kit: Kit, deck: TransformNode, hooks: DockHooks): Dock
   const anchors = new Map<string, Anchor>([["desk", { node: anchorNode, group: "agents", dy: 0.3 }]]);
 
   /* ---------------- The greeter and the visitors ---------------- */
-  const person = (id: string, palette: VoxelCharacterPalette, accent: string): { ch: VoxelCharacter; bubble: Bubble } => {
+  const person = (
+    id: string,
+    palette: VoxelCharacterPalette,
+    accent: string,
+    bubbleY = 2.45,
+  ): { ch: VoxelCharacter; bubble: Bubble } => {
     const ch = new VoxelCharacter(scene, id, palette);
     ch.root.parent = root;
     ch.root.scaling.setAll(CHARACTER_SCALE);
-    return { ch, bubble: kit.bubble(ch.root, 2.45, accent, CHARACTER_SCALE) };
+    return { ch, bubble: kit.bubble(ch.root, bubbleY, accent, CHARACTER_SCALE) };
   };
   const greeter = person("greeter", PALETTES.receptionGreeter, "#c9a14a");
   greeter.ch.root.position.set(dx - 0.4, y, dz + 1.05);
   greeter.ch.root.rotation.y = Math.PI;
+
+  /* ---------------- Amelia, the financial adviser ---------------- */
+  // She gives the advice, then links each visitor with the agents that get them started. Her
+  // tablet shows the agent she is linking, in its colour. Her bubble floats a little higher than
+  // the others', so it clears the FRONT DESK sign behind her.
+  const amelia = person(ADVISER.id, ADVISER.palette, ADVISER.color, 2.75);
+  amelia.ch.root.position.set(AMELIA_AT[0], y, AMELIA_AT[1]);
+  amelia.ch.root.rotation.y = FACE_IDLE;
+  // A slimmer click target, so the greeter behind the counter can still be clicked past her.
+  amelia.ch.getHitbox().scaling.x = 0.75;
+  const shoulder = amelia.ch.getHandAnchor().parent as TransformNode;
+  const holder = new TransformNode("v2_ameliaTablet", scene);
+  holder.parent = amelia.ch.getHandAnchor();
+  holder.rotationQuaternion = new Quaternion();
+  const tilt = new TransformNode("v2_ameliaTabletTilt", scene);
+  tilt.parent = holder;
+  tilt.position.set(0, 0.1, 0.04);
+  tilt.rotation.x = -0.45;
+  kit.block(tilt, 0, -0.18, 0, 0.52, 0.36, 0.05, kit.mat("#1f2937", { specular: 0.3 }), { dynamic: true });
+  const screen = kit.block(tilt, 0, -0.15, 0.03, 0.44, 0.3, 0.012, kit.mat(ADVISER.color, { unlit: true }), { dynamic: true });
+  let arm = 1.1;
+  /** Holds the tablet out, higher while she shows the visitor who she is linking. */
+  const pose = (dt: number, showing: boolean): void => {
+    arm += ((showing ? 1.45 : 1.1) - arm) * Math.min(1, dt * 6);
+    amelia.ch.setArmPose(0.12, arm);
+    // Undo the shoulder's turn, so the tablet stays upright whatever the arm is doing.
+    const s = shoulder.rotation;
+    Quaternion.RotationYawPitchRollToRef(s.y, s.x, s.z, holder.rotationQuaternion!).conjugateInPlace();
+  };
+  pose(1, false);
+  anchors.set("adviser", { node: amelia.ch.root, group: "agents", dy: 3.15 });
 
   const members = new Map<ScenarioId, Visitor>();
   for (const c of CUSTOMER_PERSONAS) {
@@ -284,6 +338,8 @@ export function buildDock(kit: Kit, deck: TransformNode, hooks: DockHooks): Dock
       side,
       summary: c.situation,
       scenario: c.id,
+      welcome: ARRIVALS[c.id].welcome,
+      links: ARRIVALS[c.id].links,
     });
   }
   const grace = CUSTOMER_PERSONAS.find((c) => c.id === "protection");
@@ -296,6 +352,8 @@ export function buildDock(kit: Kit, deck: TransformNode, hooks: DockHooks): Dock
     side: SCENARIO_SIDE.protection,
     summary: `${grace?.name ?? "The member"} is overseas. This request in her name is lodged by someone else, and Felix’s Financial Crime Agent will check it.`,
     scenario: "protection",
+    welcome: ARRIVALS.protection.welcome,
+    links: ARRIVALS.protection.links,
   };
   const dropIns: Visitor[] = DROP_INS.map((d) => ({
     kind: "drop-in",
@@ -305,6 +363,8 @@ export function buildDock(kit: Kit, deck: TransformNode, hooks: DockHooks): Dock
     doc: d.doc,
     side: d.side,
     summary: d.summary,
+    welcome: d.welcome,
+    links: d.links,
   }));
   for (const v of [...members.values(), impostor, ...dropIns]) v.ch.root.setEnabled(false);
 
@@ -347,6 +407,37 @@ export function buildDock(kit: Kit, deck: TransformNode, hooks: DockHooks): Dock
   const greet = (text: string): void => {
     greeter.bubble.say(text);
     greeterSays = 3.4;
+  };
+  let ameliaSays = 0;
+  let taskIndex = 0;
+  /** The greeter and Amelia take turns to say what they are doing between visitors. */
+  let ameliaTurn = false;
+  const advise = (text: string, time = 3.4): void => {
+    amelia.bubble.say(text);
+    ameliaSays = time;
+  };
+  /** The agents Amelia has linked the visitor with so far, and those still to come. */
+  let linked: string[] = [];
+  let toLink: string[] = [];
+  let linkIn = 0;
+  const agentName = (id: string): string => findStaffById(id)?.agent_name ?? "agent";
+  const linkNext = (): void => {
+    const id = toLink.shift();
+    if (!id) return;
+    linked = [...linked, id];
+    hooks.link(linked);
+    screen.material = kit.mat(findStaffById(id)?.color ?? ADVISER.color, { unlit: true });
+    // One speaker at a time: the visitor has said they are signing, now Amelia talks.
+    current?.bubble.hide();
+    advise(linked.length === 1 ? `Linking the ${agentName(id)}` : `And the ${agentName(id)}`, LINK_EVERY + 0.3);
+    linkIn = LINK_EVERY;
+  };
+  const clearLinks = (): void => {
+    toLink = [];
+    if (!linked.length) return;
+    linked = [];
+    hooks.link([]);
+    screen.material = kit.mat(ADVISER.color, { unlit: true });
   };
   const taxiAt = { x: TAXI_IN[0][0], z: TAXI_IN[0][1], heading: -Math.PI / 2 };
   const timeScale = { value: 1 };
@@ -425,6 +516,9 @@ export function buildDock(kit: Kit, deck: TransformNode, hooks: DockHooks): Dock
     sent.setEnabled(false);
     sentFor = 0;
     greeter.bubble.hide();
+    amelia.bubble.hide();
+    ameliaSays = 0;
+    clearLinks();
     phase = "away";
   };
   const callAgent = (): void => {
@@ -454,7 +548,9 @@ export function buildDock(kit: Kit, deck: TransformNode, hooks: DockHooks): Dock
     doc.setEnabled(true);
     pen.setEnabled(true);
     v.bubble.say("Signing here");
-    greet(v.kind === "drop-in" ? "Welcome to Caldova!" : "Just sign here");
+    // Then Amelia links them with the agents that get them started.
+    toLink = [...v.links];
+    linkIn = 1.2;
     wait = time;
     late = 0;
     phase = "signing";
@@ -464,6 +560,20 @@ export function buildDock(kit: Kit, deck: TransformNode, hooks: DockHooks): Dock
     clock += dt;
     greeter.ch.update(dt);
     greeter.ch.root.rotation.y = Math.PI + Math.sin(clock * 0.5) * 0.15;
+    amelia.ch.update(dt);
+    const helping = !!current && (phase === "walking-in" || phase === "signing" || phase === "signed" || phase === "walking-out");
+    const face = (helping ? FACE_HELP : FACE_IDLE) + Math.sin(clock * 0.4 + 1) * 0.1;
+    amelia.ch.root.rotation.y += (face - amelia.ch.root.rotation.y) * Math.min(1, dt * 3);
+    const linking = phase === "signing" || phase === "signed";
+    pose(dt, linking && linked.length > 0);
+    if (linking && toLink.length) {
+      linkIn -= dt;
+      if (linkIn <= 0) linkNext();
+    }
+    if (ameliaSays > 0) {
+      ameliaSays -= dt;
+      if (ameliaSays <= 0) amelia.bubble.hide();
+    }
     if (sentFor > 0) {
       sentFor -= dt;
       sent.position.y = y + 2.15 + (2.5 - sentFor) * 0.12;
@@ -480,7 +590,11 @@ export function buildDock(kit: Kit, deck: TransformNode, hooks: DockHooks): Dock
       greeterWait -= dt;
       if (greeterWait <= 0) {
         greeterWait = 10 + r() * 10;
-        greet(r() > 0.5 ? "Tidying the front desk" : "Checking the water taxi times");
+        ameliaTurn = !ameliaTurn;
+        if (ameliaTurn) {
+          taskIndex = (taskIndex + 1) % ADVISER.tasks.length;
+          advise(ADVISER.tasks[taskIndex]);
+        } else greet(r() > 0.5 ? "Tidying the front desk" : "Checking the water taxi times");
       }
     }
     if (greeterSays > 0) {
@@ -522,6 +636,7 @@ export function buildDock(kit: Kit, deck: TransformNode, hooks: DockHooks): Dock
           route = WALK_IN.slice(1);
           v.ch.setWalking(true);
           greeter.bubble.hide();
+          advise(v.welcome, 3.6);
           callAgent();
           phase = "walking-in";
         }
@@ -573,6 +688,7 @@ export function buildDock(kit: Kit, deck: TransformNode, hooks: DockHooks): Dock
         wait -= dt;
         if (wait <= 0) {
           greeter.bubble.hide();
+          clearLinks();
           route = [...WALK_IN].reverse().slice(1);
           v.ch.setWalking(true);
           phase = "walking-out";
@@ -681,9 +797,28 @@ export function buildDock(kit: Kit, deck: TransformNode, hooks: DockHooks): Dock
         status: phase === "signing" ? `Signing the ${v.doc}` : STATUS[phase],
       };
     },
+    adviserTask(): string {
+      const v = current;
+      if (!v || phase === "away") return ADVISER.tasks[taskIndex];
+      const who =
+        v.kind === "member" ? v.name.split(" ")[0] : v.kind === "impostor" ? "the visitor" : v.name.charAt(0).toLowerCase() + v.name.slice(1);
+      switch (phase) {
+        case "sailing-in":
+        case "stepping-off":
+          return "Meeting the water taxi";
+        case "walking-in":
+          return `Welcoming ${who}`;
+        case "signing":
+        case "signed":
+          return linked.length ? `Linking ${who} with the ${agentName(linked[linked.length - 1])}` : `Helping ${who} get started`;
+        default:
+          return `Seeing ${who} off`;
+      }
+    },
     setHighlights(h: Highlights): void {
       ring.setEnabled(h.desk);
       greeter.ch.setHighlight(h.desk, GOLD);
+      amelia.ch.setHighlight(h.adviser || h.desk, GOLD);
     },
   };
 }

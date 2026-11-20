@@ -56,15 +56,15 @@ Managed portfolio performance figures are illustrative.
 ### `wealth_knowledge/` — case files & operational guides (23)
 
 Case files are named `case-<case number>-<document>.json`, for example
-`case-req-20261111-demo04-hardship-application.json`.
+`case-req-20261111-ops004-hardship-application.json`.
 
 | Scenario | Case | Documents |
 | --- | --- | --- |
-| 1 · New client onboarding & consolidation — Priya Natarajan | `REQ-20261103-DEMO01` (`CS-2049817`) | application pack, Statement of Advice extract, external fund statements, BDBN as lodged, adviser fee consent |
-| 2 · Identity takeover & SMSF rollover blocked — Grace Williams | `REQ-20261106-DEMO02` (`CS-1058220`) | account activity log, travel notice & verified contacts, rollover request & ID review, SVS result |
-| 3 · Retirement: account-based pension — George Papadopoulos | `REQ-20261109-DEMO03` (`CS-1077881` → `CP-3077881`) | pension application, transfer balance account, minimum drawdown calculation |
-| 4 · Financial hardship early release — Tom Bradley | `REQ-20261111-DEMO04` (`CS-1030412`) | hardship application, Services Australia letter, payment calculation |
-| 5 · Death benefit under a binding nomination — Robert Chen (for Mei Chen) | `REQ-20261113-DEMO05` (`CP-3019042`) | death notification, BDBN, death certificate & claimant IDs, benefit calculation |
+| 1 · New client onboarding & consolidation — Priya Natarajan | `REQ-20261103-OPS001` (`CS-2049817`) | application pack, Statement of Advice extract, external fund statements, BDBN as lodged, adviser fee consent |
+| 2 · Identity takeover & SMSF rollover blocked — Grace Williams | `REQ-20261106-OPS002` (`CS-1058220`) | account activity log, travel notice & verified contacts, rollover request & ID review, SVS result |
+| 3 · Retirement: account-based pension — George Papadopoulos | `REQ-20261109-OPS003` (`CS-1077881` → `CP-3077881`) | pension application, transfer balance account, minimum drawdown calculation |
+| 4 · Financial hardship early release — Tom Bradley | `REQ-20261111-OPS004` (`CS-1030412`) | hardship application, Services Australia letter, payment calculation |
+| 5 · Death benefit under a binding nomination — Robert Chen (for Mei Chen) | `REQ-20261113-OPS005` (`CP-3019042`) | death notification, BDBN, death certificate & claimant IDs, benefit calculation |
 
 Operational guides: `guide-financial-crime-red-flags-and-controls.json`,
 `matrix-authority-approvals-and-escalation.json` (approvals, payment limits,
@@ -84,7 +84,7 @@ Each file holds one JSON object, and its `id` must equal the file name without
 | `title` | Human-readable title — what the agents cite. |
 | `category` | `Case File`, `Case Evidence`, `Operations Guide` or `Directory` (`Product & Rules` for projected rules documents). |
 | `requestType` | `New account & consolidation`, `Rollover out to SMSF`, `Pension commencement`, `Financial hardship release`, `Death benefit claim`, or `All`. |
-| `caseNumber` | e.g. `REQ-20261111-DEMO04`; empty for guides. |
+| `caseNumber` | e.g. `REQ-20261111-OPS004`; empty for guides. |
 | `memberNumber` | e.g. `CS-1030412` or `CP-3019042`; empty for guides. |
 | `content` | Body text. |
 | `severity` | `low`, `medium` or `high` (`reference` for projected rules documents). |
@@ -112,7 +112,7 @@ Each file holds one JSON object, and its `id` must equal the file name without
 | File | What it does |
 | --- | --- |
 | `setup-index.ps1` | Creates / updates both indexes and uploads every document (including the rules copy in `wealth_knowledge`). Run once after `bicep/main.bicep` has provisioned the search service. |
-| `ingest-documents.ps1` | Re-uploads the documents without recreating the index schemas. Validates each file first (JSON parse + required fields) and prints a per-index summary. Use after editing or adding a JSON file. |
+| `ingest-documents.ps1` | Re-uploads the documents without recreating the index schemas. Validates each file first (JSON parse + required fields) and prints a per-index summary. Use after editing or adding a JSON file. It also deletes the case files filed under the scenario cases' old numbers (`REQ-…-DEMOnn`, now `REQ-…-OPSnnn`), so an index loaded before the renumbering doesn't keep both. |
 | `wealth_knowledge/*.json` | Member case files and operational guides. |
 | `wealth_rules/*.json` | Product & rule documents. |
 

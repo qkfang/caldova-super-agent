@@ -1,7 +1,7 @@
 {
   "id": "retirement",
   "scenarioNumber": 3,
-  "caseId": "REQ-20261109-DEMO03",
+  "caseId": "REQ-20261109-OPS003",
   "customerId": "retirement",
   "incidentZone": "retirement",
   "amount": 1250000,
@@ -9,7 +9,7 @@
   "approveAtBenefits": true,
   "outcome": "approved",
   "narrations": {
-    "benefits": "Ben assessing REQ-20261109-DEMO03: age-65 condition of release, $2.1m transfer balance cap, 5% minimum drawdown, reversionary nomination",
+    "benefits": "Ben assessing REQ-20261109-OPS003: age-65 condition of release, $2.1m transfer balance cap, 5% minimum drawdown, reversionary nomination",
     "benefitsResult": "Ben: eligible ✓ — $850,000 of cap space remains, FY2026-27 minimum is $38,870 (227 of 365 days), Helen can be reversionary ✓",
     "payment": "Penny prepares the commencement of pension CP-3077881 — $1,250,000, paying $6,500 a month",
     "paymentResult": "Pension STARTED after Teams approval — $1,250,000 commencing 16 Nov 2026; first $6,500 payment on 15 Dec 2026",
@@ -34,7 +34,7 @@
     {"at": "customer", "action": "enter-office", "narration": "George's pension application arrives at Caldova Client Operations."},
     {"at": "customer", "action": "lodge-at-reception", "narration": "Marcus Tan's application lands in the Onboarding inbox: start a Caldova Pension with $1,250,000, paying $78,000 a year monthly, with Helen as reversionary beneficiary."},
     {"at": "Onboarding & Requests Officer", "action": "onboarding-pickup", "narration": "Olivia's agent extracts the commencement amount, income, payment frequency, reversionary nomination and bank details, then runs the NIGO checklist."},
-    {"at": "Onboarding & Requests Officer", "action": "onboarding-route", "narration": "Olivia opens case REQ-20261109-DEMO03 for new pension account CP-3077881 and routes it to Benefits & Eligibility."},
+    {"at": "Onboarding & Requests Officer", "action": "onboarding-route", "narration": "Olivia opens case REQ-20261109-OPS003 for new pension account CP-3077881 and routes it to Benefits & Eligibility."},
     {"at": "Benefits & Eligibility Assessor", "action": "benefits-pickup", "narration": "Ben checks the condition of release, the transfer balance cap, the minimum drawdown and the reversionary nomination."},
     {"at": "Benefits & Eligibility Assessor", "action": "benefits-process", "narration": "Ben confirms George is 66 — condition of release met; $1.25m is within the $2.1m transfer balance cap; $78,000 a year is above the pro-rated $38,870 minimum, and Helen can be reversionary.", "duration": 2.5},
     {"at": "Investment Analyst", "action": "investment-review", "narration": "Ivy builds the income strategy: a cash bucket of two years' payments ($156,000) in cash and term deposits, with the rest in the Balanced model — three strategies compared in a workbook.", "duration": 3.0},

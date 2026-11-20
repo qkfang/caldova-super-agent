@@ -60,7 +60,8 @@ era with two sides, Wealth Management and Superannuation:
   Web IQ) stands on a raised deck behind Microsoft Foundry, with the Azure services around it.
 
 People and agents walk about their floors on errands, with a speech bubble saying what each is
-doing. Out front, visitors arrive by water taxi and sign at the front desk on the dock, and up on
+doing. Out front, visitors arrive by water taxi and sign at the front desk on the dock, where
+Amelia, Caldova's financial adviser, links them with the agents that get them started. Up on
 the roof Caldova throws a party for its customers under a big CALDOVA WEALTH sign. Each
 chapter lifts the levels above it out of the way. Clicking anything follows its thread up or
 down the house. The finale starts at the dock with the member signing, then pulls the house apart
@@ -136,11 +137,11 @@ Five client scenarios can be launched from **Submit a request** (dates are Novem
 
 | # | Client | Life event (zone) | Request | Case | Who works the case | Outcome |
 |---|---|---|---|---|---|---|
-| 1 | Priya Natarajan | New job (Docklands) | New account & consolidation — $138,200 from two old funds | `REQ-20261103-DEMO01` | Olivia → Felix → Ben → Rory → Ivy → Penny → Cara | Completed — account opened; BDBN needs re-signing, Southern Cross rollover held for the insurance-loss check |
-| 2 | Grace Williams | Overseas trip (Airport) | Rollover out to SMSF — full $612,400 balance | `REQ-20261106-DEMO02` | Olivia → Ben → Felix → Rory → Theo → Penny → Cara | Blocked — identity takeover stopped, no funds leave the account |
-| 3 | George Papadopoulos | Retirement (Oakleigh) | Pension commencement — $1,250,000, $78,000 a year | `REQ-20261109-DEMO03` | Olivia → Ben → Ivy → Rory → Penny → Cara | Completed — pension starts 16 Nov 2026 |
-| 4 | Tom Bradley | Café closed (Lygon St) | Financial hardship release — $15,000 requested | `REQ-20261111-DEMO04` | Olivia → Ben → Theo → Ivy → Penny → Cara | Partially approved — $10,000 gross, $7,932 net |
-| 5 | Robert Chen | Family home (Box Hill) | Death benefit under a binding nomination — $486,200 | `REQ-20261113-DEMO05` | Olivia → Theo → Felix → Ben → Ivy → Penny → Cara | Completed — paid 50/50 to Robert and Lily |
+| 1 | Priya Natarajan | New job (Docklands) | New account & consolidation — $138,200 from two old funds | `REQ-20261103-OPS001` | Olivia → Felix → Ben → Rory → Ivy → Penny → Cara | Completed — account opened; BDBN needs re-signing, Southern Cross rollover held for the insurance-loss check |
+| 2 | Grace Williams | Overseas trip (Airport) | Rollover out to SMSF — full $612,400 balance | `REQ-20261106-OPS002` | Olivia → Ben → Felix → Rory → Theo → Penny → Cara | Blocked — identity takeover stopped, no funds leave the account |
+| 3 | George Papadopoulos | Retirement (Oakleigh) | Pension commencement — $1,250,000, $78,000 a year | `REQ-20261109-OPS003` | Olivia → Ben → Ivy → Rory → Penny → Cara | Completed — pension starts 16 Nov 2026 |
+| 4 | Tom Bradley | Café closed (Lygon St) | Financial hardship release — $15,000 requested | `REQ-20261111-OPS004` | Olivia → Ben → Theo → Ivy → Penny → Cara | Partially approved — $10,000 gross, $7,932 net |
+| 5 | Robert Chen | Family home (Box Hill) | Death benefit under a binding nomination — $486,200 | `REQ-20261113-OPS005` | Olivia → Theo → Felix → Ben → Ivy → Penny → Cara | Completed — paid 50/50 to Robert and Lily |
 
 Each scenario is defined in `src/scenarios/<id>.json` and mirrors
 `docs/scenario-N-*.md`. Case numbers match the cases seeded by the backend `CaseStore`.
@@ -221,14 +222,15 @@ src/frontend
     └── v2/                     # The Lakehouse storybook (docs/storybook.md)
         ├── main.ts             # Bootstrap, camera, picking, selection threads, page wiring
         ├── storyData.ts        # Storybook pages: text, camera shots, stack modes
-        ├── lakehouseData.ts    # The two sides, the business owner, the idea, agent sides and roles, handoffs, the front desk and its visitors, Microsoft IQ and Azure components
-        ├── storybook.ts        # Cover, page card, lift panel, inspector, trace panel, keyboard
-        ├── inspector.ts        # Card content for the owner, brain, people, agents, roles, components, the front desk and visitors
+        ├── lakehouseData.ts    # The two sides, the business owner, the idea, agent sides and roles, handoffs, the front desk, Amelia and the visitors, Microsoft IQ and Azure components
+        ├── storybook.ts        # Cover, page card, lift panel, view arrows, inspector, trace panel, keyboard
+        ├── inspector.ts        # Card content for the owner, brain, people, agents, roles, components, the front desk, Amelia and visitors
         ├── levelStack.ts       # House / focus / exploded arrangements of the levels
-        ├── threads.ts          # Glowing threads between levels
+        ├── threads.ts          # Lines between levels: the finale's tree, the selection's beams, and Amelia's live links
+        ├── callouts.ts         # Labels on the far ends of the selection's beams
         ├── requestTrace.ts     # Finale: a scenario's request, from the front desk through the house
         ├── wander.ts           # Walking: errands for people, Maya and the agents' roles, with speech bubbles
-        ├── dock.ts             # The dock: front desk, greeter, water taxi and visitors who sign there
+        ├── dock.ts             # The dock: front desk, greeter, Amelia the adviser, water taxi and visitors who sign there
         ├── party.ts            # The roof: the customers' party, the CALDOVA WEALTH sign, DJ, toasts and fireworks
         ├── exterior.ts         # Floating island, lake, deck, jetty, trees, boats, clouds, drone
         ├── shell.ts            # Shared floor slab, walls, steel rails, lift core and level tag

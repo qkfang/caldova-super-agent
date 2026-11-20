@@ -662,8 +662,8 @@
                     setStatus(data.agentUsed
                         ? 'Cara (live Foundry voice agent) replied. Keep chatting, or start a live call with the mic.'
                         : voiceEnabled
-                            ? 'Cara replied (scripted demo reply). Press the mic for a live Voice Live call.'
-                            : 'Cara replied (scripted demo reply — Foundry not configured). Keep chatting.');
+                            ? 'Cara replied (scripted reply). Press the mic for a live Voice Live call.'
+                            : 'Cara replied (scripted reply — Foundry not configured). Keep chatting.');
                 } catch (err) {
                     setStatus('Could not reach Cara: ' + (err.message || err), true);
                 } finally {

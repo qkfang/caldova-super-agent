@@ -1144,7 +1144,7 @@ public static class PaymentsApi
 
         return new
         {
-            mode = "deterministic-demo",
+            mode = "offline",
             note = "The Foundry agent was not invoked, so the Payments desk ran the payments_* MCP tools locally. These are the tool calls and results behind the panel.",
             toolCalls
         };
@@ -1343,7 +1343,7 @@ public static class PaymentsApi
         var why = !agentConfigured
             ? "the Foundry agent isn't configured"
             : $"the Foundry agent call didn't complete ({Shorten(agentError ?? "no reply", 160)})";
-        sb.AppendLine($"> Deterministic demo run — {why}. The Payments desk ran the payments_* MCP tools locally; see Raw Output for every call.");
+        sb.AppendLine($"> Offline run — {why}. The Payments desk ran the payments_* MCP tools locally; see Raw Output for every call.");
         sb.AppendLine();
 
         switch (run.Flow)

@@ -56,6 +56,17 @@ public static class RequestTypes
 /// </summary>
 public class CaseStore
 {
+    /// <summary>
+    /// Suffix tag of the five seeded scenario cases (<c>REQ-yyyyMMdd-OPSnnn</c>).
+    /// Live case numbers never contain an "O" (see <see cref="GenerateCaseNumber"/>),
+    /// so the tag can't clash with a case opened live.
+    /// </summary>
+    private const string ScenarioTag = "OPS";
+
+    /// <summary>True for the five seeded scenario cases, false for cases opened live.</summary>
+    public static bool IsScenarioCaseNumber(string caseNumber) =>
+        caseNumber.Contains($"-{ScenarioTag}", StringComparison.OrdinalIgnoreCase);
+
     private readonly ConcurrentDictionary<string, CaseRecord> _records =
         new(StringComparer.OrdinalIgnoreCase);
 
@@ -85,10 +96,10 @@ public class CaseStore
     /// <summary>
     /// Pre-populate the store with one case per sample in
     /// <see cref="RequestSampleCatalog"/> (the five canonical scenarios) so
-    /// every downstream demo page has cases to pick from the moment the app
+    /// every downstream agent page has cases to pick from the moment the app
     /// starts. Case numbers are deterministic —
-    /// <c>REQ-{received yyyyMMdd}-DEMO{n}</c> — and match the case ids used by
-    /// the 3D frontend scenario scripts (e.g. <c>REQ-20261103-DEMO01</c>).
+    /// <c>REQ-{received yyyyMMdd}-OPS{nnn}</c> — and match the case ids used by
+    /// the 3D frontend scenario scripts (e.g. <c>REQ-20261103-OPS001</c>).
     /// No-op if the store already contains records.
     /// </summary>
     public void SeedDefaults()
@@ -106,7 +117,7 @@ public class CaseStore
             {
                 stamp = now.ToString("yyyyMMdd");
             }
-            var caseNumber = $"REQ-{stamp}-DEMO{index:00}";
+            var caseNumber = $"REQ-{stamp}-{ScenarioTag}{index:000}";
 
             // Stagger CreatedAt so All() lists scenario 1 (Priya) first.
             _records[caseNumber] = FromFields(

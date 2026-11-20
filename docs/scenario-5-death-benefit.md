@@ -19,7 +19,7 @@ The agents step back and slow down. Humans approve every payment and every word 
 
 | Item | Detail |
 |---|---|
-| Case number | `REQ-20261113-DEMO05` |
+| Case number | `REQ-20261113-OPS005` |
 | Request type | Death benefit claim |
 | Received | Fri 13 Nov 2026 |
 | Priority | High |
@@ -63,7 +63,7 @@ On 13 Nov 2026 Robert emails Caldova to let us know. He attaches a certified cop
 - It extracts the deceased member's details, the date of death, the certified death certificate, the beneficiaries' identification and Robert's contact preferences.
 - **Pension payments stop** on notification.
 - It sets the priority to **High** (bereaved family).
-- It opens case `REQ-20261113-DEMO05` and routes it to the Team Leader as case owner.
+- It opens case `REQ-20261113-OPS005` and routes it to the Team Leader as case owner.
 
 ---
 

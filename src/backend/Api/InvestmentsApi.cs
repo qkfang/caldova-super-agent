@@ -250,7 +250,7 @@ public static class InvestmentsApi
                             : string.IsNullOrWhiteSpace(request.PreviousResponseId)
                                 ? "there's no live conversation to continue"
                                 : "the live agent returned no text";
-                    notes = $"_Offline demo reply — {reason}, so Ivy is answering from the deterministic analysis of the case._\n\n" +
+                    notes = $"_Offline reply — {reason}, so Ivy is answering from the deterministic analysis of the case._\n\n" +
                             OfflineChatReply(record, analysis, request.Message);
                 }
 

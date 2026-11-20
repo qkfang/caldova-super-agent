@@ -516,16 +516,16 @@ public class FinCrimeCaseDocumentStore
             [
                 new(received, false, "request", "Request",
                     $"Request received — {r.RequestType}",
-                    string.IsNullOrWhiteSpace(r.RequestSummary) ? "Captured by the Onboarding demo." : r.RequestSummary,
+                    string.IsNullOrWhiteSpace(r.RequestSummary) ? "Captured by the Onboarding Agent." : r.RequestSummary,
                     "info"),
                 new(received, false, "info", "Account history",
                     "No other account activity recorded",
-                    "This case was opened live by the Onboarding demo, so there is no further account history in the demo data.",
+                    "This case was opened live with the Onboarding Agent, so there is no further account history in the scenario data.",
                     "info"),
             ],
             Screening:
             [
-                new("PEP and sanctions screening", "Not yet run for this case in the demo data", "info"),
+                new("PEP and sanctions screening", "Not yet run for this case in the scenario data", "info"),
             ]);
     }
 

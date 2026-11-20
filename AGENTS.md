@@ -182,6 +182,7 @@ When you generate code, content, UI components, or documentation for this demo, 
 | Outcomes | **completed**, **declined**, **blocked** or **partially approved** |
 
 - Don't use insurance-claims language: claim or claims (except in the phrase "death benefit claim"), insurance policy, excess, loss adjuster, supplier, settlement or repairer. Insurance *inside* super, such as death and TPD cover, may be mentioned where it is relevant.
+- Never call anything on screen a "demo": not in labels, buttons, status lines, letters or case numbers. Say "scenario" or "use case" instead, or "offline" for the scripted fallback when Foundry isn't configured. The five scenario cases are numbered `REQ-YYYYMMDD-OPS001` to `OPS005`.
 - Use the department names exactly as listed above, consistently across UI, code and documentation.
 - Use Australian English (organise, licence, colour, judgement) and Australian conventions: AUD amounts, Australian date formats, and the FY2026-27 rules and numbers in [docs/background.md](docs/background.md).
 
@@ -215,7 +216,7 @@ When you generate code, content, UI components, or documentation for this demo, 
 - [docs/theme_office.md](docs/theme_office.md): the voxel operations office, with its departments, layout, labels and visual direction.
 - [docs/theme_neighhood.md](docs/theme_neighhood.md): the voxel Melbourne neighbourhood where life events trigger requests.
 - [docs/agent-demo.md](docs/agent-demo.md): the presenter click-path and 10-minute golden path.
-- [docs/storybook.md](docs/storybook.md): the v2 Lakehouse storybook at `/v2`. Caldova is shown as a wealth business for the agentic era with two sides, Wealth Management and Superannuation. The house is read from the top down: the business owner's idea, two small teams, one group of agents (dedicated to a side or shared by both, with each agent's specialised assistants as their own roles), and Microsoft IQ and the Azure services in the engine room. Out front, visitors arrive by water taxi and sign at the front desk on the dock, and on the roof Caldova throws a party for its customers. The doc covers the new business owner character and every page.
+- [docs/storybook.md](docs/storybook.md): the v2 Lakehouse storybook at `/v2`. Caldova is shown as a wealth business for the agentic era with two sides, Wealth Management and Superannuation. The house is read from the top down: the business owner's idea, two small teams, one group of agents (dedicated to a side or shared by both, with each agent's specialised assistants as their own roles), and Microsoft IQ and the Azure services in the engine room. Out front, visitors arrive by water taxi and sign at the front desk on the dock, where a Caldova financial adviser links them with the agents that get them started, and on the roof Caldova throws a party for its customers. The doc covers the new business owner and front-desk adviser characters and every page.
 - Scenarios:
   - [docs/scenario-1-new-client-onboarding.md](docs/scenario-1-new-client-onboarding.md) (Priya)
   - [docs/scenario-2-account-takeover.md](docs/scenario-2-account-takeover.md) (Grace)

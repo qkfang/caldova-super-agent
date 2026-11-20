@@ -38,11 +38,11 @@ plus a $180 p.a. account-keeping fee. Returns are illustrative —
 
 | Case | Analysis | Fact sheets |
 | --- | --- | --- |
-| `REQ-20261103-DEMO01` — Priya Natarajan | Model fit vs SoA (Growth) and fees on $138,200: Growth ≈ $1,175, Balanced ≈ $1,120, Index Balanced ≈ $843 p.a. | Growth, Balanced, Index Balanced |
-| `REQ-20261106-DEMO02` — Grace Williams | No investment action — account on hold pending the Financial Crime review | Balanced (holdings snapshot) |
-| `REQ-20261109-DEMO03` — George Papadopoulos | Pension income strategy on $1,250,000: two-year cash bucket ($156,000) + $1,094,000 Balanced, compared with two other structures | Balanced, Conservative |
-| `REQ-20261111-DEMO04` — Tom Bradley | Redemption plan for the $10,000 hardship release: cash first, then Balanced units ($84,300 → about $74,300) | Balanced |
-| `REQ-20261113-DEMO05` — Robert Chen (for Mei Chen) | Redeem the pension portfolio (about $486,200) to cash; final amount depends on sale proceeds | Conservative |
+| `REQ-20261103-OPS001` — Priya Natarajan | Model fit vs SoA (Growth) and fees on $138,200: Growth ≈ $1,175, Balanced ≈ $1,120, Index Balanced ≈ $843 p.a. | Growth, Balanced, Index Balanced |
+| `REQ-20261106-OPS002` — Grace Williams | No investment action — account on hold pending the Financial Crime review | Balanced (holdings snapshot) |
+| `REQ-20261109-OPS003` — George Papadopoulos | Pension income strategy on $1,250,000: two-year cash bucket ($156,000) + $1,094,000 Balanced, compared with two other structures | Balanced, Conservative |
+| `REQ-20261111-OPS004` — Tom Bradley | Redemption plan for the $10,000 hardship release: cash first, then Balanced units ($84,300 → about $74,300) | Balanced |
+| `REQ-20261113-OPS005` — Robert Chen (for Mei Chen) | Redeem the pension portfolio (about $486,200) to cash; final amount depends on sale proceeds | Conservative |
 
 URLs (relative to the app root): `/investments/samples/model-conservative.json`,
 `/investments/samples/model-balanced.json`, `/investments/samples/model-growth.json`,

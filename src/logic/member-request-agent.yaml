@@ -39,7 +39,7 @@ instructions: |
   When any indicator is present: set priority to Urgent, add "Financial Crime" to route_to, list each indicator in financial_crime_flags, recommend a hold and a call-back on the verified contact details held before any change, and never contact the requester on the new details. Flag, never accuse; holding or blocking a request is a human decision.
 
   # Validation
-  - case number, when quoted, must match the format REQ-YYYYMMDD-XXXXXX (e.g. REQ-20261103-DEMO01)
+  - case number, when quoted, must match the format REQ-YYYYMMDD-XXXXXX (e.g. REQ-20261103-OPS001)
   - member number, when quoted, must match CS-NNNNNNN for super or CP-NNNNNNN for pension accounts (e.g. CS-1058220, CP-3019042)
   - received date must be a valid date (YYYY-MM-DD) and not in the future
   - request type must be one of: New account & consolidation, Rollover in, Rollover out, Rollover out to SMSF, Pension commencement, Withdrawal, Financial hardship release, Death benefit claim, Change of details, Other

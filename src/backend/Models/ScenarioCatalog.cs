@@ -57,7 +57,7 @@ public static class ScenarioCatalog
             Customer: "Priya Natarajan",
             Persona: "Priya Natarajan — new advised client (via Yarra Private Wealth)",
             Tagline: "An adviser's application pack becomes a clean, compliant account in one pass.",
-            CaseNumber: "REQ-20261103-DEMO01",
+            CaseNumber: "REQ-20261103-OPS001",
             Outcome: "Account opened ✅",
             Steps: new[]
             {
@@ -88,7 +88,7 @@ public static class ScenarioCatalog
             Customer: "Grace Williams",
             Persona: "Grace Williams — member travelling overseas",
             Tagline: "A full-balance rollover to a nine-day-old SMSF is stopped before a cent leaves.",
-            CaseNumber: "REQ-20261106-DEMO02",
+            CaseNumber: "REQ-20261106-OPS002",
             Outcome: "Request blocked 🛡️",
             Steps: new[]
             {
@@ -119,7 +119,7 @@ public static class ScenarioCatalog
             Customer: "George Papadopoulos",
             Persona: "George Papadopoulos — retiring member (via Bayside Financial Partners)",
             Tagline: "From forty years on the tools to a steady, tax-free income.",
-            CaseNumber: "REQ-20261109-DEMO03",
+            CaseNumber: "REQ-20261109-OPS003",
             Outcome: "Pension started ✅",
             Steps: new[]
             {
@@ -148,7 +148,7 @@ public static class ScenarioCatalog
             Customer: "Tom Bradley",
             Persona: "Tom Bradley — member in financial hardship (direct)",
             Tagline: "Every hardship rule applied — with precision and kindness.",
-            CaseNumber: "REQ-20261111-DEMO04",
+            CaseNumber: "REQ-20261111-OPS004",
             Outcome: "Partially approved — $10,000 🟡",
             Steps: new[]
             {
@@ -177,7 +177,7 @@ public static class ScenarioCatalog
             Customer: "Robert Chen",
             Persona: "Robert Chen — son of the late Mei Chen",
             Tagline: "Taking the paperwork weight off a grieving family.",
-            CaseNumber: "REQ-20261113-DEMO05",
+            CaseNumber: "REQ-20261113-OPS005",
             Outcome: "Benefit paid ✅",
             Steps: new[]
             {

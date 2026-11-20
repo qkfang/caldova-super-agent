@@ -10,8 +10,10 @@
  *
  * The storybook pages open one level at a time (the levels above lift away).
  * Out front, visitors arrive by water taxi and sign at the front desk on the
- * dock. The finale starts there: the member signs, then the house pulls apart
- * to trace their request from the top of the house to the bottom and back.
+ * dock, where Amelia, Caldova's financial adviser, links them with the agents
+ * that get them started. The finale starts there: the member signs, then the
+ * house pulls apart to trace their request from the top of the house to the
+ * bottom and back.
  */
 import {
   ArcRotateCamera,
@@ -20,6 +22,7 @@ import {
   DirectionalLight,
   Engine,
   HemisphericLight,
+  Matrix,
   PointerEventTypes,
   Scene,
   Vector3,
@@ -34,6 +37,7 @@ import { buildExterior } from "./exterior";
 import { inspectorView, nowText, tooltipText, type InspectorAction, type Live } from "./inspector";
 import { Kit } from "./kit";
 import {
+  ADVISER,
   AGENTS,
   DESK_ROLE,
   TIERS,
@@ -54,12 +58,13 @@ import { buildParty } from "./party";
 import { RequestTrace, type TraceFocus, type TraceStep } from "./requestTrace";
 import { Storybook } from "./storybook";
 import { PAGES, pageIndex, type CameraShot, type PageId, type StoryPage } from "./storyData";
-import { Threads, type ThreadSpec } from "./threads";
+import { Threads, anchorPoint, type ThreadSpec } from "./threads";
 import type { Anchor, Highlights, InspectTarget, LevelBuild, StackMode, V2PickMetadata } from "./types";
 
 const CORAL = "#ff8f6b";
 const GOLD = "#ffc35a";
 const VIOLET = "#a78bfa";
+const RIGHT = new Vector3(1, 0, 0);
 
 function bootstrap(): void {
   const canvas = document.getElementById("v2Canvas") as HTMLCanvasElement | null;
@@ -141,12 +146,18 @@ function bootstrap(): void {
     agents: levels.agents.root,
     engine: levels.engine.root,
   });
-  // The dock out front: visitors arrive by water taxi and sign at the front desk, where the
-  // Form Extraction agent comes out to read what they signed.
+  // The dock out front: visitors arrive by water taxi and sign at the front desk, where Amelia
+  // links them with their agents and the Form Extraction agent comes out to read what they signed.
+  let liveLinks: string[] = [];
   const dock = buildDock(kit, exterior.deck, {
     callAgent: () => agentsLevel.callToDesk(),
     releaseAgent: () => agentsLevel.releaseDesk(),
     agentReady: () => agentsLevel.deskReady(),
+    link: (ids) => {
+      liveLinks = ids;
+      agentsLevel.setLinked(new Set(ids));
+      refreshLive();
+    },
   });
   let deckShown = true;
   const setDeck = (on: boolean): void => {
@@ -181,6 +192,7 @@ function bootstrap(): void {
       owner: false,
       brain: false,
       desk: false,
+      adviser: false,
       staff: new Set<string>(),
       agents: new Set<string>(),
       roles: new Set<string>(),
@@ -224,6 +236,10 @@ function bootstrap(): void {
         if (reader) h.staff.add(reader.staffId);
         break;
       }
+      case "adviser":
+        h.adviser = true;
+        for (const l of ADVISER.links) h.agents.add(l.id);
+        break;
       case "party":
         h.party = true;
         break;
@@ -246,7 +262,7 @@ function bootstrap(): void {
     }
     return e;
   };
-  /** The beams for a selection, and a label for each far end the visitor may not see. */
+  /** The beams for a selection, and a label for each end the visitor may not see. */
   const relationFor = (t: InspectTarget | null): { links: ThreadSpec[]; callouts: CalloutSpec[] } => {
     const links: ThreadSpec[] = [];
     const callouts: CalloutSpec[] = [];
@@ -282,7 +298,10 @@ function bootstrap(): void {
     switch (t.type) {
       case "owner":
       case "brain":
-        for (const p of STAFF_PERSONAS) link(end("brain"), end(`staff:${p.id}`), GOLD);
+        for (const p of STAFF_PERSONAS) {
+          link(end("brain"), end(`staff:${p.id}`), GOLD);
+          staffLabel(p.id);
+        }
         break;
       case "staff":
       case "agent":
@@ -303,12 +322,13 @@ function bootstrap(): void {
       }
       case "infra": {
         const users = agentsUsing(t.id);
+        // A few users: their whole chain, named. Every agent: a fan to the bays speaks for itself.
+        const few = users.length <= 3;
         for (const id of users) {
           link(end(`infra:${t.id}`), end(`agent:${id}`), VIOLET);
-          link(end(`agent:${id}`), end(`staff:${id}`), CORAL);
+          if (few) link(end(`agent:${id}`), end(`staff:${id}`), CORAL);
         }
-        // Name the agents when there are only a few; a fan to every agent speaks for itself.
-        if (users.length <= 3) users.forEach(agentLabel);
+        if (few) users.forEach(agentLabel);
         break;
       }
       case "desk":
@@ -321,6 +341,13 @@ function bootstrap(): void {
         staffLabel(reader.staffId);
         break;
       }
+      case "adviser":
+        // Amelia and the agents she links customers with.
+        for (const l of ADVISER.links) {
+          link(end("adviser"), end(`agent:${l.id}`), GOLD);
+          agentLabel(l.id);
+        }
+        break;
     }
     return { links, callouts };
   };
@@ -331,6 +358,7 @@ function bootstrap(): void {
           owner: false,
           brain: !!traceFocus.brain,
           desk: !!traceFocus.desk,
+          adviser: false,
           staff: new Set(traceFocus.staff ? [traceFocus.staff] : []),
           agents: new Set(traceFocus.agent ? [traceFocus.agent] : []),
           roles: new Set(traceFocus.desk ? [DESK_ROLE] : []),
@@ -344,6 +372,26 @@ function bootstrap(): void {
     party.setHighlights(h);
   };
 
+  // Amelia's live links from the front desk to the agents' bays. They show while the dock and the
+  // agents are in view, and give way to anything else the visitor has selected.
+  let liveKey = "";
+  const refreshLive = (): void => {
+    const mode = stack.current;
+    const inView = mode.kind === "house" || (mode.kind === "focus" && mode.level === "agents");
+    const free = !selection || selection.type === "desk" || selection.type === "visitor";
+    const ids = inView && free ? liveLinks : [];
+    const key = ids.join(",");
+    if (key === liveKey) return;
+    liveKey = key;
+    const from = anchor("adviser");
+    const specs: ThreadSpec[] = [];
+    for (const id of ids) {
+      const to = anchor(`agent:${id}`);
+      if (from && to) specs.push({ a: from, b: to, color: GOLD });
+    }
+    threads.setLive(specs);
+  };
+
   /* ---------------- Camera ---------------- */
   const director = new CameraDirector(camera);
   let cameraBusyUntil = 0;
@@ -353,11 +401,70 @@ function bootstrap(): void {
     // Already on the way there: let the flight finish.
     if (flyingTo === s && performance.now() < cameraBusyUntil) return;
     flyingTo = s;
+    panAhead = 0;
     // Take the shortest way round, however far the visitor has orbited.
     const twoPi = Math.PI * 2;
     camera.alpha = s.alpha + ((((camera.alpha - s.alpha) % twoPi) + 3 * Math.PI) % twoPi) - Math.PI;
     director.focus({ target: new Vector3(...s.target), radius: s.radius, alpha: s.alpha, beta: s.beta, durationSec });
     cameraBusyUntil = performance.now() + durationSec * 1000;
+  };
+
+  /* ---------------- Sliding the view left or right ---------------- */
+  // Drag-panning is off, so the arrow panel is how the visitor slides the point the view centres on
+  // (and orbits around) to the left or right, say to see past a card. A press glides one step, and
+  // holding an arrow keeps it moving. Turning the page brings the view back.
+  /** Share of the view's width a press moves, and moves per second while held. */
+  const PAN_STEP = 0.15;
+  const PAN_SPEED = 0.55;
+  /** Seconds an arrow is held before it keeps moving. */
+  const PAN_HOLD = 0.35;
+  /** The centre stays within this reach of the middle of the house and the dock, so the house stays in view. */
+  const PAN_HOME = { x: 0, z: -6 };
+  const PAN_REACH = 30;
+  /** World units still to glide; positive is to the right on screen. */
+  let panAhead = 0;
+  let panDir: -1 | 0 | 1 = 0;
+  let panHeld = 0;
+  const panBy = new Vector3();
+  const viewWidth = (): number => 2 * camera.radius * Math.tan(camera.fov / 2) * engine.getAspectRatio(camera);
+  const pan = (dir: -1 | 0 | 1): void => {
+    panDir = dir;
+    panHeld = 0;
+    if (!dir) return;
+    // The visitor has the camera now: stop any flight, spin or reveal.
+    scene.stopAnimation(camera);
+    flyingTo = null;
+    cameraBusyUntil = 0;
+    coverSpin = false;
+    revealPending = false;
+    panAhead += dir * viewWidth() * PAN_STEP;
+  };
+  const updatePan = (dt: number): void => {
+    if (panDir) {
+      panHeld += dt;
+      if (panHeld > PAN_HOLD) panAhead += panDir * viewWidth() * PAN_SPEED * dt;
+    }
+    if (Math.abs(panAhead) < 0.005) {
+      panAhead = 0;
+      return;
+    }
+    const move = panAhead * (1 - Math.exp(-dt * 9));
+    panAhead -= move;
+    // Along the screen's horizontal, level with the ground. Moving the target in place keeps the
+    // camera's angle and distance, so the whole view slides.
+    camera.getDirectionToRef(RIGHT, panBy);
+    panBy.y = 0;
+    if (panBy.lengthSquared() < 1e-6) return;
+    panBy.normalize().scaleInPlace(move);
+    const t = camera.target;
+    const from = Math.hypot(t.x - PAN_HOME.x, t.z - PAN_HOME.z);
+    const to = Math.hypot(t.x + panBy.x - PAN_HOME.x, t.z + panBy.z - PAN_HOME.z);
+    // Stop at the edge of the reach, but never pull the view back in.
+    if (to > PAN_REACH && to > from) {
+      panAhead = 0;
+      return;
+    }
+    t.addInPlace(panBy);
   };
 
   const setMode = (mode: StackMode): void => {
@@ -367,6 +474,7 @@ function bootstrap(): void {
       level.tag.setEnabled(mode.kind !== "focus" || mode.level === id);
     }
     setDeck(!(mode.kind === "exploded" || (mode.kind === "focus" && mode.level === "engine")));
+    refreshLive();
   };
 
   /* ---------------- The finale's request trace ---------------- */
@@ -421,6 +529,7 @@ function bootstrap(): void {
     staffTask: (id) => peopleLevel.task(id),
     roleTask: (id) => agentsLevel.roleTask(id),
     visitor: () => dock.visitor(),
+    adviserTask: () => dock.adviserTask(),
     partyNow: () => party.now(),
     guestTask: (id) => party.guestTask(id),
   };
@@ -431,6 +540,8 @@ function bootstrap(): void {
     storybook?.showInspector(inspectorView(selection, live));
   };
   // Labels for the far ends of the selection's beams; clicking one goes there.
+  const inspectorEl = document.getElementById("v2-inspector") as HTMLElement;
+  const cardRect = (): DOMRect | null => (inspectorEl.classList.contains("hidden") ? null : inspectorEl.getBoundingClientRect());
   const callouts = new Callouts(
     scene,
     stack,
@@ -438,12 +549,104 @@ function bootstrap(): void {
     (a) => threads.shows(a),
     (a) => runAction(a),
   );
+
+  // When the card covers what was just selected, slide the view so it sits beside the card.
+  let revealPending = false;
+  let focusAnchors: Anchor[] = [];
+  const subjectKey = (t: InspectTarget): string | null => {
+    switch (t.type) {
+      case "staff":
+        return `staff:${t.id}`;
+      case "agent":
+        return `agent:${t.id}`;
+      case "role":
+        return `role:${t.id}`;
+      case "infra":
+        return `infra:${t.id}`;
+      case "owner":
+      case "brain":
+        return t.type;
+      case "desk":
+      case "visitor":
+        return "desk";
+      case "adviser":
+        return "adviser";
+      default:
+        return null;
+    }
+  };
+  /**
+   * Pans the camera so the selection and the far ends of its beams sit in the free space beside
+   * the card (below it on a narrow screen). Does nothing when they are already in view.
+   */
+  const reveal = (): void => {
+    const rect = cardRect();
+    if (!rect || !focusAnchors.length) return;
+    const k = engine.getHardwareScalingLevel();
+    const vp = camera.viewport.toGlobal(engine.getRenderWidth(), engine.getRenderHeight());
+    const transform = scene.getTransformMatrix();
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const pad = 40;
+    // The free space: beside the card when there is room, otherwise below it. Clear of the top bar.
+    const leftRoom = rect.left;
+    const rightRoom = vw - rect.right;
+    const free =
+      Math.max(leftRoom, rightRoom) >= 260
+        ? leftRoom >= rightRoom
+          ? { x0: pad, x1: rect.left - pad, y0: 84, y1: vh - pad }
+          : { x0: rect.right + pad, x1: vw - pad, y0: 84, y1: vh - pad }
+        : { x0: pad, x1: vw - pad, y0: rect.bottom + pad, y1: vh - pad };
+    let x0 = Infinity;
+    let x1 = -Infinity;
+    let y0 = Infinity;
+    let y1 = -Infinity;
+    let depth = 0;
+    let n = 0;
+    const forward = camera.getDirection(Vector3.Forward());
+    const p = new Vector3();
+    for (const a of focusAnchors) {
+      anchorPoint(stack, a, p);
+      const s = Vector3.Project(p, Matrix.IdentityReadOnly, transform, vp);
+      const d = Vector3.Dot(p.subtract(camera.position), forward);
+      if (d <= 0) continue;
+      x0 = Math.min(x0, s.x * k);
+      x1 = Math.max(x1, s.x * k);
+      y0 = Math.min(y0, s.y * k);
+      y1 = Math.max(y1, s.y * k);
+      depth += d;
+      n++;
+    }
+    if (!n) return;
+    const inside = x0 >= free.x0 && x1 <= free.x1 && y0 >= free.y0 && y1 <= free.y1;
+    if (inside) return;
+    // Centre the selection in the free space, and only move up or down when it doesn't fit.
+    const dx = (x0 + x1) / 2 - (free.x0 + free.x1) / 2;
+    const fitsY = y0 >= free.y0 && y1 <= free.y1;
+    const dy = fitsY ? 0 : (y0 + y1) / 2 - (free.y0 + free.y1) / 2;
+    const perPx = (2 * (depth / n) * Math.tan(camera.fov / 2)) / vh;
+    const shift = camera
+      .getDirection(Vector3.Right())
+      .scale(dx * perPx)
+      .addInPlace(camera.getDirection(Vector3.Up()).scale(-dy * perPx));
+    flyingTo = null;
+    panAhead = 0;
+    director.focus({ target: camera.target.add(shift), durationSec: 0.9 });
+    cameraBusyUntil = performance.now() + 900;
+  };
+
   const select = (t: InspectTarget | null): void => {
     selection = t;
+    refreshLive();
     const relation = relationFor(t);
     threads.setSelection(relation.links);
     callouts.set(relation.callouts);
     applyHighlights();
+    const subject = t ? end(subjectKey(t) ?? "") : undefined;
+    focusAnchors = [...new Set([...(subject ? [subject] : []), ...relation.links.flatMap((l) => [l.a, l.b])])];
+    revealPending = !!t;
+    // Hold the view still while a card is open.
+    if (t) coverSpin = false;
     if (t) renderInspector();
     else storybook?.hideInspector();
   };
@@ -495,6 +698,7 @@ function bootstrap(): void {
     page: (page) => onPage(page),
     action: (a) => runAction(a),
     closeInspector: () => select(null),
+    pan: (dir) => pan(dir),
     scenario: (id) => startTrace(id),
     trace: (cmd) => {
       if (cmd === "toggle") trace.paused = !trace.paused;
@@ -523,6 +727,7 @@ function bootstrap(): void {
     if (meta.kind === "character") {
       if (meta.id === "owner") return { type: "owner" };
       if (meta.id === "greeter") return { type: "desk" };
+      if (meta.id === ADVISER.id) return { type: "adviser" };
       if (meta.id.startsWith("visitor:")) return { type: "visitor" };
       if (meta.id.startsWith("guest:")) return { type: "guest", id: meta.id.slice("guest:".length) };
       if (meta.id.startsWith("party:")) return { type: "party" };
@@ -537,6 +742,8 @@ function bootstrap(): void {
       hoverAt = { x: scene.pointerX, y: scene.pointerY };
     } else if (info.type === PointerEventTypes.POINTERDOWN) {
       coverSpin = false;
+      // The visitor has the camera now.
+      revealPending = false;
     } else if (info.type === PointerEventTypes.POINTERTAP) {
       const t = pickTarget(scene.pointerX, scene.pointerY);
       if (t) select(t);
@@ -583,12 +790,18 @@ function bootstrap(): void {
     // The party only runs while the roof is showing.
     if (stack.alpha("roof") > 0.01) party.update(dt);
     threads.update(dt);
+    updatePan(dt);
     trace.update(dt);
+    if (revealPending && now >= cameraBusyUntil) {
+      revealPending = false;
+      reveal();
+    }
     nowClock += dt;
     if (selection && nowClock > 0.4) {
       nowClock = 0;
       // A new visitor at the front desk gets a fresh card; otherwise just the "Now" line moves on.
-      if ((selection.type === "visitor" || selection.type === "desk") && (dock.visitor()?.name ?? null) !== shownVisitor) {
+      const atDesk = selection.type === "visitor" || selection.type === "desk" || selection.type === "adviser";
+      if (atDesk && (dock.visitor()?.name ?? null) !== shownVisitor) {
         renderInspector();
       } else {
         book.setInspectorNow(nowText(selection, live));
@@ -608,7 +821,7 @@ function bootstrap(): void {
       hoverAt = null;
     }
     scene.render();
-    callouts.update();
+    callouts.update(cardRect());
   });
   window.addEventListener("resize", () => {
     engine.resize();

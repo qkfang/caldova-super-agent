@@ -1,7 +1,7 @@
 {
   "id": "protection",
   "scenarioNumber": 2,
-  "caseId": "REQ-20261106-DEMO02",
+  "caseId": "REQ-20261106-OPS002",
   "customerId": "protection",
   "incidentZone": "protection",
   "amount": 612400,
@@ -9,10 +9,10 @@
   "approveAtBenefits": true,
   "outcome": "rejected",
   "narrations": {
-    "benefits": "Ben assessing REQ-20261106-DEMO02: full-balance rollover to an SMSF — ATO SMSF verification service (SVS) check required",
+    "benefits": "Ben assessing REQ-20261106-OPS002: full-balance rollover to an SMSF — ATO SMSF verification service (SVS) check required",
     "benefitsResult": "Ben: SVS FAILED — Grace's TFN is not linked to the SMSF and the bank details and ESA don't match. Escalated to Financial Crime",
-    "payment": "Penny reviews REQ-20261106-DEMO02 — outbound rollover of $612,400 on hold",
-    "paymentResult": "Request BLOCKED — REQ-20261106-DEMO02 outbound rollover cancelled; no funds leave Grace's account",
+    "payment": "Penny reviews REQ-20261106-OPS002 — outbound rollover of $612,400 on hold",
+    "paymentResult": "Request BLOCKED — REQ-20261106-OPS002 outbound rollover cancelled; no funds leave Grace's account",
     "comms": "Cara reaches Grace on her previously verified number; credentials reset, IDCARE referral and reassurance letter sent — case closed"
   },
   "preBenefits": [],
@@ -39,7 +39,7 @@
     {"at": "customer", "action": "enter-office", "narration": "The rollover request in Grace's name reaches Caldova Client Operations."},
     {"at": "customer", "action": "lodge-at-reception", "narration": "The request lands in the Onboarding inbox at 07:52 on Fri 6 Nov: roll over the full balance of member CS-1058220 to the \"GW Family Superannuation Fund\"."},
     {"at": "Onboarding & Requests Officer", "action": "onboarding-pickup", "narration": "Olivia's agent extracts the request — full balance to an SMSF, a driver licence attached, and contact details changed by phone on 2 November."},
-    {"at": "Onboarding & Requests Officer", "action": "onboarding-route", "narration": "Olivia opens case REQ-20261106-DEMO02 and routes it to Benefits & Eligibility to check the rollover rules."},
+    {"at": "Onboarding & Requests Officer", "action": "onboarding-route", "narration": "Olivia opens case REQ-20261106-OPS002 and routes it to Benefits & Eligibility to check the rollover rules."},
     {"at": "Benefits & Eligibility Assessor", "action": "benefits-pickup", "narration": "Ben checks the rollover against super law — any rollover to an SMSF must first pass the ATO SMSF verification service (SVS)."},
     {"at": "Benefits & Eligibility Assessor", "action": "benefits-process", "narration": "SVS fails: the SMSF's ABN is registered, but Grace's TFN isn't linked to it and the bank details and ESA don't match. Ben escalates to Financial Crime.", "duration": 2.5},
     {"at": "Financial Crime Investigator", "action": "fincrime-review", "narration": "Felix rates the risk HIGH: contact details changed about 93 hours (under 96) before a full-balance rollover request, a new device on a Sydney IP while Grace's travel notice says Italy, an SMSF registered 9 days ago, a tampered driver licence and a payee-name mismatch.", "duration": 3.0},

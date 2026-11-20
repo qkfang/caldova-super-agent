@@ -117,6 +117,8 @@ export interface AgentsLevelBuild extends LevelBuild {
   deskReady(): boolean;
   /** What a role is doing right now, for the inspector. */
   roleTask(id: string): string | null;
+  /** Light up the bays Amelia has linked the visitor at the front desk with, by staff id. */
+  setLinked(ids: ReadonlySet<string>): void;
 }
 
 /** What a role's robot carries, built in robot space (it faces -z). */
@@ -654,6 +656,8 @@ export function buildAgentsLevel(kit: Kit): AgentsLevelBuild {
   batch.flush();
 
   let selected: ReadonlySet<string> = new Set();
+  let linked: ReadonlySet<string> = new Set();
+  const lit = (id: string): boolean => selected.has(id) || linked.has(id);
   let introT = -1;
   const pointOnPath = (pk: Packet, f: number, out: Vector3): void => {
     // Ping-pong along the polyline so packets go out to the bay and come back.
@@ -690,7 +694,7 @@ export function buildAgentsLevel(kit: Kit): AgentsLevelBuild {
       // Called while the floor was out of the way: go now it is back in place.
       if (deskCalled && !deskPinned && !lifted) sendToDesk();
       pods.forEach((pod, i) => {
-        const on = selected.has(pod.id);
+        const on = lit(pod.id);
         // Bays power up one after another during the chapter intro.
         pod.power = introT >= 0 ? Math.min(1, Math.max(0, (introT - i * 0.18) / 0.5)) : 1;
         const glow = (0.12 + 0.28 * pod.power) * (on ? 1.6 : 1);
@@ -743,7 +747,7 @@ export function buildAgentsLevel(kit: Kit): AgentsLevelBuild {
     },
     setHighlights(h: Highlights): void {
       selected = h.agents;
-      for (const pod of pods) pod.ring.setEnabled(selected.has(pod.id));
+      for (const pod of pods) pod.ring.setEnabled(lit(pod.id));
       for (const rb of robots) {
         rb.ring.setEnabled(h.roles.has(rb.role.id));
         // A bay that is selected, or working on the finale's request, calls its team home to work.
@@ -769,6 +773,10 @@ export function buildAgentsLevel(kit: Kit): AgentsLevelBuild {
     },
     roleTask(id: string): string | null {
       return byRole.get(id)?.wanderer.task ?? null;
+    },
+    setLinked(ids: ReadonlySet<string>): void {
+      linked = ids;
+      for (const pod of pods) pod.ring.setEnabled(lit(pod.id));
     },
   };
 }

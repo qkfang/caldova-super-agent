@@ -23,6 +23,8 @@ export type InspectTarget =
   | { type: "infra"; id: InfraId }
   | { type: "desk" }
   | { type: "visitor" }
+  /** Amelia, the financial adviser at the front desk. */
+  | { type: "adviser" }
   | { type: "party" }
   | { type: "guest"; id: string };
 
@@ -46,6 +48,8 @@ export interface Highlights {
   brain: boolean;
   /** The front desk on the dock. */
   desk: boolean;
+  /** Amelia, the financial adviser at the front desk. */
+  adviser: boolean;
   staff: ReadonlySet<string>;
   /** Agent bays, by staff id. */
   agents: ReadonlySet<string>;

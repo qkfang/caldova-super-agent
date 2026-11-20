@@ -68,7 +68,7 @@ public class TransfersMcpTools
     [McpServerTool(Name = "generateTransferRequestPdf"),
      Description("Generate the branded Caldova Wealth rollover / transfer request PDF for a case once the transfer plan is settled. Each transfer is printed with its counterparty, direction, amount and status (DISPATCHED, HELD, SCHEDULED), plus insurance-loss warnings, the SMSF verification result and the 3-business-day service level. Returns JSON with a downloadUrl the operator can click.")]
     public string GenerateTransferRequestPdf(
-        [Description("Case number, e.g. REQ-20261103-DEMO01.")] string caseNumber,
+        [Description("Case number, e.g. REQ-20261103-OPS001.")] string caseNumber,
         [Description("Member's full name (for a death benefit, the deceased member).")] string memberName,
         [Description("Caldova member or account number, e.g. CS-2049817.")] string memberNumber,
         [Description("JSON array of transfers: [{ \"counterparty\": \"Harbourline Retail Super\", \"counterpartyId\": \"HRB0007AU\", \"direction\": \"Rollover in\", \"transferType\": \"SuperStream rollover — full balance\", \"amount\": 41800, \"status\": \"Dispatched\", \"detail\": \"No insurance held\" }]. Use [] when no transfer is required.")]

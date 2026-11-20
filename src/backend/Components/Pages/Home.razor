@@ -40,7 +40,7 @@
 <section id="agents" class="home-section" aria-labelledby="agents-title">
     <div class="section-head">
         <h2 id="agents-title">AI agents</h2>
-        <p>Open an agent to run its live demo.</p>
+        <p>Open an agent to run it live.</p>
     </div>
     <div class="agent-grid">
         @foreach (var (agent, index) in AgentCatalog.All.Select((a, i) => (a, i + 1)))
@@ -53,7 +53,7 @@
                 <h3>@agent.Name</h3>
                 <div class="agent-card-persona">@agent.Persona</div>
                 <p>@agent.Tagline</p>
-                <span class="agent-card-cta">Open demo <span aria-hidden="true">→</span></span>
+                <span class="agent-card-cta">Open agent <span aria-hidden="true">→</span></span>
             </a>
         }
     </div>

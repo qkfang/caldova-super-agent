@@ -284,7 +284,7 @@ public class TeamLeaderGroupChatService
         {
             await EmitLeaderAsync(session, "info",
                 $"Opening group chat for case {memberCase.CaseNumber} — {memberCase.ClientName}, {Lower(memberCase.RequestType)}. " +
-                "Demo mode: Foundry isn't configured, so this is a scripted replay built from the case facts.");
+                "Offline mode: Foundry isn't configured, so this is a scripted replay built from the case facts.");
             await RunScriptCoreAsync(session, memberCase);
         }
         catch (Exception ex)

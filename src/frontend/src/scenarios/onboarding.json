@@ -1,7 +1,7 @@
 {
   "id": "onboarding",
   "scenarioNumber": 1,
-  "caseId": "REQ-20261103-DEMO01",
+  "caseId": "REQ-20261103-OPS001",
   "customerId": "onboarding",
   "incidentZone": "onboarding",
   "amount": 138200,
@@ -9,9 +9,9 @@
   "approveAtBenefits": true,
   "outcome": "approved",
   "narrations": {
-    "benefits": "Ben assessing REQ-20261103-DEMO01: s99FA adviser fee consent ($3,300 p.a.), BDBN witnesses and target market (TMD) fit",
+    "benefits": "Ben assessing REQ-20261103-OPS001: s99FA adviser fee consent ($3,300 p.a.), BDBN witnesses and target market (TMD) fit",
     "benefitsResult": "Ben: account can open — fee consent valid ✓, TMD fit ✓; BDBN has one witness ✗, treated as non-binding until re-signed",
-    "payment": "Penny prepares investment instructions for REQ-20261103-DEMO01 — Growth model, 1% kept in the Caldova Cash Account",
+    "payment": "Penny prepares investment instructions for REQ-20261103-OPS001 — Growth model, 1% kept in the Caldova Cash Account",
     "paymentResult": "Account CS-2049817 OPENED — about $138,200 of rollovers to be invested in the Growth model on receipt",
     "comms": "Cara emails Priya a welcome pack and sends Hannah Lewis an adviser update (BDBN re-sign, insurance confirmation) — case closed"
   },
@@ -40,7 +40,7 @@
     {"at": "customer", "action": "enter-office", "narration": "Priya's application pack arrives at Caldova Client Operations."},
     {"at": "customer", "action": "lodge-at-reception", "narration": "The pack lands in the Onboarding inbox: a Caldova Super (Select) application in the Growth model, two rollovers, a $3,300 p.a. adviser fee consent and a BDBN naming Arjun."},
     {"at": "Onboarding & Requests Officer", "action": "onboarding-pickup", "narration": "Olivia's agent extracts every field from the pack and runs the NIGO checklist — ID verified electronically ✓, TFN supplied ✓, signatures ✓."},
-    {"at": "Onboarding & Requests Officer", "action": "onboarding-route", "narration": "Olivia opens case REQ-20261103-DEMO01 for new member CS-2049817 and routes it for a KYC/AML screen, then to Benefits & Eligibility."},
+    {"at": "Onboarding & Requests Officer", "action": "onboarding-route", "narration": "Olivia opens case REQ-20261103-OPS001 for new member CS-2049817 and routes it for a KYC/AML screen, then to Benefits & Eligibility."},
     {"at": "Financial Crime Investigator", "action": "fincrime-review", "narration": "Felix runs KYC/AML screening on Priya — identity verified electronically, no PEP or sanctions match. All clear.", "duration": 2.5},
     {"at": "Benefits & Eligibility Assessor", "action": "benefits-pickup", "narration": "Ben checks the adviser fee consent, the beneficiary nomination and the product fit against the PDS, the trust deed and super law."},
     {"at": "Benefits & Eligibility Assessor", "action": "benefits-process", "narration": "Ben: s99FA fee consent valid ✓, TMD fit ✓ — but the BDBN has only one witness, so it is treated as non-binding until Priya re-signs it in front of two adult witnesses who are not beneficiaries.", "duration": 2.5},

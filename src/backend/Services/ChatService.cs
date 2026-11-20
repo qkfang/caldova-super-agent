@@ -66,7 +66,7 @@ public class ChatService
         }
 
         return
-            "Thanks for your message — this is the Caldova Wealth member assistant (demo mode).\n\n" +
+            "Thanks for your message — this is the Caldova Wealth member assistant (offline mode).\n\n" +
             $"You asked: \"{trimmed}\"\n\n" +
             "In production, Caldova's specialised operations agents (Onboarding, Benefits & Eligibility, " +
             "Investment Solutions, Financial Crime, Transfers & Rollovers, Payments, Client Communications, " +

@@ -283,7 +283,7 @@ public static class TeamLeaderApi
     }
 
     private static bool IsSeeded(CaseRecord c) =>
-        c.CaseNumber.Contains("-DEMO", StringComparison.OrdinalIgnoreCase);
+        CaseStore.IsScenarioCaseNumber(c.CaseNumber);
 
     private static string Sample(CaseRecord c) => (c.SampleId ?? string.Empty).ToLowerInvariant();
 

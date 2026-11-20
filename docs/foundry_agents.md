@@ -27,9 +27,9 @@ All agents read from and write to one shared object, the **Member Case**.
 
 All agents read from and write to a common case record. The example column shows George's pension case ([scenario 3](scenario-3-retirement-pension.md)).
 
-| Field | Description | Example: `REQ-20261109-DEMO03` |
+| Field | Description | Example: `REQ-20261109-OPS003` |
 |---|---|---|
-| `case_number` | Case reference, `REQ-YYYYMMDD-XXXXXX` | `REQ-20261109-DEMO03` |
+| `case_number` | Case reference, `REQ-YYYYMMDD-XXXXXX` | `REQ-20261109-OPS003` |
 | `member_number` | Account number: `CS-…` for super, `CP-…` for pension | `CS-1077881`, and the new pension `CP-3077881` |
 | `client_name` | Member or client name | George Papadopoulos |
 | `product` | Product and tier | Caldova Super (Select), moving to Caldova Pension |
@@ -743,7 +743,7 @@ Marcus Tan emails Caldova on 9 Nov 2026:
 
 > George Papadopoulos (CS-1077881) would like to start a Caldova Pension with $1,250,000, paying $78,000 a year monthly, with his wife Helen as reversionary beneficiary. Application attached.
 
-The `onboarding-agent` extracts the fields, finds no NIGO items, and opens `REQ-20261109-DEMO03`.
+The `onboarding-agent` extracts the fields, finds no NIGO items, and opens `REQ-20261109-OPS003`.
 
 ## Step 2: The eligibility check
 
@@ -785,11 +785,11 @@ The `team-leader-agent` shows the floor for the five demo cases:
 
 | Case | Member | Status |
 |---|---|---|
-| `REQ-20261103-DEMO01` | Priya Natarajan | ✅ Account opened. Waiting for the BDBN re-sign and the insurance confirmation from the adviser |
-| `REQ-20261106-DEMO02` | Grace Williams | 🛡️ Blocked. SMR referral approved, and no funds left the account |
-| `REQ-20261109-DEMO03` | George Papadopoulos | ✅ Pension started. Commencement approved in Teams; first payment 15 Dec 2026 |
-| `REQ-20261111-DEMO04` | Tom Bradley | 🟡 Partially approved. $7,932 net paid on 13 Nov 2026 |
-| `REQ-20261113-DEMO05` | Robert Chen (for Mei Chen) | ✅ Benefit paid to Robert and Lily after Teams approval |
+| `REQ-20261103-OPS001` | Priya Natarajan | ✅ Account opened. Waiting for the BDBN re-sign and the insurance confirmation from the adviser |
+| `REQ-20261106-OPS002` | Grace Williams | 🛡️ Blocked. SMR referral approved, and no funds left the account |
+| `REQ-20261109-OPS003` | George Papadopoulos | ✅ Pension started. Commencement approved in Teams; first payment 15 Dec 2026 |
+| `REQ-20261111-OPS004` | Tom Bradley | 🟡 Partially approved. $7,932 net paid on 13 Nov 2026 |
+| `REQ-20261113-OPS005` | Robert Chen (for Mei Chen) | ✅ Benefit paid to Robert and Lily after Teams approval |
 
 ---
 

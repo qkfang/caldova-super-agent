@@ -7,12 +7,15 @@
 #      JSON parse + required-field check), so a malformed mock document
 #      can't quietly take down a whole index batch.
 #   2. Echoes each file as it is uploaded with its document id so you can
-#      cross-reference the mock documents (e.g. case-req-20261111-demo04-hardship-application).
+#      cross-reference the mock documents (e.g. case-req-20261111-ops004-hardship-application).
 #   3. Uploads every wealth_rules document twice: as-is into wealth_rules, and
 #      projected onto the knowledge schema into wealth_knowledge — the only
 #      index the Foundry agents query — so agents can cite rules by title.
 #   4. Prints a per-index summary at the end (count and any individual
 #      document failures returned by the indexer in the merge response).
+#   5. Deletes the case files filed under the scenario cases' old numbers
+#      (REQ-yyyyMMdd-DEMOnn, now REQ-yyyyMMdd-OPSnnn), since an upload can only
+#      add or replace documents. Once they are gone this is a no-op.
 
 $SearchServiceName = "search-cs"   # Update to the aiSearchName output from main.bicep (search-<baseName>, e.g. search-cs)
 $IndexPrefix = "wealth"
@@ -154,7 +157,27 @@ function Upload-Documents {
 
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
+function Remove-RetiredCaseDocuments {
+    # Each renamed case file's old id, e.g. case-req-20261103-ops001-… was case-req-20261103-demo01-….
+    param([string]$IndexName, [string]$DocumentFolder)
+
+    $retired = @(Get-ChildItem -Path $DocumentFolder -Filter "case-req-*-ops00*.json" |
+        ForEach-Object { $_.BaseName -replace '-ops00(\d)-', '-demo0$1-' })
+    if ($retired.Count -eq 0) { return }
+
+    $body = @{ value = @($retired | ForEach-Object { @{ "@search.action" = "delete"; id = $_ } }) } | ConvertTo-Json -Depth 5
+    $uri = "$searchEndpoint/indexes/${IndexName}/docs/index?api-version=$apiVersion"
+    try {
+        Invoke-RestMethod -Uri $uri -Method Post -Headers $headers -Body $body | Out-Null
+        Write-Host "  Removed any of $($retired.Count) case files still filed under the old REQ-…-DEMOnn case numbers."
+    }
+    catch {
+        Write-Warning "  Failed to remove old case files from '$IndexName': $_"
+    }
+}
+
 Write-Host "Ingesting documents into '${IndexPrefix}_knowledge' (case files, guides and projected rules)..."
+Remove-RetiredCaseDocuments -IndexName "${IndexPrefix}_knowledge" -DocumentFolder (Join-Path $scriptDir "wealth_knowledge")
 Upload-Documents -IndexName "${IndexPrefix}_knowledge" -DocumentFolder (Join-Path $scriptDir "wealth_knowledge") -RulesFolder (Join-Path $scriptDir "wealth_rules")
 
 Write-Host "`nIngesting documents into '${IndexPrefix}_rules'..."

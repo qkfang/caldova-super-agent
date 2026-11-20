@@ -571,6 +571,57 @@ body.inspecting .v2-page .pc-hint {
   box-shadow: 0 0 14px color-mix(in srgb, var(--c) 70%, transparent);
 }
 
+/* ---------------- Arrows: slide the view left or right ---------------- */
+.v2-pan {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 16;
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 18px 40px rgba(9, 15, 28, 0.3);
+}
+.pan-btn {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--accent) 60%, transparent);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+}
+.pan-btn svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.pan-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+.pan-btn:active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #101827;
+}
+.pan-btn:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
 /* ---------------- Inspector ---------------- */
 .v2-inspector {
   position: fixed;
@@ -751,7 +802,7 @@ body.inspecting .v2-page .pc-hint {
 .insp-goal.side {
   border-left: 3px solid var(--c);
 }
-.insp-demo {
+.insp-scenarios {
   margin: 10px 0 0;
   padding: 8px 10px;
   border-radius: 10px;
@@ -761,7 +812,7 @@ body.inspecting .v2-page .pc-hint {
   line-height: 1.5;
   color: #dfe6f2;
 }
-.insp-demo b {
+.insp-scenarios b {
   display: block;
   margin-bottom: 2px;
   font-size: 11px;
@@ -825,7 +876,7 @@ body.inspecting .v2-page .pc-hint {
   grid-template-columns: 28px 1fr;
   gap: 10px;
   align-items: start;
-  padding: 8px 10px 10px 8px;
+  padding: 7px 10px 9px 8px;
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.07);
@@ -946,7 +997,7 @@ button.stk-chip:hover {
 .stk-rung {
   display: flex;
   align-items: center;
-  height: 24px;
+  height: 21px;
   margin-left: 20px;
   padding-left: 13px;
   border-left: 3px dashed var(--c);
@@ -1137,6 +1188,20 @@ button.v2-callout:hover {
   .lift-btn {
     padding: 4px;
   }
+  /* Narrow enough to sit under the lift, clear of the inspector. */
+  .v2-pan {
+    right: 12px;
+    gap: 4px;
+    padding: 4px;
+  }
+  .pan-btn {
+    width: 28px;
+    height: 28px;
+  }
+  .pan-btn svg {
+    width: 15px;
+    height: 15px;
+  }
 }
 @media (max-width: 720px) {
   .v2-cover {
@@ -1160,6 +1225,12 @@ button.v2-callout:hover {
   }
   .v2-lift {
     right: 8px;
+  }
+  /* Stacked, to fit beside the page card. */
+  .v2-pan {
+    right: 8px;
+    bottom: 12px;
+    flex-direction: column;
   }
   .v2-brand-text small,
   .v2-links {

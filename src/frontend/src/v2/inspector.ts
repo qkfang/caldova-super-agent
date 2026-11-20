@@ -2,14 +2,15 @@
  * Inspector card content for everything the visitor can click in the
  * lakehouse: Maya, the brain, each person, each agent and each of its roles,
  * each engine-room component, the front desk on the dock with whoever is
- * signing there, and the party on the roof with each of its guests. Each card
- * ends with actions that move up or down the house along the same thread
- * (person ↔ agent ↔ infrastructure). Cards for Maya, people, agents, roles
- * and guests stay short: one plain-English line, then a few labelled facts,
- * including what they are doing right now. Cards for people, agents, roles
- * and engine-room components then show "Across the house": a small
- * cross-section of the house with the person, their agent and its assistants,
- * and what it runs on, where every part is a link.
+ * signing there and Amelia, its financial adviser, and the party on the roof
+ * with each of its guests. Each card ends with actions that move up or down
+ * the house along the same thread (person ↔ agent ↔ infrastructure). Cards
+ * for Maya, people, agents, roles and guests stay short: one plain-English
+ * line, then a few labelled facts, including what they are doing right now.
+ * Cards for people, agents, roles, Amelia and engine-room components then
+ * show "Across the house": a small cross-section of the house with the
+ * person, their agent and its assistants, and what it runs on, where every
+ * part is a link.
  */
 import { renderCharacterFigureSvg } from "../characterFigure";
 import { PALETTES } from "../characterPalettes";
@@ -17,6 +18,7 @@ import { CUSTOMER_PERSONAS, findStaffById, STAFF_PERSONAS, type ScenarioId, type
 import { APP_BASE_URL } from "../stepGate";
 import type { VisitorInfo } from "./dock";
 import {
+  ADVISER,
   AGENTS,
   DESK_ROLE,
   FRONT_DESK,
@@ -34,6 +36,7 @@ import {
   roleInfo,
   rolesOf,
   sideBadge,
+  teamSide,
   type InfraId,
   type LevelId,
   type SideId,
@@ -67,6 +70,7 @@ export interface Live {
   staffTask(id: string): string | null;
   roleTask(id: string): string | null;
   visitor(): VisitorInfo | null;
+  adviserTask(): string | null;
   partyNow(): string;
   guestTask(id: string): string | null;
 }
@@ -83,6 +87,11 @@ const now = (text: string | null | undefined): string =>
   text ? `<em class="insp-now" data-now>${esc(text)}</em>` : "";
 
 const GOLD = "#ffc35a";
+
+/** The "In the scenarios" note on a card: how this part of the storybook shows up in the scenarios the agents really run. */
+function scenarioNote(text: string, color: string): string {
+  return `<div class="insp-scenarios" style="--c:${color}"><b>In the scenarios</b>${esc(text)}</div>`;
+}
 
 /** What the target is doing right now, for the card's "Now" row. */
 export function nowText(target: InspectTarget, live?: Live): string | null {
@@ -102,6 +111,8 @@ export function nowText(target: InspectTarget, live?: Live): string | null {
     }
     case "visitor":
       return live.visitor()?.status ?? null;
+    case "adviser":
+      return live.adviserTask();
     case "party":
       return live.partyNow();
     case "guest":
@@ -122,9 +133,18 @@ function facts(rows: Array<[label: string, html: string]>): string {
 /** Registers a clickable part of a card's body and returns the attributes that wire it up. */
 type Linker = (a: InspectorAction) => string;
 
-/** One level of the house in the stack, styled like its floor slab with the level's edge strip. */
-function layer(level: LevelId, here: boolean, body: string, aside = ""): string {
-  const l = levelInfo(level);
+/** A layer of the stack that isn't a level of the house: the front desk out on the dock. */
+interface Place {
+  floor: string;
+  name: string;
+  accent: string;
+}
+// U+FE0E asks for the plain text anchor rather than the emoji.
+const DOCK: Place = { floor: "⚓\uFE0E", name: "The front desk", accent: GOLD };
+
+/** One level of the house (or the dock) in the stack, styled like its floor slab with the level's edge strip. */
+function layer(level: LevelId | Place, here: boolean, body: string, aside = ""): string {
+  const l = typeof level === "string" ? levelInfo(level) : level;
   return `<section class="stk-layer${here ? " here" : ""}" style="--c:${l.accent}">
     <b class="stk-floor">${esc(l.floor)}</b>
     <div class="stk-main"><div class="stk-kicker"><span>${esc(l.name)}</span>${aside}</div>${body}</div>
@@ -173,7 +193,7 @@ function chainHtml(staffId: string, here: "staff" | "agent" | { role: string }, 
   const agent = AGENTS[staffId];
   if (!p || !agent) return "";
   const role = typeof here === "object" ? here.role : null;
-  const person = stackItem(p.name, p.role, link, here === "staff" ? undefined : { label: `Up to ${p.name}`, page: "people", select: { type: "staff", id: staffId } });
+  const person = stackItem(p.name, here === "staff" ? p.team : p.role, link, here === "staff" ? undefined : { label: `Up to ${p.name}`, page: "people", select: { type: "staff", id: staffId } });
   const agentItem = stackItem(p.agent_name, "", link, here === "agent" ? undefined : { label: `Meet the ${p.agent_name}`, page: "agents", select: { type: "agent", id: staffId } });
   const assistants = rolesOf(staffId)
     .filter((r) => r.kind !== "lead")
@@ -189,14 +209,43 @@ function chainHtml(staffId: string, here: "staff" | "agent" | { role: string }, 
   </div>`;
 }
 
+const meetStaff = (id: string, name: string): InspectorAction => ({ label: `Meet ${name}`, page: "people", select: { type: "staff", id } });
+
+/** The whole house under Maya: both teams, the agents that support them, and what they run on. */
+function ownerHtml(link: Linker): string {
+  const teams = (["wealth", "super", "shared"] as const)
+    .map((side) => {
+      const people = STAFF_PERSONAS.filter((p) => teamSide(p.team) === side);
+      if (!people.length) return "";
+      const chips = people.map((p) => stackChip(p.name, p.color, link, meetStaff(p.id, p.name))).join("");
+      const title = side === "shared" ? "Leading both teams" : SIDES[side].team;
+      return `<div class="stk-tier" style="--c:${SIDES[side].color}"><i>${esc(title)}</i><div class="stk-chips">${chips}</div></div>`;
+    })
+    .join("");
+  const zones = (["wealth", "shared", "super"] as const)
+    .map((side) => {
+      const n = Object.values(AGENTS).filter((a) => a.side === side).length;
+      return stackChip(`${sideBadge(side)} · ${n}`, SIDES[side].color, link, { label: "Meet the agents", page: "agents" });
+    })
+    .join("");
+  const uses = [...new Set(Object.values(AGENTS).flatMap((a) => a.uses))];
+  return `<h4>Across the house</h4><div class="insp-stack">
+    ${layer("idea", true, stackItem(OWNER.name, OWNER.badge, link))}
+    ${rung("sets the goals for", "idea")}
+    ${layer("people", false, teams)}
+    ${rung("supported by", "people")}
+    ${layer("agents", false, `${stackItem("One group of agents", "Each with its own assistants", link)}<div class="stk-chips">${zones}</div>`)}
+    ${rung("runs on", "engine")}
+    ${layer("engine", false, engineBody(uses, link))}
+  </div>`;
+}
+
 /** The same cross-section for one engine-room component: who runs on it. */
 function usersHtml(id: InfraId, link: Linker): string {
   const users = agentsUsing(id)
     .map((sid) => findStaffById(sid))
     .filter((p): p is NonNullable<typeof p> => !!p);
-  const people = users
-    .map((p) => stackChip(p.name, p.color, link, { label: `Meet ${p.name}`, page: "people", select: { type: "staff", id: p.id } }))
-    .join("");
+  const people = users.map((p) => stackChip(p.name, p.color, link, meetStaff(p.id, p.name))).join("");
   const agents =
     users.length === STAFF_PERSONAS.length
       ? stackItem("Every agent", "on both sides", link)
@@ -210,6 +259,28 @@ function usersHtml(id: InfraId, link: Linker): string {
     ${layer("agents", false, agents)}
     ${rung("runs on", "engine")}
     ${layer("engine", true, stackItem(infraShort(id), TIERS[i.tier].name, link))}
+  </div>`;
+}
+
+/** Amelia's cross-section: the front desk, the agents she links customers with, and what they run on. */
+function adviserHtml(link: Linker): string {
+  const chips = ADVISER.links
+    .map((l) => {
+      const p = findStaffById(l.id);
+      // Short names keep the four on two rows; the layer already says they are agents.
+      return p
+        ? stackChip(p.agent_name.replace(/ Agent$/, ""), p.color, link, { label: `Meet the ${p.agent_name}. ${l.why}.`, page: "agents", select: { type: "agent", id: p.id } })
+        : "";
+    })
+    .join("");
+  const uses = [...new Set(ADVISER.links.flatMap((l) => AGENTS[l.id]?.uses ?? []))];
+  const both = `<span class="stk-side" style="--c:${SIDES.shared.color}">${esc(SIDES.shared.name)}</span>`;
+  return `<h4>Across the house</h4><div class="insp-stack">
+    ${layer(DOCK, true, stackItem(ADVISER.name, `${ADVISER.role} · gives the advice`, link))}
+    ${rung("links customers with", "agents")}
+    ${layer("agents", false, `<div class="stk-chips">${chips}</div>`, both)}
+    ${rung("runs on", "engine")}
+    ${layer("engine", false, engineBody(uses, link))}
   </div>`;
 }
 
@@ -310,10 +381,10 @@ function card(target: InspectTarget, link: Linker, live?: Live): Omit<InspectorV
         html: `${head(renderCharacterFigureSvg(OWNER.palette, OWNER.color), "idea", OWNER.name, OWNER.role)}
           <p class="insp-lede">${esc(OWNER.badge)}.</p>
           ${facts([
-            ["Sides", chip(SIDES.wealth.name, SIDES.wealth.color) + chip(SIDES.super.name, SIDES.super.color)],
             ["Goals", esc(IDEA.goals.map((g) => g.title).join(", "))],
             ["Now", now(nowText(target, live))],
-          ])}`,
+          ])}
+          ${ownerHtml(link)}`,
         actions: [
           { label: "See her idea", select: { type: "brain" }, primary: true },
           { label: "Meet the team ↓", page: "people" },
@@ -348,10 +419,7 @@ function card(target: InspectTarget, link: Linker, live?: Live): Omit<InspectorV
         accent: p.color,
         html: `${head(renderCharacterFigureSvg(PALETTES[p.palette], p.color), "people", p.name, p.role)}
           <p class="insp-lede">${esc(p.role_line)}</p>
-          ${facts([
-            ["Team", esc(p.team)],
-            ["Now", now(nowText(target, live))],
-          ])}
+          ${facts([["Now", now(nowText(target, live))]])}
           ${chainHtml(p.id, "staff", link)}`,
         actions: [
           { label: `Follow ${p.name} down to the agent ↓`, page: "agents", select: { type: "agent", id: p.id }, primary: true },
@@ -406,14 +474,16 @@ function card(target: InspectTarget, link: Linker, live?: Live): Omit<InspectorV
       const visitor = live?.visitor() ?? null;
       const actions: InspectorAction[] = [];
       if (visitor) actions.push({ label: "Who is signing", select: { type: "visitor" }, primary: true });
-      actions.push({ label: `Meet the ${reader?.short ?? "Form Extraction"} agent`, page: "agents", select: { type: "role", id: DESK_ROLE }, primary: !visitor });
+      actions.push({ label: `Meet ${ADVISER.name}`, select: { type: "adviser" }, primary: !visitor });
+      actions.push({ label: `Meet the ${reader?.short ?? "Form Extraction"} agent`, page: "agents", select: { type: "role", id: DESK_ROLE } });
       if (olivia) actions.push({ label: `Up to ${olivia.name} ↑`, page: "people", select: { type: "staff", id: olivia.id } });
       return {
         accent: GOLD,
         html: `${head(renderCharacterFigureSvg(PALETTES.receptionGreeter, GOLD), "agents", FRONT_DESK.name, "Where every request comes in", "On the dock · beside Level 1")}
           <p class="insp-lede">${esc(FRONT_DESK.summary)}</p>
-          <div class="insp-demo" style="--c:${GOLD}"><b>In this demo</b>${esc(FRONT_DESK.demo)}</div>
+          ${scenarioNote(FRONT_DESK.inScenarios, GOLD)}
           ${facts([
+            ["Adviser", chip(`${ADVISER.name} · ${ADVISER.role}`, ADVISER.color)],
             ["Read by", reader && olivia ? chip(`${reader.short} · ${olivia.name}’s agent`, olivia.color) : ""],
             ["Now", now(nowText(target, live))],
           ])}`,
@@ -444,7 +514,28 @@ function card(target: InspectTarget, link: Linker, live?: Live): Omit<InspectorV
             ["Side", chip(side.name, side.color)],
             ["Now", now(nowText(target, live))],
           ])}`,
-        actions: [{ label: "The front desk", select: { type: "desk" }, primary: true }],
+        actions: [
+          { label: "The front desk", select: { type: "desk" }, primary: true },
+          { label: `Meet ${ADVISER.name}`, select: { type: "adviser" } },
+        ],
+      };
+    }
+    case "adviser": {
+      const v = live?.visitor() ?? null;
+      const actions: InspectorAction[] = [];
+      if (v) actions.push({ label: "Who she’s helping", select: { type: "visitor" }, primary: true });
+      actions.push({ label: "The front desk", select: { type: "desk" }, primary: !v });
+      if (APP_BASE_URL) actions.push({ label: "Open the onboarding scenario ↗", href: `${APP_BASE_URL}/scenarios/new-client-onboarding` });
+      return {
+        accent: ADVISER.color,
+        html: `${head(renderCharacterFigureSvg(ADVISER.palette, ADVISER.color), "agents", ADVISER.name, ADVISER.role, "On the dock · the front desk")}
+          <p class="insp-lede">${esc(ADVISER.line)}</p>
+          ${facts([
+            ["Helping", v ? esc(v.name) : ""],
+            ["Now", now(nowText(target, live))],
+          ])}
+          ${adviserHtml(link)}`,
+        actions,
       };
     }
     case "party": {
@@ -486,13 +577,13 @@ function card(target: InspectTarget, link: Linker, live?: Live): Omit<InspectorV
     case "infra": {
       const i = infraInfo(target.id);
       const tier = TIERS[i.tier];
-      const demo = i.demo ? `<div class="insp-demo" style="--c:${tier.color}"><b>In this demo</b>${esc(i.demo)}</div>` : "";
+      const note = i.inScenarios ? scenarioNote(i.inScenarios, tier.color) : "";
       return {
         accent: i.color,
         html: `${head(badgeSvg(i.color, i.sign.charAt(0)), "engine", i.name, i.kind)}
           <div class="insp-badges"><span style="--c:${tier.color}">${esc(tier.name)} · ${esc(tier.tagline)}</span></div>
           <p class="insp-lede">${esc(i.summary)}</p>
-          ${demo}
+          ${note}
           ${i.details.length ? `<h4>Technical details</h4>${list(i.details)}` : ""}
           <h4>Security and network</h4><p class="insp-note">${esc(i.security)}</p>
           ${usersHtml(i.id, link)}`,
@@ -534,6 +625,8 @@ export function tooltipText(target: InspectTarget, live?: Live): string {
       const v = live?.visitor();
       return v ? `${v.name} · ${v.status}` : "A visitor at the front desk";
     }
+    case "adviser":
+      return `${ADVISER.name} · ${ADVISER.role} at the front desk`;
     case "party":
       return `${PARTY.name} · a party for Caldova’s customers`;
     case "guest": {

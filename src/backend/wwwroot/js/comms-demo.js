@@ -59,7 +59,7 @@
                 if (!res.ok) throw new Error('HTTP ' + res.status);
                 const cases = await res.json();
                 if (!cases.length) {
-                    selectEl.innerHTML = '<option value="">No cases yet — open one in the Onboarding demo first</option>';
+                    selectEl.innerHTML = '<option value="">No cases yet — open one with the Onboarding Agent first</option>';
                     return;
                 }
                 selectEl.innerHTML =
@@ -248,7 +248,7 @@
                     processStatus.textContent = 'Live agent unavailable' + (data.agentError ? ' (' + data.agentError + ')' : '') +
                         ' — showing Cara\'s deterministic drafts.';
                 } else {
-                    processStatus.textContent = 'Drafted (Foundry agent not configured — showing Cara\'s deterministic demo drafts).';
+                    processStatus.textContent = 'Drafted (Foundry agent not configured — showing Cara\'s scripted drafts).';
                 }
 
                 renderSummary(data);

@@ -238,12 +238,12 @@
 
                 if (data.agentError) {
                     processStatus.className = 'intake-status warn';
-                    processStatus.textContent = 'Onboarding Agent unavailable (' + data.agentError + ') — showing the deterministic demo extraction.';
+                    processStatus.textContent = 'Onboarding Agent unavailable (' + data.agentError + ') — showing the offline extraction.';
                 } else {
                     processStatus.className = 'intake-status';
                     processStatus.textContent = data.agentConfigured
                         ? 'Onboarding Agent processed the email and the attached form.'
-                        : 'Processed (Foundry agent not configured — using the deterministic demo extraction).';
+                        : 'Processed (Foundry agent not configured — using the offline extraction).';
                 }
 
                 fillForm(data.fields);

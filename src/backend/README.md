@@ -26,7 +26,7 @@ tools.
 | --- | --- |
 | `/` | Operations office landing page — scenario list and one card per agent |
 | `/agents/{id}` | Agent page — the live Try it out demo (`?caseNumber=REQ-…` pre-selects a case on Benefits, Investments, Transfers and Payments) |
-| `/scenarios/{id}` | Scenario steps, each with an **Open demo** link to that agent's page for the case |
+| `/scenarios/{id}` | Scenario steps, each with a **Run this step** link to that agent's page for the case |
 | `/account` | "Ask AI" member chatbot with related-agent references |
 | `/mcp` | MCP server (investments, transfers, payments and Teams tools) |
 
@@ -56,11 +56,11 @@ Onboarding demo are added alongside them):
 
 | Case | Member | Request |
 | --- | --- | --- |
-| `REQ-20261103-DEMO01` | Priya Natarajan | New account & consolidation (via Yarra Private Wealth) |
-| `REQ-20261106-DEMO02` | Grace Williams | Rollover out to SMSF — identity takeover, blocked |
-| `REQ-20261109-DEMO03` | George Papadopoulos | Pension commencement (via Bayside Financial Partners) |
-| `REQ-20261111-DEMO04` | Tom Bradley | Financial hardship release (partial) |
-| `REQ-20261113-DEMO05` | Robert Chen for Mei Chen | Death benefit claim (binding nomination) |
+| `REQ-20261103-OPS001` | Priya Natarajan | New account & consolidation (via Yarra Private Wealth) |
+| `REQ-20261106-OPS002` | Grace Williams | Rollover out to SMSF — identity takeover, blocked |
+| `REQ-20261109-OPS003` | George Papadopoulos | Pension commencement (via Bayside Financial Partners) |
+| `REQ-20261111-OPS004` | Tom Bradley | Financial hardship release (partial) |
+| `REQ-20261113-OPS005` | Robert Chen for Mei Chen | Death benefit claim (binding nomination) |
 
 ## Configuration
 
@@ -84,7 +84,7 @@ the same Foundry configuration keys as the CLI host. Set them in
 
 When the endpoint and model are set, `CaldovaAgentFactory.IsConfigured` is
 `true` and pages invoke the real agents (`factory.Create("payments")`, …).
-Otherwise the deterministic demo results are used.
+Otherwise the offline (deterministic) results are used.
 
 ## Financial Crime — document authenticity
 

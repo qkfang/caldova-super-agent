@@ -10,7 +10,7 @@ An adviser-led new account. A busy professional's adviser sends Caldova an appli
 
 | Item | Detail |
 |---|---|
-| Case number | `REQ-20261103-DEMO01` |
+| Case number | `REQ-20261103-OPS001` |
 | Request type | New account & consolidation |
 | Received | Tue 3 Nov 2026, by email from the adviser |
 | Priority | Standard |
@@ -76,7 +76,7 @@ On 3 Nov 2026 Hannah emails Caldova an application pack with:
 | Existing cover in funds being rolled over | ⚠ Southern Cross account holds Death & TPD cover. Sent to Transfers & Rollovers |
 
 - It sets the priority to **Standard**: a new account and consolidation with nothing time-critical.
-- It opens case `REQ-20261103-DEMO01`, prepares new member number `CS-2049817`, and routes the case to Financial Crime for screening and to Benefits & Eligibility.
+- It opens case `REQ-20261103-OPS001`, prepares new member number `CS-2049817`, and routes the case to Financial Crime for screening and to Benefits & Eligibility.
 
 > Olivia checks the extraction against the form, confirms the two flagged items and releases the case.
 

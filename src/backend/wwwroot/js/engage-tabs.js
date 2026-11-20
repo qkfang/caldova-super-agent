@@ -195,7 +195,7 @@
                     '<div><span class="k">Department</span>' + escapeHtml(m.department || '') + '</div>' +
                     '<div><span class="k">Foundry agent ID</span><code>' + escapeHtml(m.agentId || '') + '</code></div>' +
                     '<div><span class="k">Model deployment</span><code>' + escapeHtml(m.modelDeployment || '(not configured)') + '</code></div>' +
-                    '<div><span class="k">Foundry status</span>' + (m.isConfigured ? 'Configured' : 'Not configured (demo fallback)') + '</div>';
+                    '<div><span class="k">Foundry status</span>' + (m.isConfigured ? 'Configured' : 'Not configured (offline fallback)') + '</div>';
             }
             if (toolsEl) {
                 const tools = (m.configuredTools && m.configuredTools.length)
@@ -274,7 +274,7 @@
             const input = payload && payload.agentInput;
             inputEl.textContent = input
                 ? input
-                : '(No agent input — Foundry agent was not invoked. The deterministic demo path produced the result above.)';
+                : '(No agent input — Foundry agent was not invoked. The offline path produced the result above.)';
             inputEl.classList.toggle('engage-empty', !input);
         }
         if (outputEl) {

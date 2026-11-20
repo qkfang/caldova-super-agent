@@ -1,7 +1,7 @@
 {
   "id": "hardship",
   "scenarioNumber": 4,
-  "caseId": "REQ-20261111-DEMO04",
+  "caseId": "REQ-20261111-OPS004",
   "customerId": "hardship",
   "incidentZone": "hardship",
   "amount": 15000,
@@ -9,9 +9,9 @@
   "approveAtBenefits": true,
   "outcome": "partial",
   "narrations": {
-    "benefits": "Ben assessing REQ-20261111-DEMO04: severe financial hardship — 26 weeks' income support, letter within 21 days, $1,000–$10,000 once in 12 months",
+    "benefits": "Ben assessing REQ-20261111-OPS004: severe financial hardship — 26 weeks' income support, letter within 21 days, $1,000–$10,000 once in 12 months",
     "benefitsResult": "Ben: criteria met ✓ — but $15,000 exceeds the $10,000 legal maximum; recommends a PARTIAL approval of $10,000 gross",
-    "payment": "Penny prepares the hardship payment for REQ-20261111-DEMO04 — $10,000 gross at under-60 tax rates",
+    "payment": "Penny prepares the hardship payment for REQ-20261111-OPS004 — $10,000 gross at under-60 tax rates",
     "paymentResult": "Partial payment RELEASED — $10,000 gross: $7,932 to Tom on Fri 13 Nov 2026, $2,068 PAYG remitted to the ATO",
     "comms": "Cara sends Tom a plain-English outcome letter with free help (National Debt Helpline 1800 007 007, Moneysmart) — case closed"
   },
@@ -34,7 +34,7 @@
     {"at": "customer", "action": "enter-office", "narration": "Tom's hardship application arrives at Caldova Client Operations."},
     {"at": "customer", "action": "lodge-at-reception", "narration": "The application lands in the Onboarding inbox: release $15,000 on severe financial hardship grounds, with a Services Australia letter and overdue notices attached."},
     {"at": "Onboarding & Requests Officer", "action": "onboarding-pickup", "narration": "Olivia's agent extracts the application and the Services Australia letter dated Mon 9 Nov 2026 — JobSeeker paid continuously since 6 April 2026."},
-    {"at": "Onboarding & Requests Officer", "action": "onboarding-route", "narration": "Olivia opens case REQ-20261111-DEMO04, flags Tom as a vulnerable member, and routes it to Benefits & Eligibility."},
+    {"at": "Onboarding & Requests Officer", "action": "onboarding-route", "narration": "Olivia opens case REQ-20261111-OPS004, flags Tom as a vulnerable member, and routes it to Benefits & Eligibility."},
     {"at": "Benefits & Eligibility Assessor", "action": "benefits-pickup", "narration": "Ben checks the severe financial hardship criteria and payment limits in the SIS Regulations and the trust deed."},
     {"at": "Benefits & Eligibility Assessor", "action": "benefits-process", "narration": "Ben: 31 weeks of income support (26 needed) ✓, still receiving ✓, letter within 21 days ✓, no release in the last 12 months ✓ — but $10,000 is the legal maximum, so he recommends a partial approval.", "duration": 2.5},
     {"at": "Client Operations Team Leader", "action": "team-leader-review", "narration": "Theo personally reviews the vulnerable-member case and approves a partial release of $10,000 gross.", "duration": 2.5},

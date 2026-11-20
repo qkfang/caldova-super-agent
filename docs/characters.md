@@ -347,6 +347,29 @@ Maya isn't part of the day-to-day operations team and has no AI agent of her own
 
 ---
 
+# Front Desk Adviser
+
+## Amelia — Financial Adviser (Front Desk)
+
+**Role:** Caldova's own financial adviser. In the v2 Lakehouse storybook she works out front at the front desk on the dock ([storybook.md](storybook.md#the-dock-and-the-front-desk)), and helps any customer get started on either side. Her name follows the same rule as the staff: **A**melia, **A**dviser.
+
+**What she does:**
+
+- Gives the advice, which agents never do
+- Welcomes members, clients and their advisers as they arrive, and helps them sign their application, policy or death benefit claim
+- Links each customer with the agents that get them started: Olivia's Onboarding Agent, Ben's Benefits & Eligibility Agent, Ivy's Investment Analyst Agent and Cara's Client Communications Agent
+- Between visitors, reviews Statements of Advice, prepares welcome packs and checks fee consent forms
+
+**Personality:** Warm, unhurried and clear.
+
+**Typical line:**
+
+> "Hi Priya! Hannah sent your pack ahead."
+
+Amelia isn't one of the eight operations staff and has no AI agent of her own. She welcomes the clients of the two external advisers, Hannah Lewis and Marcus Tan, when they come to the desk.
+
+---
+
 # Client Characters
 
 The five clients are fictional, and each one anchors a scenario. Two fictional advisers appear alongside them:

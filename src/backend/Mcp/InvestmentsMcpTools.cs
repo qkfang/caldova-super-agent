@@ -363,7 +363,7 @@ public class InvestmentsMcpTools
     [McpServerTool(Name = "generateClientWorkbook"),
      Description("Generate the client's Excel (.xlsx) workbook for adviser review: Case Summary; Model Comparison with total annual fees in dollars; Fact Sheets and Asset Allocation (when fact sheets are supplied); one sheet per table in the summary or recommendations (e.g. holdings, an income or redemption plan); and Recommendations with the required warnings. Saves the file under wwwroot/investments/output/ and returns JSON with its downloadUrl (/investments/download/{fileName}).")]
     public string GenerateClientWorkbook(
-        [Description("Case number, e.g. REQ-20261103-DEMO01. Used in the file name.")]
+        [Description("Case number, e.g. REQ-20261103-OPS001. Used in the file name.")]
         string caseNumber,
         [Description("JSON object of case summary fields (client, member number, product, adviser, risk profile, current model, balance, …). Keys become labels. Include \"balance\" so fees can be calculated. Arrays of objects (e.g. \"holdings\") are written to their own sheet.")]
         string caseSummaryJson,

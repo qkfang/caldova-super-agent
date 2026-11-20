@@ -51,7 +51,7 @@ public class PaymentsMcpTools
     [McpServerTool(Name = "payments_validatePayee"),
      Description("Check that the payee name and bank details match the member or a nominated beneficiary held on file for the Member Case. A mismatch needs Team Leader approval — pay only to nominated accounts. Call once per payee, before requesting approval.")]
     public string ValidatePayee(
-        [Description("Member Case number, e.g. REQ-20261111-DEMO04.")] string caseNumber,
+        [Description("Member Case number, e.g. REQ-20261111-OPS004.")] string caseNumber,
         [Description("Name on the bank account the money will be paid to.")] string payeeName,
         [Description("BSB — masked is fine (e.g. '033-***').")] string? bsb = null,
         [Description("Account number — masked is fine (e.g. '****5120').")] string? accountNumber = null)

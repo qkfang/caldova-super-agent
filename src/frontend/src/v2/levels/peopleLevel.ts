@@ -71,14 +71,16 @@ export function buildPeopleLevel(kit: Kit): PeopleLevelBuild {
   });
 
   /* ---------------- The two wings ---------------- */
+  // Mid-tone rugs (each side's colour, about L* 64 once lit): pale ones wash out to white under the
+  // sun and sky, and then the white desks and everything else on the floor disappears into them.
   const rugZ0 = -10.2;
   const rugZ1 = 7.8;
   const rug = (x0: number, x1: number, hex: string): void => {
     kit.block(root, (x0 + x1) / 2, y, (rugZ0 + rugZ1) / 2, x1 - x0 - 0.3, 0.05, rugZ1 - rugZ0, kit.mat(hex));
   };
-  rug(WINGS.wealth.x0, WINGS.wealth.x1, "#e6c47c");
-  rug(WINGS.lead.x0, WINGS.lead.x1, "#cdd5ef");
-  rug(WINGS.super.x0, WINGS.super.x1, "#86d1c3");
+  rug(WINGS.wealth.x0, WINGS.wealth.x1, "#86734d");
+  rug(WINGS.lead.x0, WINGS.lead.x1, "#707da7");
+  rug(WINGS.super.x0, WINGS.super.x1, "#3a8787");
   const floorText = (text: string, x: number, z: number, width: number, color: string): void => {
     const decal = kit.label(root, {
       lines: [{ text, size: 60, weight: 800, color }],
@@ -91,9 +93,9 @@ export function buildPeopleLevel(kit: Kit): PeopleLevelBuild {
   };
   const wealthX = (WINGS.wealth.x0 + WINGS.wealth.x1) / 2;
   const superX = (WINGS.super.x0 + WINGS.super.x1) / 2;
-  floorText("WEALTH MANAGEMENT TEAM", wealthX, -8.6, 12, "#7a5a12");
-  floorText("SUPERANNUATION TEAM", superX, -8.6, 11, "#0b5f58");
-  floorText("LEADING BOTH TEAMS", 0, 1.0, 6.4, "#3d4f86");
+  floorText("WEALTH MANAGEMENT TEAM", wealthX, -8.6, 12, "#3d2b06");
+  floorText("SUPERANNUATION TEAM", superX, -8.6, 11, "#053b36");
+  floorText("LEADING BOTH TEAMS", 0, 1.0, 6.4, "#1c2550");
 
   // A sign for each side on the back wall: the side's name and its products.
   const sideSign = (side: "wealth" | "super", x: number, ink: string): void => {

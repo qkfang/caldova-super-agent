@@ -45,7 +45,7 @@ The examples below use the five demo scenarios. See [characters.md](characters.m
 
 ## Example AI agent behaviour
 
-> "Thanks, Olivia. I've extracted Hannah Lewis's application pack for Priya Natarajan. It's a Caldova Super (Select) account in the Growth managed portfolio, per the SoA dated 28 Oct 2026, with rollovers from Southern Cross Industry Super and Harbourline Retail Super (about $138,200 in total) and a $3,300 a year adviser fee. ID is verified and the TFN is supplied. Two items need attention: the binding nomination has only one witness signature, and the Southern Cross account holds Death & TPD cover. I've opened REQ-20261103-DEMO01 and routed it to Financial Crime for screening and to Benefits & Eligibility."
+> "Thanks, Olivia. I've extracted Hannah Lewis's application pack for Priya Natarajan. It's a Caldova Super (Select) account in the Growth managed portfolio, per the SoA dated 28 Oct 2026, with rollovers from Southern Cross Industry Super and Harbourline Retail Super (about $138,200 in total) and a $3,300 a year adviser fee. ID is verified and the TFN is supplied. Two items need attention: the binding nomination has only one witness signature, and the Southern Cross account holds Death & TPD cover. I've opened REQ-20261103-OPS001 and routed it to Financial Crime for screening and to Benefits & Eligibility."
 
 ---
 
@@ -118,7 +118,7 @@ The examples below use the five demo scenarios. See [characters.md](characters.m
 
 ## Example AI agent behaviour
 
-> "Felix, I've rated REQ-20261106-DEMO02 as high risk. Grace's mobile and email were changed by phone on 2 Nov at 10:42, about 93 hours before the 6 Nov 07:52 request to roll over her full $612,400 to an SMSF registered 9 days earlier. A new device logged in from Sydney while her travel notice says she is in Italy. The SMSF verification shows her TFN isn't linked, and the licence image appears tampered. I recommend holding the rollover, locking online access and calling Grace on 0491 570 157, the number on file before the change. An SMR decision is due within 3 business days."
+> "Felix, I've rated REQ-20261106-OPS002 as high risk. Grace's mobile and email were changed by phone on 2 Nov at 10:42, about 93 hours before the 6 Nov 07:52 request to roll over her full $612,400 to an SMSF registered 9 days earlier. A new device logged in from Sydney while her travel notice says she is in Italy. The SMSF verification shows her TFN isn't linked, and the licence image appears tampered. I recommend holding the rollover, locking online access and calling Grace on 0491 570 157, the number on file before the change. An SMR decision is due within 3 business days."
 
 ---
 
@@ -216,7 +216,7 @@ The examples below use the five demo scenarios. See [characters.md](characters.m
 
 ## Example AI agent behaviour
 
-> "Theo, four cases need you today. REQ-20261106-DEMO02 (Grace): the block and the SMR referral need your approval, and the SMR clock is running. REQ-20261109-DEMO03 (George): a $1,250,000 pension commencement is waiting in Teams. REQ-20261111-DEMO04 (Tom): a partial hardship release for a vulnerable member. REQ-20261113-DEMO05 (Robert and Lily): two death benefit payments. All rollovers are within their service level."
+> "Theo, four cases need you today. REQ-20261106-OPS002 (Grace): the block and the SMR referral need your approval, and the SMR clock is running. REQ-20261109-OPS003 (George): a $1,250,000 pension commencement is waiting in Teams. REQ-20261111-OPS004 (Tom): a partial hardship release for a vulnerable member. REQ-20261113-OPS005 (Robert and Lily): two death benefit payments. All rollovers are within their service level."
 
 ---
 

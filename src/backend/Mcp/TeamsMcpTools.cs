@@ -43,7 +43,7 @@ public class TeamsMcpTools
      Description("Post the Microsoft Teams Adaptive Card 'Caldova Wealth — Payment approval' asking the approver to approve or reject a payment release. The card shows the case number, member, payment type, gross amount, tax withheld, net payment, the payee with masked bank details and why approval is needed, with Approve / Reject actions. Returns the channel and the approval link. payments_requestApproval calls this for you after minting an approvalId.")]
     public async Task<string> SendApprovalCard(
         [Description("Approval id minted by payments_requestApproval (e.g. PAY-XXXXXXXXXX).")] string approvalId,
-        [Description("Member Case number (e.g. REQ-20261111-DEMO04).")] string caseNumber,
+        [Description("Member Case number (e.g. REQ-20261111-OPS004).")] string caseNumber,
         [Description("Member (and member number) the payment is for.")] string memberName,
         [Description("Payment type, e.g. 'Financial hardship lump sum', 'Death benefit lump sum', 'Pension commencement & regular payment'.")] string paymentType,
         [Description("Gross amount in AUD.")] decimal grossAmount,

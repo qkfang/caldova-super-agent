@@ -18,7 +18,7 @@ The agents handle the rules; the humans handle the person.
 
 | Item | Detail |
 |---|---|
-| Case number | `REQ-20261111-DEMO04` |
+| Case number | `REQ-20261111-OPS004` |
 | Request type | Financial hardship release |
 | Received | Wed 11 Nov 2026, direct from the member |
 | Priority | High |
@@ -60,7 +60,7 @@ Tom's café on Lygon Street closed in mid-2025, and he has been on income suppor
 - The **Onboarding Agent** extracts the application and the Services Australia (Centrelink) letter: the payment type is JobSeeker, it has been continuous since 6 Apr 2026, and the letter is dated 9 Nov 2026.
 - NIGO checklist: identity ✓, statutory declaration ✓, overdue notices ✓, bank details ✓.
 - It flags Tom as a **vulnerable member** (financial hardship) for human handling, and sets the priority to **High**.
-- It opens case `REQ-20261111-DEMO04` and routes it to Benefits & Eligibility.
+- It opens case `REQ-20261111-OPS004` and routes it to Benefits & Eligibility.
 
 ---
 

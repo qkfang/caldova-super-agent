@@ -223,7 +223,7 @@ public class TransferRequestPdfService
         p2.Format.Alignment = ParagraphAlignment.Center;
         p2.Format.Font.Size = 7.5;
         p2.Format.Font.Color = TextSubtle;
-        p2.AddText("Wealth Team in a Day demo — fictional data · Page ");
+        p2.AddText("Wealth Team in a Day — fictional data · Page ");
         p2.AddPageField();
         p2.AddText(" of ");
         p2.AddNumPagesField();

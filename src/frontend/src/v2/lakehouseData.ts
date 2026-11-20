@@ -506,8 +506,8 @@ export interface InfraInfo {
   summary: string;
   details: string[];
   security: string;
-  /** What this demo actually runs today (shown on the IQ cards). */
-  demo?: string;
+  /** How the scenarios use it today, shown on its card under "In the scenarios". */
+  inScenarios?: string;
 }
 
 export type TierId = "iq" | "azure";
@@ -532,7 +532,7 @@ export const INFRA: InfraInfo[] = [
       "Context on how people work: the documents, conversations, meetings, collaboration and past decisions in Microsoft 365.",
     details: ["Adviser emails, member calls and the team’s conversations about a case", "Part of Microsoft IQ"],
     security: "Permission-trimmed: an agent only sees the Microsoft 365 content its user is allowed to see.",
-    demo: "Not wired up in this demo. Adviser emails arrive as case documents, and approvals go to Microsoft Teams through an MCP tool.",
+    inScenarios: "Not wired up yet. Adviser emails arrive as case documents, and approvals go to Microsoft Teams through an MCP tool.",
   },
   {
     id: "fabriciq",
@@ -547,7 +547,7 @@ export const INFRA: InfraInfo[] = [
       "The state of the business through governed data, business entities, relationships and rules: members, clients, accounts, balances, holdings and transactions across both sides.",
     details: ["A business model of entities and relationships that agents can reason over", "Built on Microsoft Fabric", "Part of Microsoft IQ"],
     security: "Governed data: people and agents work under the same rules and permissions.",
-    demo: "Not wired up in this demo. The backend’s Member Case store and the seeded case files stand in for it.",
+    inScenarios: "Not wired up yet. The backend’s Member Case store and the case files stand in for it.",
   },
   {
     id: "foundryiq",
@@ -567,7 +567,7 @@ export const INFRA: InfraInfo[] = [
     ],
     security:
       "Foundry’s managed identities read the index with Search Index Data Reader; the web apps hold Search Index Data Contributor.",
-    demo: "Live in this demo: every agent grounds on, and cites, the wealth_knowledge index.",
+    inScenarios: "Live: every agent grounds on, and cites, the wealth_knowledge index.",
   },
   {
     id: "webiq",
@@ -580,8 +580,8 @@ export const INFRA: InfraInfo[] = [
     scope: "all",
     summary: "Timely, citation-ready context from the public web, so agents can check up-to-date reference information.",
     details: ["Part of Microsoft IQ"],
-    security: "In this demo, web grounding goes through the Foundry project connection, so the apps hold no web-search keys.",
-    demo: "Stands in for Web IQ in this demo: web context comes from the Grounding with Bing Search connection in the Foundry project.",
+    security: "Web grounding goes through the Foundry project connection, so the apps hold no web-search keys.",
+    inScenarios: "The Grounding with Bing Search connection in the Foundry project stands in for it.",
   },
   {
     id: "foundry",
@@ -635,7 +635,7 @@ export const INFRA: InfraInfo[] = [
     details: [
       "Sent by the teams_sendApprovalCard MCP tool",
       "Penny’s agent raises the card, and Theo approves it",
-      "In the demo, delivery to the Teams channel is simulated",
+      "In the scenarios, delivery to the Teams channel is simulated",
     ],
     security: "The card shows masked bank details only, and nothing is released until a person approves.",
   },
@@ -749,7 +749,7 @@ export const INFRA: InfraInfo[] = [
     summary:
       "Every hop is HTTPS: the browser to App Service, the backend to the Foundry project endpoint, Foundry to Foundry IQ, the web and the backend’s /mcp tools, plus a WebSocket for Voice Live.",
     details: [
-      "The demo uses public endpoints secured with Entra ID tokens and role assignments",
+      "Public endpoints today, secured with Entra ID tokens and role assignments",
       "For production, add private endpoints and virtual network integration",
     ],
     security: "TLS on every connection, with identity checked on every call.",
@@ -788,8 +788,52 @@ export function agentsUsing(id: InfraId): string[] {
 export const FRONT_DESK = {
   name: "The front desk",
   summary:
-    "Members, clients and advisers arrive by water taxi. They sign in at the front desk on the dock and sign their application, policy or claim. The greeter welcomes them, and Olivia’s Form Extraction agent reads the signed form straight into a new Member Case.",
-  demo: "In the demo, requests arrive as adviser emails, forms and member requests. The dock is the storybook’s way of showing them coming in.",
+    "Members, clients and advisers arrive by water taxi and sign their application, policy or death benefit claim at the front desk on the dock. The greeter welcomes them, Amelia gets them started with the right agents, and Olivia’s Form Extraction agent reads the signed form straight into a new Member Case.",
+  inScenarios: "Requests arrive as adviser emails, forms and member requests. The dock is the storybook’s way of showing them coming in.",
+};
+
+/** An agent Amelia links customers with, and what it does to get them started. */
+export interface AdviserLink {
+  /** Staff id of the person the agent works for (personaData.ts). */
+  id: string;
+  why: string;
+}
+
+/**
+ * Amelia, Caldova's financial adviser at the front desk. She gives the advice (agents never do),
+ * then links each customer with the agents that get them started. Like the staff, her name starts
+ * with the first letter of her role.
+ */
+export const ADVISER = {
+  /** Her character id, for picking. */
+  id: "amelia",
+  name: "Amelia",
+  role: "Financial Adviser",
+  line: "Meets new customers at the front desk, gives them advice, and links them with the agents that get them started.",
+  color: "#ffc35a",
+  palette: {
+    skin: "#b97a56",
+    hair: "#1d1410",
+    shirt: "#8b2f4b",
+    pants: "#2b2f3a",
+    shoes: "#1a1a1a",
+    accent: "#c9a14a",
+    hairStyle: "ponytail",
+    shirtLogo: true,
+  } as VoxelCharacterPalette,
+  /** What she is doing between visitors. */
+  tasks: [
+    "Reviewing a Statement of Advice",
+    "Preparing a welcome pack",
+    "Checking a fee consent form",
+    "Reading a model portfolio fact sheet",
+  ],
+  links: [
+    { id: "onboarding-1", why: "Opens the account and checks the forms are in good order" },
+    { id: "benefits-1", why: "Checks eligibility, insurance cover and fee consent" },
+    { id: "investments-1", why: "Checks portfolio fit and shows the fees in dollars" },
+    { id: "comms-1", why: "Sends the welcome pack and keeps everyone updated" },
+  ] as readonly AdviserLink[],
 };
 
 /** How each finale member arrives at the front desk. */
@@ -800,6 +844,10 @@ export interface Arrival {
   doc: string;
   /** Opening line of the finale's first step. */
   line: string;
+  /** Amelia's welcome as they walk up. */
+  welcome: string;
+  /** The agents Amelia links them with while they sign, by staff id. */
+  links: readonly string[];
 }
 
 export const ARRIVALS: Record<ScenarioId, Arrival> = {
@@ -807,26 +855,36 @@ export const ARRIVALS: Record<ScenarioId, Arrival> = {
     visitor: "member",
     doc: "Caldova Super application",
     line: "Priya arrives by water taxi and signs at the front desk.",
+    welcome: "Hi Priya! Hannah sent your pack ahead",
+    links: ["onboarding-1"],
   },
   protection: {
     visitor: "impostor",
     doc: "Rollover request · CS-1058220",
     line: "Someone arrives by water taxi and signs at the front desk in Grace’s name. Grace is in Italy.",
+    welcome: "Welcome to Caldova. Let’s get this lodged",
+    links: ["onboarding-1"],
   },
   retirement: {
     visitor: "member",
     doc: "Caldova Pension application",
     line: "George arrives by water taxi to sign the pension application his adviser, Marcus Tan, has prepared.",
+    welcome: "Hi George! Marcus has it all prepared",
+    links: ["onboarding-1"],
   },
   hardship: {
     visitor: "member",
     doc: "Hardship release application",
     line: "Tom arrives by water taxi and signs at the front desk.",
+    welcome: "Hi Tom. We’ll help you through this",
+    links: ["onboarding-1"],
   },
   bereavement: {
     visitor: "member",
     doc: "Death benefit claim",
     line: "Robert arrives by water taxi with his mother’s paperwork, and signs at the front desk.",
+    welcome: "I’m so sorry about your mother, Robert",
+    links: ["onboarding-1"],
   },
 };
 
@@ -849,6 +907,10 @@ export interface DropIn {
   doc: string;
   summary: string;
   palette: VoxelCharacterPalette;
+  /** Amelia's welcome as they walk up. */
+  welcome: string;
+  /** The agents Amelia links them with while they sign, by staff id. */
+  links: readonly string[];
 }
 
 export const DROP_INS: DropIn[] = [
@@ -858,6 +920,8 @@ export const DROP_INS: DropIn[] = [
     side: "super",
     doc: "Caldova Super · insurance cover",
     summary: "Joins Caldova Super and signs the policy for her insurance cover.",
+    welcome: "Welcome! Let’s set up your super",
+    links: ["onboarding-1", "benefits-1"],
     palette: {
       skin: "#e3b48f",
       hair: "#4a2c1d",
@@ -874,6 +938,8 @@ export const DROP_INS: DropIn[] = [
     side: "wealth",
     doc: "Caldova Wrap · account application",
     summary: "Signs his Caldova Wrap account application, set up with his adviser.",
+    welcome: "Welcome! Let’s open your Wrap account",
+    links: ["onboarding-1", "investments-1"],
     palette: {
       skin: "#c48c64",
       hair: "#cfcfd4",
@@ -891,6 +957,8 @@ export const DROP_INS: DropIn[] = [
     side: "wealth",
     doc: "Managed Portfolio · client application",
     summary: "Drops off a client’s Managed Portfolio application with the Statement of Advice.",
+    welcome: "Thanks! I’ll get your client started",
+    links: ["onboarding-1", "investments-1", "comms-1"],
     palette: {
       skin: "#f1c7a1",
       hair: "#6b4423",

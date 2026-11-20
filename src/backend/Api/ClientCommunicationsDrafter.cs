@@ -1035,12 +1035,12 @@ internal static class ClientCommunicationsDrafter
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// True for the five seeded scenario cases (<c>REQ-yyyyMMdd-DEMOnn</c>),
+    /// True for the five seeded scenario cases (<c>REQ-yyyyMMdd-OPSnnn</c>),
     /// which are shown at the point Cara writes the outcome. Cases opened
-    /// live by the Onboarding demo are freshly received.
+    /// live with the Onboarding Agent are freshly received.
     /// </summary>
     internal static bool IsScenarioCase(CaseRecord r) =>
-        r.CaseNumber.Contains("-DEMO", StringComparison.OrdinalIgnoreCase);
+        CaseStore.IsScenarioCaseNumber(r.CaseNumber);
 
     private static string SuperComplaints(string howToTellUs) =>
         "**If you're unhappy**\n" +
