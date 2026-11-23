@@ -106,7 +106,13 @@ public abstract class BaseAgent
             agentId,
             new ProjectsAgentVersionCreationOptions(agentDefinition)).Value;
 
-        _responseClient = aiProjectClient.ProjectOpenAIClient.GetProjectResponsesClientForAgent(agentVersion.Name);
+        // Pin this instance to the version it just created. A name-only
+        // reference resolves to the latest version on every request, so a
+        // concurrent caller publishing a different definition (e.g. the group
+        // chat's Payments agent without the MCP tool) would break in-flight
+        // runs and their MCP approval follow-ups.
+        _responseClient = aiProjectClient.ProjectOpenAIClient.GetProjectResponsesClientForAgent(
+            new AgentReference(agentVersion.Name, agentVersion.Version));
     }
 
     public async Task<AgentResult> RunAsync(string message, string? conversationId = null)

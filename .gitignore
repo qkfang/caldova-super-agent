@@ -7,9 +7,9 @@ dist/
 build/
 out/
 
-# Don't ignore vendored static assets shipped under src/app/wwwroot/lib
+# Don't ignore vendored static assets shipped under src/backend/wwwroot/lib
 # (e.g. Bootstrap's dist/ folder must be packed into the Blazor app).
-!src/app/wwwroot/lib/**
+!src/backend/wwwroot/lib/**
 .vite/
 .next/
 .nuxt/
