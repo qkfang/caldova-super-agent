@@ -10,6 +10,9 @@ param appServiceLocation string = location
 @description('Principal object IDs to grant access to deployed resources')
 param principals array = []
 
+@description('Create the Bing grounding account (false when it already exists)')
+param createBingAccount bool = true
+
 var commonTags = {
   workload: 'caldova-super-agent'
   demo: 'wealth-operations-office'
@@ -89,6 +92,7 @@ module foundry 'foundry.bicep' = {
     tags: commonTags
     aiSearchEndpoint: aiSearch.outputs.endpoint
     aiSearchResourceId: aiSearch.outputs.id
+    createBingAccount: createBingAccount
   }
 }
 

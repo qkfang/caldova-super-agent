@@ -13,6 +13,9 @@ param aiSearchEndpoint string = ''
 @description('Azure AI Search resource ID to connect to the Foundry project (optional)')
 param aiSearchResourceId string = ''
 
+@description('Create the Bing grounding account. Set to false once it exists: the Bing resource provider rejects re-deploying an existing account ("Unable to retrieve product").')
+param createBingAccount bool = true
+
 resource foundry 'Microsoft.CognitiveServices/accounts@2025-10-01-preview' = {
   name: name
   location: location
@@ -66,7 +69,7 @@ resource modelDeployment 'Microsoft.CognitiveServices/accounts/deployments@2024-
   }
 }
 
-resource bingAccount 'Microsoft.Bing/accounts@2020-06-10' = {
+resource bingAccountNew 'Microsoft.Bing/accounts@2020-06-10' = if (createBingAccount) {
   name: '${name}-bing'
   location: 'global'
   tags: tags
@@ -74,6 +77,15 @@ resource bingAccount 'Microsoft.Bing/accounts@2020-06-10' = {
   sku: {
     name: 'G1'
   }
+}
+
+// Always reference the account through `existing` so the connections below
+// work whether it was just created or deployed earlier.
+resource bingAccount 'Microsoft.Bing/accounts@2020-06-10' existing = {
+  name: '${name}-bing'
+  dependsOn: [
+    bingAccountNew
+  ]
 }
 
 // Azure AI Search connections — exposed to the Foundry account and to the
