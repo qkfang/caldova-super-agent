@@ -79,13 +79,10 @@ resource bingAccountNew 'Microsoft.Bing/accounts@2020-06-10' = if (createBingAcc
   }
 }
 
-// Always reference the account through `existing` so the connections below
-// work whether it was just created or deployed earlier.
+// Reference the account through `existing` so the connections below work
+// whether it was just created or deployed earlier.
 resource bingAccount 'Microsoft.Bing/accounts@2020-06-10' existing = {
   name: '${name}-bing'
-  dependsOn: [
-    bingAccountNew
-  ]
 }
 
 // Azure AI Search connections — exposed to the Foundry account and to the
@@ -133,6 +130,7 @@ resource bingSearchConnection 'Microsoft.CognitiveServices/accounts/connections@
   name: '${name}-bingsearchconnection'
   dependsOn: [
     aiSearchProjectConnection
+    bingAccountNew
   ]
   properties: {
     authType: 'ApiKey'
