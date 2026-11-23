@@ -93,6 +93,21 @@ module foundry 'foundry.bicep' = {
 }
 
 // ---------------------------------------------------------------------------
+// Application Insights connection on the Foundry project (enables tracing)
+// ---------------------------------------------------------------------------
+module foundryAppInsights 'foundry-appinsights.bicep' = {
+  name: 'foundryAppInsightsDeployment'
+  params: {
+    foundryName: foundryName
+    appInsightsName: appInsightsName
+  }
+  dependsOn: [
+    foundry
+    monitoring
+  ]
+}
+
+// ---------------------------------------------------------------------------
 // App Service Plan (P1v3) shared by frontend and backend Web Apps
 // ---------------------------------------------------------------------------
 module appService 'appservice.bicep' = {
