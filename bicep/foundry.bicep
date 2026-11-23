@@ -69,7 +69,10 @@ resource modelDeployment 'Microsoft.CognitiveServices/accounts/deployments@2024-
   }
 }
 
-resource bingAccountNew 'Microsoft.Bing/accounts@2020-06-10' = if (createBingAccount) {
+// The Bing resource provider rejects re-deploying an existing account and its
+// listKeys call fails the whole deployment, so the account and its Foundry
+// connections are only managed here when createBingAccount is true.
+resource bingAccount 'Microsoft.Bing/accounts@2020-06-10' = if (createBingAccount) {
   name: '${name}-bing'
   location: 'global'
   tags: tags
@@ -77,12 +80,6 @@ resource bingAccountNew 'Microsoft.Bing/accounts@2020-06-10' = if (createBingAcc
   sku: {
     name: 'G1'
   }
-}
-
-// Reference the account through `existing` so the connections below work
-// whether it was just created or deployed earlier.
-resource bingAccount 'Microsoft.Bing/accounts@2020-06-10' existing = {
-  name: '${name}-bing'
 }
 
 // Azure AI Search connections — exposed to the Foundry account and to the
@@ -125,12 +122,11 @@ resource aiSearchProjectConnection 'Microsoft.CognitiveServices/accounts/project
 }
 
 #disable-next-line BCP081
-resource bingSearchConnection 'Microsoft.CognitiveServices/accounts/connections@2025-10-01-preview' = {
+resource bingSearchConnection 'Microsoft.CognitiveServices/accounts/connections@2025-10-01-preview' = if (createBingAccount) {
   parent: foundry
   name: '${name}-bingsearchconnection'
   dependsOn: [
     aiSearchProjectConnection
-    bingAccountNew
   ]
   properties: {
     authType: 'ApiKey'
@@ -149,7 +145,7 @@ resource bingSearchConnection 'Microsoft.CognitiveServices/accounts/connections@
 }
 
 #disable-next-line BCP081
-resource bingSearchProjectConnection 'Microsoft.CognitiveServices/accounts/projects/connections@2025-10-01-preview' = {
+resource bingSearchProjectConnection 'Microsoft.CognitiveServices/accounts/projects/connections@2025-10-01-preview' = if (createBingAccount) {
   parent: project
   name: '${name}-bingsearchconnection-project'
   dependsOn: [
@@ -177,8 +173,8 @@ output projectName string = project.name
 output projectEndpoint string = project.properties.endpoints['AI Foundry API']
 output deploymentName string = modelDeployment.name
 output principalId string = foundry.identity.principalId
-output bingAccountName string = bingAccount.name
-output bingProjectConnectionId string = bingSearchProjectConnection.id
+output bingAccountName string = '${name}-bing'
+output bingProjectConnectionId string = resourceId('Microsoft.CognitiveServices/accounts/projects/connections', name, '${name}-project', '${name}-bingsearchconnection-project')
 output projectPrincipalId string = project.identity.principalId
 output aiSearchConnectionId string = aiSearchEndpoint != '' ? aiSearchConnection.id : ''
 output aiSearchProjectConnectionId string = aiSearchEndpoint != '' ? aiSearchProjectConnection.id : ''
