@@ -75,30 +75,14 @@ internal static class AgentSseStreaming
         {
             try
             {
-                await foreach (var ev in agent.RunStreamingTraceAsync(prompt, ct))
-                {
-                    switch (ev)
-                    {
-                        case AgentStreamingDelta delta:
-                            if (!string.IsNullOrEmpty(delta.Text))
-                                await WriteEventAsync(response, "delta", new { text = delta.Text }, ct);
-                            break;
-                        case AgentStreamingCompleted completed:
-                            trace = completed.Trace;
-                            break;
-                    }
-                }
+                (trace, agentError) = await ConsumeAsync(
+                    response, () => agent.RunStreamingTraceAsync(prompt, ct), logger,
+                    $"{agentLabel} streaming invocation failed; falling back to deterministic demo data", ct);
             }
             catch (OperationCanceledException) when (ct.IsCancellationRequested)
             {
                 // Client disconnected; nothing more to do.
                 return;
-            }
-            catch (Exception ex)
-            {
-                logger.LogWarning(ex, "{AgentLabel} streaming invocation failed; falling back to deterministic demo data", agentLabel);
-                agentError = ex.Message;
-                await WriteEventAsync(response, "error", new { message = ex.Message }, ct);
             }
         }
 
@@ -136,34 +120,71 @@ internal static class AgentSseStreaming
         {
             try
             {
-                await foreach (var ev in agent.ChatStreamingTraceAsync(previousResponseId, message, ct))
+                (trace, agentError) = await ConsumeAsync(
+                    response, () => agent.ChatStreamingTraceAsync(previousResponseId, message, ct), logger,
+                    $"{agentLabel} chat streaming invocation failed", ct);
+            }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested)
+            {
+                return;
+            }
+        }
+
+        var envelope = buildEnvelope(trace, agentError);
+        await WriteEventAsync(response, "done", envelope, ct);
+    }
+
+    private const int MaxRateLimitAttempts = 5;
+
+    /// <summary>
+    /// Forwards the agent's streamed text as <c>delta</c> events. A rate-limited
+    /// response is retried after a short back-off, but only while nothing has
+    /// been sent yet, so the browser never sees duplicated text. Any other
+    /// failure becomes an <c>error</c> event plus the returned error message.
+    /// </summary>
+    private static async Task<(AgentTraceResult? Trace, string? Error)> ConsumeAsync(
+        HttpResponse response,
+        Func<IAsyncEnumerable<AgentStreamingEvent>> start,
+        ILogger logger,
+        string failureLog,
+        CancellationToken ct)
+    {
+        for (var attempt = 1; ; attempt++)
+        {
+            var sentText = false;
+            try
+            {
+                AgentTraceResult? trace = null;
+                await foreach (var ev in start())
                 {
                     switch (ev)
                     {
                         case AgentStreamingDelta delta:
                             if (!string.IsNullOrEmpty(delta.Text))
+                            {
+                                sentText = true;
                                 await WriteEventAsync(response, "delta", new { text = delta.Text }, ct);
+                            }
                             break;
                         case AgentStreamingCompleted completed:
                             trace = completed.Trace;
                             break;
                     }
                 }
+                return (trace, null);
             }
-            catch (OperationCanceledException) when (ct.IsCancellationRequested)
+            catch (AgentResponseFailedException ex) when (ex.IsRateLimit && !sentText && attempt < MaxRateLimitAttempts)
             {
-                return;
+                logger.LogWarning(ex, "Agent response was rate limited; retrying (attempt {Attempt} of {Max})", attempt + 1, MaxRateLimitAttempts);
+                await Task.Delay(TimeSpan.FromSeconds(5 * attempt), ct);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!(ex is OperationCanceledException && ct.IsCancellationRequested))
             {
-                logger.LogWarning(ex, "{AgentLabel} chat streaming invocation failed", agentLabel);
-                agentError = ex.Message;
+                logger.LogWarning(ex, "{FailureLog}", failureLog);
                 await WriteEventAsync(response, "error", new { message = ex.Message }, ct);
+                return (null, ex.Message);
             }
         }
-
-        var envelope = buildEnvelope(trace, agentError);
-        await WriteEventAsync(response, "done", envelope, ct);
     }
 
     private static async Task WriteEventAsync(HttpResponse response, string eventName, object payload, CancellationToken ct)

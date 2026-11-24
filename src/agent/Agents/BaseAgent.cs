@@ -3,9 +3,12 @@ using Azure.AI.Projects;
 using Azure.AI.Projects.Agents;
 using Microsoft.Extensions.Logging;
 using OpenAI.Responses;
+using System.ClientModel;
 using System.ClientModel.Primitives;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 
@@ -55,6 +58,24 @@ public record PendingToolApproval(string ResponseId, string ApprovalItemId, stri
 public record AgentStepResult(string? Result, PendingToolApproval? Pending, string? ResponseId);
 
 /// <summary>
+/// Thrown when Foundry ends a streamed response with a failure event (for
+/// example <c>rate_limit_exceeded</c>) instead of completing it. Without this
+/// the stream simply ends with no text and the caller reports "no reply".
+/// </summary>
+public sealed class AgentResponseFailedException : Exception
+{
+    public string? Code { get; }
+
+    public bool IsRateLimit => Code?.Contains("rate_limit", StringComparison.OrdinalIgnoreCase) == true;
+
+    public AgentResponseFailedException(string? code, string? message)
+        : base(string.IsNullOrWhiteSpace(code) ? (message ?? "The agent response failed.") : $"{code}: {message}")
+    {
+        Code = code;
+    }
+}
+
+/// <summary>
 /// Base wrapper around an Azure AI Foundry declarative agent. Each operations-office
 /// staff character is implemented as a subclass of <see cref="CaldovaAgent"/>
 /// (which in turn inherits from this <see cref="BaseAgent"/>) so that every
@@ -102,9 +123,7 @@ public abstract class BaseAgent
 
         configureAgent?.Invoke(agentDefinition);
 
-        var agentVersion = aiProjectClient.AgentAdministrationClient.CreateAgentVersion(
-            agentId,
-            new ProjectsAgentVersionCreationOptions(agentDefinition)).Value;
+        var agentVersion = GetOrCreateVersion(aiProjectClient, agentId, agentDefinition, _logger);
 
         // Pin this instance to the version it just created. A name-only
         // reference resolves to the latest version on every request, so a
@@ -113,6 +132,57 @@ public abstract class BaseAgent
         // runs and their MCP approval follow-ups.
         _responseClient = aiProjectClient.ProjectOpenAIClient.GetProjectResponsesClientForAgent(
             new AgentReference(agentVersion.Name, agentVersion.Version));
+    }
+
+    private static readonly ConcurrentDictionary<string, ProjectsAgentVersion> VersionCache = new();
+    private static readonly ConcurrentDictionary<string, object> VersionLocks = new();
+
+    /// <summary>
+    /// Publishes the agent definition as a Foundry agent version, once per
+    /// distinct definition. Every request used to publish a new version, and
+    /// simultaneous requests for the same agent failed with 409 Conflict /
+    /// 412 "modified concurrently". Identical definitions now reuse the cached
+    /// version, creation is serialised per agent id, and a conflict (e.g. from
+    /// another instance) is retried.
+    /// </summary>
+    private static ProjectsAgentVersion GetOrCreateVersion(
+        AIProjectClient aiProjectClient, string agentId, DeclarativeAgentDefinition definition, ILogger logger)
+    {
+        var options = new ProjectsAgentVersionCreationOptions(definition);
+
+        string? cacheKey = null;
+        try
+        {
+            cacheKey = agentId + ":" + Convert.ToHexString(SHA256.HashData(ModelReaderWriter.Write(options).ToArray()));
+        }
+        catch (Exception ex)
+        {
+            logger.LogDebug(ex, "Could not fingerprint the {AgentId} definition; publishing a fresh version", agentId);
+        }
+
+        if (cacheKey is not null && VersionCache.TryGetValue(cacheKey, out var cached))
+            return cached;
+
+        lock (VersionLocks.GetOrAdd(agentId, _ => new object()))
+        {
+            if (cacheKey is not null && VersionCache.TryGetValue(cacheKey, out cached))
+                return cached;
+
+            for (var attempt = 1; ; attempt++)
+            {
+                try
+                {
+                    var version = aiProjectClient.AgentAdministrationClient.CreateAgentVersion(agentId, options).Value;
+                    if (cacheKey is not null) VersionCache[cacheKey] = version;
+                    return version;
+                }
+                catch (ClientResultException ex) when (ex.Status is 409 or 412 && attempt < 4)
+                {
+                    logger.LogWarning("Publishing agent {AgentId} conflicted (HTTP {Status}); retrying (attempt {Attempt})", agentId, ex.Status, attempt + 1);
+                    Thread.Sleep(500 * attempt + Random.Shared.Next(250));
+                }
+            }
+        }
     }
 
     public async Task<AgentResult> RunAsync(string message, string? conversationId = null)
@@ -267,6 +337,7 @@ public abstract class BaseAgent
                 .CreateResponseStreamingAsync(nextOptions, cancellationToken)
                 .WithCancellation(cancellationToken))
             {
+                ThrowIfFailed(update);
                 if (update is StreamingResponseOutputTextDeltaUpdate delta)
                 {
                     textBuilder.Append(delta.Delta);
@@ -348,6 +419,7 @@ public abstract class BaseAgent
                 .CreateResponseStreamingAsync(nextOptions, cancellationToken)
                 .WithCancellation(cancellationToken))
             {
+                ThrowIfFailed(update);
                 if (update is StreamingResponseOutputTextDeltaUpdate delta)
                 {
                     textBuilder.Append(delta.Delta);
@@ -412,6 +484,7 @@ public abstract class BaseAgent
 
             await foreach (var update in _responseClient.CreateResponseStreamingAsync(nextOptions, cancellationToken).WithCancellation(cancellationToken))
             {
+                ThrowIfFailed(update);
                 if (update is StreamingResponseOutputTextDeltaUpdate delta)
                     yield return delta.Delta;
                 else if (update is StreamingResponseOutputItemDoneUpdate itemDone && itemDone.Item is McpToolCallApprovalRequestItem mcpCall)
@@ -497,6 +570,18 @@ public abstract class BaseAgent
 
         _logger.LogInformation("Agent {AgentId} step completed", _agentId);
         return new AgentStepResult(result.GetOutputText(), null, result.Id);
+    }
+
+    private static void ThrowIfFailed(StreamingResponseUpdate update)
+    {
+        switch (update)
+        {
+            case StreamingResponseFailedUpdate failed:
+                var error = failed.Response?.Error;
+                throw new AgentResponseFailedException(error?.Code.ToString(), error?.Message);
+            case StreamingResponseErrorUpdate errorUpdate:
+                throw new AgentResponseFailedException(errorUpdate.Code, errorUpdate.Message);
+        }
     }
 
     private IReadOnlyList<SearchCitation> ExtractCitations(ResponseResult? result)
