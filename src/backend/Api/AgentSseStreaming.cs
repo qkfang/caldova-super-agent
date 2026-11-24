@@ -173,14 +173,15 @@ internal static class AgentSseStreaming
                 }
                 return (trace, null);
             }
-            catch (AgentResponseFailedException ex) when (ex.IsRateLimit && !sentText && attempt < MaxRateLimitAttempts)
+            catch (AgentResponseFailedException ex) when (ex.IsRateLimit && !ex.ToolsMayHaveRun && !sentText && attempt < MaxRateLimitAttempts)
             {
-                logger.LogWarning(ex, "Agent response was rate limited; retrying (attempt {Attempt} of {Max})", attempt + 1, MaxRateLimitAttempts);
-                await Task.Delay(TimeSpan.FromSeconds(5 * attempt), ct);
+                logger.LogWarning("Agent response was rate limited; retrying (attempt {Attempt} of {Max}). Provider said: {ProviderMessage}",
+                    attempt + 1, MaxRateLimitAttempts, ex.ProviderMessage);
+                await Task.Delay(TimeSpan.FromSeconds(5 * attempt) + TimeSpan.FromMilliseconds(Random.Shared.Next(0, 2000)), ct);
             }
             catch (Exception ex) when (!(ex is OperationCanceledException && ct.IsCancellationRequested))
             {
-                logger.LogWarning(ex, "{FailureLog}", failureLog);
+                logger.LogWarning(ex, "{FailureLog}. Provider said: {ProviderMessage}", failureLog, (ex as AgentResponseFailedException)?.ProviderMessage);
                 await WriteEventAsync(response, "error", new { message = ex.Message }, ct);
                 return (null, ex.Message);
             }

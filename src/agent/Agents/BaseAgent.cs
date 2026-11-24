@@ -59,20 +59,39 @@ public record AgentStepResult(string? Result, PendingToolApproval? Pending, stri
 
 /// <summary>
 /// Thrown when Foundry ends a streamed response with a failure event (for
-/// example <c>rate_limit_exceeded</c>) instead of completing it. Without this
-/// the stream simply ends with no text and the caller reports "no reply".
+/// example <c>rate_limit_exceeded</c>) or truncates it, instead of completing
+/// it. Without this the stream simply ends with no text and the caller
+/// reports "no reply".
 /// </summary>
 public sealed class AgentResponseFailedException : Exception
 {
     public string? Code { get; }
 
+    /// <summary>The provider's own message. Log it; don't send it to browsers.</summary>
+    public string? ProviderMessage { get; }
+
+    /// <summary>
+    /// True when an MCP tool may already have run during this agent run, so
+    /// replaying the whole run could repeat a side effect.
+    /// </summary>
+    public bool ToolsMayHaveRun { get; }
+
     public bool IsRateLimit => Code?.Contains("rate_limit", StringComparison.OrdinalIgnoreCase) == true;
 
-    public AgentResponseFailedException(string? code, string? message)
-        : base(string.IsNullOrWhiteSpace(code) ? (message ?? "The agent response failed.") : $"{code}: {message}")
+    public AgentResponseFailedException(string? code, string? message, bool toolsMayHaveRun = false)
+        : base(BuildMessage(code, message))
     {
         Code = code;
+        ProviderMessage = message;
+        ToolsMayHaveRun = toolsMayHaveRun;
     }
+
+    private static string BuildMessage(string? code, string? message) =>
+        code?.Contains("rate_limit", StringComparison.OrdinalIgnoreCase) == true
+            ? "The AI model is busy right now (rate limit reached). Please try again in a moment."
+            : code?.Equals("incomplete", StringComparison.OrdinalIgnoreCase) == true
+                ? "The agent's response was cut short. Please try again."
+                : "The agent could not complete this request. Please try again.";
 }
 
 /// <summary>
@@ -326,6 +345,7 @@ public abstract class BaseAgent
 
         ResponseResult? completedResponse = null;
         var allOutputItems = new List<ResponseItem>();
+        var toolsMayHaveRun = false;
         var textBuilder = new StringBuilder();
 
         while (true)
@@ -337,7 +357,7 @@ public abstract class BaseAgent
                 .CreateResponseStreamingAsync(nextOptions, cancellationToken)
                 .WithCancellation(cancellationToken))
             {
-                ThrowIfFailed(update);
+                ThrowIfFailed(update, toolsMayHaveRun);
                 if (update is StreamingResponseOutputTextDeltaUpdate delta)
                 {
                     textBuilder.Append(delta.Delta);
@@ -346,9 +366,11 @@ public abstract class BaseAgent
                 else if (update is StreamingResponseOutputItemDoneUpdate itemDone)
                 {
                     allOutputItems.Add(itemDone.Item);
+                    if (itemDone.Item is McpToolCallItem) toolsMayHaveRun = true;
                     if (itemDone.Item is McpToolCallApprovalRequestItem mcpCall)
                     {
                         _logger.LogInformation("Auto-approving MCP tool call on {ServerLabel}", mcpCall.ServerLabel);
+                        toolsMayHaveRun = true;
                         pendingApprovals.Add(mcpCall.Id);
                     }
                 }
@@ -408,6 +430,7 @@ public abstract class BaseAgent
 
         ResponseResult? completedResponse = null;
         var allOutputItems = new List<ResponseItem>();
+        var toolsMayHaveRun = false;
         var textBuilder = new StringBuilder();
 
         while (true)
@@ -419,7 +442,7 @@ public abstract class BaseAgent
                 .CreateResponseStreamingAsync(nextOptions, cancellationToken)
                 .WithCancellation(cancellationToken))
             {
-                ThrowIfFailed(update);
+                ThrowIfFailed(update, toolsMayHaveRun);
                 if (update is StreamingResponseOutputTextDeltaUpdate delta)
                 {
                     textBuilder.Append(delta.Delta);
@@ -428,9 +451,11 @@ public abstract class BaseAgent
                 else if (update is StreamingResponseOutputItemDoneUpdate itemDone)
                 {
                     allOutputItems.Add(itemDone.Item);
+                    if (itemDone.Item is McpToolCallItem) toolsMayHaveRun = true;
                     if (itemDone.Item is McpToolCallApprovalRequestItem mcpCall)
                     {
                         _logger.LogInformation("Auto-approving MCP tool call on {ServerLabel} (chat turn)", mcpCall.ServerLabel);
+                        toolsMayHaveRun = true;
                         pendingApprovals.Add(mcpCall.Id);
                     }
                 }
@@ -476,6 +501,7 @@ public abstract class BaseAgent
             nextOptions.AgentConversationId = conversationId;
 
         ResponseResult? completedResponse = null;
+        var toolsMayHaveRun = false;
 
         while (true)
         {
@@ -484,12 +510,15 @@ public abstract class BaseAgent
 
             await foreach (var update in _responseClient.CreateResponseStreamingAsync(nextOptions, cancellationToken).WithCancellation(cancellationToken))
             {
-                ThrowIfFailed(update);
+                ThrowIfFailed(update, toolsMayHaveRun);
+                if (update is StreamingResponseOutputItemDoneUpdate { Item: McpToolCallItem })
+                    toolsMayHaveRun = true;
                 if (update is StreamingResponseOutputTextDeltaUpdate delta)
                     yield return delta.Delta;
                 else if (update is StreamingResponseOutputItemDoneUpdate itemDone && itemDone.Item is McpToolCallApprovalRequestItem mcpCall)
                 {
                     _logger.LogInformation("Auto-approving MCP tool call on {ServerLabel}", mcpCall.ServerLabel);
+                    toolsMayHaveRun = true;
                     pendingApprovals.Add(mcpCall.Id);
                 }
                 else if (update is StreamingResponseCompletedUpdate done)
@@ -572,15 +601,18 @@ public abstract class BaseAgent
         return new AgentStepResult(result.GetOutputText(), null, result.Id);
     }
 
-    private static void ThrowIfFailed(StreamingResponseUpdate update)
+    private static void ThrowIfFailed(StreamingResponseUpdate update, bool toolsMayHaveRun)
     {
         switch (update)
         {
             case StreamingResponseFailedUpdate failed:
                 var error = failed.Response?.Error;
-                throw new AgentResponseFailedException(error?.Code.ToString(), error?.Message);
+                throw new AgentResponseFailedException(error?.Code.ToString(), error?.Message, toolsMayHaveRun);
             case StreamingResponseErrorUpdate errorUpdate:
-                throw new AgentResponseFailedException(errorUpdate.Code, errorUpdate.Message);
+                throw new AgentResponseFailedException(errorUpdate.Code, errorUpdate.Message, toolsMayHaveRun);
+            case StreamingResponseIncompleteUpdate incomplete:
+                throw new AgentResponseFailedException(
+                    "incomplete", incomplete.Response?.IncompleteStatusDetails?.Reason?.ToString(), toolsMayHaveRun);
         }
     }
 
